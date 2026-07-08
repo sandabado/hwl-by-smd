@@ -1,30 +1,34 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import type { Metadata } from "next";
+import { Cormorant_Garamond, Inter } from "next/font/google";
+import "./globals.css";
 
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'})
-
-const fontMono = Geist_Mono({
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-mono",
-})
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-serif",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
+
+export const metadata: Metadata = {
+  title: "HWL by SMD | Body · Beauty · Being",
+  description:
+    "Luxury facial rituals, movement, and intentional wellness experiences designed to restore your glow from the inside out.",
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
-    >
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
+    <html lang="en">
+      <body className={`${cormorant.variable} ${inter.variable} antialiased`}>
+        {children}
       </body>
     </html>
-  )
+  );
 }

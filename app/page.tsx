@@ -25,8 +25,13 @@ const journalCards = [
 export default function Page() {
   return (
     <>
-      <section className="-mt-16 flex min-h-screen items-center bg-gradient-to-b from-[var(--muted)] to-[var(--background)] px-6 pt-16 md:-mt-20 md:pt-20">
-        <div className="mx-auto max-w-5xl text-center">
+      <section className="calm-hero -mt-16 flex min-h-screen items-center overflow-hidden px-6 pt-16 md:-mt-20 md:pt-20">
+        <div className="calm-hero__field" aria-hidden="true">
+          <span className="calm-hero__wave calm-hero__wave--one" />
+          <span className="calm-hero__wave calm-hero__wave--two" />
+          <span className="calm-hero__wave calm-hero__wave--three" />
+        </div>
+        <div className="relative z-10 mx-auto max-w-5xl text-center">
           <p className="mb-5 hidden text-xs font-medium uppercase tracking-[0.28em] text-[var(--accent)] sm:block">
             HWL by SMD
           </p>

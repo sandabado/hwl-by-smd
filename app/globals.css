@@ -30,3 +30,71 @@ h5,
 h6 {
   font-family: var(--font-serif);
 }
+
+.calm-hero {
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.62), transparent 34%),
+    linear-gradient(180deg, var(--muted), var(--background));
+}
+
+.calm-hero__field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.calm-hero__wave {
+  position: absolute;
+  left: 50%;
+  width: 145vw;
+  height: 34rem;
+  border-radius: 47% 53% 49% 51%;
+  opacity: 0.42;
+  filter: blur(1px);
+  transform: translate3d(-50%, 0, 0);
+  will-change: transform;
+}
+
+.calm-hero__wave--one {
+  top: 8%;
+  background: rgba(255, 255, 255, 0.3);
+  animation: calm-wave 26s ease-in-out infinite alternate;
+}
+
+.calm-hero__wave--two {
+  top: 22%;
+  background: rgba(196, 168, 130, 0.18);
+  animation: calm-wave 34s ease-in-out infinite alternate-reverse;
+}
+
+.calm-hero__wave--three {
+  top: 38%;
+  background: rgba(232, 223, 211, 0.28);
+  animation: calm-drift 42s ease-in-out infinite alternate;
+}
+
+@keyframes calm-wave {
+  from {
+    transform: translate3d(-54%, 0, 0) rotate(-3deg) scale(1);
+  }
+  to {
+    transform: translate3d(-46%, 1.5rem, 0) rotate(3deg) scale(1.04);
+  }
+}
+
+@keyframes calm-drift {
+  from {
+    transform: translate3d(-48%, 0, 0) rotate(2deg) scale(1.02);
+  }
+  to {
+    transform: translate3d(-52%, -1rem, 0) rotate(-2deg) scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .calm-hero__wave {
+    animation: none;
+  }
+}

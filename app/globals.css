@@ -8,8 +8,8 @@
   --accent: #c4a882;
   --primary: #5a4a3f;
   --border: #e8dfd3;
-  --font-serif: var(--font-serif);
-  --font-sans: var(--font-sans);
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: Arial, Helvetica, sans-serif;
 }
 
 * {
@@ -19,7 +19,7 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans);
 }
 
 h1,
@@ -28,5 +28,5 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: var(--font-serif);
 }

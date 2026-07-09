@@ -1,11 +1,13 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import Link from "next/link"
+import { ArrowRight } from "lucide-react"
 
-import { CtaBlock } from "@/components/shared/cta-block";
-import { PillarCard } from "@/components/shared/pillar-card";
-import { SectionHeading } from "@/components/shared/section-heading";
-import { TestimonialQuote } from "@/components/shared/testimonial-quote";
-import { Button } from "@/components/ui/button";
+import { CtaBlock } from "@/components/shared/cta-block"
+import { FadeIn } from "@/components/shared/fade-in"
+import { PillarCard } from "@/components/shared/pillar-card"
+import { SectionHeading } from "@/components/shared/section-heading"
+import { TestimonialQuote } from "@/components/shared/testimonial-quote"
+import { WaveHero } from "@/components/shared/wave-hero"
+import { Button } from "@/components/ui/button"
 
 const journalCards = [
   {
@@ -20,22 +22,18 @@ const journalCards = [
     category: "Movement",
     title: "Breathwork for Nervous System Regulation — Where to Begin",
   },
-];
+]
 
 export default function Page() {
   return (
     <>
-      <section className="calm-hero -mt-16 flex min-h-screen items-center overflow-hidden px-6 pt-16 md:-mt-20 md:pt-20">
-        <div className="calm-hero__field" aria-hidden="true">
-          <span className="calm-hero__wave calm-hero__wave--one" />
-          <span className="calm-hero__wave calm-hero__wave--two" />
-          <span className="calm-hero__wave calm-hero__wave--three" />
-        </div>
+      <section className="relative -mt-16 flex min-h-screen items-center overflow-hidden px-6 pt-16 md:-mt-20 md:pt-20">
+        <WaveHero variant="desert" />
         <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <p className="mb-5 hidden text-xs font-medium uppercase tracking-[0.28em] text-[var(--accent)] sm:block">
+          <p className="mb-5 hidden text-xs font-medium tracking-[0.28em] text-[var(--accent)] uppercase sm:block">
             HWL by SMD
           </p>
-          <h1 className="mx-auto max-w-4xl text-4xl font-medium leading-tight text-[var(--primary)] md:text-6xl lg:text-7xl">
+          <h1 className="gentle-breath mx-auto max-w-4xl text-4xl leading-tight font-medium text-[var(--primary)] md:text-6xl lg:text-7xl">
             Beauty begins where restoration meets ritual.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[var(--muted-foreground)] md:text-lg">
@@ -61,36 +59,39 @@ export default function Page() {
       </section>
 
       <section className="mx-auto max-w-3xl px-6 py-20 text-center md:py-32">
-        <SectionHeading
-          eyebrow="The Philosophy"
-          title="Beauty is more than skin deep."
-          align="center"
-        />
-        <div className="mt-8 space-y-6 text-base leading-relaxed text-[var(--foreground)] md:text-lg">
-          <p>
-            True well-being doesn&apos;t live in one lane. It emerges when
-            body, beauty, and being are nourished together — when skincare
-            becomes ritual, movement becomes medicine, and stillness becomes a
-            practice rather than an accident.
+        <FadeIn>
+          <SectionHeading
+            eyebrow="The Philosophy"
+            title="Beauty is more than skin deep."
+            align="center"
+          />
+          <div className="mt-8 space-y-6 text-base leading-relaxed text-[var(--foreground)] md:text-lg">
+            <p>
+              True well-being doesn&apos;t live in one lane. It emerges when
+              body, beauty, and being are nourished together — when skincare
+              becomes ritual, movement becomes medicine, and stillness becomes a
+              practice rather than an accident.
+            </p>
+            <p>
+              My work lives at the intersection of beauty, movement, ritual, and
+              nervous system restoration. Whether I&apos;m guiding a private
+              yoga session, facilitating a seasonal ceremony, offering sound
+              healing, or creating a luxury facial experience, my intention is
+              always the same: to help you reconnect with yourself, restore
+              balance, and leave feeling more grounded, radiant, embodied, and
+              alive.
+            </p>
+          </div>
+          <p className="mt-8 font-serif text-sm text-[var(--accent)] italic">
+            — Shannon Mary Dixon, Founder of HWL by SMD
           </p>
-          <p>
-            My work lives at the intersection of beauty, movement, ritual, and
-            nervous system restoration. Whether I&apos;m guiding a private yoga
-            session, facilitating a seasonal ceremony, offering sound healing,
-            or creating a luxury facial experience, my intention is always the
-            same: to help you reconnect with yourself, restore balance, and
-            leave feeling more grounded, radiant, embodied, and alive.
-          </p>
-        </div>
-        <p className="mt-8 font-serif text-sm italic text-[var(--accent)]">
-          — Shannon Mary Dixon, Founder of HWL by SMD
-        </p>
-        <Link
-          href="/about"
-          className="mt-6 inline-block text-sm font-medium text-[var(--accent)] underline underline-offset-4"
-        >
-          Read Shannon&apos;s Story
-        </Link>
+          <Link
+            href="/about"
+            className="mt-6 inline-block text-sm font-medium text-[var(--accent)] underline underline-offset-4"
+          >
+            Read Shannon&apos;s Story
+          </Link>
+        </FadeIn>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-20 md:py-32">
@@ -126,10 +127,10 @@ export default function Page() {
       <section className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 md:grid-cols-2 md:py-32">
         <div className="aspect-[4/5] rounded-lg bg-[var(--muted)]" />
         <div>
-          <p className="mb-4 text-xs font-medium uppercase tracking-[0.24em] text-[var(--accent)]">
+          <p className="mb-4 text-xs font-medium tracking-[0.24em] text-[var(--accent)] uppercase">
             Meet Shannon
           </p>
-          <h2 className="text-3xl font-medium leading-tight text-[var(--primary)] md:text-4xl">
+          <h2 className="text-3xl leading-tight font-medium text-[var(--primary)] md:text-4xl">
             Meet Shannon
           </h2>
           <div className="mt-6 space-y-5 text-base leading-relaxed text-[var(--foreground)]">
@@ -139,12 +140,12 @@ export default function Page() {
               But long before the certifications, there was the ice rink.
             </p>
             <p>
-              As a former elite figure skater, I learned discipline,
-              embodiment, and presence — what it means to inhabit your body
-              fully. That foundation shaped everything that followed. My work
-              in beauty taught me the power of care and touch. My years in
-              yoga, energy work, astrology, and ritual taught me how to create
-              spaces where meaningful transformation can occur.
+              As a former elite figure skater, I learned discipline, embodiment,
+              and presence — what it means to inhabit your body fully. That
+              foundation shaped everything that followed. My work in beauty
+              taught me the power of care and touch. My years in yoga, energy
+              work, astrology, and ritual taught me how to create spaces where
+              meaningful transformation can occur.
             </p>
             <p>
               Whether through movement, beauty, sound, astrology, or ritual, my
@@ -162,12 +163,12 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="bg-[var(--primary)] px-6 py-20 text-[var(--background)] md:py-32">
+      <section className="lift-gradient-shift px-6 py-20 text-[var(--background)] md:py-32">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="mb-4 text-xs font-medium uppercase tracking-[0.24em] text-[var(--accent)]">
+          <p className="mb-4 text-xs font-medium tracking-[0.24em] text-[var(--accent)] uppercase">
             The Facial Massage Guide
           </p>
-          <h2 className="text-4xl font-medium leading-tight md:text-5xl">
+          <h2 className="text-4xl leading-tight font-medium md:text-5xl">
             LIFT — A Daily Ritual
           </h2>
           <div className="mt-6 space-y-5 text-base leading-relaxed opacity-85">
@@ -240,10 +241,10 @@ export default function Page() {
               key={card.title}
               className="rounded-lg border border-[var(--border)] bg-white/50 p-6"
             >
-              <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--accent)]">
+              <p className="text-xs font-medium tracking-[0.22em] text-[var(--accent)] uppercase">
                 {card.category}
               </p>
-              <h3 className="mt-5 text-2xl font-medium leading-tight text-[var(--primary)]">
+              <h3 className="mt-5 text-2xl leading-tight font-medium text-[var(--primary)]">
                 {card.title}
               </h3>
               <p className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)]">
@@ -277,7 +278,7 @@ export default function Page() {
             type="email"
             placeholder="Your email address"
             aria-label="Email address"
-            className="min-h-10 flex-1 rounded-full border border-[var(--border)] bg-white/60 px-4 py-2 text-sm outline-none transition placeholder:text-[var(--muted-foreground)] focus:border-[var(--accent)]"
+            className="min-h-10 flex-1 rounded-full border border-[var(--border)] bg-white/60 px-4 py-2 text-sm transition outline-none placeholder:text-[var(--muted-foreground)] focus:border-[var(--accent)]"
           />
           <Button className="h-10 rounded-full bg-[var(--primary)] px-6 text-white hover:bg-[var(--accent)]">
             Join
@@ -297,5 +298,5 @@ export default function Page() {
         secondaryHref="/contact"
       />
     </>
-  );
+  )
 }

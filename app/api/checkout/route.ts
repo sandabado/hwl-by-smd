@@ -1,0 +1,84 @@
+import { NextResponse } from "next/server"
+
+import { getSiteUrl } from "@/lib/env"
+import { getAuthenticatedUser } from "@/lib/access"
+import { createClient } from "@/lib/supabase/server"
+import {
+  getPriceId,
+  getStripe,
+  isProductCheckoutReady,
+  isProductId,
+  PRODUCTS,
+} from "@/lib/stripe"
+
+export async function POST(request: Request) {
+  const body = (await request.json().catch(() => null)) as {
+    productId?: unknown
+  } | null
+  if (!isProductId(body?.productId)) {
+    return NextResponse.json({ error: "Unknown offering." }, { status: 400 })
+  }
+
+  if (!isProductCheckoutReady(body.productId)) {
+    return NextResponse.json(
+      {
+        error:
+          "This offering is still being prepared. Sales will open after its content and delivery are fully verified.",
+      },
+      { status: 503 }
+    )
+  }
+
+  const user = await getAuthenticatedUser()
+  if (!user?.email) {
+    return NextResponse.json(
+      { loginUrl: "/login?redirectTo=/store" },
+      { status: 401 }
+    )
+  }
+
+  const stripe = getStripe()
+  const price = getPriceId(body.productId)
+  if (!stripe || !price) {
+    return NextResponse.json(
+      {
+        error:
+          "Secure checkout is built and waiting for the Stripe product keys.",
+      },
+      { status: 503 }
+    )
+  }
+
+  const supabase = await createClient()
+  const { data: profile } =
+    (await supabase
+      ?.from("profiles")
+      .select("stripe_customer_id")
+      .eq("id", user.id)
+      .maybeSingle()) ?? {}
+  const siteUrl = getSiteUrl(request.url)
+  const product = PRODUCTS[body.productId]
+  const metadata = {
+    product_type: body.productId,
+    user_id: user.id,
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    allow_promotion_codes: true,
+    billing_address_collection: "auto",
+    cancel_url: `${siteUrl}/store?checkout=cancelled`,
+    client_reference_id: user.id,
+    customer: profile?.stripe_customer_id ?? undefined,
+    customer_email: profile?.stripe_customer_id ? undefined : user.email,
+    line_items: [{ price, quantity: 1 }],
+    metadata,
+    mode: product.mode,
+    payment_method_types: ["card"],
+    payment_intent_data: product.mode === "payment" ? { metadata } : undefined,
+    subscription_data:
+      product.mode === "subscription" ? { metadata } : undefined,
+    success_url: `${siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+  })
+
+  return NextResponse.json({ url: session.url })
+}

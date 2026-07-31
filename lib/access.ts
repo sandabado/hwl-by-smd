@@ -1,0 +1,120 @@
+import "server-only"
+
+import { redirect } from "next/navigation"
+
+import { createClient } from "@/lib/supabase/server"
+
+export type AccessRequirement =
+  "authenticated" | "any_purchase" | "membership_only" | "lift_guide_only"
+
+export type MemberAccess = {
+  canDownloadLift: boolean
+  canAccessLift: boolean
+  hasAnyPurchase: boolean
+  isMember: boolean
+  membership: {
+    cancel_at_period_end: boolean
+    current_period_end: string | null
+    status: string
+  } | null
+  purchases: Array<{
+    amount_paid: number
+    product_type: string
+    purchased_at: string
+    status: string
+  }>
+}
+
+export async function getAuthenticatedUser() {
+  const supabase = await createClient()
+  if (!supabase) return null
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  return user
+}
+
+export async function getMemberAccess(userId: string): Promise<MemberAccess> {
+  const supabase = await createClient()
+  if (!supabase) {
+    return {
+      canDownloadLift: false,
+      canAccessLift: false,
+      hasAnyPurchase: false,
+      isMember: false,
+      membership: null,
+      purchases: [],
+    }
+  }
+
+  const [{ data: purchases }, { data: memberships }] = await Promise.all([
+    supabase
+      .from("purchases")
+      .select("amount_paid, product_type, purchased_at, status")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .order("purchased_at", { ascending: false }),
+    supabase
+      .from("memberships")
+      .select("cancel_at_period_end, current_period_end, status")
+      .eq("user_id", userId)
+      .in("status", ["active", "trialing"])
+      .order("current_period_end", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ])
+
+  const purchaseList = purchases ?? []
+  const membership = memberships ?? null
+  const isMember = Boolean(membership)
+  const canAccessLift =
+    isMember ||
+    purchaseList.some((purchase) => purchase.product_type === "lift_guide")
+  const canDownloadLift =
+    canAccessLift ||
+    purchaseList.some((purchase) => purchase.product_type === "pdf_download")
+
+  return {
+    canDownloadLift,
+    canAccessLift,
+    hasAnyPurchase:
+      isMember ||
+      purchaseList.some((purchase) => purchase.product_type !== "membership"),
+    isMember,
+    membership,
+    purchases: purchaseList,
+  }
+}
+
+export async function requireAccess(
+  requirement: AccessRequirement,
+  returnTo: string
+) {
+  const user = await getAuthenticatedUser()
+  if (!user) {
+    redirect(`/login?redirectTo=${encodeURIComponent(returnTo)}`)
+  }
+
+  if (requirement === "authenticated") {
+    return {
+      access: await getMemberAccess(user.id),
+      user,
+    }
+  }
+
+  const access = await getMemberAccess(user.id)
+  const allowed =
+    requirement === "any_purchase"
+      ? access.hasAnyPurchase
+      : requirement === "membership_only"
+        ? access.isMember
+        : access.canAccessLift
+
+  if (!allowed) {
+    redirect(`/store?access=${requirement}`)
+  }
+
+  return { access, user }
+}

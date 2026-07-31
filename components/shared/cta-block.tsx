@@ -1,14 +1,14 @@
-import Link from "next/link";
+import Link from "next/link"
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 
 interface CtaBlockProps {
-  title: string;
-  subtitle?: string;
-  primaryLabel: string;
-  primaryHref: string;
-  secondaryLabel?: string;
-  secondaryHref?: string;
+  title: string
+  subtitle?: string
+  primaryLabel: string
+  primaryHref: string
+  secondaryLabel?: string
+  secondaryHref?: string
 }
 
 export function CtaBlock({
@@ -22,7 +22,7 @@ export function CtaBlock({
   return (
     <section className="px-6 py-20 md:py-32">
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-3xl font-medium leading-tight text-[var(--primary)] md:text-4xl">
+        <h2 className="text-3xl leading-tight font-medium text-[var(--primary)] md:text-4xl">
           {title}
         </h2>
         {subtitle ? (
@@ -49,5 +49,5 @@ export function CtaBlock({
         </div>
       </div>
     </section>
-  );
+  )
 }

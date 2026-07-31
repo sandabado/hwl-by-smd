@@ -1,179 +1,275 @@
-import type { Metadata } from "next"
+import Image from "next/image"
+import Link from "next/link"
+import { ArrowRight, MoonStar, ScrollText, Sparkles } from "lucide-react"
 
-import {
-  BenefitGrid,
-  FaqAccordion,
-  InteriorHero,
-  OfferingCard,
-  PageSection,
-} from "@/components/shared/internal-page"
-import { CtaBlock } from "@/components/shared/cta-block"
-import { SectionHeading } from "@/components/shared/section-heading"
-import { TestimonialQuote } from "@/components/shared/testimonial-quote"
+import { JsonLd } from "@/components/seo/json-ld"
+import { PullQuote } from "@/components/shared/pull-quote"
+import { SectionDivider } from "@/components/shared/section-divider"
+import { Button } from "@/components/ui/button"
+import { media } from "@/lib/media"
+import { createPageMetadata, createServiceJsonLd } from "@/lib/seo"
 
-export const metadata: Metadata = {
-  title: "Ritual Experiences | HWL by SMD",
+export const metadata = createPageMetadata({
+  title: "Being | Tarot, Astrology & Ritual | HWL by SMD",
   description:
-    "Seasonal astrology, ritual, intuitive guidance, and intentional ceremony. Ancient wisdom for modern life with grounded, practical application.",
-}
+    "Tarot, astrology, and ritual ceremony offered as grounded practices for reflection, meaning, and inner alignment.",
+  path: "/being",
+})
 
-const seasonal = [
+const offerings = [
   {
-    title: "Seasonal Astrology Workshop",
-    details: ["60-90 minutes", "Starting at $555"],
-    description:
-      "A grounded astrology workshop designed around the current season, moon cycle, or planetary moment, with reflection prompts and practical integration.",
+    icon: ScrollText,
+    title: "Tarot",
+    summary:
+      "A private mirror for the question, transition, or pattern asking for your attention.",
+    detail:
+      "The cards are used for reflection rather than prediction. You leave with grounded language for what you noticed and the freedom to take only what resonates.",
+    format: "Private · in person or virtual availability to be confirmed",
   },
   {
-    title: "Seasonal Astrology + Ritual Experience",
-    details: ["90-120 minutes", "Starting at $777"],
-    description:
-      "A guided seasonal experience combining astrology, intention setting, simple ritual, meditation, and group reflection.",
+    icon: MoonStar,
+    title: "Astrology",
+    summary:
+      "Seasonal and lunar perspective for understanding timing, rhythm, and the life you are already living.",
+    detail:
+      "Astrology becomes a framework for inquiry—not a rulebook. Sessions can center a season, a threshold, or a personal cycle once Shannon confirms her final formats.",
+    format: "Private or group · by consultation",
   },
   {
-    title: "Signature Solstice & Equinox Ceremonies",
-    details: ["120+ minutes", "Starting at $888"],
-    description:
-      "A ceremonial container for marking thresholds with astrology, ritual, guided meditation, sound, intention, and integration.",
+    icon: Sparkles,
+    title: "Ritual Ceremony",
+    summary:
+      "A thoughtful container for beginnings, endings, grief, celebration, and return.",
+    detail:
+      "Each ceremony is shaped around the people and moment it serves, using only practices that feel grounded, consensual, and appropriate to the gathering.",
+    format: "Private or group · custom scope",
   },
-]
+] as const
 
-const intuitive = [
+const seasons = [
   {
-    title: "Intuitive Tarot Reading",
-    details: ["45-60 minutes", "$222"],
-    description:
-      "A reflective reading for clarity, perspective, and self-understanding, held with practical guidance and grounded care.",
+    name: "Spring",
+    ritual: "Begin again",
+    note: "A practice for emergence, clarity, and the first honest yes.",
+    image: media.experiences.beauty,
   },
   {
-    title: "Moon Oracle Reading",
-    details: ["45-60 minutes", "$222"],
-    description:
-      "A lunar-focused reading for emotional insight, timing, cycles, and inner alignment.",
+    name: "Summer",
+    ritual: "Stand in the light",
+    note: "A practice for expression, warmth, and receiving what has grown.",
+    image: media.brand.destinationPortrait,
   },
   {
-    title: "Tarot + Reiki Experience",
-    details: ["60-75 minutes", "$444"],
-    description:
-      "A combined intuitive and energetic session blending tarot guidance with Reiki, aromatherapy, and restorative integration.",
-  },
-]
-
-const faqs = [
-  {
-    question: "What if I'm skeptical?",
-    answer:
-      "The work is grounded and invitational. Astrology, tarot, and ritual are used as reflective frameworks, not rigid predictions.",
+    name: "Autumn",
+    ritual: "Release with care",
+    note: "A practice for discernment, gratitude, and making room.",
+    image: media.editorial.liftBotanicals,
   },
   {
-    question: "What's the difference between tarot and moon oracle?",
-    answer:
-      "Tarot is broad and archetypal. Moon oracle work is more cyclical, emotional, and connected to timing, seasonality, and inner rhythm.",
+    name: "Winter",
+    ritual: "Listen inward",
+    note: "A practice for rest, quiet, and trusting what cannot be rushed.",
+    image: media.experiences.ritualMoon,
   },
-  {
-    question: "Can readings be offered to a private group?",
-    answer:
-      "Yes. Private readings, mini-readings, and group ritual formats can be adapted for retreats, celebrations, and gatherings.",
-  },
-  {
-    question: "What happens in Tarot + Reiki?",
-    answer:
-      "The session begins with intuitive guidance and moves into energetic clearing, aromatherapy, and quiet integration.",
-  },
-  {
-    question: "Are remote sessions available?",
-    answer:
-      "Yes. Many ritual and intuitive guidance sessions can be offered remotely when travel or timing calls for it.",
-  },
-]
+] as const
 
 export default function RitualPage() {
   return (
     <>
-      <InteriorHero
-        eyebrow="Experiences"
-        particles
-        title="Ancient wisdom for modern life"
-        subtitle="Seasonal astrology, ritual, intuitive guidance, and intentional ceremony — experiences that help you navigate life with more clarity, meaning, and connection."
-        variant="ritual"
+      <JsonLd
+        data={createServiceJsonLd({
+          name: "HWL Being Experiences",
+          description:
+            "Tarot, astrology, and intentional ritual offered as reflective wellness practices for private guests and groups.",
+          path: "/being",
+          serviceType: "Reflective ritual and intuitive guidance",
+          image: media.experiences.ritualMoon.src,
+        })}
+        id="being-service-schema"
       />
 
-      <PageSection>
-        <SectionHeading align="center" title="Ritual creates a container" />
-        <div className="mx-auto mt-8 max-w-3xl space-y-5 text-center text-lg leading-relaxed text-[var(--muted-foreground)]">
-          <p>
-            Human beings need ritual. We need moments that ask us to pause,
-            reflect, release, choose, and begin again with intention.
-          </p>
-          <p>
-            After more than twenty years of studying astrology, tarot,
-            symbolism, energetics, and personal transformation, Shannon offers
-            these practices as grounded frameworks for awareness — ancient
-            wisdom translated into modern life.
-          </p>
-        </div>
-      </PageSection>
-
-      <PageSection className="bg-white/35">
-        <SectionHeading
-          align="center"
-          eyebrow="Seasonal & Group Ritual"
-          title="Gather with intention"
+      <section className="relative -mt-16 flex min-h-[88vh] items-end overflow-hidden bg-[#211c22] px-6 py-24 pt-36 text-white md:-mt-20 md:pt-40">
+        <Image
+          alt={media.experiences.ritualMoon.alt}
+          className="object-cover opacity-25 [filter:saturate(.55)_contrast(1.05)]"
+          fill
+          priority
+          sizes="100vw"
+          src={media.experiences.ritualMoon.src}
         />
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {seasonal.map((offering) => (
-            <OfferingCard {...offering} key={offering.title} />
-          ))}
-        </div>
-      </PageSection>
-
-      <PageSection>
-        <SectionHeading
-          align="center"
-          eyebrow="Intuitive Guidance (Private)"
-          title="For clarity and integration"
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_58%_78%,rgba(210,150,100,0.2),transparent_26%),linear-gradient(to_top,rgba(20,16,21,0.92),rgba(33,28,34,0.26)_62%,rgba(24,20,25,0.65))]"
         />
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {intuitive.map((offering) => (
-            <OfferingCard {...offering} key={offering.title} />
-          ))}
+        <div
+          aria-hidden="true"
+          className="candle-breath absolute bottom-[16%] left-[58%] h-48 w-32 rounded-full bg-[radial-gradient(ellipse,rgba(239,195,132,0.2),transparent_65%)] blur-xl"
+        />
+        <div className="relative z-10 mx-auto w-full max-w-7xl pb-8 md:pb-16">
+          <p className="text-xs tracking-[0.3em] text-[#dcc5a5] uppercase">
+            Being
+          </p>
+          <h1 className="mt-6 max-w-4xl text-5xl leading-[1.02] font-medium text-white md:text-7xl lg:text-8xl">
+            Ancient wisdom for modern life.
+          </h1>
+          <p className="mt-7 max-w-2xl text-lg leading-[1.9] text-white/65 md:text-xl">
+            Tarot, astrology, and ritual ceremony for inner alignment.
+          </p>
+          <Button
+            asChild
+            className="mt-10 h-12 rounded-full bg-[#dcc5a5] px-7 text-[#211c22] hover:bg-white"
+          >
+            <Link href="/book?service=being">Book a Reading</Link>
+          </Button>
         </div>
-      </PageSection>
+      </section>
 
-      <PageSection className="bg-white/35">
-        <SectionHeading align="center" title="What this supports" />
-        <div className="mt-10">
-          <BenefitGrid
-            items={[
-              "Clarity & Perspective",
-              "Timing & Alignment",
-              "Self-Awareness",
-              "Energetic Clearing",
-              "Meaning & Connection",
-              "Integration",
-            ]}
-          />
+      <section
+        className="relative overflow-hidden bg-[#f7f1e9] px-6 py-28 md:py-40"
+        id="overview"
+      >
+        <div
+          aria-hidden="true"
+          className="absolute -top-44 -left-40 size-[34rem] rounded-full bg-[#76536e]/6 blur-3xl"
+        />
+        <div className="relative mx-auto max-w-3xl text-center">
+          <p className="font-serif text-xl leading-[2] text-[var(--primary)] md:text-2xl">
+            Ritual is not superstition. It&apos;s structure for meaning. A way
+            to mark transitions, ask questions, and listen for what&apos;s
+            underneath the noise. These offerings are designed as reflective
+            practices — held with care, approached without prediction, and
+            centered on your experience. Nothing here asks you to believe
+            anything. Only to pay attention.
+          </p>
         </div>
-      </PageSection>
+        <PullQuote
+          className="mx-auto mt-24 max-w-5xl"
+          quote="Ritual is the bridge between who you are and who you're becoming."
+        />
+      </section>
 
-      <TestimonialQuote
-        attribution="Grace R."
-        context="Ritual guest"
-        quote="The experience felt sacred without being intimidating. I left with language for what I was moving through and a simple ritual I could actually carry into my life."
-      />
+      <SectionDivider variant="fade" />
 
-      <PageSection className="bg-white/35">
-        <SectionHeading align="center" title="Questions" />
-        <div className="mt-8">
-          <FaqAccordion items={faqs} />
+      <section
+        className="relative overflow-hidden bg-[#251f27] px-6 py-28 text-white md:py-40"
+        id="offerings"
+      >
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 [background-image:radial-gradient(circle_at_20%_18%,rgba(220,197,165,0.12),transparent_24%),radial-gradient(circle_at_82%_72%,rgba(118,83,110,0.2),transparent_30%)] opacity-30"
+        />
+        <div className="relative mx-auto max-w-5xl">
+          <p className="text-center text-xs tracking-[0.28em] text-[#dcc5a5] uppercase">
+            Offerings
+          </p>
+          <h2 className="mx-auto mt-5 max-w-2xl text-center text-5xl leading-tight text-white md:text-6xl">
+            Three ways to listen.
+          </h2>
+          <div className="mt-20 divide-y divide-white/10 border-y border-white/10">
+            {offerings.map(({ detail, format, icon: Icon, summary, title }) => (
+              <details className="group py-8 md:py-10" key={title}>
+                <summary className="grid cursor-pointer list-none gap-6 md:grid-cols-[64px_0.55fr_1fr_auto] md:items-center">
+                  <span className="grid size-14 place-items-center rounded-full border border-white/12 text-[#dcc5a5]">
+                    <Icon className="size-5" aria-hidden="true" />
+                  </span>
+                  <h3 className="text-4xl text-white">{title}</h3>
+                  <p className="max-w-xl text-base leading-[1.9] text-white/58">
+                    {summary}
+                  </p>
+                  <span className="text-xs tracking-[0.18em] text-[#dcc5a5] uppercase group-open:hidden">
+                    Enter
+                  </span>
+                  <span className="hidden text-xs tracking-[0.18em] text-[#dcc5a5] uppercase group-open:block">
+                    Close
+                  </span>
+                </summary>
+                <div className="mt-8 grid gap-4 pl-0 md:ml-[calc(64px+1.5rem)] md:grid-cols-[1fr_auto]">
+                  <p className="max-w-2xl text-base leading-[1.9] text-white/68">
+                    {detail}
+                  </p>
+                  <p className="text-xs tracking-wide text-white/70">
+                    {format}
+                  </p>
+                </div>
+              </details>
+            ))}
+          </div>
+          <p className="mx-auto mt-12 max-w-2xl text-center text-xs leading-[1.8] text-white/72">
+            Readings are offered for reflection and self-inquiry. They are not
+            predictions, psychological counseling, medical care, or financial
+            advice. Take what resonates and leave what does not.
+          </p>
         </div>
-      </PageSection>
+      </section>
 
-      <CtaBlock
-        primaryHref="/book"
-        primaryLabel="Book an Experience"
-        title="Remember who you already are."
-      />
+      <section
+        className="overflow-hidden bg-[#f8f3ec] px-6 py-28 md:py-40"
+        id="seasons"
+      >
+        <div className="mx-auto max-w-7xl">
+          <p className="text-xs tracking-[0.28em] text-[var(--accent)] uppercase">
+            Seasonal rituals
+          </p>
+          <h2 className="mt-5 max-w-3xl text-5xl leading-tight text-[var(--primary)] md:text-6xl">
+            The year already knows how to move.
+          </h2>
+          <div
+            aria-label="Seasonal ritual gallery"
+            className="-mx-6 mt-16 flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-6 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)] md:mx-0 md:px-0"
+            role="region"
+            tabIndex={0}
+          >
+            {seasons.map(({ image, name, note, ritual }) => (
+              <article
+                className="group relative aspect-[4/5] w-[82vw] max-w-sm shrink-0 snap-center overflow-hidden rounded-[2rem] bg-[var(--muted)] md:w-[30vw]"
+                key={name}
+              >
+                <Image
+                  alt={image.alt}
+                  className="object-cover transition duration-[1200ms] ease-out motion-safe:group-hover:scale-[1.035]"
+                  fill
+                  sizes="(max-width: 767px) 82vw, 30vw"
+                  src={image.src}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#211c22]/88 via-[#211c22]/12 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-7 text-white">
+                  <p className="text-xs tracking-[0.22em] text-[#dcc5a5] uppercase">
+                    {name}
+                  </p>
+                  <h3 className="mt-3 text-3xl text-white">{ritual}</h3>
+                  <p className="mt-3 text-sm leading-[1.75] text-white/62">
+                    {note}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="relative overflow-hidden bg-[#211c22] px-6 py-36 text-center text-white md:py-52"
+        id="invitation"
+      >
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-[radial-gradient(circle_at_50%_105%,rgba(210,150,100,0.17),transparent_48%)]"
+        />
+        <div className="relative mx-auto max-w-3xl">
+          <p className="text-xs tracking-[0.3em] text-[#dcc5a5] uppercase">
+            Being
+          </p>
+          <h2 className="mt-6 text-5xl leading-tight text-white md:text-7xl">
+            Begin the inner work.
+          </h2>
+          <Link
+            className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#dcc5a5] px-7 py-3 text-sm font-medium text-[#211c22] transition hover:bg-white"
+            href="/book?service=being"
+          >
+            Book a Reading <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
     </>
   )
 }

@@ -1,151 +1,448 @@
-import type { Metadata } from "next"
+import Link from "next/link"
+import { ArrowRight, Check, Droplets, Sparkles } from "lucide-react"
 
-import {
-  BenefitGrid,
-  InteriorHero,
-  OfferingCard,
-  PageSection,
-} from "@/components/shared/internal-page"
-import { CtaBlock } from "@/components/shared/cta-block"
+import { JsonLd } from "@/components/seo/json-ld"
+import { PageSection } from "@/components/shared/internal-page"
+import { ParallaxImage } from "@/components/shared/parallax-image"
+import { PullQuote } from "@/components/shared/pull-quote"
+import { SectionDivider } from "@/components/shared/section-divider"
 import { SectionHeading } from "@/components/shared/section-heading"
-import { TestimonialQuote } from "@/components/shared/testimonial-quote"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { media } from "@/lib/media"
+import { createPageMetadata, createServiceJsonLd } from "@/lib/seo"
 
-export const metadata: Metadata = {
-  title: "Beauty Experiences | HWL by SMD",
+export const metadata = createPageMetadata({
+  title: "Beauty | Facial Rituals | HWL by SMD",
   description:
-    "Luxury facial rituals that restore healthy skin while creating space to slow down. Advanced skincare, therapeutic massage, energy balancing, and personalized care.",
-}
+    "Facial rituals centered on thoughtful skin care and space to slow down.",
+  path: "/beauty",
+})
 
-const experiences = [
-  {
-    title: "Wild Glow Express Facial",
-    details: ["15-20 minutes", "$111 per guest", "Minimum 4 guests"],
-    description:
-      "A refreshing facial experience designed to restore radiance in moments. Combines cleansing, hydration, sculpting massage, and finishing touches to leave guests feeling refreshed, lifted, and glowing.",
-  },
-  {
-    title: "Reiki Aromatherapy Healing",
-    details: ["30-45 minutes", "$222 per guest"],
-    description:
-      "A deeply restorative blend of Reiki, crystal healing, and aromatherapy touch designed to soothe the nervous system, clear energetic stagnation, and renew vitality.",
-  },
-  {
-    title: "Signature Retreat Facial",
-    details: ["60 minutes", "$277 per guest"],
-    description:
-      "A customized facial designed to restore glow, hydration, balance, and relaxation while creating a meaningful moment of pause within the retreat experience.",
-  },
+const offerings = [
   {
     title: "HWL Beauty & Being Ritual",
-    details: ["90 minutes", "$333 per guest"],
+    details: ["90 minutes", "Signature ritual", "Investment by consultation"],
     description:
-      "A luxe facial ritual blending customized skincare, aromatherapy, therapeutic and lymphatic facial massage, Reiki healing, and intentional restoration.",
+      "A longer, layered beauty ritual shaped in conversation with Shannon. The exact modalities and pace are confirmed before you book.",
   },
   {
-    title: "Wild Glow Luxury Facial Ritual",
-    details: ["120 minutes", "$444 per guest"],
+    title: "Restorative Facial",
+    details: ["60 minutes", "Private session", "Investment by consultation"],
     description:
-      "A fully immersive beauty and wellbeing experience combining advanced skincare, extended massage, energy balancing, aromatherapy, and personalized ritual.",
+      "A facial centered on attentive skin care and unhurried massage, paced for comfort and a genuine moment of rest.",
+  },
+  {
+    title: "Express Glow",
+    details: ["45 minutes", "Private session", "Investment by consultation"],
+    description:
+      "A focused facial for visible radiance when time is limited, without rushing the care or the quiet around it.",
+  },
+  {
+    title: "Skin Consultation",
+    details: ["30 minutes", "One-to-one", "Investment by consultation"],
+    description:
+      "A thoughtful skin assessment with routine guidance for anyone who wants clarity before choosing an experience.",
   },
 ]
 
 const benefits = [
-  "Radiant Skin",
-  "Reduced Puffiness",
-  "Released Tension",
-  "Nervous System Regulation",
-  "Enhanced Absorption",
-  "Deep Restoration",
+  {
+    title: "A refreshed finish",
+    description:
+      "Thoughtful skin care and an unhurried pace create a polished, rested-looking finish.",
+  },
+  {
+    title: "Space to soften",
+    description:
+      "Intentional touch around the jaw, brow, and temples is offered at a comfortable pace, based on your preferences.",
+  },
+  {
+    title: "A quieter pace",
+    description:
+      "The room, rhythm, and touch are designed to make slowing down feel possible.",
+  },
+  {
+    title: "Personal attention",
+    description:
+      "Products, pressure, and pacing are chosen around what you share with Shannon.",
+  },
+  {
+    title: "Simple continuity",
+    description:
+      "You leave with clear, realistic guidance for caring for your skin between visits.",
+  },
+  {
+    title: "Time to receive",
+    description:
+      "Nothing to perform. Nothing to solve. Just a protected interval of care.",
+  },
+]
+
+const process = [
+  {
+    title: "Arrive",
+    description:
+      "Settle into a quiet room and let the pace of the day begin to change.",
+  },
+  {
+    title: "Listen",
+    description:
+      "Share what your skin has been doing, what it is sensitive to, and what you need today.",
+  },
+  {
+    title: "Receive",
+    description:
+      "Shannon shapes the facial, products, pressure, and rhythm around that conversation.",
+  },
+  {
+    title: "Rest",
+    description:
+      "The final moments are deliberately unhurried so the experience can close without a rush.",
+  },
+  {
+    title: "Continue",
+    description:
+      "Leave with a few grounded suggestions—not a complicated list—for the days ahead.",
+  },
+]
+
+const faqs = [
+  {
+    question: "How do I choose the right facial?",
+    answer:
+      "You do not need to decide alone. Begin with a consultation or share what you are looking for in your booking note. Shannon will confirm the most fitting format before your appointment.",
+  },
+  {
+    question: "What should I share before my appointment?",
+    answer:
+      "Please mention active skin conditions, allergies, pregnancy, recent procedures, prescriptions, or anything that changes how your skin should be cared for.",
+  },
+  {
+    question: "What should I do before I arrive?",
+    answer:
+      "Come with a clean face when possible, but do not make the day complicated. Your current products and routine can be discussed when you arrive.",
+  },
+  {
+    question: "Can a beauty experience be part of a retreat?",
+    answer:
+      "Yes. Private groups and retreats can request a beauty format shaped around the setting, timing, and number of guests.",
+  },
+  {
+    question: "Is this medical or dermatological care?",
+    answer:
+      "No. HWL beauty experiences are complementary wellness practices and are not a substitute for dermatological or medical treatment.",
+  },
 ]
 
 export default function BeautyPage() {
   return (
-    <>
-      <InteriorHero
-        eyebrow="Experiences"
-        title="Beauty that goes beneath the surface"
-        subtitle="Luxury facial rituals that restore healthy skin while creating space to slow down, breathe, and reconnect with yourself."
-        variant="flow"
+    <div className="overflow-hidden">
+      <JsonLd
+        data={createServiceJsonLd({
+          name: "HWL Beauty Experiences",
+          description:
+            "Facial rituals centered on thoughtful skin care and space to slow down.",
+          path: "/beauty",
+          serviceType: "Facial and beauty wellness experiences",
+          image: media.experiences.beauty.src,
+        })}
+        id="beauty-service-schema"
       />
 
-      <PageSection>
-        <SectionHeading align="center" title="More than skin deep" />
-        <div className="mx-auto mt-8 max-w-3xl space-y-5 text-center text-lg leading-relaxed text-[var(--muted-foreground)]">
-          <p>
-            Beauty is not surface-level. The way your skin looks is intimately
-            connected to how your nervous system feels. Stress, tension, and
-            fatigue show up in your face long before they show up anywhere else.
-          </p>
-          <p>
-            My facial experiences are designed to work on both levels
-            simultaneously — restoring your skin&apos;s natural radiance through
-            advanced skincare, therapeutic massage, and targeted treatments,
-            while regulating your nervous system through intentional touch,
-            aromatherapy, and energetic care. You don&apos;t just leave with
-            glowing skin. You leave feeling restored.
-          </p>
+      <section className="relative isolate flex min-h-[82svh] items-center overflow-hidden bg-[linear-gradient(145deg,#faf7f2_0%,#f5ece8_46%,#edf2ef_100%)] px-6 py-24">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-24 -left-32 size-[34rem] rounded-full border border-white/70 opacity-80"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute top-6 -left-12 size-[22rem] rounded-full border border-[var(--accent)]/15"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-[-12rem] bottom-[-14rem] size-[38rem] rounded-full bg-white/30 blur-3xl"
+        />
+
+        <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-14 md:grid-cols-[minmax(0,0.92fr)_minmax(340px,0.78fr)] md:gap-20">
+          <div className="max-w-3xl text-center md:text-left">
+            <p className="hero-reveal hero-reveal--1 text-xs font-medium tracking-[0.32em] text-[var(--accent)] uppercase">
+              Beauty
+            </p>
+            <h1 className="hero-reveal hero-reveal--2 mt-6 text-5xl leading-[0.98] font-medium text-[var(--primary)] md:text-7xl lg:text-8xl">
+              Skin holds memory.
+            </h1>
+            <p className="hero-reveal hero-reveal--3 mx-auto mt-7 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)] md:mx-0 md:text-xl">
+              Facial rituals centered on thoughtful skin care while creating
+              space to slow down.
+            </p>
+            <div className="hero-reveal hero-reveal--4 mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
+              <Button
+                asChild
+                className="h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
+              >
+                <Link href="/book">
+                  Book a Facial <ArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                className="h-12 rounded-full border-[var(--border)] bg-white/35 px-7 text-[var(--primary)] backdrop-blur-sm hover:bg-white/65"
+                variant="outline"
+              >
+                <Link href="/beauty/lift">Get the LIFT Guide — $5.55</Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="hero-image-reveal relative mx-auto w-full max-w-md md:max-w-none">
+            <div
+              aria-hidden="true"
+              className="absolute -inset-5 rounded-[2.75rem] border border-white/70"
+            />
+            <ParallaxImage
+              alt={media.experiences.beauty.alt}
+              aspectRatio="4 / 5"
+              className="rounded-[2.5rem] shadow-[0_32px_90px_rgba(112,84,77,0.16)]"
+              imageClassName="object-cover"
+              preload
+              speed={0.1}
+              src={media.experiences.beauty.src}
+            />
+            <span className="absolute right-5 bottom-5 inline-flex items-center gap-2 rounded-full border border-white/55 bg-[var(--background)]/75 px-4 py-2 text-[10px] tracking-[0.2em] text-[var(--primary)] uppercase backdrop-blur-md">
+              <Droplets
+                className="size-3.5 text-[var(--accent)]"
+                aria-hidden="true"
+              />
+              The bathroom
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <PageSection className="py-24 md:py-32" id="overview">
+        <div className="mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[0.72fr_1fr] lg:gap-24">
+          <div className="relative mx-auto grid aspect-square w-full max-w-sm place-items-center rounded-full border border-[var(--accent)]/25 bg-[radial-gradient(circle,rgba(255,255,255,0.88)_0%,rgba(232,223,211,0.36)_52%,transparent_72%)]">
+            <div
+              aria-hidden="true"
+              className="absolute inset-[12%] rounded-full border border-white"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-[27%] rounded-full border border-[var(--accent)]/20"
+            />
+            <Droplets
+              className="size-10 text-[var(--accent)]/70"
+              aria-hidden="true"
+            />
+          </div>
+          <div>
+            <p className="text-xs font-medium tracking-[0.3em] text-[var(--accent)] uppercase">
+              Beneath the surface
+            </p>
+            <p className="mt-6 text-lg leading-[1.9] text-[var(--foreground)] md:text-xl">
+              Your skin meets the world with you every day. These facials pair
+              attentive skin care with unhurried touch, quiet, and a pace shaped
+              around what you share. You may leave looking refreshed; the
+              experience is also designed to offer a genuine interval of rest.
+            </p>
+          </div>
+        </div>
+        <PullQuote
+          className="mt-20"
+          quote="You don't just leave with glowing skin. You leave feeling restored."
+        />
+      </PageSection>
+
+      <SectionDivider variant="wave" />
+
+      <PageSection
+        className="bg-[linear-gradient(180deg,rgba(255,255,255,0.36),rgba(245,236,232,0.48))] py-24 md:py-32"
+        id="offerings"
+      >
+        <SectionHeading
+          eyebrow="Facial rituals"
+          title="Choose the depth, not a service menu."
+        />
+        <p className="mt-6 max-w-2xl text-base leading-[1.9] text-[var(--muted-foreground)]">
+          Each offering begins with listening. The cards below are a sense of
+          time and intention; Shannon confirms the details with you personally.
+        </p>
+        <div className="mt-14 grid gap-6 md:grid-cols-2">
+          {offerings.map((offering, index) => (
+            <Card
+              className="group relative overflow-hidden rounded-[2rem] border-white/65 bg-white/55 p-7 shadow-[0_22px_65px_rgba(112,84,77,0.07)] backdrop-blur-sm transition duration-500 hover:border-[var(--accent)]/35 hover:shadow-[0_28px_75px_rgba(112,84,77,0.12)] motion-safe:hover:-translate-y-1 md:p-9"
+              key={offering.title}
+            >
+              <span className="text-xs tracking-[0.28em] text-[var(--accent)] uppercase">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h2 className="mt-5 text-3xl leading-tight font-medium text-[var(--primary)] md:text-4xl">
+                {offering.title}
+              </h2>
+              <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs tracking-[0.12em] text-[var(--muted-foreground)] uppercase">
+                {offering.details.map((detail) => (
+                  <span key={detail}>{detail}</span>
+                ))}
+              </div>
+              <p className="mt-6 max-w-xl text-base leading-[1.9] text-[var(--muted-foreground)]">
+                {offering.description}
+              </p>
+            </Card>
+          ))}
         </div>
       </PageSection>
 
-      <PageSection className="bg-white/35">
+      <PageSection className="py-24 md:py-32" id="benefits">
         <SectionHeading
           align="center"
-          eyebrow="Signature Beauty Experiences"
-          title="Choose your ritual"
+          eyebrow="What the room makes possible"
+          title="Care you can feel after you leave."
         />
-        <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {experiences.map((experience) => (
-            <OfferingCard {...experience} key={experience.title} />
-          ))}
-        </div>
-      </PageSection>
-
-      <PageSection>
-        <SectionHeading align="center" title="What this creates" />
-        <div className="mt-10">
-          <BenefitGrid items={benefits} />
-        </div>
-      </PageSection>
-
-      <PageSection className="bg-white/35">
-        <SectionHeading align="center" title="Investment" />
-        <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-lg border border-[var(--border)] bg-white/60">
-          {experiences.map((experience) => (
-            <div
-              className="grid gap-3 border-b border-[var(--border)] p-5 last:border-b-0 md:grid-cols-[1fr_auto_auto]"
-              key={experience.title}
+        <div className="mt-14 grid gap-px overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2 lg:grid-cols-3">
+          {benefits.map((benefit) => (
+            <article
+              className="bg-[var(--background)] p-7 md:p-9"
+              key={benefit.title}
             >
-              <span className="font-medium text-[var(--primary)]">
-                {experience.title}
-              </span>
-              <span className="text-sm text-[var(--muted-foreground)]">
-                {experience.details[0]}
-              </span>
-              <span className="text-sm font-medium text-[var(--accent)]">
-                {experience.details[1]}
-              </span>
-            </div>
+              <Check
+                className="size-4 text-[var(--accent)]"
+                aria-hidden="true"
+              />
+              <h3 className="mt-5 text-2xl font-medium text-[var(--primary)]">
+                {benefit.title}
+              </h3>
+              <p className="mt-3 text-sm leading-[1.9] text-[var(--muted-foreground)]">
+                {benefit.description}
+              </p>
+            </article>
           ))}
         </div>
-        <p className="mx-auto mt-5 max-w-2xl text-center text-sm leading-relaxed text-[var(--muted-foreground)]">
-          Group pricing and travel fees are confirmed during booking. No travel
-          fee applies within the Coachella Valley.
-        </p>
       </PageSection>
 
-      <TestimonialQuote
-        attribution="Zara K."
-        context="Beauty experience guest"
-        quote="My skin was glowing, but what surprised me most was how calm I felt afterward. It was beauty, care, and deep nervous system rest all at once."
-      />
+      <PageSection className="bg-white/35 py-24 md:py-32" id="process">
+        <SectionHeading
+          align="center"
+          eyebrow="Your experience"
+          title="Five unhurried moments."
+        />
+        <ol className="mx-auto mt-16 max-w-5xl">
+          {process.map((step, index) => (
+            <li
+              className="grid gap-5 border-t border-[var(--border)] py-8 first:border-t-0 md:grid-cols-[7rem_0.75fr_1fr] md:items-baseline"
+              key={step.title}
+            >
+              <span className="text-xs tracking-[0.25em] text-[var(--accent)] uppercase">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h3 className="text-3xl font-medium text-[var(--primary)]">
+                {step.title}
+              </h3>
+              <p className="text-base leading-[1.9] text-[var(--muted-foreground)]">
+                {step.description}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </PageSection>
 
-      <CtaBlock
-        primaryHref="/book"
-        primaryLabel="Book an Experience"
-        secondaryHref="/contact"
-        secondaryLabel="Contact Shannon"
-        title="Ready to glow?"
-      />
-    </>
+      <PageSection className="py-24 md:py-32" id="investment">
+        <div className="mx-auto max-w-4xl rounded-[2.5rem] border border-[var(--accent)]/25 bg-[linear-gradient(135deg,rgba(255,255,255,0.72),rgba(232,223,211,0.32))] p-8 text-center shadow-[0_28px_80px_rgba(90,74,63,0.08)] md:p-14">
+          <Sparkles
+            className="mx-auto size-5 text-[var(--accent)]"
+            aria-hidden="true"
+          />
+          <p className="mt-5 text-xs tracking-[0.28em] text-[var(--accent)] uppercase">
+            Investment
+          </p>
+          <h2 className="mt-5 text-4xl font-medium text-[var(--primary)] md:text-5xl">
+            Begin with a conversation.
+          </h2>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)]">
+            Service investment is confirmed in consultation, once the timing,
+            setting, and experience are clear. You will know the full details
+            before you commit.
+          </p>
+          <Button
+            asChild
+            className="mt-8 h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
+          >
+            <Link href="/book">
+              Book a Facial <ArrowRight aria-hidden="true" />
+            </Link>
+          </Button>
+        </div>
+      </PageSection>
+
+      <PageSection className="bg-white/35 py-24 md:py-32" id="faq">
+        <SectionHeading align="center" title="Questions, answered gently." />
+        <Accordion
+          className="mx-auto mt-10 max-w-3xl"
+          collapsible
+          type="single"
+        >
+          {faqs.map((item, index) => (
+            <AccordionItem
+              className="border-[var(--border)]"
+              key={item.question}
+              value={`beauty-faq-${index}`}
+            >
+              <AccordionTrigger className="py-6 text-left text-lg text-[var(--primary)] hover:no-underline">
+                {item.question}
+              </AccordionTrigger>
+              <AccordionContent className="pb-6 text-base leading-[1.9] text-[var(--muted-foreground)]">
+                {item.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </PageSection>
+
+      <PageSection className="py-24 md:py-32" id="lift">
+        <div className="mx-auto grid max-w-6xl overflow-hidden rounded-[2.5rem] bg-[var(--primary)] text-[var(--background)] shadow-[0_35px_90px_rgba(43,39,36,0.18)] lg:grid-cols-[0.88fr_1.12fr]">
+          <ParallaxImage
+            alt={media.editorial.liftBotanicals.alt}
+            aspectRatio="4 / 3"
+            className="h-full min-h-80 rounded-none"
+            imageClassName="object-cover opacity-85"
+            sizes="(max-width: 1023px) 100vw, 42vw"
+            speed={0.1}
+            src={media.editorial.liftBotanicals.src}
+          />
+          <div className="flex flex-col justify-center p-8 md:p-12 lg:p-16">
+            <p className="text-xs tracking-[0.3em] text-[var(--accent-on-dark)] uppercase">
+              LIFT · A daily ritual
+            </p>
+            <h2 className="mt-5 text-4xl leading-tight font-medium md:text-5xl">
+              Your hands know more than you think.
+            </h2>
+            <p className="mt-6 max-w-xl text-lg leading-[1.9] text-[var(--background)]/72">
+              Seven facial massage movements, demonstrated in video and paired
+              with a printable guide. Five minutes to return to your face,
+              breath, and attention.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-5">
+              <span className="font-serif text-4xl text-[var(--accent-on-dark)]">
+                $5.55
+              </span>
+              <Button
+                asChild
+                className="h-12 rounded-full bg-[var(--background)] px-7 text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
+              >
+                <Link href="/beauty/lift">
+                  Get the LIFT Guide <ArrowRight aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </PageSection>
+    </div>
   )
 }

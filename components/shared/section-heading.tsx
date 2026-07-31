@@ -1,11 +1,11 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
 interface SectionHeadingProps {
-  eyebrow?: string;
-  title: string;
-  subtitle?: string;
-  align?: "left" | "center";
-  className?: string;
+  eyebrow?: string
+  title: string
+  subtitle?: string
+  align?: "left" | "center"
+  className?: string
 }
 
 export function SectionHeading({
@@ -15,21 +15,18 @@ export function SectionHeading({
   align = "left",
   className,
 }: SectionHeadingProps) {
-  const isCentered = align === "center";
+  const isCentered = align === "center"
 
   return (
     <div
-      className={cn(
-        isCentered && "mx-auto max-w-2xl text-center",
-        className
-      )}
+      className={cn(isCentered && "mx-auto max-w-2xl text-center", className)}
     >
       {eyebrow ? (
-        <p className="mb-4 text-xs font-medium uppercase tracking-[0.24em] text-[var(--accent)]">
+        <p className="mb-4 text-xs font-medium tracking-[0.24em] text-[var(--accent)] uppercase">
           {eyebrow}
         </p>
       ) : null}
-      <h2 className="text-3xl font-medium leading-tight text-[var(--primary)] md:text-4xl lg:text-5xl">
+      <h2 className="text-3xl leading-tight font-medium text-[var(--primary)] md:text-4xl lg:text-5xl">
         {title}
       </h2>
       {subtitle ? (
@@ -43,5 +40,5 @@ export function SectionHeading({
         </p>
       ) : null}
     </div>
-  );
+  )
 }

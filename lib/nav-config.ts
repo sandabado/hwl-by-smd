@@ -1,9 +1,8 @@
-import { NAV_ITEMS } from "./constants";
+import { NAV_ITEMS } from "./constants"
 
 export interface NavItem {
-  label: string;
-  href: string;
-  children?: { label: string; href: string; description: string }[];
+  label: string
+  href: string
 }
 
-export const MAIN_NAV: NavItem[] = NAV_ITEMS;
+export const MAIN_NAV: NavItem[] = NAV_ITEMS

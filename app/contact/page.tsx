@@ -1,27 +1,30 @@
 import Link from "next/link"
-import type { Metadata } from "next"
 import { AtSign, Mail, MapPin, Phone } from "lucide-react"
 
-import {
-  ContactForm,
-  InteriorHero,
-  PageSection,
-} from "@/components/shared/internal-page"
+import { InteriorHero, PageSection } from "@/components/shared/internal-page"
+import { ContactForm } from "@/components/shared/contact-form"
+import { CtaBlock } from "@/components/shared/cta-block"
 import { SectionHeading } from "@/components/shared/section-heading"
 import { Card } from "@/components/ui/card"
 import { SITE_CONFIG } from "@/lib/constants"
+import { media } from "@/lib/media"
+import { createPageMetadata } from "@/lib/seo"
 
-export const metadata: Metadata = {
+export const metadata = createPageMetadata({
   title: "Contact Shannon | HWL by SMD",
   description:
     "Get in touch to book an experience, plan a retreat, or ask a question. Shannon responds within 48 hours.",
-}
+  path: "/contact",
+})
 
 export default function ContactPage() {
   return (
     <>
       <InteriorHero
         eyebrow="Contact"
+        image={media.brand.windowPortrait.src}
+        imageAlt={media.brand.windowPortrait.alt}
+        imagePosition="center 30%"
         title="Connect with Shannon"
         subtitle="Questions? Ready to book? Planning a retreat? I'd love to hear from you."
         variant="ritual"
@@ -43,6 +46,7 @@ export default function ContactPage() {
                   { label: "Phone", name: "phone", type: "tel" },
                   { label: "Subject", name: "subject" },
                 ]}
+                source="contact-page"
               />
             </div>
           </div>
@@ -97,6 +101,15 @@ export default function ContactPage() {
           title="Planning something larger?"
         />
       </PageSection>
+
+      <CtaBlock
+        primaryHref="/book"
+        primaryLabel="Explore Booking"
+        secondaryHref={`mailto:${SITE_CONFIG.email}`}
+        secondaryLabel="Email Shannon"
+        subtitle="If you already know what you need, begin with the concierge booking flow. If not, a simple note is a beautiful place to start."
+        title="Choose your next step"
+      />
     </>
   )
 }

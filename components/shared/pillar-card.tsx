@@ -1,39 +1,54 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import Image from "next/image"
+import Link from "next/link"
+import { ArrowRight } from "lucide-react"
 
-import { cn } from "@/lib/utils";
-import { OfferingLineArt } from "@/components/shared/offering-line-art";
+import { cn } from "@/lib/utils"
+import { OfferingLineArt } from "@/components/shared/offering-line-art"
 
 interface PillarCardProps {
-  title: string;
-  description: string;
-  href: string;
-  imageAlt?: string;
-  className?: string;
+  title: string
+  description: string
+  href: string
+  imageSrc?: string
+  imageAlt?: string
+  className?: string
 }
 
 export function PillarCard({
   title,
   description,
   href,
+  imageSrc,
   imageAlt,
   className,
 }: PillarCardProps) {
   return (
     <Link
       href={href}
-      aria-label={imageAlt ? `${title}: ${imageAlt}` : `Explore ${title}`}
+      aria-label={`Explore ${title}`}
       className={cn(
         "group block overflow-hidden rounded-lg border border-[var(--border)] bg-white/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
         className
       )}
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-[var(--muted)] text-[var(--primary)]">
-        <div className="absolute inset-x-0 top-0 h-2/3 opacity-55">
-          <OfferingLineArt kind={title as "Beauty" | "Movement" | "Retreats" | "Ritual"} />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--primary)]/42 via-[var(--muted)]/20 to-white/20" />
-        <h3 className="absolute bottom-5 left-5 right-5 text-4xl font-medium leading-none text-white md:text-5xl">
+        {imageSrc ? (
+          <Image
+            alt={imageAlt ?? ""}
+            className="object-cover transition duration-700 group-hover:scale-[1.03]"
+            fill
+            sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 25vw"
+            src={imageSrc}
+          />
+        ) : (
+          <div className="absolute inset-x-0 top-0 h-2/3 opacity-55">
+            <OfferingLineArt
+              kind={title as "Beauty" | "Movement" | "Retreats" | "Ritual"}
+            />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--primary)]/75 via-[var(--primary)]/8 to-white/5" />
+        <h3 className="absolute right-5 bottom-5 left-5 text-4xl leading-none font-medium text-white md:text-5xl">
           {title}
         </h3>
       </div>
@@ -47,5 +62,5 @@ export function PillarCard({
         </span>
       </div>
     </Link>
-  );
+  )
 }

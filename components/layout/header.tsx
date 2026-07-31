@@ -1,56 +1,68 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
-import { MainNav } from "@/components/layout/main-nav";
-import { MobileNav } from "@/components/layout/mobile-nav";
-import { Button } from "@/components/ui/button";
-import { SITE_CONFIG } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { AuthLinks } from "@/components/auth/auth-links"
+import { MainNav } from "@/components/layout/main-nav"
+import { MobileNav } from "@/components/layout/mobile-nav"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 export function Header() {
-  const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname()
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
+    const onScroll = () => setScrolled(window.scrollY > 100)
 
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
 
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
+  if (pathname.startsWith("/admin")) return null
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 transition-all duration-300",
-        scrolled && "bg-[var(--background)]/95 shadow-sm backdrop-blur"
+        "sticky top-0 z-50 max-h-[72px] border-b border-[var(--border)]/50 bg-[var(--background)]/80 backdrop-blur-md transition-[height,background-color,box-shadow,backdrop-filter] duration-300",
+        scrolled &&
+          "max-h-14 bg-[var(--background)]/90 shadow-[0_8px_24px_rgba(43,39,36,0.06)] backdrop-blur-xl"
       )}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:h-20">
-        <Link href="/" className="shrink-0">
-          <span className="block font-serif text-xl font-medium leading-none text-[var(--primary)] md:text-2xl">
-            {SITE_CONFIG.name}
-          </span>
-          <span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.28em] text-[var(--muted-foreground)]">
-            {SITE_CONFIG.tagline}
-          </span>
+      <div
+        className={cn(
+          "mx-auto flex h-[72px] max-w-7xl items-center justify-between px-6 transition-[height] duration-300 md:grid md:grid-cols-[auto_1fr_auto] md:gap-12",
+          scrolled && "h-14"
+        )}
+      >
+        <Link
+          href="/"
+          aria-label="HWL by SMD home"
+          className="shrink-0 font-serif text-xl font-medium tracking-[0.12em] text-[var(--primary)] md:text-2xl"
+        >
+          <span aria-hidden="true">HWL·SMD</span>
+          <span className="sr-only">HWL by SMD</span>
         </Link>
 
-        <div className="hidden items-center gap-6 md:flex">
-          <MainNav />
+        <MainNav />
+
+        <div className="hidden items-center gap-4 md:flex">
           <Button
             asChild
             size="sm"
-            className="h-9 rounded-full bg-[var(--accent)] px-6 text-white hover:bg-[var(--primary)]"
+            className="h-auto rounded-full bg-[var(--accent)] px-5 py-2 text-sm text-[var(--background)] hover:bg-[var(--primary)]"
           >
             <Link href="/book">Book</Link>
           </Button>
+          <AuthLinks />
         </div>
 
         <MobileNav />
       </div>
     </header>
-  );
+  )
 }

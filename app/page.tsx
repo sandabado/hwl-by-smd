@@ -1,302 +1,313 @@
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, ChevronDown } from "lucide-react"
 
-import { CtaBlock } from "@/components/shared/cta-block"
-import { FadeIn } from "@/components/shared/fade-in"
-import { PillarCard } from "@/components/shared/pillar-card"
-import { SectionHeading } from "@/components/shared/section-heading"
-import { TestimonialQuote } from "@/components/shared/testimonial-quote"
-import { WaveHero } from "@/components/shared/wave-hero"
+import { AmbientLight } from "@/components/shared/ambient-light"
+import { BreathingSection } from "@/components/shared/breathing-section"
+import { BreathingText } from "@/components/shared/breathing-text"
+import { ParallaxWindow } from "@/components/shared/parallax-window"
+import { Reveal } from "@/components/shared/reveal"
+import { TextureOverlay } from "@/components/shared/texture-overlay"
 import { Button } from "@/components/ui/button"
+import { media } from "@/lib/media"
+import { createPageMetadata } from "@/lib/seo"
 
-const journalCards = [
-  {
-    category: "Beauty",
-    title: "Why Facial Massage Belongs in Your Morning Routine",
-  },
-  {
-    category: "Ritual",
-    title: "Honoring the New Moon: A Simple Practice for Intention Setting",
-  },
-  {
-    category: "Movement",
-    title: "Breathwork for Nervous System Regulation — Where to Begin",
-  },
-]
+export const metadata = createPageMetadata({
+  title: "HWL by SMD | Beauty · Body · Being",
+  description:
+    "A space for your whole self—skin, movement, and ritual with Shannon Mary Dixon.",
+  path: "/",
+})
 
 export default function Page() {
   return (
     <>
-      <section className="relative -mt-16 flex min-h-screen items-center overflow-hidden px-6 pt-16 md:-mt-20 md:pt-20">
-        <WaveHero variant="desert" />
-        <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <p className="mb-5 hidden text-xs font-medium tracking-[0.28em] text-[var(--accent)] uppercase sm:block">
-            HWL by SMD
-          </p>
-          <h1 className="gentle-breath mx-auto max-w-4xl text-4xl leading-tight font-medium text-[var(--primary)] md:text-6xl lg:text-7xl">
-            Beauty begins where restoration meets ritual.
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[var(--muted-foreground)] md:text-lg">
-            Luxury facial rituals, movement, and intentional wellness
-            experiences designed to restore your glow from the inside out.
-          </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <Button
-              asChild
-              className="h-10 rounded-full bg-[var(--primary)] px-6 text-white hover:bg-[var(--accent)]"
-            >
-              <Link href="/book">Book an Experience</Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="h-10 rounded-full border-[var(--border)] bg-transparent px-6 text-[var(--primary)] hover:bg-[var(--background)]"
-            >
-              <Link href="/about">Explore the Philosophy</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-3xl px-6 py-20 text-center md:py-32">
-        <FadeIn>
-          <SectionHeading
-            eyebrow="The Philosophy"
-            title="Beauty is more than skin deep."
-            align="center"
-          />
-          <div className="mt-8 space-y-6 text-base leading-relaxed text-[var(--foreground)] md:text-lg">
-            <p>
-              True well-being doesn&apos;t live in one lane. It emerges when
-              body, beauty, and being are nourished together — when skincare
-              becomes ritual, movement becomes medicine, and stillness becomes a
-              practice rather than an accident.
-            </p>
-            <p>
-              My work lives at the intersection of beauty, movement, ritual, and
-              nervous system restoration. Whether I&apos;m guiding a private
-              yoga session, facilitating a seasonal ceremony, offering sound
-              healing, or creating a luxury facial experience, my intention is
-              always the same: to help you reconnect with yourself, restore
-              balance, and leave feeling more grounded, radiant, embodied, and
-              alive.
-            </p>
-          </div>
-          <p className="mt-8 font-serif text-sm text-[var(--accent)] italic">
-            — Shannon Mary Dixon, Founder of HWL by SMD
-          </p>
-          <Link
-            href="/about"
-            className="mt-6 inline-block text-sm font-medium text-[var(--accent)] underline underline-offset-4"
-          >
-            Read Shannon&apos;s Story
-          </Link>
-        </FadeIn>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-20 md:py-32">
-        <SectionHeading
-          eyebrow="Experiences"
-          title="Four pillars. One philosophy."
-          align="center"
+      <section className="living-room-hero relative -mt-16 flex min-h-[80svh] items-center overflow-hidden px-6 pt-28 pb-24 md:-mt-20 md:pt-32">
+        <AmbientLight className="opacity-70" position="top-left" tone="warm" />
+        <AmbientLight
+          className="opacity-80"
+          position="bottom-right"
+          tone="clay"
         />
-        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <PillarCard
-            title="Beauty"
-            description="Luxury facial rituals that restore healthy skin while creating space to slow down."
-            href="/experiences/beauty"
-          />
-          <PillarCard
-            title="Movement"
-            description="Private yoga, restorative movement, and sound healing to reconnect with your body."
-            href="/experiences/movement"
-          />
-          <PillarCard
-            title="Ritual"
-            description="Seasonal gatherings, astrology, Reiki, meditation, and intentional ceremony."
-            href="/experiences/ritual"
-          />
-          <PillarCard
-            title="Retreats"
-            description="Custom wellness programming for boutique retreats, luxury hospitality, and private groups."
-            href="/experiences/retreats"
-          />
+        <TextureOverlay intensity="soft" variant="grain" />
+
+        <div className="relative z-10 mx-auto w-full max-w-5xl text-center">
+          <Reveal>
+            <BreathingText
+              as="h1"
+              className="text-[var(--room-charcoal)] md:text-7xl lg:text-8xl"
+              size="hero"
+            >
+              Beauty · Body · Being
+            </BreathingText>
+            <BreathingText
+              className="mt-7 text-[var(--primary)]"
+              size="subheading"
+            >
+              A space for your whole self.
+            </BreathingText>
+            <BreathingText
+              className="mx-auto mt-8 max-w-3xl text-[var(--muted-foreground)]"
+              size="body"
+            >
+              Shannon Mary Dixon brings skin, movement, and ritual into one
+              thoughtful experience. Not a menu of services. A way of being.
+              Each experience meets you where you are — in your skin, in your
+              body, in your inner life — and walks with you toward what&apos;s
+              next.
+            </BreathingText>
+
+            <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button
+                asChild
+                className="h-12 rounded-full bg-[var(--room-charcoal)] px-7 text-[var(--room-cream)] hover:bg-[var(--accent)]"
+              >
+                <Link href="/book">
+                  Book an Experience
+                  <ArrowRight aria-hidden="true" className="size-4" />
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="h-12 rounded-full border-[var(--room-charcoal)]/20 bg-white/25 px-7 text-[var(--room-charcoal)] backdrop-blur-sm hover:bg-white/55"
+              >
+                <Link href="/store#the-den">Join The Den</Link>
+              </Button>
+            </div>
+          </Reveal>
         </div>
+
+        <a
+          aria-label="Continue to Beauty"
+          className="living-room-hero__scroll absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 text-[10px] font-medium tracking-[0.22em] text-[var(--room-charcoal)] uppercase"
+          href="#beauty-room"
+        >
+          Enter
+          <ChevronDown aria-hidden="true" className="size-4" />
+        </a>
       </section>
 
-      <section className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 md:grid-cols-2 md:py-32">
-        <div className="aspect-[4/5] rounded-lg bg-[var(--muted)]" />
-        <div>
-          <p className="mb-4 text-xs font-medium tracking-[0.24em] text-[var(--accent)] uppercase">
-            Meet Shannon
-          </p>
-          <h2 className="text-3xl leading-tight font-medium text-[var(--primary)] md:text-4xl">
-            Meet Shannon
-          </h2>
-          <div className="mt-6 space-y-5 text-base leading-relaxed text-[var(--foreground)]">
-            <p>
-              I&apos;m a licensed aesthetician, 500-hour yoga instructor, Reiki
-              practitioner, aromatherapy specialist, and wellness facilitator.
-              But long before the certifications, there was the ice rink.
-            </p>
-            <p>
-              As a former elite figure skater, I learned discipline, embodiment,
-              and presence — what it means to inhabit your body fully. That
-              foundation shaped everything that followed. My work in beauty
-              taught me the power of care and touch. My years in yoga, energy
-              work, astrology, and ritual taught me how to create spaces where
-              meaningful transformation can occur.
-            </p>
-            <p>
-              Whether through movement, beauty, sound, astrology, or ritual, my
-              goal is always the same: to help you remember what it feels like
-              to be fully alive.
-            </p>
-          </div>
-          <Link
-            href="/about"
-            className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)] underline underline-offset-4"
+      <BreathingSection
+        className="flex min-h-[88svh] items-center"
+        contentClassName="mx-auto grid w-full max-w-7xl items-center gap-14 px-6 md:grid-cols-[0.9fr_1.1fr] md:gap-20"
+        id="beauty-room"
+        padding="expansive"
+        variant="living-room"
+      >
+        <div className="max-w-xl">
+          <BreathingText
+            className="text-[var(--accent)] uppercase"
+            size="caption"
           >
-            Read the Full Story
-            <ArrowRight className="size-4" />
+            Beauty
+          </BreathingText>
+          <BreathingText
+            as="h2"
+            className="mt-6 text-[var(--primary)]"
+            size="heading"
+          >
+            Skin holds memory.
+          </BreathingText>
+          <BreathingText
+            className="mt-7 text-[var(--muted-foreground)]"
+            size="body"
+          >
+            Facial ritual, lymphatic touch, and intentional care create space
+            for your skin — and the person inside it — to soften.
+          </BreathingText>
+          <Link
+            className="mt-9 inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline"
+            href="/beauty"
+          >
+            Enter Beauty
+            <ArrowRight aria-hidden="true" className="size-4" />
           </Link>
         </div>
-      </section>
 
-      <section className="lift-gradient-shift px-6 py-20 text-[var(--background)] md:py-32">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="mb-4 text-xs font-medium tracking-[0.24em] text-[var(--accent)] uppercase">
-            The Facial Massage Guide
-          </p>
-          <h2 className="text-4xl leading-tight font-medium md:text-5xl">
-            LIFT — A Daily Ritual
-          </h2>
-          <div className="mt-6 space-y-5 text-base leading-relaxed opacity-85">
-            <p>
-              One of the questions I hear most often in the treatment room is,
-              &apos;What can I do at home to lift, sculpt, and support my skin
-              as I age?&apos; My answer is almost always the same: facial
-              massage.
-            </p>
-            <p>
-              This isn&apos;t about adding another twenty-minute ritual to your
-              day. It&apos;s about making the few minutes you&apos;re already
-              spending on your skincare more intentional. Even five minutes a
-              day can make a meaningful difference.
-            </p>
-          </div>
-          <p className="mx-auto mt-8 max-w-2xl text-sm leading-relaxed text-[var(--accent)]">
-            7 guided movements · 5-minute daily sequence · Step-by-step
-            technique · Printable version included
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Button
-              asChild
-              className="h-10 rounded-full bg-[var(--background)] px-6 text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
-            >
-              <Link href="/lift">Explore the Guide</Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="h-10 rounded-full border-[var(--background)] bg-transparent px-6 text-[var(--background)] hover:bg-white/10"
-            >
-              <Link href="/lift">Download the Printable PDF</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+        <ParallaxWindow
+          alt={media.experiences.beauty.alt}
+          aspectRatio="4 / 5"
+          className="w-full"
+          imageClassName="object-cover"
+          sizes="(max-width: 767px) 100vw, 52vw"
+          speed={0.15}
+          src={media.experiences.beauty.src}
+          texture="paper"
+        />
+      </BreathingSection>
 
-      <section className="px-6 py-20 md:py-32">
-        <SectionHeading
-          eyebrow="Kind Words"
-          title="What guests are saying"
-          align="center"
-        />
-        <TestimonialQuote
-          quote="The celestial and aromatherapy elements of the class are so fascinating and comforting. The flow is just challenging enough to be a great workout, while still offering lots of modifications free of judgment. Such an empowering and healing space — Shannon is so wonderful and knowledgeable!"
-          attribution="Grace R."
-          context="Astrology + Yoga Client"
-        />
-        <TestimonialQuote
-          quote="What a wonderful experience! I went in for a facial before my wedding feeling quite stressed, but felt immediately soothed once Shannon started working her magic. My skin is still showing the happy effects. Honestly, I would pay again just to have that meditative experience!"
-          attribution="Zara K."
-          context="Beauty + Facial Client"
-        />
-      </section>
+      <BreathingSection
+        background="cool"
+        className="movement-room-traces flex min-h-[78svh] items-center"
+        contentClassName="mx-auto w-full max-w-4xl px-6 text-center"
+        padding="expansive"
+        variant="studio"
+      >
+        <BreathingText
+          className="text-[var(--accent)] uppercase"
+          size="caption"
+        >
+          Body
+        </BreathingText>
+        <BreathingText
+          as="h2"
+          className="mt-6 text-[var(--primary)] md:text-6xl"
+          size="heading"
+        >
+          Movement as medicine.
+        </BreathingText>
+        <BreathingText
+          className="mx-auto mt-8 max-w-2xl text-[var(--muted-foreground)]"
+          size="body"
+        >
+          Yoga, restorative movement, sound, and breath help the body release
+          effort and recognize its own steadier rhythm.
+        </BreathingText>
+        <Link
+          className="mt-9 inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline"
+          href="/body"
+        >
+          Enter Body
+          <ArrowRight aria-hidden="true" className="size-4" />
+        </Link>
+        <BreathingText
+          as="blockquote"
+          className="mx-auto mt-20 max-w-3xl border-t border-[var(--primary)]/10 pt-12 font-serif text-3xl text-[var(--primary)] italic md:text-4xl"
+          size="subheading"
+        >
+          “You don&apos;t visit wellness. You live it.”
+        </BreathingText>
+      </BreathingSection>
 
-      <section className="mx-auto max-w-7xl px-6 py-20 md:py-32">
-        <SectionHeading
-          eyebrow="The Journal"
-          title="Stories, rituals, and reflections"
-          align="center"
+      <BreathingSection
+        background="gradient"
+        className="flex min-h-[88svh] items-center"
+        contentClassName="mx-auto grid w-full max-w-7xl items-center gap-14 px-6 md:grid-cols-[1.1fr_0.9fr] md:gap-20"
+        padding="expansive"
+        variant="living-room"
+      >
+        <ParallaxWindow
+          alt={media.experiences.ritualMoon.alt}
+          aspectRatio="4 / 5"
+          className="w-full"
+          frame="dark"
+          sizes="(max-width: 767px) 100vw, 52vw"
+          speed={0.12}
+          src={media.experiences.ritualMoon.src}
         />
-        <p className="mx-auto mt-4 max-w-xl text-center text-base leading-relaxed text-[var(--muted-foreground)]">
-          Thoughtful writing on beauty, movement, ritual, and the art of living
-          well.
-        </p>
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {journalCards.map((card) => (
-            <article
-              key={card.title}
-              className="rounded-lg border border-[var(--border)] bg-white/50 p-6"
-            >
-              <p className="text-xs font-medium tracking-[0.22em] text-[var(--accent)] uppercase">
-                {card.category}
-              </p>
-              <h3 className="mt-5 text-2xl leading-tight font-medium text-[var(--primary)]">
-                {card.title}
-              </h3>
-              <p className="mt-8 inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)]">
-                Read more
-                <ArrowRight className="size-4" />
-              </p>
-            </article>
-          ))}
-        </div>
-        <div className="mt-10 text-center">
-          <Link
-            href="/journal"
-            className="text-sm font-medium text-[var(--accent)] underline underline-offset-4"
+
+        <div className="max-w-xl md:ml-auto md:text-right">
+          <BreathingText
+            className="text-[var(--accent)] uppercase"
+            size="caption"
           >
-            Read the Journal
+            Being
+          </BreathingText>
+          <BreathingText
+            as="h2"
+            className="mt-6 text-[var(--primary)]"
+            size="heading"
+          >
+            Ancient wisdom for modern life.
+          </BreathingText>
+          <BreathingText
+            className="mt-7 text-[var(--muted-foreground)]"
+            size="body"
+          >
+            Tarot, astrology, and ritual offer a quiet place to ask meaningful
+            questions, listen inward, and honor what is changing.
+          </BreathingText>
+          <Link
+            className="mt-9 inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline"
+            href="/being"
+          >
+            Enter Being
+            <ArrowRight aria-hidden="true" className="size-4" />
           </Link>
         </div>
-      </section>
+      </BreathingSection>
 
-      <section className="mx-auto max-w-2xl px-6 py-20 text-center md:py-32">
-        <h2 className="text-3xl font-medium text-[var(--primary)]">
-          Stay connected
-        </h2>
-        <p className="mt-4 text-base leading-relaxed text-[var(--muted-foreground)]">
-          Receive seasonal rituals, wellness inspiration, facial massage tips,
-          and early access to retreats and gatherings — straight to your inbox.
-          No noise, no spam, just thoughtful notes from time to time.
-        </p>
-        <form className="mx-auto mt-8 flex max-w-md flex-col gap-4 sm:flex-row">
-          <input
-            type="email"
-            placeholder="Your email address"
-            aria-label="Email address"
-            className="min-h-10 flex-1 rounded-full border border-[var(--border)] bg-white/60 px-4 py-2 text-sm transition outline-none placeholder:text-[var(--muted-foreground)] focus:border-[var(--accent)]"
+      <BreathingSection
+        contentClassName="mx-auto w-full max-w-7xl px-6"
+        padding="expansive"
+        variant="dressing-room"
+      >
+        <article className="relative grid overflow-hidden rounded-[2.5rem] border border-[var(--border)] bg-[#f2e9dc] shadow-[0_34px_100px_rgba(72,55,43,0.13)] md:grid-cols-[0.8fr_1.2fr]">
+          <TextureOverlay intensity="soft" variant="paper" />
+          <ParallaxWindow
+            alt={media.editorial.liftBotanicals.alt}
+            aspectRatio="4 / 5"
+            className="z-10 min-h-[24rem] rounded-none md:min-h-[34rem]"
+            frame="none"
+            sizes="(max-width: 767px) 100vw, 40vw"
+            speed={0.12}
+            src={media.editorial.liftBotanicals.src}
+            texture="none"
           />
-          <Button className="h-10 rounded-full bg-[var(--primary)] px-6 text-white hover:bg-[var(--accent)]">
-            Join
-          </Button>
-        </form>
-        <p className="mt-4 text-xs text-[var(--muted-foreground)]">
-          No spam, ever. Unsubscribe anytime.
-        </p>
-      </section>
+          <div className="relative z-10 flex flex-col justify-center p-9 md:p-14 lg:p-20">
+            <BreathingText
+              className="text-[var(--accent)] uppercase"
+              size="caption"
+            >
+              LIFT
+            </BreathingText>
+            <BreathingText
+              as="h2"
+              className="mt-5 text-[var(--primary)]"
+              size="heading"
+            >
+              A Daily Ritual.
+            </BreathingText>
+            <BreathingText
+              className="mt-6 text-[var(--primary)]"
+              size="subheading"
+            >
+              Seven movements. Five minutes a day.
+            </BreathingText>
+            <BreathingText
+              className="mt-5 max-w-xl text-[var(--muted-foreground)]"
+              size="body"
+            >
+              Practice alongside Shannon, then keep the printable guide close
+              for the mornings you want to move at your own pace.
+            </BreathingText>
+            <p className="mt-8 font-serif text-3xl text-[var(--primary)]">
+              $5.55
+            </p>
+            <Button
+              asChild
+              className="mt-8 h-12 self-start rounded-full bg-[var(--primary)] px-7 text-[var(--background)] hover:bg-[var(--accent)]"
+            >
+              <Link href="/beauty/lift">
+                Get the Guide
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </Link>
+            </Button>
+          </div>
+        </article>
+      </BreathingSection>
 
-      <CtaBlock
-        title="Let's create something extraordinary."
-        subtitle="Beauty experiences, private sessions, seasonal rituals, and custom retreat programming — available in the Coachella Valley and for destination events."
-        primaryLabel="Book an Experience"
-        primaryHref="/book"
-        secondaryLabel="Contact Shannon"
-        secondaryHref="/contact"
-      />
+      <BreathingSection
+        background="dark"
+        contentClassName="mx-auto max-w-4xl px-6 text-center"
+        padding="expansive"
+        variant="living-room"
+      >
+        <figure>
+          <BreathingText
+            as="blockquote"
+            className="font-serif text-3xl text-[var(--background)] italic md:text-4xl"
+            size="heading"
+          >
+            “The celestial and aromatherapy elements are so fascinating and
+            comforting. Such an empowering and healing space — Shannon is so
+            wonderful and knowledgeable.”
+          </BreathingText>
+          <figcaption className="mt-9 text-sm tracking-[0.2em] text-[var(--accent-on-dark)] uppercase">
+            Grace R. · Astrology + Yoga Client
+          </figcaption>
+        </figure>
+      </BreathingSection>
     </>
   )
 }

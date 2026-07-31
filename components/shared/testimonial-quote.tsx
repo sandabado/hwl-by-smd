@@ -1,7 +1,7 @@
 interface TestimonialQuoteProps {
-  quote: string;
-  attribution: string;
-  context?: string;
+  quote: string
+  attribution: string
+  context?: string
 }
 
 export function TestimonialQuote({
@@ -11,11 +11,11 @@ export function TestimonialQuote({
 }: TestimonialQuoteProps) {
   return (
     <figure className="mx-auto max-w-3xl py-16 text-center">
-      <blockquote className="text-xl italic leading-relaxed text-[var(--foreground)] md:text-2xl">
+      <blockquote className="text-xl leading-relaxed text-[var(--foreground)] italic md:text-2xl">
         “{quote}”
       </blockquote>
       <figcaption className="mt-6">
-        <p className="text-sm font-medium uppercase tracking-[0.22em] text-[var(--accent)]">
+        <p className="text-sm font-medium tracking-[0.22em] text-[var(--accent)] uppercase">
           {attribution}
         </p>
         {context ? (
@@ -25,5 +25,5 @@ export function TestimonialQuote({
         ) : null}
       </figcaption>
     </figure>
-  );
+  )
 }

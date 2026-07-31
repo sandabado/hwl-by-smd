@@ -1,16 +1,16 @@
-import Link from "next/link";
+import Link from "next/link"
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 
 interface PlaceholderPageProps {
-  title: string;
+  title: string
 }
 
 export function PlaceholderPage({ title }: PlaceholderPageProps) {
   return (
     <section className="flex min-h-screen items-center justify-center px-6 py-24 text-center">
       <div>
-        <h1 className="text-4xl font-medium leading-tight text-[var(--primary)] md:text-6xl">
+        <h1 className="text-4xl leading-tight font-medium text-[var(--primary)] md:text-6xl">
           {title}
         </h1>
         <p className="mt-4 text-base text-[var(--muted-foreground)]">
@@ -24,5 +24,5 @@ export function PlaceholderPage({ title }: PlaceholderPageProps) {
         </Button>
       </div>
     </section>
-  );
+  )
 }

@@ -28,6 +28,7 @@ export function AccountActions({ hasBilling }: { hasBilling: boolean }) {
       <div className="flex flex-col gap-3 sm:flex-row">
         {hasBilling && (
           <Button
+            aria-busy={pending}
             className="h-11 rounded-full bg-[var(--primary)] px-6 text-white"
             disabled={pending}
             onClick={manageBilling}
@@ -45,7 +46,11 @@ export function AccountActions({ hasBilling }: { hasBilling: boolean }) {
           Sign Out
         </Button>
       </div>
-      {error && <p className="mt-3 text-sm text-[#9c4b40]">{error}</p>}
+      {error && (
+        <p className="mt-3 text-sm text-[#9c4b40]" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

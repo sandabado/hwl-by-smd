@@ -25,8 +25,8 @@ export default function ContactPage() {
         image={media.brand.windowPortrait.src}
         imageAlt={media.brand.windowPortrait.alt}
         imagePosition="center 30%"
-        title="Connect with Shannon"
-        subtitle="Questions? Ready to book? Planning a retreat? I'd love to hear from you."
+        title="Get in Touch"
+        subtitle="Questions, retreat inquiries, or just a hello."
         variant="ritual"
       />
 
@@ -35,14 +35,19 @@ export default function ContactPage() {
           <div>
             <SectionHeading
               eyebrow="Inquiry"
-              subtitle="Use the form for bookings, retreat partnerships, collaborations, or simple questions."
+              subtitle="For bookings, use the Book page. For retreat partnerships, use the Retreats inquiry form. For everything else, send a note."
               title="Send a note"
             />
             <div className="mt-8">
               <ContactForm
                 fields={[
-                  { label: "Name", name: "name" },
-                  { label: "Email", name: "email", type: "email" },
+                  { label: "Name", name: "name", required: true },
+                  {
+                    label: "Email",
+                    name: "email",
+                    required: true,
+                    type: "email",
+                  },
                   { label: "Phone", name: "phone", type: "tel" },
                   { label: "Subject", name: "subject" },
                 ]}

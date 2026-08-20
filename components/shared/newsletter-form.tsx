@@ -36,7 +36,9 @@ export function NewsletterForm() {
 
       form.reset()
       setStatus("sent")
-      setFeedback("Welcome. You’re on the list.")
+      setFeedback(
+        "Shannon received your request for journal updates. She’ll follow up when new notes are ready."
+      )
     } catch (error) {
       setStatus("error")
       setFeedback(
@@ -49,7 +51,8 @@ export function NewsletterForm() {
 
   return (
     <form
-      className="mx-auto mt-8 flex max-w-xl flex-col gap-3 sm:flex-row"
+      aria-busy={status === "sending"}
+      className="mx-auto mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:flex-wrap"
       onSubmit={handleSubmit}
     >
       <label className="sr-only" htmlFor="journal-email">
@@ -63,15 +66,27 @@ export function NewsletterForm() {
         required
         type="email"
       />
+      <label aria-hidden="true" className="sr-only">
+        Website
+        <input autoComplete="off" name="website" tabIndex={-1} />
+      </label>
       <Button
         className="min-h-11 rounded-full bg-[var(--primary)] px-6 text-white hover:bg-[var(--accent)]"
         disabled={status === "sending"}
       >
-        {status === "sending" ? "Joining…" : "Join the Journal"}
+        {status === "sending" ? "Sending…" : "Request journal updates"}
       </Button>
+      <p className="text-xs leading-relaxed text-[var(--muted-foreground)] sm:basis-full">
+        This sends a private request to Shannon. It does not subscribe you to
+        automated marketing. See the{" "}
+        <a className="underline underline-offset-2" href="/privacy">
+          privacy policy
+        </a>
+        .
+      </p>
       {feedback ? (
         <p
-          aria-live="polite"
+          role={status === "error" ? "alert" : "status"}
           className="text-sm text-[var(--muted-foreground)] sm:basis-full"
         >
           {feedback}

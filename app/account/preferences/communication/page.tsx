@@ -18,21 +18,19 @@ export const metadata: Metadata = {
 }
 
 const defaults: ConnectionPreferences = {
-  bookingInvites: true,
-  guidanceCadence: "weekly",
-  shareProgress: true,
+  bookingInvites: false,
 }
 
 export default async function CommunicationPreferencesPage() {
   const { user } = await requireAccess(
-    "authenticated",
+    "membership_only",
     "/account/preferences/communication"
   )
   const supabase = await createClient()
   const { data } = supabase
     ? await supabase
         .from("connection_preferences")
-        .select("guidance_cadence, booking_invites, share_progress")
+        .select("booking_invites")
         .eq("user_id", user.id)
         .maybeSingle()
     : { data: null }
@@ -40,12 +38,6 @@ export default async function CommunicationPreferencesPage() {
   const initialPreferences: ConnectionPreferences = data
     ? {
         bookingInvites: Boolean(data.booking_invites),
-        guidanceCadence:
-          data.guidance_cadence === "daily" ||
-          data.guidance_cadence === "relevant"
-            ? data.guidance_cadence
-            : "weekly",
-        shareProgress: Boolean(data.share_progress),
       }
     : defaults
 
@@ -70,8 +62,8 @@ export default async function CommunicationPreferencesPage() {
           Connection preferences
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-[var(--muted-foreground)]">
-          Choose what feels supportive. You can pause a Journey, change the
-          rhythm, or step back at any time—without losing your place.
+          Decide whether Shannon may include an occasional invitation to book
+          inside a guided Journey. You can change this boundary at any time.
         </p>
         <div className="mt-12">
           <ConnectionPreferencesForm initialPreferences={initialPreferences} />

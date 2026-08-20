@@ -22,7 +22,7 @@ export function createPageMetadata({
   title,
   description,
   path,
-  image = DEFAULT_SOCIAL_IMAGE,
+  image,
 }: {
   title: string
   description: string
@@ -30,7 +30,7 @@ export function createPageMetadata({
   image?: string
 }): Metadata {
   const canonical = absoluteUrl(path)
-  const socialImage = absoluteUrl(image)
+  const socialImage = image ? absoluteUrl(image) : null
 
   return {
     title,
@@ -42,13 +42,15 @@ export function createPageMetadata({
       url: canonical,
       siteName: SITE_NAME,
       type: "website",
-      images: [{ url: socialImage, width: 1200, height: 630 }],
+      ...(socialImage
+        ? { images: [{ url: socialImage, width: 1200, height: 630 }] }
+        : {}),
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [socialImage],
+      ...(socialImage ? { images: [socialImage] } : {}),
     },
   }
 }

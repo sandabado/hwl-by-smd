@@ -7,6 +7,7 @@ import { BreathingButton } from "@/components/shared/breathing-button"
 type ContactField = {
   label: string
   name: string
+  required?: boolean
   type?: string
   placeholder?: string
 }
@@ -62,6 +63,7 @@ export function ContactForm({
 
   return (
     <form
+      aria-busy={status === "sending"}
       className="grid gap-4 rounded-lg border border-[var(--border)] bg-white/55 p-6"
       onSubmit={handleSubmit}
     >
@@ -70,12 +72,19 @@ export function ContactForm({
           className="grid gap-2 text-sm text-[var(--primary)]"
           key={field.name}
         >
-          {field.label}
+          <span>
+            {field.label}
+            {field.required ? null : (
+              <span className="ml-1 font-normal text-[var(--muted-foreground)]">
+                (optional)
+              </span>
+            )}
+          </span>
           <input
             className="min-h-11 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-[var(--foreground)] outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
             name={field.name}
             placeholder={field.placeholder}
-            required
+            required={field.required ?? false}
             type={field.type ?? "text"}
           />
         </label>
@@ -101,7 +110,7 @@ export function ContactForm({
       </BreathingButton>
       {feedback ? (
         <p
-          aria-live="polite"
+          role={status === "error" ? "alert" : "status"}
           className={
             status === "sent"
               ? "text-sm text-[var(--primary)]"

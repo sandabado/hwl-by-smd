@@ -6,20 +6,19 @@ import { BreathingText } from "@/components/shared/breathing-text"
 import { NewsletterForm } from "@/components/shared/newsletter-form"
 import { ParallaxWindow } from "@/components/shared/parallax-window"
 import { Reveal } from "@/components/shared/reveal"
-import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { media } from "@/lib/media"
 import { seoJournalArticles } from "@/lib/seo-journal-articles"
 import { createPageMetadata } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
   title: "The Journal | HWL by SMD",
-  description: "Stories, rituals, and reflections from Shannon Mary Dixon.",
+  description:
+    "Notes from Shannon Mary Dixon's practice across beauty, yoga, tarot, and retreat living.",
   path: "/journal",
 })
 
-type JournalCategory = "Beauty" | "Being" | "Body" | "Retreat Living"
+type JournalCategory = "Beauty" | "Yoga" | "Tarot" | "Retreat Living"
 
 type Article = {
   category: JournalCategory
@@ -30,13 +29,13 @@ type Article = {
 
 const articles: Article[] = [
   {
-    category: "Being",
+    category: "Tarot",
     title: seoJournalArticles["tarot-palm-springs"].h1,
     excerpt: seoJournalArticles["tarot-palm-springs"].metadata.description,
     href: "/journal/tarot-palm-springs",
   },
   {
-    category: "Body",
+    category: "Yoga",
     title: seoJournalArticles["sound-bath-joshua-tree"].h1,
     excerpt: seoJournalArticles["sound-bath-joshua-tree"].metadata.description,
     href: "/journal/sound-bath-joshua-tree",
@@ -49,67 +48,62 @@ const articles: Article[] = [
   },
   {
     category: "Beauty",
-    title: "What Your Jaw Is Trying to Tell You",
+    title: "What Can I Do at Home?",
     excerpt:
-      "A draft reflection on jaw tension as information, with space for Shannon's story and a gentle two-minute practice.",
+      "The most-asked question in the treatment room has a simple answer, and it's not a product.",
   },
   {
     category: "Beauty",
-    title: "The Lymphatic System Is Not a Buzzword",
+    title: "Lymphatic Drainage Is Not What You Think",
     excerpt:
-      "A plain-language look at what the lymphatic system does, why the face and neck matter, and why light touch leads.",
+      "Most people misunderstand what lymphatic drainage actually does and why it matters for the face.",
   },
   {
-    category: "Beauty",
-    title: "Why I Don't Sell 'Anti-Aging'",
+    category: "Yoga",
+    title: "Bad at Yoga",
     excerpt:
-      "A reframing of aging language around healthy skin, thoughtful maintenance, and care without promises of reversal.",
+      "There's no such thing. The belief is a symptom of performance culture, not a statement about your body.",
   },
   {
-    category: "Body",
-    title: "The Body Keeps Score — Here's How to Listen",
+    category: "Yoga",
+    title: "Sound Before Words",
     excerpt:
-      "A draft on reading tension as information and beginning a simple body scan, awaiting Shannon's lived perspective.",
+      "The nervous system responds to vibration before the brain can interpret it, which is why sound can reach places words do not.",
   },
   {
-    category: "Body",
-    title: "Sound Baths Aren't Woo — They're Physiology",
+    category: "Tarot",
+    title: "The Cards Don't Predict",
     excerpt:
-      "A grounded introduction to sound, the nervous system, and what someone can honestly expect from a session.",
+      "Tarot is a reflective practice, not a predictive one. Understanding this distinction changes how readings work.",
   },
   {
-    category: "Being",
-    title: "What Tarot Actually Is (And Isn't)",
+    category: "Tarot",
+    title: "Twenty Years of Symbols",
     excerpt:
-      "Tarot as a mirror for self-inquiry rather than prediction, with Shannon's own path into the practice still to come.",
-  },
-  {
-    category: "Being",
-    title: "Living by the Moon Without Losing Your Mind",
-    excerpt:
-      "A simple lunar rhythm for intention-setting that keeps attention on practice instead of complicated rules.",
+      "Two decades studying astrology changes how you see the world—not because the stars control anything, but because patterns become visible.",
   },
   {
     category: "Retreat Living",
-    title: "How to Design a Retreat People Actually Remember",
+    title: "What the Desert Teaches",
     excerpt:
-      "A draft brief on creating a spacious container rather than packing every hour with programming.",
+      "The desert is not empty. It's clear. That clarity is why people come here to reset.",
   },
   {
     category: "Retreat Living",
-    title: "What I Bring to a Retreat (And What I Don't)",
+    title: "Meeting People Where They Are",
     excerpt:
-      "A reflection on the essentials, the things intentionally left behind, and how each place shapes the practice.",
+      "Guests arrive seeking different things. The practice is reading what each person needs, not imposing a program.",
+  },
+  {
+    category: "Retreat Living",
+    title: "Host Responsibilities",
+    excerpt:
+      "A great retreat partnership is built on clarity: what Shannon brings, what the host provides, and where the practice comes alive.",
   },
 ]
 
-const filters: Array<{ label: string; value: string }> = [
-  { label: "All", value: "all" },
-  { label: "Beauty", value: "beauty" },
-  { label: "Body", value: "body" },
-  { label: "Being", value: "being" },
-  { label: "Retreat Living", value: "retreat-living" },
-]
+const publishedArticles = articles.filter((article) => article.href)
+const upcomingArticles = articles.filter((article) => !article.href)
 
 function ArticleGrid({ items }: { items: Article[] }) {
   return (
@@ -132,18 +126,12 @@ function ArticleGrid({ items }: { items: Article[] }) {
             <p className="mt-6 flex-1 text-sm leading-[1.85] text-[var(--muted-foreground)]">
               {excerpt}
             </p>
-            {href ? (
-              <Link
-                className="mt-8 inline-flex items-center justify-between gap-3 border-t border-[var(--border)] pt-5 text-xs font-medium tracking-[0.12em] text-[var(--accent)] uppercase hover:text-[var(--primary)]"
-                href={href}
-              >
-                Read article <span aria-hidden="true">→</span>
-              </Link>
-            ) : (
-              <p className="mt-8 border-t border-[var(--border)] pt-5 text-[10px] font-medium tracking-[0.18em] text-[var(--muted-foreground)] uppercase">
-                Draft brief · Coming soon
-              </p>
-            )}
+            <Link
+              className="mt-8 inline-flex items-center justify-between gap-3 border-t border-[var(--border)] pt-5 text-xs font-medium tracking-[0.12em] text-[var(--accent)] uppercase hover:text-[var(--primary)]"
+              href={href ?? "/journal"}
+            >
+              Read article <span aria-hidden="true">→</span>
+            </Link>
           </Card>
         </Reveal>
       ))}
@@ -151,18 +139,14 @@ function ArticleGrid({ items }: { items: Article[] }) {
   )
 }
 
-function articlesIn(category: JournalCategory) {
-  return articles.filter((article) => article.category === category)
-}
-
 export default function JournalPage() {
   return (
     <>
       <BreathingSection
         background="warm"
-        className="flex min-h-[70svh] items-center"
+        className="flex min-h-[58svh] items-center"
         contentClassName="mx-auto w-full max-w-7xl px-6 text-center"
-        padding="expansive"
+        padding="standard"
         reveal={false}
         variant="library"
       >
@@ -172,20 +156,15 @@ export default function JournalPage() {
             className="font-medium text-[var(--primary)]"
             size="hero"
           >
-            The Journal
+            Notes from the practice.
           </BreathingText>
           <BreathingText
             className="mx-auto mt-7 max-w-2xl text-[var(--muted-foreground)]"
             size="subheading"
           >
-            Stories, rituals, and reflections.
+            Observations from Shannon&apos;s work — the patterns, the questions,
+            the moments when something shifts. Take what&apos;s useful.
           </BreathingText>
-          <Button
-            asChild
-            className="mt-10 min-h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
-          >
-            <Link href="#journal-notes">Subscribe</Link>
-          </Button>
         </Reveal>
       </BreathingSection>
 
@@ -195,42 +174,52 @@ export default function JournalPage() {
         id="journal-library"
         variant="library"
       >
-        <Tabs defaultValue="all">
-          <TabsList
-            aria-label="Filter journal drafts by category"
-            className="mx-auto flex h-auto max-w-full flex-wrap gap-2 rounded-full border border-[var(--border)] bg-white/55 p-2"
+        <div className="mb-12 text-center">
+          <p className="text-xs font-medium tracking-[0.26em] text-[var(--accent)] uppercase">
+            Published notes
+          </p>
+          <h2 className="mt-4 font-serif text-4xl text-[var(--primary)] md:text-5xl">
+            Read from the practice.
+          </h2>
+        </div>
+        <ArticleGrid items={publishedArticles} />
+
+        <section
+          aria-labelledby="coming-next-heading"
+          className="mt-16 rounded-[2rem] border border-[var(--border)] bg-white/42 p-7 md:p-10"
+        >
+          <h2
+            className="font-serif text-3xl text-[var(--primary)]"
+            id="coming-next-heading"
           >
-            {filters.map(({ label, value }) => (
-              <TabsTrigger
-                className="min-h-10 rounded-full px-5 data-active:bg-[var(--primary)] data-active:text-white"
-                key={value}
-                value={value}
+            Coming next
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--muted-foreground)]">
+            Shannon is developing these notes from her practice. They will be
+            published here when they are ready.
+          </p>
+          <ul className="mt-8 grid gap-x-10 gap-y-4 md:grid-cols-2">
+            {upcomingArticles.map((article) => (
+              <li
+                className="flex items-start justify-between gap-4 border-t border-[var(--border)] pt-4"
+                key={article.title}
               >
-                {label}
-              </TabsTrigger>
+                <span className="font-serif text-lg text-[var(--primary)]">
+                  {article.title}
+                </span>
+                <span className="shrink-0 text-[10px] tracking-[0.16em] text-[var(--accent)] uppercase">
+                  {article.category}
+                </span>
+              </li>
             ))}
-          </TabsList>
-
-          <TabsContent className="mt-12" value="all">
-            <ArticleGrid items={articles} />
-          </TabsContent>
-          <TabsContent className="mt-12" value="beauty">
-            <ArticleGrid items={articlesIn("Beauty")} />
-          </TabsContent>
-          <TabsContent className="mt-12" value="body">
-            <ArticleGrid items={articlesIn("Body")} />
-          </TabsContent>
-          <TabsContent className="mt-12" value="being">
-            <ArticleGrid items={articlesIn("Being")} />
-          </TabsContent>
-          <TabsContent className="mt-12" value="retreat-living">
-            <ArticleGrid items={articlesIn("Retreat Living")} />
-          </TabsContent>
-        </Tabs>
-
-        <p className="mx-auto mt-14 max-w-xl text-center font-serif text-2xl text-[var(--primary)]">
-          Shannon is writing. Check back soon.
-        </p>
+          </ul>
+          <Link
+            className="mt-8 inline-flex min-h-11 items-center rounded-full border border-[var(--primary)] px-6 text-sm font-medium text-[var(--primary)] transition hover:bg-[var(--primary)] hover:text-white"
+            href="/store#the-den"
+          >
+            Explore The Den
+          </Link>
+        </section>
       </BreathingSection>
 
       <BreathingSection
@@ -263,8 +252,8 @@ export default function JournalPage() {
             className="mt-7 text-[var(--muted-foreground)]"
             size="body"
           >
-            Join the journal for new reflections on beauty, body, being, and the
-            spaces that hold us.
+            Request new reflections on beauty, body, being, and the spaces that
+            hold us.
           </BreathingText>
           <NewsletterForm />
         </div>

@@ -67,8 +67,13 @@ export async function getMemberAccess(userId: string): Promise<MemberAccess> {
   ])
 
   const purchaseList = purchases ?? []
-  const membership = memberships ?? null
-  const isMember = Boolean(membership)
+  const membershipRecord = memberships ?? null
+  const membershipEndsAt = membershipRecord?.current_period_end
+    ? new Date(membershipRecord.current_period_end).getTime()
+    : Number.NaN
+  const isMember =
+    Number.isFinite(membershipEndsAt) && membershipEndsAt > Date.now()
+  const membership = isMember ? membershipRecord : null
   const canAccessLift =
     isMember ||
     purchaseList.some((purchase) => purchase.product_type === "lift_guide")

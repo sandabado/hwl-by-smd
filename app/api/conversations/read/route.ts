@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 
-import { getAuthenticatedUser } from "@/lib/access"
+import { getAuthenticatedUser, getMemberAccess } from "@/lib/access"
 import {
   getOwnedConversation,
   isRelationshipSchemaUnavailable,
@@ -27,6 +27,13 @@ export async function POST(request: Request) {
   const user = await getAuthenticatedUser()
   if (!user) {
     return NextResponse.json({ error: "Please sign in." }, { status: 401 })
+  }
+  const access = await getMemberAccess(user.id)
+  if (!access.isMember) {
+    return NextResponse.json(
+      { error: "An active Den membership is required." },
+      { status: 403 }
+    )
   }
 
   const payload = (await request.json().catch(() => null)) as {

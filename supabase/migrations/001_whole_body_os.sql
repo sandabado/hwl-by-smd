@@ -234,8 +234,8 @@ values
   (
     '7d479f66-2894-4552-b8e1-1f6ce7228011',
     '5aa34592-e286-41a2-a94d-7f2479f7e0a1',
-    'Prepare the Skin',
-    'prepare-the-skin',
+    'Prep the Skin',
+    'prep-the-skin',
     'Create slip, settle your breath, and begin with intention.',
     90,
     1,
@@ -294,9 +294,9 @@ values
   (
     '7d479f66-2894-4552-b8e1-1f6ce7228017',
     '5aa34592-e286-41a2-a94d-7f2479f7e0a1',
-    'Neck Release',
-    'neck-release',
-    'Complete the ritual with flowing movement through the neck.',
+    'Neck Drainage',
+    'neck-drainage',
+    'Complete the lymphatic pathway with gentle downward strokes toward the collarbones.',
     120,
     7,
     true

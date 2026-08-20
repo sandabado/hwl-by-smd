@@ -3,7 +3,7 @@ export const SITE_CONFIG = {
   tagline: "Beauty · Body · Being",
   description:
     "Beauty rituals, private yoga, tarot, and retreat experiences with Shannon Mary Dixon in Palm Springs.",
-  email: "hello@howlbysmd.com",
+  email: "shannonmarydixon@gmail.com",
   phone: "617.671.8636",
   instagramPersonal: "@shannmarydix",
   instagramBrand: "@hwl.bysmd",
@@ -16,7 +16,8 @@ export const SITE_CONFIG = {
 export const NAV_ITEMS = [
   { label: "About", href: "/about" },
   { label: "Beauty", href: "/beauty" },
-  { label: "Yoga", href: "/yoga" },
+  { label: "Yoga + Sound", href: "/yoga" },
   { label: "Tarot", href: "/tarot" },
   { label: "Retreats", href: "/retreats" },
+  { label: "Store", href: "/store" },
 ]

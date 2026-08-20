@@ -12,7 +12,17 @@ export function isSameOriginMutation(request: Request) {
   if (!origin) return true
 
   try {
-    return new URL(origin).origin === new URL(request.url).origin
+    const requestUrl = new URL(request.url)
+    const allowedOrigins = new Set([requestUrl.origin])
+    const host = request.headers.get("host")
+
+    // Next can canonicalize localhost in request.url even when the browser used
+    // 127.0.0.1. The Host header preserves the origin the browser actually saw.
+    if (host) {
+      allowedOrigins.add(new URL(`${requestUrl.protocol}//${host}`).origin)
+    }
+
+    return allowedOrigins.has(new URL(origin).origin)
   } catch {
     return false
   }
@@ -31,4 +41,50 @@ export function hasAcceptableBodySize(request: Request, maximumBytes: number) {
 
   const parsed = Number(contentLength)
   return Number.isFinite(parsed) && parsed >= 0 && parsed <= maximumBytes
+}
+
+export async function readLimitedJson<T>(
+  request: Request,
+  maximumBytes: number
+): Promise<
+  { ok: true; value: T } | { ok: false; reason: "invalid" | "too_large" }
+> {
+  if (!hasAcceptableBodySize(request, maximumBytes)) {
+    return { ok: false, reason: "too_large" }
+  }
+
+  const reader = request.body?.getReader()
+  if (!reader) return { ok: false, reason: "invalid" }
+
+  const chunks: Uint8Array[] = []
+  let totalBytes = 0
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      totalBytes += value.byteLength
+      if (totalBytes > maximumBytes) {
+        await reader.cancel()
+        return { ok: false, reason: "too_large" }
+      }
+      chunks.push(value)
+    }
+
+    const bytes = new Uint8Array(totalBytes)
+    let offset = 0
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset)
+      offset += chunk.byteLength
+    }
+
+    return {
+      ok: true,
+      value: JSON.parse(
+        new TextDecoder("utf-8", { fatal: true }).decode(bytes)
+      ) as T,
+    }
+  } catch {
+    return { ok: false, reason: "invalid" }
+  }
 }

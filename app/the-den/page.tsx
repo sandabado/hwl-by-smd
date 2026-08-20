@@ -65,11 +65,15 @@ export default async function TheDenPage() {
               Welcome back, {firstName}.
             </h1>
           </div>
-          <MemberNavigation />
+          <MemberNavigation hasMembership={access.isMember} />
         </div>
 
         <p className="mt-5 text-xl tracking-wide text-[var(--muted-foreground)]">
           Continue your ritual.
+        </p>
+        <p className="mt-4 max-w-3xl leading-relaxed text-[var(--muted-foreground)]">
+          Your practices. Your courses. Your private line to Shannon. Nothing
+          here is urgent. Everything here is yours.
         </p>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
@@ -138,12 +142,21 @@ export default async function TheDenPage() {
               <p className="mt-3 font-serif text-2xl leading-relaxed text-[var(--primary)] italic">
                 “Let consistency be an act of devotion, not pressure.”
               </p>
-              <Link
-                className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)]"
-                href="/the-den/connection"
-              >
-                Open Connection Hub <ArrowRight className="size-4" />
-              </Link>
+              {access.isMember ? (
+                <Link
+                  className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)]"
+                  href="/the-den/connection"
+                >
+                  Open Connection Hub <ArrowRight className="size-4" />
+                </Link>
+              ) : (
+                <Link
+                  className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)]"
+                  href="/store#the-den"
+                >
+                  Explore Den membership <ArrowRight className="size-4" />
+                </Link>
+              )}
             </article>
           </div>
         </div>

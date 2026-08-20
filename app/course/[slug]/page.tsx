@@ -52,7 +52,7 @@ export default async function CoursePage({
     <section className="member-atmosphere min-h-screen px-6 py-12 md:py-20">
       <div className="mx-auto max-w-6xl">
         <div className="flex justify-end">
-          <MemberNavigation />
+          <MemberNavigation hasMembership={access.isMember} />
         </div>
         <div className="mt-12 max-w-3xl">
           <p className="text-xs tracking-[0.3em] text-[var(--accent)] uppercase">

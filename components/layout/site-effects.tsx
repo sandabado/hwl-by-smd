@@ -10,14 +10,15 @@ import { allowsAmbientMotion } from "@/lib/motion-policy"
 
 export function SiteEffects() {
   const pathname = usePathname()
+  const allowAmbientMotion = allowsAmbientMotion(pathname)
 
   if (pathname.startsWith("/admin")) return null
 
   return (
     <>
       <ScrollProgress />
-      {allowsAmbientMotion(pathname) ? <ScrollBreath /> : null}
-      <CursorGlow />
+      {allowAmbientMotion ? <ScrollBreath /> : null}
+      {allowAmbientMotion ? <CursorGlow /> : null}
       <BackToTop />
     </>
   )

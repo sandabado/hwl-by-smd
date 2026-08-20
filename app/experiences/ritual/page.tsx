@@ -20,33 +20,33 @@ export const metadata = createPageMetadata({
 const offerings = [
   {
     icon: ScrollText,
-    title: "Tarot",
-    bookingHref: "/book?service=tarot#booking-inquiry",
+    title: "Intuitive Tarot Reading",
+    bookingHref: "/book?service=intuitive-tarot-reading#choose-time",
     summary:
-      "A private mirror for the question, transition, or pattern asking for your attention.",
+      "A personalized virtual reading for life transitions, decision-making, and reconnecting with inner wisdom.",
     detail:
-      "The cards are used for reflection rather than prediction. You leave with grounded language for what you noticed and the freedom to take only what resonates.",
-    format: "Private session · final format confirmed before booking",
+      "Explore current circumstances, opportunities, challenges, and aligned next steps through reflective card work.",
+    format: "45–60 minutes · $222 · Virtual via Zoom",
   },
   {
     icon: MoonStar,
-    title: "Astrology",
-    bookingHref: "/book?service=astrology#booking-inquiry",
+    title: "Moon Oracle Reading",
+    bookingHref: "/book?service=moon-oracle-reading#choose-time",
     summary:
-      "Seasonal and lunar perspective for understanding timing, rhythm, and the life you are already living.",
+      "A personalized astrological and lunar reading for clarity, timing, and connection to the immediate season.",
     detail:
-      "Astrology becomes a framework for inquiry—not a rulebook. Sessions can center a season, a threshold, or a personal cycle once Shannon confirms her final formats.",
-    format: "Private or group · by consultation",
+      "Explore the current cosmic landscape and how its themes show up in your life, without treating astrology as fate.",
+    format: "45–60 minutes · $222 · Virtual via Zoom",
   },
   {
     icon: Sparkles,
-    title: "Ritual Ceremony",
-    bookingHref: "/book?service=ritual-ceremony#booking-inquiry",
+    title: "Tarot + Reiki Experience",
+    bookingHref: "/book?service=tarot-and-reiki#choose-time",
     summary:
-      "A thoughtful container for beginnings, endings, grief, celebration, and return.",
+      "Intuitive guidance followed by restorative Reiki support designed to balance, clarify, and renew.",
     detail:
-      "Each ceremony is shaped around the people and moment it serves, using only practices that feel grounded, consensual, and appropriate to the gathering.",
-    format: "Private or group · custom scope",
+      "Begin with a virtual tarot reading, then continue with optional in-person Reiki locally or remote Reiki energy work.",
+    format: "60–75 minutes · $444 · Hybrid",
   },
 ] as const
 
@@ -87,43 +87,48 @@ export default function RitualPage() {
             "Tarot, astrology, and intentional ritual offered as reflective wellness practices for private guests and groups.",
           path: "/tarot",
           serviceType: "Reflective ritual and intuitive guidance",
-          image: media.experiences.ritualMoon.src,
+          image: media.experiences.tarotSpread.src,
         })}
         id="tarot-service-schema"
       />
 
       <section className="relative -mt-16 flex min-h-[88vh] items-end overflow-hidden bg-[#211c22] px-6 py-24 pt-36 text-white md:-mt-20 md:pt-40">
         <Image
-          alt={media.experiences.ritualMoon.alt}
-          className="object-cover opacity-25 [filter:saturate(.55)_contrast(1.05)]"
+          alt={media.experiences.tarotSpread.alt}
+          className="object-cover object-[67%_center] [filter:saturate(.82)_contrast(1.02)] md:object-center"
           fill
           preload
           sizes="100vw"
-          src={media.experiences.ritualMoon.src}
+          src={media.experiences.tarotSpread.src}
         />
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(circle_at_58%_78%,rgba(210,150,100,0.2),transparent_26%),linear-gradient(to_top,rgba(20,16,21,0.92),rgba(33,28,34,0.26)_62%,rgba(24,20,25,0.65))]"
-        />
-        <div
-          aria-hidden="true"
-          className="candle-breath absolute bottom-[16%] left-[58%] h-48 w-32 rounded-full bg-[radial-gradient(ellipse,rgba(239,195,132,0.2),transparent_65%)] blur-xl"
+          className="absolute inset-0 bg-[linear-gradient(to_right,rgba(20,16,21,0.96)_0%,rgba(20,16,21,0.8)_34%,rgba(20,16,21,0.2)_70%,rgba(20,16,21,0.14)_100%),linear-gradient(to_top,rgba(20,16,21,0.93)_0%,rgba(20,16,21,0.22)_56%,rgba(20,16,21,0.48)_100%)]"
         />
         <div className="relative z-10 mx-auto w-full max-w-7xl pb-8 md:pb-16">
           <p className="text-xs tracking-[0.3em] text-[#dcc5a5] uppercase">
             Tarot
           </p>
           <h1 className="mt-6 max-w-4xl text-5xl leading-[1.02] font-medium text-white md:text-7xl lg:text-8xl">
-            Ancient wisdom for modern life.
+            A mirror, not a map.
           </h1>
           <p className="mt-7 max-w-2xl text-lg leading-[1.9] text-white/65 md:text-xl">
-            Tarot, astrology, and ritual ceremony for inner alignment.
+            Pattern-reading for the season you&apos;re in.
           </p>
           <Button
             asChild
             className="mt-10 h-12 rounded-full bg-[#dcc5a5] px-7 text-[#211c22] hover:bg-white"
           >
-            <Link href="/book?service=tarot">Book a Reading</Link>
+            <Link href="/book?service=intuitive-tarot-reading#choose-time">
+              Book a Reading
+            </Link>
+          </Button>
+          <Button
+            asChild
+            className="mt-4 h-12 rounded-full border-white/35 bg-white/10 px-7 text-white hover:bg-white/20 hover:text-white sm:mt-10 sm:ml-3"
+            variant="outline"
+          >
+            <Link href="/the-den">Explore The Den</Link>
           </Button>
         </div>
       </section>
@@ -138,20 +143,20 @@ export default function RitualPage() {
         />
         <div className="relative mx-auto max-w-3xl text-center">
           <p className="mb-7 font-serif text-2xl text-[var(--primary)] italic md:text-3xl">
-            Being is where we listen—with cards, stars, and ritual.
+            Shannon reads tarot the way she reads skin — looking for what&apos;s
+            held, what&apos;s ready to move, what the body already knows.
           </p>
           <p className="font-serif text-xl leading-[2] text-[var(--primary)] md:text-2xl">
-            Ritual is not superstition. It&apos;s structure for meaning. A way
-            to mark transitions, ask questions, and listen for what&apos;s
-            underneath the noise. These offerings are designed as reflective
-            practices — held with care, approached without prediction, and
-            centered on your experience. Nothing here asks you to believe
-            anything. Only to pay attention.
+            For more than two decades she has studied astrology, symbolism,
+            ritual, tarot, energetics, and personal transformation. Tarot and
+            astrology readings are offered virtually via Zoom. Meet from
+            wherever you are. The work doesn&apos;t require physical presence.
+            It requires presence.
           </p>
         </div>
         <PullQuote
           className="mx-auto mt-24 max-w-5xl"
-          quote="Ritual is the bridge between who you are and who you're becoming."
+          quote="The cards don't tell you what to do. They show you what you already know."
         />
       </section>
 
@@ -294,7 +299,7 @@ export default function RitualPage() {
           </h2>
           <Link
             className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#dcc5a5] px-7 py-3 text-sm font-medium text-[#211c22] transition hover:bg-white"
-            href="/book?service=tarot"
+            href="/book?service=intuitive-tarot-reading#choose-time"
           >
             Book a Reading <ArrowRight className="size-4" aria-hidden="true" />
           </Link>

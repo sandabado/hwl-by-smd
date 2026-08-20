@@ -24,7 +24,7 @@ export const metadata = createPageMetadata({
   title:
     "Shannon Mary Dixon — Aesthetician, Yoga Teacher & Tarot Reader in Palm Springs",
   description:
-    "Meet Shannon Mary Dixon: skincare alchemist, yoga guide, and tarot reader based in Palm Springs, California.",
+    "Meet Shannon Mary Dixon, a licensed aesthetician, 500-hour yoga instructor, Reiki practitioner, and aromatherapy specialist in Palm Springs.",
   path: "/about",
 })
 
@@ -85,21 +85,23 @@ const modalities = [
   },
 ]
 
-const credentialPlaceholders = [
-  {
-    title: "Aesthetics training",
-    detail:
-      "Institution, license type, and completion date awaiting verification.",
-  },
-  {
-    title: "Yoga training",
-    detail: "Teacher-training level, school, and year awaiting verification.",
-  },
-  {
-    title: "Ritual & energy study",
-    detail: "Programs, teachers, and dates awaiting verification.",
-  },
-]
+const story = [
+  "Shannon started on ice. Figure skating — the discipline, the early mornings, the falls you don't talk about. Elite athletics taught her embodiment, resilience, and presence before she had words for them. When the body said stop, she listened. Not right away. But eventually.",
+  "Beauty came next. Licensed aesthetician. She learned the face like terrain — where tension collects, where lymph stalls, where a gentle hand can move what years of holding have locked. Aromatherapy study. Reiki training. The understanding that touch is a language the nervous system speaks before the mind translates.",
+  "Then the body. 500 hours of yoga instruction. Breath as regulation, not performance. Sound as vibration the body receives before the brain interprets. Private sessions customized for restorative flow, vinyasa strength, mobility work, or athletic recovery. Always with modifications. Always free of judgment.",
+  "Then the being. Twenty years studying astrology, symbolism, ritual, tarot, energetics. The practices women kept alive when institutions weren't listening. Not prediction. Reflection. Pattern-reading. Astrology for context, not fate. Tarot for clarity, not certainty.",
+  "Reiki wove through all of it. Energy moves where attention goes. Healing isn't something you do to someone — it's something you create space for.",
+  "Now it's one practice. HWL. Beauty, body, being. In the desert, where things are dry and clear and you can see further than you can hide.",
+] as const
+
+const credentials = [
+  "Licensed Aesthetician",
+  "500hr Yoga Instructor",
+  "Reiki Practitioner",
+  "Aromatherapy Specialist",
+  "Wellness Facilitator",
+  "Former Elite Figure Skater",
+] as const
 
 const shannonJsonLd = {
   "@context": "https://schema.org",
@@ -139,19 +141,21 @@ export default function AboutPage() {
               className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(180deg,transparent_30%,rgba(31,25,22,0.74)_100%)]"
             />
             <Reveal className="absolute right-0 bottom-0 left-0 z-20 p-8 text-white md:p-14 lg:p-16">
+              <p className="mb-5 text-xs tracking-[0.28em] text-white/75 uppercase">
+                About
+              </p>
               <BreathingText
                 as="h1"
                 className="max-w-3xl text-white md:text-7xl"
                 size="hero"
               >
-                Meet Shannon
+                Shannon&apos;s Story
               </BreathingText>
               <BreathingText
                 className="mt-5 max-w-2xl text-white/88"
                 size="subheading"
               >
-                Beauty, body, and being — brought together with intention in
-                Palm Springs, California.
+                One long way home.
               </BreathingText>
             </Reveal>
           </div>
@@ -164,25 +168,16 @@ export default function AboutPage() {
         padding="expansive"
         variant="kitchen"
       >
-        <div className="space-y-7">
-          <BreathingText className="text-[var(--muted-foreground)]" size="body">
-            HWL begins with a simple idea: beauty, body, and inner life belong
-            in the same conversation.
-          </BreathingText>
-          <BreathingText className="text-[var(--muted-foreground)]" size="body">
-            Beauty invites care for skin and the person inside it. Body creates
-            space for breath, movement, sound, and rest.
-          </BreathingText>
-          <BreathingText className="text-[var(--muted-foreground)]" size="body">
-            Being offers room to reflect, mark change, and listen inward.
-            Together, the three become a practice shaped around the whole
-            person.
-          </BreathingText>
-          <BreathingText className="text-[var(--primary)]" size="body">
-            Shannon is confirming the personal history and training details she
-            would like to share here. They will be added only after they are
-            verified.
-          </BreathingText>
+        <div className="space-y-7 text-left">
+          {story.map((paragraph) => (
+            <BreathingText
+              className="text-[var(--muted-foreground)]"
+              key={paragraph}
+              size="body"
+            >
+              {paragraph}
+            </BreathingText>
+          ))}
         </div>
 
         <BreathingText
@@ -190,7 +185,8 @@ export default function AboutPage() {
           className="mx-auto mt-20 max-w-2xl border-l-2 border-[var(--room-clay)] pl-7 text-left font-serif text-3xl text-[var(--primary)] italic md:text-4xl"
           size="subheading"
         >
-          “One method. One philosophy. Whole body wellness.”
+          “The most powerful experiences don&apos;t ask us to become someone
+          new. They help us remember who we already are.”
         </BreathingText>
       </BreathingSection>
 
@@ -304,29 +300,26 @@ export default function AboutPage() {
             className="mt-5 text-[var(--primary)]"
             size="heading"
           >
-            The details deserve accuracy.
+            One practice, many ways in.
           </BreathingText>
           <p className="mt-6 text-base leading-[1.8] text-[var(--muted-foreground)]">
-            Shannon is confirming the exact institutions, completion dates, and
-            current credential language before they are published here.
+            Shannon&apos;s work brings beauty, movement, energy, and reflection
+            into one attentive practice.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {credentialPlaceholders.map((credential) => (
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
+          {credentials.map((credential) => (
             <article
               className="rounded-[1.5rem] border border-[var(--border)] bg-white/45 p-7"
-              key={credential.title}
+              key={credential}
             >
               <p className="text-xs tracking-[0.18em] text-[var(--accent)] uppercase">
-                Verification in progress
+                Shannon Mary Dixon
               </p>
               <h3 className="mt-4 text-2xl text-[var(--primary)]">
-                {credential.title}
+                {credential}
               </h3>
-              <p className="mt-3 text-sm leading-[1.8] text-[var(--muted-foreground)]">
-                {credential.detail}
-              </p>
             </article>
           ))}
         </div>
@@ -344,16 +337,23 @@ export default function AboutPage() {
           className="text-[var(--background)] md:text-6xl"
           size="heading"
         >
-          Begin your journey.
+          Work with Shannon.
         </BreathingText>
         <Button
           asChild
           className="mt-10 h-12 rounded-full bg-[var(--background)] px-8 text-[var(--primary)] hover:bg-[var(--room-clay)] hover:text-[var(--room-charcoal)]"
         >
           <Link href="/book">
-            Begin Your Journey
+            Work with Shannon
             <ArrowRight aria-hidden="true" className="size-4" />
           </Link>
+        </Button>
+        <Button
+          asChild
+          className="mt-4 h-12 rounded-full border-white/35 bg-transparent px-8 text-[var(--background)] hover:bg-white/10 hover:text-white md:mt-10 md:ml-3"
+          variant="outline"
+        >
+          <Link href="/journal">Read the Journal</Link>
         </Button>
       </BreathingSection>
     </>

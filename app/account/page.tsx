@@ -34,13 +34,14 @@ export default async function AccountPage() {
     <section className="member-atmosphere px-6 py-16 md:py-24">
       <div className="mx-auto max-w-5xl">
         <p className="text-xs tracking-[0.3em] text-[var(--accent)] uppercase">
-          Your account
+          Account
         </p>
         <h1 className="mt-4 text-6xl font-medium text-[var(--primary)]">
-          A quiet place to
-          <br />
-          <em className="font-normal">tend the details.</em>
+          Your Account
         </h1>
+        <p className="mt-4 text-lg text-[var(--muted-foreground)]">
+          Profile, membership, purchases, and preferences.
+        </p>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2">
           <article className="den-card rounded-[2rem] p-8">
@@ -48,6 +49,11 @@ export default async function AccountPage() {
             <p className="mt-5 text-xs tracking-[0.2em] text-[var(--muted-foreground)] uppercase">
               Signed in as
             </p>
+            {user.user_metadata.full_name ? (
+              <p className="mt-2 text-[var(--primary)]">
+                {String(user.user_metadata.full_name)}
+              </p>
+            ) : null}
             <p className="mt-2 text-[var(--primary)]">{user.email}</p>
           </article>
 
@@ -68,8 +74,9 @@ export default async function AccountPage() {
               </>
             ) : (
               <p className="mt-5 leading-relaxed text-[var(--muted-foreground)]">
-                Your one-time rituals remain yours. The Den will be here
-                whenever it feels right.
+                You don&apos;t have an active membership. The Den is
+                $11.11/month — your private library, your direct line to
+                Shannon, and your ongoing practice.
               </p>
             )}
           </article>
@@ -105,8 +112,8 @@ export default async function AccountPage() {
           ) : (
             <div className="mt-6">
               <p className="text-[var(--muted-foreground)]">
-                Your purchase history is quiet for now. The store is here
-                whenever you feel like exploring.
+                You haven&apos;t chosen a practice yet. That&apos;s okay. The
+                library is here when you&apos;re ready.
               </p>
               <Button
                 asChild
@@ -121,7 +128,11 @@ export default async function AccountPage() {
 
         <Link
           className="den-card mt-6 flex items-center justify-between gap-5 rounded-[2rem] p-8 transition hover:-translate-y-0.5 hover:border-[var(--accent)]"
-          href="/account/preferences/communication"
+          href={
+            access.isMember
+              ? "/account/preferences/communication"
+              : "/store#the-den"
+          }
         >
           <div className="flex items-start gap-4">
             <HeartHandshake
@@ -130,10 +141,14 @@ export default async function AccountPage() {
             />
             <div>
               <h2 className="text-3xl text-[var(--primary)]">
-                Connection preferences
+                {access.isMember
+                  ? "Connection preferences"
+                  : "The Den connection"}
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                Choose your guidance rhythm, booking invitations, and privacy.
+                {access.isMember
+                  ? "Choose whether Shannon may include booking invitations in a guided Journey."
+                  : "Private Connection is available with an active Den membership."}
               </p>
             </div>
           </div>

@@ -1,7 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, ChevronDown, Droplets, Leaf, Sparkles } from "lucide-react"
+import { ArrowRight, Droplets, Leaf, Sparkles } from "lucide-react"
 
+import { HeroFilm } from "@/components/home/hero-film"
 import { BreathingSection } from "@/components/shared/breathing-section"
 import { BreathingText } from "@/components/shared/breathing-text"
 import { BreathPause } from "@/components/shared/breath-pause"
@@ -9,7 +10,9 @@ import { BreathingButton } from "@/components/shared/breathing-button"
 import { NewsletterForm } from "@/components/shared/newsletter-form"
 import { ParallaxWindow } from "@/components/shared/parallax-window"
 import { Reveal } from "@/components/shared/reveal"
+import ScrollIndicator from "@/components/shared/scroll-indicator"
 import { TextureOverlay } from "@/components/shared/texture-overlay"
+import { Button } from "@/components/ui/button"
 import { media } from "@/lib/media"
 import { createPageMetadata } from "@/lib/seo"
 
@@ -56,97 +59,78 @@ const pathways = [
 export default function Page() {
   return (
     <>
-      <section className="sanctuary-hero relative -mt-16 flex min-h-[calc(100svh+4rem)] items-end overflow-hidden md:-mt-20 md:min-h-[calc(100svh+5rem)]">
-        <Image
-          alt="A tranquil mineral pool surrounded by lush green plants and luminous morning mist"
-          className="sanctuary-hero__image object-cover"
-          fill
-          preload
-          quality={88}
-          sizes="100vw"
-          src={media.brand.sanctuaryHero.src}
-        />
-        <div className="sanctuary-hero__veil absolute inset-0" />
-        <TextureOverlay intensity="soft" variant="grain" />
+      <section
+        aria-labelledby="hero-heading"
+        className="desert-oasis-hero relative -mt-[72px] min-h-[100svh] overflow-hidden bg-[#102a20]"
+      >
+        <div aria-hidden="true" className="absolute inset-0">
+          <Image
+            alt=""
+            className="desert-oasis-hero__image object-cover"
+            fill
+            preload
+            quality={88}
+            sizes="100vw"
+            src="/images/homero-desert-oasis.jpg"
+          />
+        </div>
+        <HeroFilm source={media.motion.desertHero.src} />
+        <div className="hero-overlay absolute inset-0" />
 
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl items-end gap-12 px-6 pt-40 pb-24 md:grid-cols-[minmax(0,1fr)_auto] md:pt-52 md:pb-28 lg:pb-32">
-          <Reveal className="max-w-3xl text-[var(--sanctuary-ivory)]">
-            <p className="mb-6 flex items-center gap-3 text-[11px] font-medium tracking-[0.28em] text-white/75 uppercase">
-              <span className="h-px w-9 bg-white/50" aria-hidden="true" />
-              Shannon Mary Dixon · Palm Springs
+        <div className="hero-content relative z-10 mx-auto flex w-full max-w-7xl items-end px-6 pt-40 pb-24 md:pt-44 md:pb-28 lg:px-8 lg:pb-32">
+          <div className="hero-content-fade flex max-w-2xl flex-col items-start text-left">
+            <p className="mb-5 text-[11px] font-medium tracking-[0.3em] text-white/75 uppercase sm:text-xs">
+              Private experiences · Palm Springs
             </p>
-            <BreathingText
-              as="h1"
-              className="max-w-3xl text-[clamp(3.65rem,8vw,7.5rem)] leading-[0.88] font-medium tracking-[-0.025em] text-[var(--sanctuary-ivory)]"
-              size="hero"
+            <h1
+              className="max-w-[12ch] text-5xl leading-[0.98] font-light tracking-[-0.035em] text-white sm:text-6xl md:text-7xl lg:text-[5.5rem]"
+              id="hero-heading"
             >
-              Beauty · Body · Being
-            </BreathingText>
-            <BreathingText
-              className="mt-7 max-w-xl text-white"
-              size="subheading"
-            >
-              Come back to yourself.
-            </BreathingText>
-            <BreathingText
-              className="mt-5 max-w-xl text-base leading-8 text-white/82 md:text-lg"
-              size="body"
-            >
-              A space for skin, movement, and ritual—held with warmth by Shannon
-              Mary Dixon.
-            </BreathingText>
+              Come back to your whole body.
+            </h1>
+            <p className="mt-6 text-sm font-medium tracking-[0.2em] text-white/80 uppercase md:text-base">
+              Facial rituals · Yoga + Sound · Tarot
+            </p>
+            <p className="mt-5 max-w-xl text-base leading-7 font-light text-white/82 md:text-lg">
+              Skin care, movement, sound, and intuitive readings with Shannon,
+              held in the quiet of the desert.
+            </p>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <BreathingButton
+            <div className="mt-9 flex w-full flex-col items-start gap-5 sm:w-auto sm:flex-row sm:items-center">
+              <Button
                 asChild
-                breathVariant="primary"
-                className="h-12 rounded-full bg-[var(--sanctuary-ivory)] px-7 text-[var(--sanctuary-ink)] shadow-[0_12px_40px_rgba(4,20,13,0.18)] hover:bg-white"
+                className="btn-primary-hover h-14 w-full gap-3 rounded-full bg-white py-1.5 pr-7 pl-2 text-[#102a20] shadow-[0_12px_40px_rgba(4,20,13,0.18)] hover:bg-white sm:w-auto"
+                size="lg"
               >
                 <Link href="/book">
-                  Book an Experience
-                  <ArrowRight aria-hidden="true" className="size-4" />
+                  <Image
+                    alt=""
+                    className="size-11 rounded-full border border-[#dbe6de] object-cover object-[center_32%]"
+                    height={44}
+                    src={media.brand.windowPortrait.src}
+                    width={44}
+                  />
+                  <span>Book with Shannon</span>
                 </Link>
-              </BreathingButton>
-              <BreathingButton
-                asChild
-                breathVariant="secondary"
-                className="h-12 rounded-full border-white/35 bg-white/8 px-7 text-white backdrop-blur-md hover:bg-white/16 hover:text-white"
+              </Button>
+              <Link
+                className="group inline-flex min-h-11 items-center gap-2 py-2 text-sm font-medium text-white/88 underline decoration-white/35 underline-offset-8 transition hover:text-white"
+                href="#experiences"
               >
-                <Link href="/beauty/lift">Get the LIFT Guide — $5.55</Link>
-              </BreathingButton>
-            </div>
-          </Reveal>
-
-          <div className="hidden items-center gap-4 rounded-full border border-white/20 bg-[#0b2118]/30 p-2 pr-5 text-white shadow-[0_20px_70px_rgba(2,18,11,0.25)] backdrop-blur-xl md:flex">
-            <div className="relative size-14 overflow-hidden rounded-full border border-white/35">
-              <Image
-                alt="Shannon Mary Dixon smiling"
-                className="object-cover object-[center_30%]"
-                fill
-                sizes="56px"
-                src={media.brand.smilingPortrait.src}
-              />
-            </div>
-            <div>
-              <p className="font-serif text-lg leading-none">Shannon</p>
-              <p className="mt-1 text-[10px] tracking-[0.2em] text-white/65 uppercase">
-                Your guide inward
-              </p>
+                Explore experiences
+                <ArrowRight
+                  aria-hidden="true"
+                  className="size-4 transition-transform group-hover:translate-x-1 motion-reduce:transform-none"
+                />
+              </Link>
             </div>
           </div>
         </div>
 
-        <a
-          aria-label="Continue to meet Shannon"
-          className="sanctuary-hero__scroll absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-1 text-[9px] font-medium tracking-[0.26em] text-white/65 uppercase lg:flex"
-          href="#meet-shannon"
-        >
-          Exhale
-          <ChevronDown aria-hidden="true" className="size-4" />
-        </a>
+        <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2">
+          <ScrollIndicator />
+        </div>
       </section>
-
-      <BreathPause text="Breathe here." />
 
       <BreathingSection
         className="sanctuary-introduction"
@@ -159,13 +143,13 @@ export default function Page() {
         <div className="relative mx-auto w-full max-w-md md:mx-0">
           <div className="sanctuary-portrait-glow absolute -inset-10" />
           <ParallaxWindow
-            alt={media.brand.windowPortrait.alt}
+            alt={media.brand.smilingPortrait.alt}
             aspectRatio="4 / 5.35"
             className="relative w-full rounded-t-[12rem] rounded-b-[2rem]"
             imageClassName="object-cover object-[center_34%]"
             sizes="(max-width: 767px) 90vw, 38vw"
             speed={0.1}
-            src={media.brand.windowPortrait.src}
+            src={media.brand.smilingPortrait.src}
             texture="none"
           />
           <div className="absolute -right-4 -bottom-6 rounded-full border border-white/70 bg-white/60 p-4 shadow-[0_16px_50px_rgba(23,66,48,0.14)] backdrop-blur-lg md:-right-8 md:p-5">
@@ -236,6 +220,7 @@ export default function Page() {
         background="cool"
         className="pathways-section"
         contentClassName="mx-auto w-full max-w-7xl px-6"
+        id="experiences"
         padding="expansive"
         texture="grain"
         variant="studio"
@@ -323,9 +308,12 @@ export default function Page() {
             className="mx-auto mt-8 max-w-4xl text-[var(--sanctuary-ivory)] md:text-6xl"
             size="heading"
           >
-            You don&apos;t have to become someone new. You can return to what is
-            already alive in you.
+            The most powerful experiences don&apos;t ask us to become someone
+            new. They help us remember who we already are.
           </BreathingText>
+          <p className="mt-6 text-xs tracking-[0.22em] text-[var(--sanctuary-sage)] uppercase">
+            Shannon Mary Dixon
+          </p>
         </Reveal>
       </BreathingSection>
 
@@ -369,16 +357,13 @@ export default function Page() {
               Seven movements guided by Shannon, with a printable ritual to keep
               close for the mornings you want to move at your own pace.
             </BreathingText>
-            <p className="mt-7 font-serif text-3xl text-[var(--sanctuary-ink)]">
-              $5.55
-            </p>
             <BreathingButton
               asChild
               breathVariant="primary"
               className="mt-8 h-12 self-start rounded-full bg-[var(--sanctuary-fern)] px-7 text-[var(--sanctuary-ivory)] hover:bg-[var(--sanctuary-ink)]"
             >
               <Link href="/beauty/lift">
-                Get the Guide
+                Explore LIFT
                 <ArrowRight aria-hidden="true" className="size-4" />
               </Link>
             </BreathingButton>

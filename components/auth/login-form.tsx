@@ -85,15 +85,13 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
     <div className="rounded-[2rem] border border-white/60 bg-white/65 p-7 shadow-[0_30px_80px_rgba(90,74,63,0.12)] backdrop-blur md:p-10">
       <div
         className="grid grid-cols-2 rounded-full bg-[var(--muted)]/70 p-1"
-        role="tablist"
         aria-label="Account action"
       >
         {(["signin", "signup"] as const).map((item) => (
           <button
             key={item}
             type="button"
-            role="tab"
-            aria-selected={mode === item}
+            aria-pressed={mode === item}
             onClick={() => {
               setMode(item)
               setError("")
@@ -118,7 +116,11 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
         </p>
       )}
 
-      <form className="mt-7 space-y-5" onSubmit={handleSubmit}>
+      <form
+        aria-busy={pending}
+        className="mt-7 space-y-5"
+        onSubmit={handleSubmit}
+      >
         {mode === "signup" && (
           <label className="block text-sm text-[var(--primary)]">
             Your name
@@ -189,7 +191,17 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
             Forgot your password?
           </Link>
         ) : (
-          <p>By joining, you agree to the privacy policy and terms.</p>
+          <p>
+            By joining, you agree to the{" "}
+            <Link className="underline underline-offset-4" href="/privacy">
+              privacy policy
+            </Link>{" "}
+            and{" "}
+            <Link className="underline underline-offset-4" href="/terms">
+              terms
+            </Link>
+            .
+          </p>
         )}
       </div>
     </div>

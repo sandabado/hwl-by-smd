@@ -65,7 +65,7 @@ export default async function LessonPage({
             <ArrowLeft className="size-4" aria-hidden="true" />
             {result.course.title}
           </Link>
-          <MemberNavigation />
+          <MemberNavigation hasMembership={access.isMember} />
         </div>
 
         <div className="mt-10">

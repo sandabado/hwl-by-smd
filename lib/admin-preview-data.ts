@@ -184,8 +184,8 @@ export const adminCourses = [
 
 export const liftLessons = [
   {
-    id: "prepare-the-skin",
-    title: "Prepare the Skin",
+    id: "prep-the-skin",
+    title: "Prep the Skin",
     duration: "1:30",
     media: "Awaiting Mux playback ID",
     status: "Draft",
@@ -219,16 +219,16 @@ export const liftLessons = [
     status: "Draft",
   },
   {
-    id: "neck-and-decollete",
-    title: "Neck & Décolleté",
+    id: "lymphatic-sweep",
+    title: "Lymphatic Sweep",
     duration: "2:00",
     media: "Awaiting Mux playback ID",
     status: "Draft",
   },
   {
-    id: "close-the-ritual",
-    title: "Close the Ritual",
-    duration: "1:00",
+    id: "neck-drainage",
+    title: "Neck Drainage",
+    duration: "2:00",
     media: "Awaiting Mux playback ID",
     status: "Draft",
   },

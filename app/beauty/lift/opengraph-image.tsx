@@ -11,6 +11,6 @@ export const contentType = OG_IMAGE_CONTENT_TYPE
 export default function OpenGraphImage() {
   return createBrandOgImage({
     eyebrow: "LIFT · A daily ritual",
-    title: "Seven movements. Five minutes a day.",
+    title: "Seven movements. Five minutes. Your own two hands.",
   })
 }

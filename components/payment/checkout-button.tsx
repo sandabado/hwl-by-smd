@@ -59,6 +59,7 @@ export function CheckoutButton({
   return (
     <div>
       <Button
+        aria-busy={pending}
         className={cn(
           "h-11 w-full rounded-full px-6",
           variant === "default"
@@ -77,7 +78,10 @@ export function CheckoutButton({
         {pending ? "Opening secure checkout…" : label}
       </Button>
       {error && (
-        <p className="mt-3 text-center text-xs leading-relaxed text-[#9c4b40]">
+        <p
+          className="mt-3 text-center text-xs leading-relaxed text-[#9c4b40]"
+          role="alert"
+        >
           {error}
         </p>
       )}

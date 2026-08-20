@@ -201,6 +201,12 @@ function ConversationThread({
           contact your local emergency service or a licensed professional in
           your area.
         </p>
+        <p className="mt-2 text-[10px] leading-relaxed text-[var(--muted-foreground)]">
+          Member messages may be automatically scanned for a small set of
+          support-related terms solely to pause scheduled communication and
+          alert Shannon. This ensures that if you&apos;re struggling, a
+          person—not an automated system—responds.
+        </p>
       </form>
     </section>
   )
@@ -320,9 +326,9 @@ export function ConnectionHub({
         <div className="mt-5 grid gap-2">
           <Link
             className="rounded-full bg-[var(--primary)] px-4 py-2.5 text-center text-xs font-medium text-white transition hover:bg-[var(--accent)]"
-            href="/book?service=check-in&duration=15"
+            href="/book"
           >
-            Book a 15-min check-in
+            Choose a private session
           </Link>
           {canDownloadLift ? (
             <Link
@@ -336,7 +342,7 @@ export function ConnectionHub({
             className="rounded-full border border-[var(--border)] px-4 py-2.5 text-center text-xs font-medium text-[var(--primary)] transition hover:border-[var(--accent)]"
             href="/account/preferences/communication"
           >
-            Adjust frequency
+            Booking invitations
           </Link>
         </div>
       </aside>

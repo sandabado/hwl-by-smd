@@ -40,21 +40,21 @@ const sections: LegalSection[] = [
   {
     title: "Service providers",
     body: [
-      "Trusted providers process information only as needed to operate the service. These may include Supabase for authentication and data storage, Stripe for payments, Mux for protected video, Resend for transactional email, Cal.com for scheduling, Plausible for aggregate website analytics, OpenStreetMap for map tiles, and hosting or monitoring providers.",
+      "Trusted providers process information only as needed to operate the service. These may include Supabase for authentication and data storage, Stripe for payments, Mux for protected video, Resend for transactional email, Cal.com for scheduling, OpenStreetMap for map tiles, and hosting or monitoring providers.",
       "Each provider processes information under its own terms and security practices. Services are configured to minimize unnecessary access wherever practical.",
     ],
   },
   {
-    title: "Analytics and service-area maps",
+    title: "Service-area maps and future analytics",
     body: [
-      "HWL by SMD uses Plausible for aggregate website analytics without creating advertising profiles or placing analytics cookies. Reports help show which public pages are useful without identifying a visitor by name.",
+      "HWL by SMD does not currently load a third-party analytics script. If privacy-respecting aggregate analytics are enabled later, this notice will be updated before collection begins.",
       "Location pages load map tiles from OpenStreetMap. As with most externally hosted web resources, the tile service receives ordinary technical request information such as an IP address, browser headers, and the tiles requested. Maps show a general service area rather than a client or studio address.",
     ],
   },
   {
     title: "Communication choices",
     body: [
-      "Members can adjust Journey cadence, booking invitations, and progress-sharing from Connection Preferences. A Journey can be paused or left without losing unrelated purchases.",
+      "Members can choose whether guided Journeys may include booking invitations. A Journey can be paused or left without losing unrelated purchases.",
       "Required account, security, billing, and service messages may still be sent when necessary. Optional messages include a clear way to change frequency or opt out.",
     ],
   },

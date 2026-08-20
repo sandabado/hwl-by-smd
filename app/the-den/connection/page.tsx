@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default async function ConnectionHubPage() {
   const { access, user } = await requireAccess(
-    "authenticated",
+    "membership_only",
     "/the-den/connection"
   )
   const hub = await getConnectionHubData(user.id)
@@ -35,7 +35,7 @@ export default async function ConnectionHubPage() {
               <em className="font-normal">not a broadcast.</em>
             </h1>
           </div>
-          <MemberNavigation />
+          <MemberNavigation hasMembership />
         </div>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-[var(--muted-foreground)]">
           Follow your guided journeys, ask questions, and keep Shannon&apos;s

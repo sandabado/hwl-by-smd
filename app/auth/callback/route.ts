@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server"
 
 import { createClient } from "@/lib/supabase/server"
-
-function safeNext(value: string | null) {
-  return value?.startsWith("/") && !value.startsWith("//") ? value : "/the-den"
-}
+import { safeInternalPath } from "@/lib/safe-path"
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
   const code = url.searchParams.get("code")
-  const next = safeNext(url.searchParams.get("next"))
+  const next = safeInternalPath(url.searchParams.get("next"), "/the-den")
   const supabase = await createClient()
 
   if (code && supabase) {

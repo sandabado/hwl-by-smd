@@ -24,23 +24,23 @@ export const metadata = createPageMetadata({
 
 const previewMovements = [
   {
-    name: "The Opening",
+    name: "Prep the Skin",
     instruction:
-      "With very light pressure, trace slow downward strokes along the sides of the neck before moving to the face.",
+      "Apply a product with enough slip. Use broad sweeping strokes over the jaw, cheeks, forehead, and neck. Take one slow breath and let your touch become intentional. This supports smooth glide, even product application, and a mindful starting point.",
   },
   {
-    name: "The Unwind",
+    name: "Jawline Lift",
     instruction:
-      "With soft, sustained pressure, trace slow circles along the jaw hinge to release tension stored in the masseter.",
+      "Starting at the chin, glide your knuckles or fingers along the jawline toward the ear with gentle upward sweeps. Make 3–6 passes on each side, then use small circles where the jaw meets to release tension. This supports definition, tension release, and lymphatic flow.",
   },
 ] as const
 
 const lockedMovements = [
-  "The Sculpt",
-  "The Sweep",
-  "The Arch",
-  "The Smooth",
-  "The Hold",
+  "Mid-Face Sculpt",
+  "Brow Lift",
+  "Forehead Release",
+  "Lymphatic Sweep",
+  "Neck Drainage",
 ] as const
 
 const movementNames = [
@@ -49,35 +49,38 @@ const movementNames = [
 ]
 
 const benefits = [
-  "Invites a few minutes of gentle, intentional touch",
-  "Creates space to notice the jaw, temples, and breath",
-  "Offers a consistent rhythm for applying facial products",
-  "Encourages a softer, less hurried morning or evening ritual",
-  "Builds familiarity with how your face feels from day to day",
-  "Keeps pressure, pace, and comfort in your own hands",
-  "Creates a daily moment of physical self-awareness",
+  "Lift & Sculpt — support and define the natural contours of the face",
+  "Reduce Puffiness — encourage lymphatic drainage",
+  "Release Tension — especially in the jaw, brow, forehead, and neck",
+  "Boost Circulation — promote a healthy, natural glow",
+  "Support Skin Renewal — encourage healthy cell turnover",
+  "Enhance Product Absorption — help your skincare work more effectively",
 ] as const
 
 const preparation = [
   {
-    title: "Clean hands",
-    detail: "Begin with freshly washed hands.",
+    title: "Clean hands, clean skin",
+    detail: "Always begin with freshly cleansed skin and clean hands.",
   },
   {
-    title: "Cleansed skin",
-    detail: "Remove makeup and settle in at the mirror.",
-  },
-  {
-    title: "Add slip",
-    detail: "Use facial oil, balm, or moisturizer so your hands glide.",
+    title: "Work it into your routine",
+    detail:
+      "Use serum, moisturizer, facial oil, or another product with enough slip.",
   },
   {
     title: "Gentle pressure",
-    detail: "Start lighter than you think and never force the skin.",
+    detail:
+      "Think lift, not force. Use light to medium pressure without pulling the skin.",
   },
   {
-    title: "Five quiet minutes",
-    detail: "Let your breath set the pace of the ritual.",
+    title: "Don't skip the neck",
+    detail:
+      "The neck extends the face and supports healthy circulation and lymphatic drainage.",
+  },
+  {
+    title: "Consistency is key",
+    detail:
+      "Five minutes a day goes a long way. Consistency matters more than duration.",
   },
 ] as const
 
@@ -119,6 +122,15 @@ const faqs = [
   },
 ]
 
+const welcomeParagraphs = [
+  "I'm so glad you're taking this time to love on yourself!",
+  "One of the questions I hear most often in the treatment room is, ‘What can I do at home to lift, sculpt, and support my skin as I age?’ My answer is almost always the same: facial massage.",
+  "It's a technique I use with every client, and a daily ritual I've developed for myself. With consistency, it's one of the simplest ways to support healthy, radiant skin while creating a moment to slow down and reconnect with yourself.",
+  "Facial massage helps stimulate circulation, encourage lymphatic drainage, release tension, improve product absorption, and create a more lifted, sculpted appearance over time.",
+  "This isn't about adding another 20-minute ritual to your day. It's about making the few minutes you're already spending on your skincare more intentional. Even five minutes a day can make a meaningful difference.",
+  "I hope these techniques become something you look forward to — a simple ritual that supports not only your skin, but your relationship with yourself. Let's begin!",
+] as const
+
 export default async function LiftPage() {
   const user = await getAuthenticatedUser()
   const access = user ? await getMemberAccess(user.id) : null
@@ -145,31 +157,28 @@ export default async function LiftPage() {
             className="mt-6 max-w-3xl font-medium text-[var(--primary)]"
             size="hero"
           >
-            A Daily Ritual.
+            A Daily Facial Ritual
           </BreathingText>
           <BreathingText
             as="p"
             className="mt-7 max-w-xl text-[var(--primary)]"
             size="subheading"
           >
-            Seven movements. Five minutes a day.
+            Seven movements. Five minutes. Your own two hands.
           </BreathingText>
           <BreathingText
             className="mt-7 max-w-2xl text-[var(--muted-foreground)]"
             size="body"
           >
-            This guide came from years of holding space for others&apos; skin.
-            What I found is simple: the five minutes you give yourself each
-            morning matter more than any single appointment. Your hands know
-            more than you think. This practice teaches you what to do with them.
-            Seven movements. Five minutes. Your face, your breath, your ritual.
+            Turn the minutes you already spend on skincare into a daily practice
+            of circulation, release, and intentional touch.
           </BreathingText>
           <div className="mt-10 flex flex-wrap gap-4">
             <Button
               asChild
               className="min-h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
             >
-              <Link href="#download">Get the Guide — $5.55</Link>
+              <Link href="/store">Get LIFT</Link>
             </Button>
             <Button
               asChild
@@ -178,7 +187,7 @@ export default async function LiftPage() {
             >
               <Link href="#sequence">
                 <Play className="size-4" aria-hidden="true" />
-                Watch Preview
+                Preview the First Two Movements
               </Link>
             </Button>
           </div>
@@ -232,17 +241,18 @@ export default async function LiftPage() {
             Welcome.
           </BreathingText>
         </div>
-        <div>
-          <BreathingText className="text-[var(--muted-foreground)]" size="body">
-            This practice grew from holding space for other people&apos;s skin
-            and noticing what a few quiet minutes of intentional touch can
-            offer. Seven movements. That&apos;s all. Not complicated. Not
-            impressive. Just consistent. Your hands are the tools. Your breath
-            is the pace. Give yourself five minutes tomorrow morning. Then the
-            next morning. Then the next. That&apos;s how ritual begins.
-          </BreathingText>
+        <div className="space-y-6">
+          {welcomeParagraphs.map((paragraph) => (
+            <BreathingText
+              className="text-[var(--muted-foreground)]"
+              key={paragraph}
+              size="body"
+            >
+              {paragraph}
+            </BreathingText>
+          ))}
           <p className="mt-8 font-serif text-xl text-[var(--primary)]">
-            — Shannon
+            — Shannon Mary Dixon, Founder, HWL by SMD
           </p>
         </div>
       </BreathingSection>
@@ -280,10 +290,6 @@ export default async function LiftPage() {
                 </li>
               ))}
             </ol>
-            <p className="mt-5 text-xs leading-relaxed text-[var(--muted-foreground)]">
-              Draft benefit language for Shannon&apos;s final review before
-              publication.
-            </p>
           </div>
 
           <aside className="relative overflow-hidden rounded-[2rem] bg-[var(--primary)] p-8 text-[var(--background)] md:p-12 lg:mt-24">
@@ -366,8 +372,8 @@ export default async function LiftPage() {
             Seven movements. One return.
           </BreathingText>
           <p className="mx-auto mt-6 max-w-2xl text-sm leading-[1.8] text-[var(--muted-foreground)]">
-            Movement and preparation guidance is working copy awaiting
-            Shannon&apos;s final technique verification before publication.
+            Steps one and two are public previews. The complete demonstrations
+            for steps three through seven are available with LIFT access.
           </p>
         </div>
 
@@ -480,6 +486,15 @@ export default async function LiftPage() {
               )
             })}
           </div>
+          <aside className="mx-auto max-w-3xl rounded-[2rem] border border-[var(--border)] bg-white/55 p-8 text-center">
+            <p className="text-xs tracking-[0.24em] text-[var(--accent)] uppercase">
+              Glow Finish · Optional
+            </p>
+            <p className="mt-4 font-serif text-2xl leading-relaxed text-[var(--primary)]">
+              Rest your hands on your face. Close your eyes. Take one slow
+              breath—the pause between doing and being.
+            </p>
+          </aside>
         </div>
       </BreathingSection>
 

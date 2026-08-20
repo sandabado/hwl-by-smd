@@ -10,7 +10,7 @@ export const contentType = OG_IMAGE_CONTENT_TYPE
 
 export default function OpenGraphImage() {
   return createBrandOgImage({
-    eyebrow: "Tarot · Being",
-    title: "Ancient wisdom for modern life.",
+    eyebrow: "Tarot",
+    title: "A mirror, not a map.",
   })
 }

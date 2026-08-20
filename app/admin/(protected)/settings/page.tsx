@@ -21,6 +21,7 @@ import {
   StatusPill,
 } from "@/components/admin/admin-ui"
 import { requireAdmin } from "@/lib/admin-auth"
+import { getCalcomPublicEventTypes } from "@/lib/calcom"
 import {
   isStripeConfigured,
   isSupabaseAdminConfigured,
@@ -38,11 +39,13 @@ function IntegrationCard({
   name,
   connected,
   detail,
+  statusLabel,
 }: {
   icon: typeof Cloud
   name: string
   connected: boolean
   detail: string
+  statusLabel?: string
 }) {
   return (
     <div className="rounded-2xl border border-[#ddd7cd] bg-white/26 p-4">
@@ -51,7 +54,7 @@ function IntegrationCard({
           <Icon className="size-4" aria-hidden="true" />
         </span>
         <StatusPill tone={connected ? "positive" : "warning"}>
-          {connected ? "Configured" : "Waiting"}
+          {statusLabel ?? (connected ? "Configured" : "Waiting")}
         </StatusPill>
       </div>
       <p className="mt-4 text-sm font-medium">{name}</p>
@@ -65,6 +68,7 @@ function IntegrationCard({
 
 export default async function AdminSettingsPage() {
   await requireAdmin()
+  const calcom = await getCalcomPublicEventTypes()
 
   const muxConfigured = Boolean(
     present(process.env.MUX_ACCESS_TOKEN) &&
@@ -73,9 +77,9 @@ export default async function AdminSettingsPage() {
     present(process.env.MUX_PRIVATE_KEY)
   )
   const resendConfigured = present(process.env.RESEND_API_KEY)
-  const calConfigured =
-    present(process.env.NEXT_PUBLIC_CALCOM_URL) ||
-    present(process.env.CALCOM_API_KEY)
+  const calProfileLinked = calcom.status === "available"
+  const calPublishedEventCount = calcom.eventTypes.length
+  const calBookingReady = calProfileLinked && calPublishedEventCount > 0
   const domainConfigured =
     present(process.env.NEXT_PUBLIC_SITE_URL) &&
     !publicEnv.siteUrl.includes("localhost")
@@ -221,10 +225,21 @@ export default async function AdminSettingsPage() {
               name="Resend"
             />
             <IntegrationCard
-              connected={calConfigured}
-              detail="Booking and external calendar sync"
+              connected={calBookingReady}
+              detail={
+                calProfileLinked
+                  ? `${calPublishedEventCount} published event ${calPublishedEventCount === 1 ? "type" : "types"} on the public profile`
+                  : "Public profile check unavailable; no personal calendar data was read"
+              }
               icon={Cloud}
               name="Cal.com"
+              statusLabel={
+                calBookingReady
+                  ? "Live"
+                  : calProfileLinked
+                    ? "Setup needed"
+                    : "Check needed"
+              }
             />
           </div>
         </AdminPanel>

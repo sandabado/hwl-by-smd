@@ -29,27 +29,30 @@ export const metadata = createPageMetadata({
 const practices = [
   {
     title: "Private Yoga",
-    bookingHref: "/book?service=private-yoga#booking-inquiry",
-    detail: "60 minutes · Investment by consultation",
+    bookingHref: "/book?service=private-yoga#choose-time",
+    detail:
+      "75–90 minutes · Starting at $555 for up to 4 guests · +$55 per additional guest",
     image: media.experiences.movementBoat,
     description:
-      "A personalized flow based on your body and goals. The session can make room for strength, mobility, recovery, or stillness without asking you to perform.",
+      "A complete movement and integration experience with yoga, breathwork, meditation, and aromatherapy. A 90-minute format is available for an additional $55.",
   },
   {
-    title: "Restorative Yoga",
-    bookingHref: "/book?service=restorative-yoga#booking-inquiry",
-    detail: "75 minutes · Investment by consultation",
+    title: "Private Sound Healing",
+    bookingHref: "/book?service=private-sound-healing#choose-time",
+    detail:
+      "60 minutes · Starting at $555 for up to 4 guests · +$55 per additional guest",
     image: media.experiences.movementEagle,
     description:
-      "A slow, prop-supported practice for nervous system regulation. Time is built in for breath, sensation, and the kind of rest that does not need to be earned.",
+      "An immersive sound bath using crystal singing bowls, guided meditation, breathwork, and restorative frequencies.",
   },
   {
-    title: "Private Sound Bath",
-    bookingHref: "/book?service=private-sound-bath#booking-inquiry",
-    detail: "60 minutes · Investment by consultation",
+    title: "Private Yoga + Sound",
+    bookingHref: "/book?service=private-yoga-and-sound#choose-time",
+    detail:
+      "60–75 minutes · Starting at $444 for up to 8 guests · +$44 per additional guest",
     image: media.experiences.movementStretch,
     description:
-      "A one-to-one sound healing session shaped around deep listening. Crystal bowls, tone, breath, and silence create a spacious place to settle.",
+      "Yoga, movement, and sound healing woven together. A 90-minute format is available for an additional $55.",
   },
 ]
 
@@ -177,11 +180,10 @@ export default function MovementPage() {
               Yoga
             </p>
             <h1 className="hero-reveal hero-reveal--2 mt-6 text-5xl leading-[0.98] font-medium text-[var(--primary)] md:text-7xl lg:text-8xl">
-              Movement as medicine.
+              The body trusts what the mind hasn&apos;t said yet.
             </h1>
             <p className="hero-reveal hero-reveal--3 mx-auto mt-7 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)] md:mx-0 md:text-xl">
-              Private yoga, restorative practice, and sound healing to reconnect
-              with your body.
+              Movement as nervous system care.
             </p>
             <div className="hero-reveal hero-reveal--4 mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
               <Button
@@ -197,7 +199,7 @@ export default function MovementPage() {
                 className="h-12 rounded-full border-[#68735f]/25 bg-white/35 px-7 text-[var(--primary)] hover:bg-white/70"
                 variant="outline"
               >
-                <Link href="#practices">Explore Yoga Sessions</Link>
+                <Link href="/the-den">Explore The Den</Link>
               </Button>
             </div>
           </div>
@@ -241,22 +243,23 @@ export default function MovementPage() {
               Come back inside
             </p>
             <p className="mt-6 font-serif text-2xl text-[var(--primary)] italic md:text-3xl">
-              Body is where we deepen—with movement, breath, and sound.
+              Private yoga with Shannon is not a class. It&apos;s a conversation
+              between your body and your nervous system.
             </p>
             <p className="mt-5 text-lg leading-[1.9] text-[var(--foreground)] md:text-xl">
-              Your body keeps score. Tension accumulates — in the jaw, the hips,
-              the breath. These sessions are designed to help that tension
-              release. Not through performance, but through attention. Through
-              moving slowly enough to actually feel what&apos;s happening
-              inside. Whether it&apos;s yoga, sound, or both, the goal is the
-              same: come home to your body.
+              Breath-led. Slow enough to feel what&apos;s underneath the
+              holding. Customized for restorative flow, mindful movement,
+              vinyasa strength, mobility work, or athletic recovery. Always with
+              modifications, always free of judgment. Sessions are offered in
+              person only, rooted in the desert environment. The space matters.
+              The light changes. Your breath finds its own rhythm.
             </p>
           </div>
         </div>
         <PullQuote
-          attribution="HWL by SMD"
+          attribution="Shannon"
           className="mt-20"
-          quote="Your body keeps score. Movement helps it settle."
+          quote="Movement doesn't ask you to be impressive. It asks you to be present."
         />
       </PageSection>
 
@@ -402,9 +405,9 @@ export default function MovementPage() {
               Let the format follow the need.
             </h2>
             <p className="mt-6 text-lg leading-[1.9] text-[var(--muted-foreground)]">
-              Private session investment is confirmed in consultation, once the
-              practice, setting, timing, and number of guests are clear. You
-              will receive the full details before booking.
+              Group rates are shown above. Individual one-to-one pricing is
+              confirmed through booking. All sessions are in person in the
+              desert.
             </p>
             <Button
               asChild

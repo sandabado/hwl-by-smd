@@ -33,6 +33,13 @@ type DeliveryContext = {
   >
 }
 
+class InactiveMembershipError extends Error {
+  constructor() {
+    super("Journey delivery cancelled because membership is not active.")
+    this.name = "InactiveMembershipError"
+  }
+}
+
 export type JourneyDeliveryEmail = {
   bodyHtml: string
   idempotencyKey: string
@@ -95,7 +102,6 @@ function replaceTokens(
 
 export function renderJourneyBody({
   body,
-  bodyFormat,
   firstName,
   journeyName,
 }: {
@@ -104,15 +110,9 @@ export function renderJourneyBody({
   firstName: string
   journeyName: string
 }) {
-  const personalized = replaceTokens(
-    body,
-    { firstName, journeyName },
-    bodyFormat === "sanitized_html"
-  )
+  const personalized = replaceTokens(body, { firstName, journeyName }, false)
 
-  return bodyFormat === "sanitized_html"
-    ? personalized
-    : escapeHtml(personalized).replaceAll("\n", "<br />")
+  return escapeHtml(personalized).replaceAll("\n", "<br />")
 }
 
 function plainConversationBody({
@@ -313,26 +313,52 @@ async function loadDeliveryContext(
 
   const typedMilestone = milestone as JourneyMilestoneRecord
   const typedEnrollment = enrollment as JourneyEnrollmentRecord
-  const [{ data: journey }, { data: member }, { data: preferences }] =
-    await Promise.all([
-      supabase
-        .from("journeys")
-        .select(JOURNEY_SELECT)
-        .eq("id", typedEnrollment.journey_id)
-        .single(),
-      supabase
-        .from("profiles")
-        .select("id, email, full_name")
-        .eq("id", typedEnrollment.member_id)
-        .single(),
-      supabase
-        .from("connection_preferences")
-        .select("guidance_cadence, booking_invites, share_progress")
-        .eq("user_id", typedEnrollment.member_id)
-        .maybeSingle(),
-    ])
+  const [
+    { data: journey },
+    { data: member },
+    { data: preferences },
+    { data: authIdentity },
+    { data: membership },
+  ] = await Promise.all([
+    supabase
+      .from("journeys")
+      .select(JOURNEY_SELECT)
+      .eq("id", typedEnrollment.journey_id)
+      .single(),
+    supabase
+      .from("profiles")
+      .select("id, email, full_name")
+      .eq("id", typedEnrollment.member_id)
+      .single(),
+    supabase
+      .from("connection_preferences")
+      .select("guidance_cadence, booking_invites, share_progress")
+      .eq("user_id", typedEnrollment.member_id)
+      .maybeSingle(),
+    supabase.auth.admin.getUserById(typedEnrollment.member_id),
+    supabase
+      .from("memberships")
+      .select("current_period_end, status")
+      .eq("user_id", typedEnrollment.member_id)
+      .in("status", ["active", "trialing"])
+      .order("current_period_end", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ])
 
-  if (!journey || !member || typedMilestone.journey_id !== journey.id) {
+  const membershipEnd = membership?.current_period_end
+    ? new Date(membership.current_period_end).getTime()
+    : Number.NaN
+  if (!Number.isFinite(membershipEnd) || membershipEnd <= Date.now()) {
+    throw new InactiveMembershipError()
+  }
+
+  if (
+    !journey ||
+    !member ||
+    !authIdentity.user?.email ||
+    typedMilestone.journey_id !== journey.id
+  ) {
     throw new Error("Journey delivery relationships are inconsistent.")
   }
 
@@ -341,7 +367,7 @@ async function loadDeliveryContext(
     enrollment: typedEnrollment,
     journey: journey as JourneyRecord,
     member: {
-      email: String(member.email ?? ""),
+      email: authIdentity.user.email,
       full_name: member.full_name ? String(member.full_name) : null,
       id: String(member.id),
     },
@@ -556,6 +582,18 @@ async function failDelivery(
     .eq("status", "processing")
 }
 
+async function cancelDelivery(
+  supabase: SupabaseClient,
+  deliveryId: string,
+  reason: string
+) {
+  await supabase
+    .from("journey_deliveries")
+    .update({ error_message: reason.slice(0, 1000), status: "cancelled" })
+    .eq("id", deliveryId)
+    .eq("status", "processing")
+}
+
 export async function runJourneyScheduler({
   batchSize = 50,
   now = new Date(),
@@ -591,7 +629,11 @@ export async function runJourneyScheduler({
       await deliverOne(supabase, delivery, sender)
       sent += 1
     } catch (deliveryError) {
-      await failDelivery(supabase, delivery.id, deliveryError)
+      if (deliveryError instanceof InactiveMembershipError) {
+        await cancelDelivery(supabase, delivery.id, deliveryError.message)
+      } else {
+        await failDelivery(supabase, delivery.id, deliveryError)
+      }
       failed += 1
     }
   }
@@ -631,7 +673,11 @@ export async function sendJourneyDeliveryNow(
     await deliverOne(supabase, delivery, sender)
     return { configured: true, sent: true }
   } catch (deliveryError) {
-    await failDelivery(supabase, delivery.id, deliveryError)
+    if (deliveryError instanceof InactiveMembershipError) {
+      await cancelDelivery(supabase, delivery.id, deliveryError.message)
+    } else {
+      await failDelivery(supabase, delivery.id, deliveryError)
+    }
     return { configured: true, sent: false }
   }
 }

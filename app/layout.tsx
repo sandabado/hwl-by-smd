@@ -1,5 +1,4 @@
 import type { Metadata } from "next"
-import Script from "next/script"
 
 import { AuthProvider } from "@/components/auth/auth-provider"
 import { Footer } from "@/components/layout/footer"
@@ -55,13 +54,6 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
-        <Script
-          async
-          data-domain="howlbysmd.com"
-          defer
-          src="https://plausible.io/js/script.js"
-          strategy="afterInteractive"
-        />
         <LocalSchema />
         <JsonLd data={createWebsiteJsonLd()} id="site-schema" />
         <AuthProvider>

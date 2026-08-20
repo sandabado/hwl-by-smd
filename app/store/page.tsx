@@ -1,5 +1,7 @@
+import Image from "next/image"
 import Link from "next/link"
 import {
+  ArrowRight,
   Check,
   FileText,
   LibraryBig,
@@ -15,15 +17,39 @@ import { FaqAccordion } from "@/components/shared/internal-page"
 import { Reveal } from "@/components/shared/reveal"
 import { Button } from "@/components/ui/button"
 import { getAuthenticatedUser, getMemberAccess } from "@/lib/access"
+import { media } from "@/lib/media"
 import { createPageMetadata, createProductJsonLd } from "@/lib/seo"
 import { isProductCheckoutReady } from "@/lib/stripe"
 
 export const metadata = createPageMetadata({
-  title: "Digital Offerings | HWL by SMD",
+  title: "Beauty Products, Magical Tools & Digital Guides | HWL by SMD",
   description:
-    "Preview the LIFT PDF, LIFT video guide, and The Den member library from HWL by SMD.",
+    "Shop Shannon's beauty shelf, magical tools, digital LIFT guides, and The Den membership from HWL by SMD.",
   path: "/store",
 })
+
+const collections = [
+  {
+    id: "beauty-products",
+    eyebrow: "The beauty shelf",
+    title: "Beauty Products",
+    description:
+      "Professional and everyday beauty products selected by Shannon for thoughtful at-home care. The first collection is being gathered now.",
+    image: media.experiences.beauty,
+    href: "/contact",
+    label: "Ask about beauty products",
+  },
+  {
+    id: "magical-tools",
+    eyebrow: "Tools for practice",
+    title: "Magical Tools",
+    description:
+      "A home for the tarot, ritual, lunar, and sensory tools Shannon chooses to carry. The first collection is being gathered now.",
+    image: media.experiences.ritualMoon,
+    href: "/contact",
+    label: "Ask about magical tools",
+  },
+] as const
 
 type Offer = {
   cadence: string
@@ -45,11 +71,11 @@ const offers: Offer[] = [
     productId: "pdf_download",
     id: "lift-pdf",
     eyebrow: "Downloadable PDF",
-    title: "LIFT PDF",
+    title: "LIFT PDF Guide",
     price: "$3.33",
     cadence: "one time",
     description:
-      "A printable facial massage guide designed to live beside your mirror and move with your morning.",
+      "The complete seven-movement facial massage ritual, with instructions, benefits, and preparation notes.",
     features: [
       "Seven guided movements",
       "Printable format",
@@ -68,7 +94,7 @@ const offers: Offer[] = [
     price: "$5.55",
     cadence: "one time",
     description:
-      "Watch each movement flow with Shannon in your browser, then keep the printable guide close for daily practice.",
+      "A full video walkthrough of all seven movements plus the downloadable guide. Learn each technique by seeing it demonstrated.",
     features: [
       "Guided in-browser video",
       "Printable PDF",
@@ -83,11 +109,11 @@ const offers: Offer[] = [
     productId: "membership",
     id: "the-den",
     eyebrow: "The growing library",
-    title: "The Den",
+    title: "The Den Membership",
     price: "$11.11",
     cadence: "per month",
     description:
-      "Enter a growing member library of beauty, movement, sound, and ritual, with a private connection hub for Shannon's care.",
+      "Full library access, a private connection with Shannon, guided journeys, and member pricing on sessions.",
     features: [
       "Everything in LIFT",
       "A growing member library",
@@ -124,7 +150,7 @@ const faqs = [
   {
     question: "What is the refund policy?",
     answer:
-      "Because access is delivered digitally, completed digital purchases and elapsed membership periods are generally non-refundable except where required by law. If access is not working, contact Shannon so it can be made right.",
+      "Contact Shannon within 14 days for a full refund on a digital purchase. The Den can be canceled at any time; partial membership months are not refunded, and access continues through the billing period.",
   },
 ]
 
@@ -181,9 +207,9 @@ export default async function StorePage() {
 
       <BreathingSection
         background="gradient"
-        className="flex min-h-[78svh] items-center"
+        className="flex min-h-[64svh] items-center"
         contentClassName="mx-auto grid w-full max-w-7xl items-center gap-14 px-6 lg:grid-cols-[1.2fr_0.8fr]"
-        padding="expansive"
+        padding="standard"
         reveal={false}
         variant="gift-shop"
       >
@@ -193,37 +219,34 @@ export default async function StorePage() {
             className="font-medium text-[var(--primary)]"
             size="hero"
           >
-            Digital Offerings
+            Beauty, ritual, and practice for home.
           </BreathingText>
           <BreathingText
             className="mt-7 text-[var(--primary)]"
             size="subheading"
           >
-            Tools for your practice.
+            Shannon&apos;s store, gathered with care.
           </BreathingText>
           <BreathingText
             className="mt-7 max-w-3xl text-[var(--muted-foreground)]"
             size="body"
           >
-            Three offerings are taking shape. The LIFT PDF is made to live
-            beside your mirror. The LIFT video will demonstrate each approved
-            movement in-browser. The Den will gather a growing library and a
-            private place to connect. Sales stay closed until every promised
-            resource is ready.
+            Explore beauty products, magical tools, digital guides, and The Den.
+            The first physical collections are being gathered now.
           </BreathingText>
           <div className="mt-10 flex flex-wrap gap-4">
             <Button
               asChild
               className="min-h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
             >
-              <Link href="#lift-guide">Preview LIFT — $5.55</Link>
+              <Link href="#beauty-products">Explore the Store</Link>
             </Button>
             <Button
               asChild
               className="min-h-12 rounded-full border-[var(--border)] bg-white/30 px-7 text-[var(--primary)] hover:bg-white/70"
               variant="outline"
             >
-              <Link href="#the-den">Preview The Den — $11.11/mo</Link>
+              <Link href="#digital-practice">Digital Practice</Link>
             </Button>
           </div>
         </Reveal>
@@ -243,10 +266,83 @@ export default async function StorePage() {
       </BreathingSection>
 
       <BreathingSection
-        background="warm"
+        background="cool"
         contentClassName="mx-auto max-w-7xl px-6"
         variant="gift-shop"
       >
+        <div className="max-w-3xl">
+          <p className="text-xs font-medium tracking-[0.28em] text-[var(--accent)] uppercase">
+            Shop by collection
+          </p>
+          <BreathingText
+            as="h2"
+            className="mt-5 font-medium text-[var(--primary)]"
+            size="heading"
+          >
+            A shelf for the things Shannon actually uses.
+          </BreathingText>
+          <p className="mt-6 text-base leading-[1.9] text-[var(--muted-foreground)]">
+            The physical shop has two homes. Each item will arrive with the
+            details you need to choose it with confidence.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-6 lg:grid-cols-2">
+          {collections.map((collection) => (
+            <article
+              className="group relative min-h-[32rem] overflow-hidden rounded-[2rem] border border-white/65 bg-[var(--muted)] shadow-[0_26px_70px_rgba(90,74,63,0.1)]"
+              id={collection.id}
+              key={collection.id}
+            >
+              <Image
+                alt={collection.image.alt}
+                className="object-cover transition duration-[1200ms] ease-out motion-safe:group-hover:scale-[1.025]"
+                fill
+                sizes="(max-width: 1023px) 100vw, 50vw"
+                src={collection.image.src}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[var(--primary)]/95 via-[var(--primary)]/40 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-7 text-[var(--background)] md:p-10">
+                <p className="text-xs font-medium tracking-[0.22em] text-[var(--accent-on-dark)] uppercase">
+                  {collection.eyebrow}
+                </p>
+                <h3 className="mt-4 font-serif text-4xl text-white md:text-5xl">
+                  {collection.title}
+                </h3>
+                <p className="mt-5 max-w-xl text-sm leading-[1.85] text-white/76 md:text-base">
+                  {collection.description}
+                </p>
+                <Link
+                  className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-full border border-white/38 bg-white/10 px-5 py-2 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white hover:text-[var(--primary)]"
+                  href={collection.href}
+                >
+                  {collection.label}
+                  <ArrowRight aria-hidden="true" className="size-4" />
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      </BreathingSection>
+
+      <BreathingSection
+        background="warm"
+        contentClassName="mx-auto max-w-7xl px-6"
+        id="digital-practice"
+        variant="gift-shop"
+      >
+        <div className="mx-auto mb-14 max-w-3xl text-center">
+          <p className="text-xs font-medium tracking-[0.28em] text-[var(--accent)] uppercase">
+            Available digitally
+          </p>
+          <BreathingText
+            as="h2"
+            className="mt-5 font-medium text-[var(--primary)]"
+            size="heading"
+          >
+            Guides and ongoing practice.
+          </BreathingText>
+        </div>
         <div className="grid gap-6 lg:grid-cols-3 lg:items-stretch">
           {offers.map((offer, index) => {
             const Icon = offer.icon

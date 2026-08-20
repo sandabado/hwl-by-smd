@@ -45,5 +45,7 @@ export async function GET(
     })
   }
 
-  return NextResponse.redirect(data.signedUrl)
+  return NextResponse.redirect(data.signedUrl, {
+    headers: { "Cache-Control": "private, no-store" },
+  })
 }

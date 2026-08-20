@@ -17,9 +17,10 @@ const sections: LegalSection[] = [
     ],
   },
   {
-    title: "Wellness, not medical care",
+    title: "Services and appropriate use",
     body: [
-      "Beauty, movement, sound, ritual, coaching, and educational content are offered for general wellness and personal development. They do not diagnose, treat, or replace medical, mental-health, or emergency care.",
+      "HWL by SMD offers aesthetician services, yoga instruction, Reiki, aromatherapy, tarot and astrology readings, retreat facilitation, digital products, and educational content for general wellness and personal development.",
+      "Tarot and astrology are reflective practices offered for entertainment and personal insight. They are not medical, psychological, legal, or financial advice. Wellness services do not diagnose, treat, or replace medical, mental-health, or emergency care.",
       "Consult an appropriate licensed professional before beginning a practice when you have an injury, medical condition, pregnancy, allergy, medication concern, or other reason for caution. Stop any practice that causes pain or concerning symptoms.",
     ],
   },
@@ -34,13 +35,14 @@ const sections: LegalSection[] = [
     title: "Payments, memberships, and cancellations",
     body: [
       "Prices are shown before checkout and payments are processed by Stripe. The Den renews monthly until canceled. You can manage or cancel renewal from the secure billing portal; access continues through the paid period unless otherwise stated.",
-      "Except where law requires otherwise, delivered digital products and elapsed membership periods are non-refundable. If a file is unusable or access was granted incorrectly, contact HWL by SMD so the issue can be reviewed fairly.",
+      "Digital products may be refunded within 14 days of purchase by contacting HWL by SMD. The Den is $11.11 per month and can be canceled at any time. Partial membership months are not refunded; access continues through the current billing period.",
     ],
   },
   {
     title: "Bookings and in-person experiences",
     body: [
       "Session scope, location, timing, travel, group size, payment schedule, cancellation terms, and any venue requirements are confirmed during booking. A request is not confirmed until Shannon accepts it and any required payment is received.",
+      "Booked services require at least 24 hours' cancellation notice for a full refund. No-shows may be charged the full session rate. Retreat cancellation, travel, lodging, equipment, and host responsibilities are governed by the individual retreat agreement.",
       "You agree to disclose relevant safety information and follow reasonable instructions. HWL by SMD may adapt or stop an experience when continued participation appears unsafe.",
     ],
   },

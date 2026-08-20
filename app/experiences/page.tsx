@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { InteriorHero, PageSection } from "@/components/shared/internal-page"
 import { PillarCard } from "@/components/shared/pillar-card"
 import { SectionHeading } from "@/components/shared/section-heading"
@@ -21,7 +23,7 @@ const pillars = [
     imageAlt: media.experiences.beauty.alt,
   },
   {
-    title: "Yoga",
+    title: "Yoga + Sound",
     description:
       "Private yoga, restorative movement, and sound healing to reconnect with your body.",
     href: "/yoga",
@@ -82,4 +84,3 @@ export default function ExperiencesPage() {
     </>
   )
 }
-import Link from "next/link"

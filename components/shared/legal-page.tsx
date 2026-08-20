@@ -1,6 +1,7 @@
 import Link from "next/link"
 
 import { InteriorHero, PageSection } from "@/components/shared/internal-page"
+import { SITE_CONFIG } from "@/lib/constants"
 
 export type LegalSection = {
   body: string[]
@@ -30,7 +31,7 @@ export function LegalPage({
       <PageSection>
         <article className="mx-auto max-w-3xl">
           <p className="text-xs tracking-[0.2em] text-[var(--accent)] uppercase">
-            Effective July 31, 2026
+            Effective August 20, 2026
           </p>
           <div className="mt-10 space-y-12">
             {sections.map((section) => (
@@ -59,9 +60,9 @@ export function LegalPage({
               For privacy or terms questions, email{" "}
               <a
                 className="text-[var(--accent)] underline underline-offset-4"
-                href="mailto:hello@howlbysmd.com"
+                href={`mailto:${SITE_CONFIG.email}`}
               >
-                hello@howlbysmd.com
+                {SITE_CONFIG.email}
               </a>{" "}
               or use the{" "}
               <Link

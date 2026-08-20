@@ -28,32 +28,32 @@ export const metadata = createPageMetadata({
 
 const offerings = [
   {
+    title: "Wild Glow Express Facial",
+    bookingHref: "/book?service=wild-glow-express-facial#choose-time",
+    details: ["15–20 minutes", "$111 per guest", "Minimum 4 retreat guests"],
+    description:
+      "A refreshing facial restoring radiance in moments, with cleansing, hydration, sculpting massage, and finishing touches.",
+  },
+  {
+    title: "Signature Retreat Facial",
+    bookingHref: "/book?service=signature-facial#choose-time",
+    details: ["60 minutes", "$277 per guest", "Group rate"],
+    description:
+      "A customized facial restoring glow, hydration, and balance while creating a meaningful moment of pause.",
+  },
+  {
     title: "HWL Beauty & Being Ritual",
-    bookingHref: "/book?service=beauty-being-ritual#booking-inquiry",
-    details: ["90 minutes", "Signature ritual", "Investment by consultation"],
+    bookingHref: "/book?service=beauty-being-ritual#choose-time",
+    details: ["90 minutes", "$333 per guest", "Group rate"],
     description:
-      "A longer, layered beauty ritual shaped in conversation with Shannon. The exact modalities and pace are confirmed before you book.",
+      "A luxury facial blending customized skincare, aromatherapy, therapeutic and lymphatic massage, Reiki, and intentional restoration.",
   },
   {
-    title: "Restorative Facial",
-    bookingHref: "/book?service=restorative-facial#booking-inquiry",
-    details: ["60 minutes", "Private session", "Investment by consultation"],
+    title: "Wild Glow Luxury Facial Ritual",
+    bookingHref: "/book?service=wild-glow-luxury-facial#choose-time",
+    details: ["120 minutes", "$444 per guest", "Group rate"],
     description:
-      "A facial centered on attentive skin care and unhurried massage, paced for comfort and a genuine moment of rest.",
-  },
-  {
-    title: "Express Glow",
-    bookingHref: "/book?service=express-glow#booking-inquiry",
-    details: ["45 minutes", "Private session", "Investment by consultation"],
-    description:
-      "A focused facial for visible radiance when time is limited, without rushing the care or the quiet around it.",
-  },
-  {
-    title: "Skin Consultation",
-    bookingHref: "/book?service=skin-consultation#booking-inquiry",
-    details: ["30 minutes", "One-to-one", "Investment by consultation"],
-    description:
-      "A thoughtful skin assessment with routine guidance for anyone who wants clarity before choosing an experience.",
+      "A fully immersive experience with advanced skincare, extended massage, energy balancing, aromatherapy, and personalized ritual.",
   },
 ]
 
@@ -181,19 +181,18 @@ export default function BeautyPage() {
               Beauty
             </p>
             <h1 className="hero-reveal hero-reveal--2 mt-6 text-5xl leading-[0.98] font-medium text-[var(--primary)] md:text-7xl lg:text-8xl">
-              Skin holds memory.
+              Skin as landscape. Touch as language.
             </h1>
             <p className="hero-reveal hero-reveal--3 mx-auto mt-7 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)] md:mx-0 md:text-xl">
-              Facial rituals centered on thoughtful skin care while creating
-              space to slow down.
+              The face holds what the body carries.
             </p>
             <div className="hero-reveal hero-reveal--4 mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
               <Button
                 asChild
                 className="h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
               >
-                <Link href="/book">
-                  Book a Facial <ArrowRight aria-hidden="true" />
+                <Link href="/beauty/lift">
+                  Learn LIFT <ArrowRight aria-hidden="true" />
                 </Link>
               </Button>
               <Button
@@ -201,7 +200,7 @@ export default function BeautyPage() {
                 className="h-12 rounded-full border-[var(--border)] bg-white/35 px-7 text-[var(--primary)] backdrop-blur-sm hover:bg-white/65"
                 variant="outline"
               >
-                <Link href="/beauty/lift">Get the LIFT Guide — $5.55</Link>
+                <Link href="/book">Book a Session</Link>
               </Button>
             </div>
           </div>
@@ -252,16 +251,16 @@ export default function BeautyPage() {
               Beneath the surface
             </p>
             <p className="mt-6 text-lg leading-[1.9] text-[var(--foreground)] md:text-xl">
-              Your skin meets the world with you every day. These facials pair
-              attentive skin care with unhurried touch, quiet, and a pace shaped
-              around what you share. You may leave looking refreshed; the
-              experience is also designed to offer a genuine interval of rest.
+              Shannon&apos;s approach to skin is slow. As a licensed
+              aesthetician, she works with lymphatic drainage, facial sculpting,
+              and circulation — not to erase age, but to move what&apos;s
+              stagnant. The glow that comes from flow, not from product.
             </p>
           </div>
         </div>
         <PullQuote
           className="mt-20"
-          quote="You don't just leave with glowing skin. You leave feeling restored."
+          quote="Your face is not a problem to solve. It's a landscape to tend."
         />
       </PageSection>
 
@@ -273,11 +272,11 @@ export default function BeautyPage() {
       >
         <SectionHeading
           eyebrow="Facial rituals"
-          title="Choose the depth, not a service menu."
+          title="Choose the ritual that meets the moment."
         />
         <p className="mt-6 max-w-2xl text-base leading-[1.9] text-[var(--muted-foreground)]">
-          Each offering begins with listening. The cards below are a sense of
-          time and intention; Shannon confirms the details with you personally.
+          Retreat group rates are shown below. Individual one-to-one pricing is
+          available through booking.
         </p>
         <div className="mt-14 grid gap-6 md:grid-cols-2">
           {offerings.map((offering, index) => (
@@ -377,9 +376,9 @@ export default function BeautyPage() {
             Begin with a conversation.
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)]">
-            Service investment is confirmed in consultation, once the timing,
-            setting, and experience are clear. You will know the full details
-            before you commit.
+            Retreat rates are priced per guest. Individual one-to-one sessions
+            are confirmed through booking, once the timing and experience are
+            clear.
           </p>
           <Button
             asChild
@@ -435,9 +434,10 @@ export default function BeautyPage() {
               Your hands know more than you think.
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-[1.9] text-[var(--background)]/72">
-              Seven facial massage movements, demonstrated in video and paired
-              with a printable guide. Five minutes to return to your face,
-              breath, and attention.
+              LIFT is Shannon&apos;s daily facial massage ritual — seven
+              movements, five minutes, your own two hands. It&apos;s the
+              practice she teaches every client to do at home, between sessions,
+              when the appointment ends and the maintenance begins.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-5">
               <span className="font-serif text-4xl text-[var(--accent-on-dark)]">

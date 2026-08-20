@@ -38,6 +38,10 @@ export const media = {
       src: "/images/experiences/movement-seated-stretch.webp",
       alt: "Shannon reaching through a seated side stretch",
     },
+    tarotSpread: {
+      src: "/images/experiences/tarot-rider-waite-spread-v1.webp",
+      alt: "A seven-card Rider-Waite-Smith tarot spread beside candlelight, quartz, desert sage, and a Palm Springs pool",
+    },
     ritualWolf: {
       src: "/images/experiences/ritual-wolf-moon.webp",
       alt: "A wolf howling beneath a luminous full moon",
@@ -51,6 +55,41 @@ export const media = {
     liftBotanicals: {
       src: "/images/editorial/lift-dried-botanicals.webp",
       alt: "Dried botanicals casting delicate shadows",
+    },
+  },
+  retreats: {
+    palmSpringsHero: {
+      src: "/images/retreats/retreats-palm-springs-hero-v1.webp",
+      alt: "A quiet desert pool set for movement and sound beneath the mountains and palms",
+    },
+    highDesertPath: {
+      src: "/images/retreats/retreats-high-desert-path-v1.webp",
+      alt: "A path winding through Joshua trees and sunlit high-desert boulders",
+    },
+    groupPractice: {
+      src: "/images/retreats/retreats-group-practice-v1.webp",
+      alt: "A small outdoor movement practice beneath the desert mountains",
+    },
+    fanPalmOasis: {
+      src: "/images/retreats/retreats-fan-palm-oasis-v1.webp",
+      alt: "California fan palms glowing along a quiet desert canyon path",
+    },
+    facialRitual: {
+      src: "/images/hero/hwl-facial-ritual-v1.webp",
+      alt: "A warm facial ritual with botanical skincare in desert light",
+    },
+    outdoorYoga: {
+      src: "/images/hero/hwl-palm-springs-yoga-v1.webp",
+      alt: "An outdoor yoga practice framed by palms and desert mountains",
+    },
+    soundRitual: {
+      src: "/images/hero/hwl-sound-tarot-v1.webp",
+      alt: "Sound bowls and reflective ritual tools beside a desert pool",
+    },
+  },
+  motion: {
+    desertHero: {
+      src: "/video/hwl-whole-brand-hero-v3/landscape.mp4",
     },
   },
 } as const

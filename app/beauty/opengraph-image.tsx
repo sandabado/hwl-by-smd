@@ -11,6 +11,6 @@ export const contentType = OG_IMAGE_CONTENT_TYPE
 export default function OpenGraphImage() {
   return createBrandOgImage({
     eyebrow: "Beauty",
-    title: "Rituals that restore more than skin.",
+    title: "Skin as landscape. Touch as language.",
   })
 }

@@ -7,19 +7,22 @@ import {
   isSameOriginMutation,
   isUuid,
 } from "@/lib/relationships/request"
+import { findBookingService } from "@/lib/booking-services"
 import { createClient } from "@/lib/supabase/server"
 
 const allowedDurations = new Set([15, 30, 45, 60, 90, 120])
-const serviceLabels = {
-  beauty: "Beauty",
-  being: "Being",
-  body: "Body",
+const bookingServiceByCategory = {
+  beauty: "signature-facial",
+  being: "intuitive-tarot-reading",
+  body: "private-yoga-and-sound",
 } as const
 
-type Service = keyof typeof serviceLabels
+type ServiceCategory = keyof typeof bookingServiceByCategory
 
-function isService(value: unknown): value is Service {
-  return typeof value === "string" && Object.hasOwn(serviceLabels, value)
+function isServiceCategory(value: unknown): value is ServiceCategory {
+  return (
+    typeof value === "string" && Object.hasOwn(bookingServiceByCategory, value)
+  )
 }
 
 export async function POST(request: Request) {
@@ -63,7 +66,7 @@ export async function POST(request: Request) {
 
   if (
     !isUuid(payload?.conversationId) ||
-    !isService(payload.service) ||
+    !isServiceCategory(payload.service) ||
     typeof payload.durationMinutes !== "number" ||
     !Number.isInteger(payload.durationMinutes) ||
     !allowedDurations.has(payload.durationMinutes) ||
@@ -122,12 +125,19 @@ export async function POST(request: Request) {
     }
   }
 
+  const bookingSelection = findBookingService(
+    bookingServiceByCategory[payload.service]
+  )
+  if (!bookingSelection) {
+    return NextResponse.json(
+      { error: "The selected booking service is not configured." },
+      { status: 503 }
+    )
+  }
+
   const search = new URLSearchParams({
-    duration: String(payload.durationMinutes),
-    from: payload.conversationId,
-    service: payload.service,
+    service: bookingSelection.service.slug,
   })
-  const serviceLabel = serviceLabels[payload.service]
 
   return NextResponse.json(
     {
@@ -135,9 +145,9 @@ export async function POST(request: Request) {
         durationMinutes: payload.durationMinutes,
         href: `/book?${search.toString()}`,
         kind: "booking",
-        label: `Book a ${payload.durationMinutes}-minute ${serviceLabel} session`,
+        label: `Book ${bookingSelection.service.title}`,
         message,
-        service: payload.service,
+        service: bookingSelection.service.slug,
       },
     },
     { headers: { "Cache-Control": "no-store" } }

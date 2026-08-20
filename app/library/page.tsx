@@ -38,7 +38,7 @@ export default async function LibraryPage({
               The Library
             </h1>
           </div>
-          <MemberNavigation />
+          <MemberNavigation hasMembership={access.isMember} />
         </div>
 
         <div className="mt-10 flex flex-wrap gap-2">

@@ -40,6 +40,8 @@ const routes = [
   { path: "/contact", changeFrequency: "yearly", priority: 0.6 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.2 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.2 },
+  { path: "/refund-policy", changeFrequency: "yearly", priority: 0.2 },
+  { path: "/health-disclaimer", changeFrequency: "yearly", priority: 0.2 },
 ] satisfies Array<{
   path: string
   changeFrequency: NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>

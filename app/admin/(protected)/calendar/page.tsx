@@ -10,6 +10,7 @@ import {
 } from "@/components/admin/admin-ui"
 import { adminBookings } from "@/lib/admin-preview-data"
 import { requireAdmin } from "@/lib/admin-auth"
+import { getCalcomPublicEventTypes } from "@/lib/calcom"
 
 export const dynamic = "force-dynamic"
 
@@ -39,6 +40,9 @@ const eventTones = {
 
 export default async function AdminCalendarPage() {
   await requireAdmin()
+  const calcom = await getCalcomPublicEventTypes()
+  const calProfileLinked = calcom.status === "available"
+  const calPublishedEventCount = calcom.eventTypes.length
 
   return (
     <>
@@ -132,20 +136,35 @@ export default async function AdminCalendarPage() {
         <div className="space-y-5">
           <AdminPanel>
             <PanelHeading
-              detail="Cal.com connection"
-              eyebrow="Sync"
-              title="Calendar health"
+              detail="Public Cal.com booking profile"
+              eyebrow="Booking"
+              title="Cal.com status"
             />
             <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl bg-[#f6f1e8]/60 p-4">
               <div className="flex items-center gap-3">
                 <Cloud className="size-4 text-[#788178]" aria-hidden="true" />
-                <span className="text-sm">External calendar</span>
+                <span className="text-sm">HWL by SMD profile</span>
               </div>
-              <StatusPill tone="warning">Not configured</StatusPill>
+              <StatusPill
+                tone={
+                  calProfileLinked && calPublishedEventCount > 0
+                    ? "positive"
+                    : "warning"
+                }
+              >
+                {calProfileLinked && calPublishedEventCount > 0
+                  ? "Live"
+                  : calProfileLinked
+                    ? "Setup needed"
+                    : "Check needed"}
+              </StatusPill>
             </div>
             <p className="mt-4 text-xs leading-5 text-[#7a827a]">
-              The preview does not read or change a personal calendar. Cal.com
-              sync can be added after the booking account is confirmed.
+              {calProfileLinked
+                ? `${calPublishedEventCount} published event ${calPublishedEventCount === 1 ? "type is" : "types are"} currently visible on the public profile. `
+                : "The public profile could not be checked right now. "}
+              This sample calendar does not read or change Shannon&apos;s
+              personal calendars.
             </p>
           </AdminPanel>
 

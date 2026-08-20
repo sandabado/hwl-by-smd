@@ -47,17 +47,36 @@ export default function ResetPasswordPage() {
         <p className="mt-4 leading-relaxed text-[var(--muted-foreground)]">
           Enter your email and we&apos;ll send a secure link.
         </p>
-        <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+        <form
+          aria-busy={pending}
+          className="mt-8 space-y-4"
+          onSubmit={handleSubmit}
+        >
+          <label
+            className="block text-sm text-[var(--primary)]"
+            htmlFor="reset-email"
+          >
+            Email address
+          </label>
           <input
             required
             autoComplete="email"
+            id="reset-email"
             name="email"
             type="email"
             className="h-12 w-full rounded-2xl border border-[var(--border)] bg-white/80 px-4 outline-none focus:border-[var(--accent)]"
             placeholder="you@example.com"
           />
-          {error && <p className="text-sm text-[#9c4b40]">{error}</p>}
-          {message && <p className="text-sm text-[#52694d]">{message}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-[#9c4b40]">
+              {error}
+            </p>
+          )}
+          {message && (
+            <p role="status" className="text-sm text-[#52694d]">
+              {message}
+            </p>
+          )}
           <Button
             className="h-12 w-full rounded-full bg-[var(--primary)] text-white"
             disabled={pending}

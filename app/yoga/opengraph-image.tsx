@@ -10,7 +10,7 @@ export const contentType = OG_IMAGE_CONTENT_TYPE
 
 export default function OpenGraphImage() {
   return createBrandOgImage({
-    eyebrow: "Yoga · Body",
-    title: "Movement as medicine.",
+    eyebrow: "Yoga",
+    title: "The body trusts what the mind hasn't said yet.",
   })
 }

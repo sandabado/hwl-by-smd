@@ -4,6 +4,11 @@ import { getSiteUrl } from "@/lib/env"
 import { getAuthenticatedUser } from "@/lib/access"
 import { createClient } from "@/lib/supabase/server"
 import {
+  hasAcceptableBodySize,
+  hasJsonContentType,
+  isSameOriginMutation,
+} from "@/lib/relationships/request"
+import {
   getPriceId,
   getStripe,
   isProductCheckoutReady,
@@ -12,6 +17,15 @@ import {
 } from "@/lib/stripe"
 
 export async function POST(request: Request) {
+  if (!isSameOriginMutation(request)) {
+    return NextResponse.json({ error: "Request not allowed." }, { status: 403 })
+  }
+  if (!hasJsonContentType(request) || !hasAcceptableBodySize(request, 2_000)) {
+    return NextResponse.json(
+      { error: "A valid JSON request is required." },
+      { status: 400 }
+    )
+  }
   const body = (await request.json().catch(() => null)) as {
     productId?: unknown
   } | null

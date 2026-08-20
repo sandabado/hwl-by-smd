@@ -10,8 +10,9 @@ const footerColumns = [
     title: "Explore",
     links: [
       { label: "About", href: "/about" },
+      { label: "All Experiences", href: "/experiences" },
       { label: "Beauty", href: "/beauty" },
-      { label: "Yoga", href: "/yoga" },
+      { label: "Yoga + Sound", href: "/yoga" },
       { label: "Tarot", href: "/tarot" },
       { label: "Retreats", href: "/retreats" },
       { label: "Journal", href: "/journal" },
@@ -20,6 +21,9 @@ const footerColumns = [
   {
     title: "Shop",
     links: [
+      { label: "Store", href: "/store" },
+      { label: "Beauty Products", href: "/store#beauty-products" },
+      { label: "Magical Tools", href: "/store#magical-tools" },
       { label: "LIFT Guide", href: "/beauty/lift" },
       { label: "LIFT PDF", href: "/beauty/lift#download" },
       { label: "Membership", href: "/store#the-den" },
@@ -37,10 +41,10 @@ const footerColumns = [
   {
     title: "Service Areas",
     links: [
-      { label: "Palm Springs, CA" },
-      { label: "Joshua Tree, CA" },
-      { label: "Yucca Valley, CA" },
-      { label: "Desert Hot Springs, CA" },
+      { label: "Palm Springs, CA", href: "/palm-springs" },
+      { label: "Joshua Tree, CA", href: "/joshua-tree" },
+      { label: "Yucca Valley, CA", href: "/yucca-valley" },
+      { label: "Desert Hot Springs, CA", href: "/desert-hot-springs" },
       { label: "Morongo Valley, CA" },
     ],
   },
@@ -73,10 +77,24 @@ export function Footer() {
 
           <address className="flex flex-col gap-2 text-sm text-[var(--background)]/80 not-italic md:items-end">
             <a
-              href="mailto:hello@howlbysmd.com"
+              href={`mailto:${SITE_CONFIG.email}`}
               className="transition-colors duration-200 hover:text-[var(--background)]"
             >
-              hello@howlbysmd.com
+              {SITE_CONFIG.email}
+            </a>
+            <a
+              href={`tel:${SITE_CONFIG.phone.replace(/\D/g, "")}`}
+              className="transition-colors duration-200 hover:text-[var(--background)]"
+            >
+              {SITE_CONFIG.phone}
+            </a>
+            <a
+              href={SITE_CONFIG.instagramPersonalUrl}
+              rel="noreferrer"
+              target="_blank"
+              className="transition-colors duration-200 hover:text-[var(--background)]"
+            >
+              {SITE_CONFIG.instagramPersonal}
             </a>
             <a
               href={SITE_CONFIG.instagramBrandUrl}
@@ -99,14 +117,24 @@ export function Footer() {
               {column.title === "Service Areas" ? (
                 <>
                   <div className="mt-5 flex flex-col items-start gap-3">
-                    {column.links.map((item) => (
-                      <span
-                        className="text-sm text-[var(--background)]/65"
-                        key={item.label}
-                      >
-                        {item.label}
-                      </span>
-                    ))}
+                    {column.links.map((item) =>
+                      "href" in item ? (
+                        <Link
+                          className={footerLinkClass}
+                          href={item.href}
+                          key={item.label}
+                        >
+                          {item.label}
+                        </Link>
+                      ) : (
+                        <span
+                          className="text-sm text-[var(--background)]/65"
+                          key={item.label}
+                        >
+                          {item.label}
+                        </span>
+                      )
+                    )}
                   </div>
                   <p className="mt-5 max-w-56 text-xs leading-relaxed text-[var(--background)]/60">
                     Based in Palm Springs. Serving the Coachella Valley and
@@ -144,7 +172,7 @@ export function Footer() {
 
         <div className="flex flex-col gap-4 border-t border-[var(--background)]/10 pt-6 text-xs text-[var(--background)]/75 md:flex-row md:items-center md:justify-between">
           <p>© 2026 HWL by SMD. Built on Whole Body OS.</p>
-          <div className="flex gap-5">
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
             <Link
               className="transition-colors duration-200 hover:text-[var(--background)]"
               href="/terms"
@@ -156,6 +184,18 @@ export function Footer() {
               href="/privacy"
             >
               Privacy
+            </Link>
+            <Link
+              className="transition-colors duration-200 hover:text-[var(--background)]"
+              href="/refund-policy"
+            >
+              Refund Policy
+            </Link>
+            <Link
+              className="transition-colors duration-200 hover:text-[var(--background)]"
+              href="/health-disclaimer"
+            >
+              Health Disclaimer
             </Link>
           </div>
         </div>

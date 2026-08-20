@@ -1,14 +1,11 @@
 import type { Metadata } from "next"
 
 import { LoginForm } from "@/components/auth/login-form"
+import { safeInternalPath } from "@/lib/safe-path"
 
 export const metadata: Metadata = {
   title: "Sign In to The Den | HWL by SMD",
   description: "Enter your private HWL by SMD ritual library.",
-}
-
-function safeReturnTo(value: string | undefined) {
-  return value?.startsWith("/") && !value.startsWith("//") ? value : "/the-den"
 }
 
 export default async function LoginPage({
@@ -35,7 +32,7 @@ export default async function LoginPage({
             the rituals Shannon has created for you.
           </p>
         </div>
-        <LoginForm redirectTo={safeReturnTo(redirectTo)} />
+        <LoginForm redirectTo={safeInternalPath(redirectTo, "/the-den")} />
       </div>
     </section>
   )

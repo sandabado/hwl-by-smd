@@ -4,8 +4,12 @@ import { getAuthenticatedUser } from "@/lib/access"
 import { getSiteUrl } from "@/lib/env"
 import { createClient } from "@/lib/supabase/server"
 import { getStripe } from "@/lib/stripe"
+import { isSameOriginMutation } from "@/lib/relationships/request"
 
 export async function POST(request: Request) {
+  if (!isSameOriginMutation(request)) {
+    return NextResponse.json({ error: "Request not allowed." }, { status: 403 })
+  }
   const user = await getAuthenticatedUser()
   if (!user) {
     return NextResponse.json({ error: "Please sign in." }, { status: 401 })

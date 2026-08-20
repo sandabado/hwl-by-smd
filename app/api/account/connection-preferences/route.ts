@@ -1,28 +1,41 @@
 import { NextResponse } from "next/server"
 
-import { getAuthenticatedUser } from "@/lib/access"
+import { getAuthenticatedUser, getMemberAccess } from "@/lib/access"
+import {
+  hasAcceptableBodySize,
+  hasJsonContentType,
+  isSameOriginMutation,
+} from "@/lib/relationships/request"
 import { createClient } from "@/lib/supabase/server"
 
-const allowedCadences = new Set(["daily", "weekly", "relevant"])
-
 export async function POST(request: Request) {
+  if (!isSameOriginMutation(request)) {
+    return NextResponse.json({ error: "Request not allowed." }, { status: 403 })
+  }
+  if (!hasJsonContentType(request) || !hasAcceptableBodySize(request, 1_000)) {
+    return NextResponse.json(
+      { error: "A valid JSON request is required." },
+      { status: 400 }
+    )
+  }
+
   const user = await getAuthenticatedUser()
   if (!user) {
     return NextResponse.json({ error: "Please sign in." }, { status: 401 })
   }
+  const access = await getMemberAccess(user.id)
+  if (!access.isMember) {
+    return NextResponse.json(
+      { error: "An active Den membership is required." },
+      { status: 403 }
+    )
+  }
 
   const body = (await request.json().catch(() => null)) as {
     bookingInvites?: unknown
-    guidanceCadence?: unknown
-    shareProgress?: unknown
   } | null
 
-  if (
-    typeof body?.guidanceCadence !== "string" ||
-    !allowedCadences.has(body.guidanceCadence) ||
-    typeof body.bookingInvites !== "boolean" ||
-    typeof body.shareProgress !== "boolean"
-  ) {
+  if (typeof body?.bookingInvites !== "boolean") {
     return NextResponse.json(
       { error: "Invalid connection preferences." },
       { status: 400 }
@@ -40,8 +53,6 @@ export async function POST(request: Request) {
   const { error } = await supabase.from("connection_preferences").upsert(
     {
       booking_invites: body.bookingInvites,
-      guidance_cadence: body.guidanceCadence,
-      share_progress: body.shareProgress,
       user_id: user.id,
     },
     { onConflict: "user_id" }

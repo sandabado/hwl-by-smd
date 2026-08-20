@@ -1,5 +1,9 @@
 export const media = {
   brand: {
+    sanctuaryHero: {
+      src: "/images/brand/hwl-sanctuary-hero.webp",
+      alt: "A tranquil mineral pool surrounded by lush green plants and luminous morning mist",
+    },
     standingStretch: {
       src: "/images/brand/shannon-standing-stretch.webp",
       alt: "Shannon standing in a soft neutral movement pose",

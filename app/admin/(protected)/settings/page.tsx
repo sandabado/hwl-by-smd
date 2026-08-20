@@ -137,8 +137,8 @@ export default async function AdminSettingsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <FieldPreview label="Brand name" value="HWL by SMD" />
               <FieldPreview label="Tagline" value="Body · Beauty · Being" />
-              <FieldPreview label="Serif" value="Cormorant Garamond" />
-              <FieldPreview label="Sans serif" value="Inter" />
+              <FieldPreview label="Serif" value="System Serif" />
+              <FieldPreview label="Sans serif" value="System Sans" />
               <div>
                 <p className="mb-2 text-[10px] font-semibold tracking-[0.15em] text-[#818981] uppercase">
                   Palette

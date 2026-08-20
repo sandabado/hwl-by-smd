@@ -10,7 +10,10 @@ export function MainNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="hidden items-center gap-8 md:flex" aria-label="Main">
+    <nav
+      className="hidden items-center gap-5 justify-self-center lg:flex xl:gap-8"
+      aria-label="Main"
+    >
       {MAIN_NAV.map((item) => {
         const isActive =
           pathname === item.href || pathname.startsWith(`${item.href}/`)

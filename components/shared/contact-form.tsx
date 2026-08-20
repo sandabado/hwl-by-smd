@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react"
 
-import { Button } from "@/components/ui/button"
+import { BreathingButton } from "@/components/shared/breathing-button"
 
 type ContactField = {
   label: string
@@ -92,12 +92,13 @@ export function ContactForm({
           required
         />
       </label>
-      <Button
+      <BreathingButton
+        breathVariant="primary"
         className="mt-2 rounded-full bg-[var(--primary)] text-white hover:bg-[var(--accent)]"
         disabled={status === "sending"}
       >
         {status === "sending" ? "Sending…" : submitLabel}
-      </Button>
+      </BreathingButton>
       {feedback ? (
         <p
           aria-live="polite"

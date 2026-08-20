@@ -5,30 +5,33 @@ import { ArrowRight, MoonStar, ScrollText, Sparkles } from "lucide-react"
 import { JsonLd } from "@/components/seo/json-ld"
 import { PullQuote } from "@/components/shared/pull-quote"
 import { SectionDivider } from "@/components/shared/section-divider"
+import { ServiceAreaNote } from "@/components/shared/service-area-note"
 import { Button } from "@/components/ui/button"
 import { media } from "@/lib/media"
 import { createPageMetadata, createServiceJsonLd } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
-  title: "Being | Tarot, Astrology & Ritual | HWL by SMD",
+  title: "Tarot Readings & Astrology in Palm Springs | HWL by SMD",
   description:
-    "Tarot, astrology, and ritual ceremony offered as grounded practices for reflection, meaning, and inner alignment.",
-  path: "/being",
+    "Private tarot readings, astrology consultations, and ritual ceremony in Palm Springs and the Hi-Desert.",
+  path: "/tarot",
 })
 
 const offerings = [
   {
     icon: ScrollText,
     title: "Tarot",
+    bookingHref: "/book?service=tarot#booking-inquiry",
     summary:
       "A private mirror for the question, transition, or pattern asking for your attention.",
     detail:
       "The cards are used for reflection rather than prediction. You leave with grounded language for what you noticed and the freedom to take only what resonates.",
-    format: "Private · in person or virtual availability to be confirmed",
+    format: "Private session · final format confirmed before booking",
   },
   {
     icon: MoonStar,
     title: "Astrology",
+    bookingHref: "/book?service=astrology#booking-inquiry",
     summary:
       "Seasonal and lunar perspective for understanding timing, rhythm, and the life you are already living.",
     detail:
@@ -38,6 +41,7 @@ const offerings = [
   {
     icon: Sparkles,
     title: "Ritual Ceremony",
+    bookingHref: "/book?service=ritual-ceremony#booking-inquiry",
     summary:
       "A thoughtful container for beginnings, endings, grief, celebration, and return.",
     detail:
@@ -51,7 +55,7 @@ const seasons = [
     name: "Spring",
     ritual: "Begin again",
     note: "A practice for emergence, clarity, and the first honest yes.",
-    image: media.experiences.beauty,
+    image: media.brand.sanctuaryHero,
   },
   {
     name: "Summer",
@@ -78,14 +82,14 @@ export default function RitualPage() {
     <>
       <JsonLd
         data={createServiceJsonLd({
-          name: "HWL Being Experiences",
+          name: "HWL Tarot Experiences",
           description:
             "Tarot, astrology, and intentional ritual offered as reflective wellness practices for private guests and groups.",
-          path: "/being",
+          path: "/tarot",
           serviceType: "Reflective ritual and intuitive guidance",
           image: media.experiences.ritualMoon.src,
         })}
-        id="being-service-schema"
+        id="tarot-service-schema"
       />
 
       <section className="relative -mt-16 flex min-h-[88vh] items-end overflow-hidden bg-[#211c22] px-6 py-24 pt-36 text-white md:-mt-20 md:pt-40">
@@ -93,7 +97,7 @@ export default function RitualPage() {
           alt={media.experiences.ritualMoon.alt}
           className="object-cover opacity-25 [filter:saturate(.55)_contrast(1.05)]"
           fill
-          priority
+          preload
           sizes="100vw"
           src={media.experiences.ritualMoon.src}
         />
@@ -107,7 +111,7 @@ export default function RitualPage() {
         />
         <div className="relative z-10 mx-auto w-full max-w-7xl pb-8 md:pb-16">
           <p className="text-xs tracking-[0.3em] text-[#dcc5a5] uppercase">
-            Being
+            Tarot
           </p>
           <h1 className="mt-6 max-w-4xl text-5xl leading-[1.02] font-medium text-white md:text-7xl lg:text-8xl">
             Ancient wisdom for modern life.
@@ -119,7 +123,7 @@ export default function RitualPage() {
             asChild
             className="mt-10 h-12 rounded-full bg-[#dcc5a5] px-7 text-[#211c22] hover:bg-white"
           >
-            <Link href="/book?service=being">Book a Reading</Link>
+            <Link href="/book?service=tarot">Book a Reading</Link>
           </Button>
         </div>
       </section>
@@ -133,6 +137,9 @@ export default function RitualPage() {
           className="absolute -top-44 -left-40 size-[34rem] rounded-full bg-[#76536e]/6 blur-3xl"
         />
         <div className="relative mx-auto max-w-3xl text-center">
+          <p className="mb-7 font-serif text-2xl text-[var(--primary)] italic md:text-3xl">
+            Being is where we listen—with cards, stars, and ritual.
+          </p>
           <p className="font-serif text-xl leading-[2] text-[var(--primary)] md:text-2xl">
             Ritual is not superstition. It&apos;s structure for meaning. A way
             to mark transitions, ask questions, and listen for what&apos;s
@@ -166,33 +173,44 @@ export default function RitualPage() {
             Three ways to listen.
           </h2>
           <div className="mt-20 divide-y divide-white/10 border-y border-white/10">
-            {offerings.map(({ detail, format, icon: Icon, summary, title }) => (
-              <details className="group py-8 md:py-10" key={title}>
-                <summary className="grid cursor-pointer list-none gap-6 md:grid-cols-[64px_0.55fr_1fr_auto] md:items-center">
-                  <span className="grid size-14 place-items-center rounded-full border border-white/12 text-[#dcc5a5]">
-                    <Icon className="size-5" aria-hidden="true" />
-                  </span>
-                  <h3 className="text-4xl text-white">{title}</h3>
-                  <p className="max-w-xl text-base leading-[1.9] text-white/58">
-                    {summary}
-                  </p>
-                  <span className="text-xs tracking-[0.18em] text-[#dcc5a5] uppercase group-open:hidden">
-                    Enter
-                  </span>
-                  <span className="hidden text-xs tracking-[0.18em] text-[#dcc5a5] uppercase group-open:block">
-                    Close
-                  </span>
-                </summary>
-                <div className="mt-8 grid gap-4 pl-0 md:ml-[calc(64px+1.5rem)] md:grid-cols-[1fr_auto]">
-                  <p className="max-w-2xl text-base leading-[1.9] text-white/68">
-                    {detail}
-                  </p>
-                  <p className="text-xs tracking-wide text-white/70">
-                    {format}
-                  </p>
-                </div>
-              </details>
-            ))}
+            {offerings.map(
+              ({ bookingHref, detail, format, icon: Icon, summary, title }) => (
+                <details className="group py-8 md:py-10" key={title}>
+                  <summary className="grid cursor-pointer list-none gap-6 md:grid-cols-[64px_0.55fr_1fr_auto] md:items-center">
+                    <span className="grid size-14 place-items-center rounded-full border border-white/12 text-[#dcc5a5]">
+                      <Icon className="size-5" aria-hidden="true" />
+                    </span>
+                    <h3 className="text-4xl text-white">{title}</h3>
+                    <p className="max-w-xl text-base leading-[1.9] text-white/58">
+                      {summary}
+                    </p>
+                    <span className="text-xs tracking-[0.18em] text-[#dcc5a5] uppercase group-open:hidden">
+                      Enter
+                    </span>
+                    <span className="hidden text-xs tracking-[0.18em] text-[#dcc5a5] uppercase group-open:block">
+                      Close
+                    </span>
+                  </summary>
+                  <div className="mt-8 grid gap-5 pl-0 md:ml-[calc(64px+1.5rem)] md:grid-cols-[1fr_auto] md:items-end">
+                    <p className="max-w-2xl text-base leading-[1.9] text-white/68">
+                      {detail}
+                    </p>
+                    <div className="md:text-right">
+                      <p className="text-xs tracking-wide text-white/70">
+                        {format}
+                      </p>
+                      <Link
+                        className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#dcc5a5] underline-offset-4 hover:underline"
+                        href={bookingHref}
+                      >
+                        Book this offering
+                        <ArrowRight className="size-4" aria-hidden="true" />
+                      </Link>
+                    </div>
+                  </div>
+                </details>
+              )
+            )}
           </div>
           <p className="mx-auto mt-12 max-w-2xl text-center text-xs leading-[1.8] text-white/72">
             Readings are offered for reflection and self-inquiry. They are not
@@ -200,6 +218,18 @@ export default function RitualPage() {
             advice. Take what resonates and leave what does not.
           </p>
         </div>
+      </section>
+
+      <section className="bg-[#f3e9dc] px-6 py-24 text-center md:py-32">
+        <figure className="mx-auto max-w-4xl">
+          <blockquote className="font-serif text-3xl leading-[1.35] text-[var(--primary)] italic md:text-5xl">
+            “The celestial and aromatherapy elements are so fascinating and
+            comforting. Such an empowering and healing space.”
+          </blockquote>
+          <figcaption className="mt-8 text-xs tracking-[0.22em] text-[var(--accent)] uppercase">
+            Grace R. · Astrology + Yoga Client
+          </figcaption>
+        </figure>
       </section>
 
       <section
@@ -257,19 +287,20 @@ export default function RitualPage() {
         />
         <div className="relative mx-auto max-w-3xl">
           <p className="text-xs tracking-[0.3em] text-[#dcc5a5] uppercase">
-            Being
+            Tarot
           </p>
           <h2 className="mt-6 text-5xl leading-tight text-white md:text-7xl">
             Begin the inner work.
           </h2>
           <Link
             className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#dcc5a5] px-7 py-3 text-sm font-medium text-[#211c22] transition hover:bg-white"
-            href="/book?service=being"
+            href="/book?service=tarot"
           >
             Book a Reading <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </div>
       </section>
+      <ServiceAreaNote />
     </>
   )
 }

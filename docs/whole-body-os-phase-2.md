@@ -1,5 +1,7 @@
 # Whole Body OS — Phase 2
 
+> NOTE: This document references route names that have since been updated. /body is now /yoga. /being is now /tarot. The architecture and design decisions described herein remain valid.
+
 Phase 2 adds the first production commerce and member layer to HWL by SMD.
 
 ## Experience architecture

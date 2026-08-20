@@ -1,5 +1,7 @@
 # Paste This Into Lumo AI
 
+> NOTE: This document references route names that have since been updated. /body is now /yoga. /being is now /tarot. The architecture and design decisions described herein remain valid.
+
 You are helping Celeste and Codex finish **HWL by SMD / howlbysmd.com**, a
 luxury wellness platform for Shannon Mary Dixon.
 
@@ -21,8 +23,8 @@ The public rooms are:
 | `/`            | Living Room   | Warm, welcoming, first breath  |
 | `/about`       | Kitchen       | Intimate, vulnerable, lived-in |
 | `/beauty`      | Bathroom      | Cleansing, reflective, soft    |
-| `/body`        | Studio        | Grounded, spacious, in motion  |
-| `/being`       | Altar Room    | Mystical, quiet, reverent      |
+| `/yoga`        | Studio        | Grounded, spacious, in motion  |
+| `/tarot`       | Altar Room    | Mystical, quiet, reverent      |
 | `/retreats`    | Sunroom       | Expansive, airy, horizon-led   |
 | `/beauty/lift` | Dressing Room | Private, focused, ritualistic  |
 | `/journal`     | Library       | Thoughtful, warm, ordered      |
@@ -73,10 +75,10 @@ The final operating philosophy remains relationship-first:
 
 ### Public platform
 
-- Exact Beauty · Body · Being navigation.
+- Exact Beauty · Yoga · Tarot navigation.
 - Responsive desktop and mobile header.
 - Permanent legacy-route redirects.
-- Rebuilt Home, About, Beauty, Body, Being, Retreats, LIFT, Store, Journal,
+- Rebuilt Home, About, Beauty, Yoga, Tarot, Retreats, LIFT, Store, Journal,
   Book, Contact, Privacy, and Terms routes.
 - Branded footer.
 - Responsive section navigation, parallax, reveals, pull quotes, dividers,
@@ -197,8 +199,8 @@ For missing motion, specify:
 Examples we already know may be missing:
 
 - Beauty water/skin close-up.
-- Body slow movement loop.
-- Being candle/altar loop.
+- Yoga slow movement loop.
+- Tarot candle/altar loop.
 - Retreat horizon landscape.
 - LIFT hands preparing oil.
 - Journal/library/paper atmosphere.
@@ -257,14 +259,14 @@ Provide:
 - “Beyond Skin Deep” paragraph.
 - Shannon’s LIFT welcome note and sign-off.
 - The Den welcome note.
-- Initial course list under Beauty, Body, and Being.
+- Initial course list under Beauty, Yoga, and Tarot.
 - Suggested lesson titles only; do not write fake credentials or results.
 
 ### 6. Journal starter set
 
 Give nine article briefs:
 
-- At least two per Beauty, Body, Being, and Retreat Living.
+- At least two per Beauty, Yoga, Tarot, and Retreat Living.
 - Title.
 - 1-sentence thesis.
 - 3-part outline.

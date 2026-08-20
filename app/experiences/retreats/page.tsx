@@ -9,9 +9,10 @@ import { media } from "@/lib/media"
 import { createPageMetadata, createServiceJsonLd } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
-  title: "Retreat Partnerships | HWL by SMD",
+  title:
+    "Wellness Retreat Facilitation in Palm Springs & Joshua Tree | HWL by SMD",
   description:
-    "Custom beauty, movement, and ritual programming for boutique retreats, luxury hospitality, private groups, and destination events.",
+    "Custom wellness programming for retreats and private groups in Palm Springs, Joshua Tree, and the Coachella Valley.",
   path: "/retreats",
 })
 

@@ -5,13 +5,8 @@ import { ChevronDown } from "lucide-react"
 
 import { FadeIn } from "@/components/shared/fade-in"
 import { Particles } from "@/components/shared/particles"
+import { SoftAccordion } from "@/components/shared/soft-accordion"
 import { WaveHero, type WaveHeroVariant } from "@/components/shared/wave-hero"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
@@ -146,7 +141,7 @@ export function OfferingCard({
   title: string
 }) {
   return (
-    <Card className="group flex h-full flex-col rounded-lg border-[var(--border)] bg-white/55 p-6 transition duration-300 hover:-translate-y-2 hover:border-[var(--accent)]/45 hover:shadow-[0_24px_60px_rgba(90,74,63,0.12)]">
+    <Card className="gentle-hover group flex h-full flex-col rounded-lg border-[var(--border)] bg-white/55 p-6">
       <h3 className="text-2xl font-medium text-[var(--primary)]">{title}</h3>
       {details?.length ? (
         <div className="mt-4 flex flex-wrap gap-2">
@@ -172,7 +167,7 @@ export function BenefitGrid({ items }: { items: string[] }) {
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => (
         <Card
-          className="rounded-lg border-[var(--border)] bg-white/50 p-5 text-center transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)]/45 hover:bg-white/75 hover:shadow-[0_18px_50px_rgba(90,74,63,0.1)]"
+          className="gentle-hover rounded-lg border-[var(--border)] bg-white/50 p-5 text-center"
           key={item}
         >
           <h3 className="text-lg font-medium text-[var(--primary)]">{item}</h3>
@@ -190,7 +185,7 @@ export function InfoListCard({
   title: string
 }) {
   return (
-    <Card className="rounded-lg border-[var(--border)] bg-white/55 p-6 transition duration-300 hover:-translate-y-1 hover:border-[var(--accent)]/45 hover:shadow-[0_18px_50px_rgba(90,74,63,0.1)]">
+    <Card className="gentle-hover rounded-lg border-[var(--border)] bg-white/55 p-6">
       <h3 className="text-2xl font-medium text-[var(--primary)]">{title}</h3>
       <ul className="mt-5 space-y-3 text-sm leading-relaxed text-[var(--muted-foreground)]">
         {items.map((item) => (
@@ -211,24 +206,7 @@ export function FaqAccordion({
 }: {
   items: { answer: string; question: string }[]
 }) {
-  return (
-    <Accordion className="mx-auto max-w-3xl" collapsible type="single">
-      {items.map((item, index) => (
-        <AccordionItem
-          className="border-[var(--border)]"
-          key={item.question}
-          value={`item-${index}`}
-        >
-          <AccordionTrigger className="py-5 text-left text-[var(--primary)] hover:no-underline">
-            {item.question}
-          </AccordionTrigger>
-          <AccordionContent className="text-[var(--muted-foreground)]">
-            {item.answer}
-          </AccordionContent>
-        </AccordionItem>
-      ))}
-    </Accordion>
-  )
+  return <SoftAccordion items={items} />
 }
 
 export function LinkCard({
@@ -244,7 +222,7 @@ export function LinkCard({
 }) {
   return (
     <Link
-      className="group block h-full rounded-lg border border-[var(--border)] bg-white/55 p-6 transition hover:-translate-y-1 hover:shadow-lg"
+      className="gentle-hover group block h-full rounded-lg border border-[var(--border)] bg-white/55 p-6"
       href={href}
     >
       <h3 className="text-2xl font-medium text-[var(--primary)]">{title}</h3>

@@ -18,7 +18,7 @@ import { isProductCheckoutReady } from "@/lib/stripe"
 export const metadata = createPageMetadata({
   title: "LIFT — Daily Facial Massage Guide | HWL by SMD",
   description:
-    "Seven facial massage movements and a five-minute daily ritual from Shannon Mary Dixon.",
+    "Seven movements. Five minutes a day. A daily facial massage ritual by Shannon Mary Dixon.",
   path: "/beauty/lift",
 })
 

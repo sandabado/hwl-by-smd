@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-import { Button } from "@/components/ui/button"
+import { BreathingButton } from "@/components/shared/breathing-button"
 
 interface CtaBlockProps {
   title: string
@@ -31,20 +31,22 @@ export function CtaBlock({
           </p>
         ) : null}
         <div className="mt-8 flex flex-wrap justify-center gap-4">
-          <Button
+          <BreathingButton
             asChild
+            breathVariant="primary"
             className="rounded-full bg-[var(--primary)] px-6 text-white hover:bg-[var(--accent)]"
           >
             <Link href={primaryHref}>{primaryLabel}</Link>
-          </Button>
+          </BreathingButton>
           {secondaryLabel && secondaryHref ? (
-            <Button
+            <BreathingButton
               asChild
+              breathVariant="secondary"
               variant="outline"
               className="rounded-full border-[var(--border)] bg-transparent px-6 text-[var(--primary)] hover:bg-[var(--muted)]"
             >
               <Link href={secondaryHref}>{secondaryLabel}</Link>
-            </Button>
+            </BreathingButton>
           ) : null}
         </div>
       </div>

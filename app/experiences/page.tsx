@@ -21,18 +21,18 @@ const pillars = [
     imageAlt: media.experiences.beauty.alt,
   },
   {
-    title: "Body",
+    title: "Yoga",
     description:
       "Private yoga, restorative movement, and sound healing to reconnect with your body.",
-    href: "/body",
+    href: "/yoga",
     imageSrc: media.experiences.movementBoat.src,
     imageAlt: media.experiences.movementBoat.alt,
   },
   {
-    title: "Being",
+    title: "Tarot",
     description:
       "Seasonal astrology, intuitive guidance, Reiki, and intentional ceremony.",
-    href: "/being",
+    href: "/tarot",
     imageSrc: media.experiences.ritualWolf.src,
     imageAlt: media.experiences.ritualWolf.alt,
   },

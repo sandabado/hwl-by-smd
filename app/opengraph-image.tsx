@@ -11,6 +11,6 @@ export const contentType = OG_IMAGE_CONTENT_TYPE
 export default function OpenGraphImage() {
   return createBrandOgImage({
     eyebrow: "Beauty · Body · Being",
-    title: "Luxury wellness for the whole self.",
+    title: "Come back to yourself.",
   })
 }

@@ -47,6 +47,7 @@ export default function ContactPage() {
                   { label: "Subject", name: "subject" },
                 ]}
                 source="contact-page"
+                submitLabel="Send Note"
               />
             </div>
           </div>

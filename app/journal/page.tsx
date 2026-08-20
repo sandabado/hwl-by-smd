@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { media } from "@/lib/media"
+import { seoJournalArticles } from "@/lib/seo-journal-articles"
 import { createPageMetadata } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
@@ -23,10 +24,29 @@ type JournalCategory = "Beauty" | "Being" | "Body" | "Retreat Living"
 type Article = {
   category: JournalCategory
   excerpt: string
+  href?: string
   title: string
 }
 
 const articles: Article[] = [
+  {
+    category: "Being",
+    title: seoJournalArticles["tarot-palm-springs"].h1,
+    excerpt: seoJournalArticles["tarot-palm-springs"].metadata.description,
+    href: "/journal/tarot-palm-springs",
+  },
+  {
+    category: "Body",
+    title: seoJournalArticles["sound-bath-joshua-tree"].h1,
+    excerpt: seoJournalArticles["sound-bath-joshua-tree"].metadata.description,
+    href: "/journal/sound-bath-joshua-tree",
+  },
+  {
+    category: "Beauty",
+    title: seoJournalArticles["desert-skincare"].h1,
+    excerpt: seoJournalArticles["desert-skincare"].metadata.description,
+    href: "/journal/desert-skincare",
+  },
   {
     category: "Beauty",
     title: "What Your Jaw Is Trying to Tell You",
@@ -94,7 +114,7 @@ const filters: Array<{ label: string; value: string }> = [
 function ArticleGrid({ items }: { items: Article[] }) {
   return (
     <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-      {items.map(({ category, excerpt, title }, index) => (
+      {items.map(({ category, excerpt, href, title }, index) => (
         <Reveal as="article" delay={(index % 3) * 70} key={title}>
           <Card className="flex h-full min-h-80 flex-col rounded-[1.75rem] border-[var(--border)] bg-white/48 p-7 shadow-none transition-colors duration-500 hover:bg-white/68">
             <div className="flex items-center justify-between gap-4">
@@ -112,9 +132,18 @@ function ArticleGrid({ items }: { items: Article[] }) {
             <p className="mt-6 flex-1 text-sm leading-[1.85] text-[var(--muted-foreground)]">
               {excerpt}
             </p>
-            <p className="mt-8 border-t border-[var(--border)] pt-5 text-[10px] font-medium tracking-[0.18em] text-[var(--muted-foreground)] uppercase">
-              Draft brief · Coming soon
-            </p>
+            {href ? (
+              <Link
+                className="mt-8 inline-flex items-center justify-between gap-3 border-t border-[var(--border)] pt-5 text-xs font-medium tracking-[0.12em] text-[var(--accent)] uppercase hover:text-[var(--primary)]"
+                href={href}
+              >
+                Read article <span aria-hidden="true">→</span>
+              </Link>
+            ) : (
+              <p className="mt-8 border-t border-[var(--border)] pt-5 text-[10px] font-medium tracking-[0.18em] text-[var(--muted-foreground)] uppercase">
+                Draft brief · Coming soon
+              </p>
+            )}
           </Card>
         </Reveal>
       ))}

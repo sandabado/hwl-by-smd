@@ -67,42 +67,49 @@ export default async function CoursePage({
         </div>
 
         <div className="mt-14 grid gap-4">
-          {result.lessons.map((lesson, index) => {
-            const done = completed.has(lesson.id)
-            return (
-              <Link
-                className="den-card group grid items-center gap-5 rounded-[1.5rem] p-5 transition hover:-translate-y-0.5 md:grid-cols-[auto_1fr_auto]"
-                href={`/lesson/${lesson.id}`}
-                key={lesson.id}
-              >
-                <span className="grid size-11 place-items-center rounded-full bg-white/60 font-serif text-lg text-[var(--primary)]">
-                  {done ? (
-                    <Check
-                      className="size-4 text-[#52694d]"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    String(index + 1).padStart(2, "0")
-                  )}
-                </span>
-                <div>
-                  <h2 className="text-2xl text-[var(--primary)]">
-                    {lesson.title}
-                  </h2>
-                  <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-                    {lesson.description}
-                  </p>
-                </div>
-                <span className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
-                  <Clock3 className="size-4" aria-hidden="true" />
-                  {minutes(lesson.duration_seconds)} min
-                  {!done && (
-                    <Circle className="ml-2 size-3" aria-hidden="true" />
-                  )}
-                </span>
-              </Link>
-            )
-          })}
+          {result.lessons.length ? (
+            result.lessons.map((lesson, index) => {
+              const done = completed.has(lesson.id)
+              return (
+                <Link
+                  className="den-card group grid items-center gap-5 rounded-[1.5rem] p-5 transition hover:-translate-y-0.5 md:grid-cols-[auto_1fr_auto]"
+                  href={`/lesson/${lesson.id}`}
+                  key={lesson.id}
+                >
+                  <span className="grid size-11 place-items-center rounded-full bg-white/60 font-serif text-lg text-[var(--primary)]">
+                    {done ? (
+                      <Check
+                        className="size-4 text-[#52694d]"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      String(index + 1).padStart(2, "0")
+                    )}
+                  </span>
+                  <div>
+                    <h2 className="text-2xl text-[var(--primary)]">
+                      {lesson.title}
+                    </h2>
+                    <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                      {lesson.description}
+                    </p>
+                  </div>
+                  <span className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
+                    <Clock3 className="size-4" aria-hidden="true" />
+                    {minutes(lesson.duration_seconds)} min
+                    {!done && (
+                      <Circle className="ml-2 size-3" aria-hidden="true" />
+                    )}
+                  </span>
+                </Link>
+              )
+            })
+          ) : (
+            <p className="den-card rounded-[1.5rem] p-6 leading-relaxed text-[var(--muted-foreground)]">
+              This course is resting while Shannon prepares its first lesson.
+              You can return to the library whenever you like.
+            </p>
+          )}
         </div>
       </div>
     </section>

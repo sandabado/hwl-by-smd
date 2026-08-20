@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 
-export const SITE_URL = "https://howlbysmd.com"
+export const SITE_URL = "https://www.howlbysmd.com"
 export const SITE_NAME = "HWL by SMD"
 export const DEFAULT_SOCIAL_IMAGE = "/og.png"
 
@@ -53,25 +53,6 @@ export function createPageMetadata({
   }
 }
 
-export function createOrganizationJsonLd(): JsonLdNode {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "@id": `${SITE_URL}/#organization`,
-    name: SITE_NAME,
-    url: absoluteUrl("/"),
-    logo: absoluteUrl(DEFAULT_SOCIAL_IMAGE),
-    description:
-      "Beauty, movement, ritual, and intentional wellness experiences with Shannon Mary Dixon.",
-    email: "hello@howlbysmd.com",
-    telephone: "+1-617-671-8636",
-    sameAs: [
-      "https://instagram.com/shannmarydix",
-      "https://instagram.com/hwl.bysmd",
-    ],
-  }
-}
-
 export function createWebsiteJsonLd(): JsonLdNode {
   return {
     "@context": "https://schema.org",
@@ -80,14 +61,14 @@ export function createWebsiteJsonLd(): JsonLdNode {
     name: SITE_NAME,
     url: absoluteUrl("/"),
     description:
-      "Luxury facial rituals, movement, and intentional wellness experiences designed to restore your glow from the inside out.",
+      "Beauty rituals, private yoga, tarot, and retreat experiences with Shannon Mary Dixon in Palm Springs.",
     publisher: { "@id": `${SITE_URL}/#organization` },
     inLanguage: "en-US",
   }
 }
 
 export function createPersonJsonLd({
-  image = "/images/brand/shannon-smiling-portrait.webp",
+  image = "/images/brand/shannon-window-portrait.webp",
 }: {
   image?: string
 } = {}): JsonLdNode {
@@ -212,5 +193,25 @@ export function createArticleJsonLd({
     publisher: { "@id": `${SITE_URL}/#organization` },
     inLanguage: "en-US",
     ...(articleSection ? { articleSection } : {}),
+  }
+}
+
+export function createFaqPageJsonLd(
+  items: readonly { question: string; answer: string }[],
+  path: string
+): JsonLdNode {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "@id": `${absoluteUrl(path)}#faq`,
+    url: absoluteUrl(path),
+    mainEntity: items.map(({ question, answer }) => ({
+      "@type": "Question",
+      name: question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: answer,
+      },
+    })),
   }
 }

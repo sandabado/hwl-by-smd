@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Cormorant_Garamond, Inter } from "next/font/google"
+import Script from "next/script"
 
 import { AuthProvider } from "@/components/auth/auth-provider"
 import { Footer } from "@/components/layout/footer"
@@ -8,39 +8,26 @@ import { SiteBreadcrumbs } from "@/components/layout/site-breadcrumbs"
 import { SiteEffects } from "@/components/layout/site-effects"
 import { SkipLink } from "@/components/layout/skip-link"
 import { JsonLd } from "@/components/seo/json-ld"
+import { LocalSchema } from "@/components/seo/local-schema"
+import { MotionPreference } from "@/components/shared/motion-preference"
 import { PageTransition } from "@/components/shared/page-transition"
-import { createOrganizationJsonLd, createWebsiteJsonLd } from "@/lib/seo"
+import { createWebsiteJsonLd, SITE_URL } from "@/lib/seo"
+import "leaflet/dist/leaflet.css"
 import "./globals.css"
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-})
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  display: "swap",
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
-  weight: ["400", "500", "600"],
-})
-
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://howlbysmd.com"
-  ),
-  title: "HWL by SMD | Beauty · Body · Being",
+  metadataBase: new URL(SITE_URL),
+  title: "HWL by SMD — Skincare, Yoga, Tarot & Retreats in Palm Springs",
   description:
-    "Luxury facial rituals, movement, and intentional wellness experiences designed to restore your glow from the inside out.",
+    "Shannon Mary Dixon offers facial rituals, private yoga, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "HWL by SMD | Beauty · Body · Being",
+    title: "HWL by SMD — Skincare, Yoga, Tarot & Retreats in Palm Springs",
     description:
-      "Luxury facial rituals, movement, and intentional wellness experiences designed to restore your glow from the inside out.",
+      "Shannon Mary Dixon offers facial rituals, private yoga, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
     images: [
       {
         url: "/og.png",
@@ -53,9 +40,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "HWL by SMD | Beauty · Body · Being",
+    title: "HWL by SMD — Skincare, Yoga, Tarot & Retreats in Palm Springs",
     description:
-      "Luxury facial rituals, movement, and intentional wellness experiences designed to restore your glow from the inside out.",
+      "Shannon Mary Dixon offers facial rituals, private yoga, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
     images: ["/og.png"],
   },
 }
@@ -66,21 +53,27 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${cormorant.variable}`}>
+    <html lang="en" data-scroll-behavior="smooth">
       <body>
-        <SkipLink />
-        <JsonLd
-          data={[createOrganizationJsonLd(), createWebsiteJsonLd()]}
-          id="site-schema"
+        <Script
+          async
+          data-domain="howlbysmd.com"
+          defer
+          src="https://plausible.io/js/script.js"
+          strategy="afterInteractive"
         />
-        <SiteEffects />
+        <LocalSchema />
+        <JsonLd data={createWebsiteJsonLd()} id="site-schema" />
         <AuthProvider>
-          <div className="flex min-h-screen flex-col">
+          <div className="flex min-h-screen flex-col" data-app-shell="">
+            <SkipLink />
+            <SiteEffects />
             <Header />
             <SiteBreadcrumbs />
             <main className="flex-1" id="main-content" tabIndex={-1}>
               <PageTransition>{children}</PageTransition>
             </main>
+            <MotionPreference />
             <Footer />
           </div>
         </AuthProvider>

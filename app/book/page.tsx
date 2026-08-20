@@ -26,21 +26,21 @@ const concierge = [
   [
     "Reduce stress",
     "Private yoga, restorative movement, breath, and sound healing.",
-    "/body",
+    "/yoga",
   ],
   [
-    "Deep relaxation",
-    "Begin with the five-minute LIFT ritual or book a guided beauty experience.",
-    "/beauty/lift",
+    "Find clarity",
+    "Tarot, astrology, and grounded ritual for the question or transition asking for attention.",
+    "/tarot",
   ],
   [
-    "Retreat wellness",
+    "Plan a retreat",
     "Custom programming for retreats, hospitality, and destination gatherings.",
     "/retreats",
   ],
   [
-    "Group experience",
-    "Plan a private group ritual, beauty activation, movement session, or ceremony.",
+    "Not sure yet",
+    "Share what you are looking for and Shannon can help you find the right place to begin.",
     "/contact",
   ],
 ]
@@ -51,15 +51,11 @@ const direct = [
     "Facial rituals, Reiki aromatherapy healing, and skin-nervous system restoration.",
     "/beauty",
   ],
+  ["Yoga", "Private yoga, restorative movement, and sound healing.", "/yoga"],
   [
-    "Movement",
-    "Private yoga, restorative movement, and sound healing.",
-    "/body",
-  ],
-  [
-    "Ritual",
+    "Tarot",
     "Astrology, tarot, Reiki, seasonal ceremonies, and intentional guidance.",
-    "/being",
+    "/tarot",
   ],
   [
     "Retreats",

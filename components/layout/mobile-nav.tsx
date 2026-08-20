@@ -28,7 +28,7 @@ export function MobileNav() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-[var(--foreground)] md:hidden"
+          className="text-[var(--foreground)] lg:hidden"
           aria-label="Open navigation menu"
         >
           <Menu className="size-5" aria-hidden="true" />
@@ -41,6 +41,9 @@ export function MobileNav() {
         <div className="flex h-full flex-col px-6 py-6">
           <SheetTitle className="font-serif text-xl font-medium tracking-[0.12em] text-[var(--primary)]">
             HWL·SMD
+            <span className="mt-2 block font-serif text-xs tracking-[0.2em] text-[var(--muted-foreground)] uppercase">
+              Beauty · Body · Being
+            </span>
           </SheetTitle>
           <SheetDescription className="sr-only">
             Navigate the HWL by SMD website.

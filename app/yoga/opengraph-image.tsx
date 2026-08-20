@@ -4,13 +4,13 @@ import {
   OG_IMAGE_SIZE,
 } from "@/lib/og-image"
 
-export const alt = "Being experiences by HWL by SMD"
+export const alt = "Private yoga and sound healing by HWL by SMD"
 export const size = OG_IMAGE_SIZE
 export const contentType = OG_IMAGE_CONTENT_TYPE
 
 export default function OpenGraphImage() {
   return createBrandOgImage({
-    eyebrow: "Being",
-    title: "Ancient wisdom for modern life.",
+    eyebrow: "Yoga · Body",
+    title: "Movement as medicine.",
   })
 }

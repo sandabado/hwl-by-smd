@@ -7,6 +7,7 @@ import { ParallaxImage } from "@/components/shared/parallax-image"
 import { PullQuote } from "@/components/shared/pull-quote"
 import { SectionDivider } from "@/components/shared/section-divider"
 import { SectionHeading } from "@/components/shared/section-heading"
+import { ServiceAreaNote } from "@/components/shared/service-area-note"
 import { Button } from "@/components/ui/button"
 import {
   Accordion,
@@ -19,15 +20,16 @@ import { cn } from "@/lib/utils"
 import { createPageMetadata, createServiceJsonLd } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
-  title: "Body | Movement & Sound | HWL by SMD",
+  title: "Private Yoga & Sound Healing in Palm Springs | HWL by SMD",
   description:
-    "Private yoga, restorative practice, and sound healing to reconnect with your body.",
-  path: "/body",
+    "Private yoga, restorative movement, and sound bath sessions in Palm Springs, Joshua Tree, and Yucca Valley.",
+  path: "/yoga",
 })
 
 const practices = [
   {
     title: "Private Yoga",
+    bookingHref: "/book?service=private-yoga#booking-inquiry",
     detail: "60 minutes · Investment by consultation",
     image: media.experiences.movementBoat,
     description:
@@ -35,6 +37,7 @@ const practices = [
   },
   {
     title: "Restorative Yoga",
+    bookingHref: "/book?service=restorative-yoga#booking-inquiry",
     detail: "75 minutes · Investment by consultation",
     image: media.experiences.movementEagle,
     description:
@@ -42,6 +45,7 @@ const practices = [
   },
   {
     title: "Private Sound Bath",
+    bookingHref: "/book?service=private-sound-bath#booking-inquiry",
     detail: "60 minutes · Investment by consultation",
     image: media.experiences.movementStretch,
     description:
@@ -143,14 +147,14 @@ export default function MovementPage() {
     <div className="overflow-hidden">
       <JsonLd
         data={createServiceJsonLd({
-          name: "HWL Body Experiences",
+          name: "HWL Yoga Experiences",
           description:
             "Private yoga, restorative practice, and sound healing to reconnect with your body.",
-          path: "/body",
+          path: "/yoga",
           serviceType: "Private yoga, restorative movement, and sound healing",
           image: media.brand.standingStretch.src,
         })}
-        id="body-service-schema"
+        id="yoga-service-schema"
       />
 
       <section className="relative isolate flex min-h-[82svh] items-center overflow-hidden bg-[linear-gradient(145deg,#f6f2e9_0%,#e9ece4_50%,#ddd9cf_100%)] px-6 py-24">
@@ -170,7 +174,7 @@ export default function MovementPage() {
         <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-14 md:grid-cols-[minmax(0,0.88fr)_minmax(360px,0.82fr)] md:gap-20">
           <div className="max-w-3xl text-center md:text-left">
             <p className="hero-reveal hero-reveal--1 text-xs font-medium tracking-[0.32em] text-[#68735f] uppercase">
-              Body
+              Yoga
             </p>
             <h1 className="hero-reveal hero-reveal--2 mt-6 text-5xl leading-[0.98] font-medium text-[var(--primary)] md:text-7xl lg:text-8xl">
               Movement as medicine.
@@ -179,14 +183,21 @@ export default function MovementPage() {
               Private yoga, restorative practice, and sound healing to reconnect
               with your body.
             </p>
-            <div className="hero-reveal hero-reveal--4 mt-9 flex justify-center md:justify-start">
+            <div className="hero-reveal hero-reveal--4 mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
               <Button
                 asChild
                 className="h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[#68735f]"
               >
                 <Link href="/book">
-                  Book a Session <ArrowRight aria-hidden="true" />
+                  Book a Yoga Session <ArrowRight aria-hidden="true" />
                 </Link>
+              </Button>
+              <Button
+                asChild
+                className="h-12 rounded-full border-[#68735f]/25 bg-white/35 px-7 text-[var(--primary)] hover:bg-white/70"
+                variant="outline"
+              >
+                <Link href="#practices">Explore Yoga Sessions</Link>
               </Button>
             </div>
           </div>
@@ -229,7 +240,10 @@ export default function MovementPage() {
             <p className="text-xs font-medium tracking-[0.3em] text-[#68735f] uppercase">
               Come back inside
             </p>
-            <p className="mt-6 text-lg leading-[1.9] text-[var(--foreground)] md:text-xl">
+            <p className="mt-6 font-serif text-2xl text-[var(--primary)] italic md:text-3xl">
+              Body is where we deepen—with movement, breath, and sound.
+            </p>
+            <p className="mt-5 text-lg leading-[1.9] text-[var(--foreground)] md:text-xl">
               Your body keeps score. Tension accumulates — in the jaw, the hips,
               the breath. These sessions are designed to help that tension
               release. Not through performance, but through attention. Through
@@ -278,7 +292,7 @@ export default function MovementPage() {
                 </p>
                 <Link
                   className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)] underline-offset-4 hover:underline"
-                  href="/book"
+                  href={practice.bookingHref}
                 >
                   Ask about this practice
                   <ArrowRight className="size-4" aria-hidden="true" />
@@ -397,7 +411,7 @@ export default function MovementPage() {
               className="mt-8 h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[#68735f]"
             >
               <Link href="/book">
-                Book a Session <ArrowRight aria-hidden="true" />
+                Book a Yoga Session <ArrowRight aria-hidden="true" />
               </Link>
             </Button>
           </div>
@@ -444,11 +458,12 @@ export default function MovementPage() {
             className="mt-9 h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[#68735f]"
           >
             <Link href="/book">
-              Book a Session <ArrowRight aria-hidden="true" />
+              Book a Yoga Session <ArrowRight aria-hidden="true" />
             </Link>
           </Button>
         </div>
       </section>
+      <ServiceAreaNote />
     </div>
   )
 }

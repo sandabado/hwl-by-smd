@@ -28,6 +28,7 @@ const LABELS: Record<string, string> = {
   retreats: "Retreats",
   ritual: "Ritual",
   store: "Products",
+  tarot: "Tarot",
   terms: "Terms",
   "the-den": "The Den",
 }
@@ -48,8 +49,10 @@ const HIDDEN_PREFIXES = [
   "/reset-password",
   "/retreats",
   "/store",
+  "/tarot",
   "/the-den",
   "/update-password",
+  "/yoga",
 ]
 
 function humanize(segment: string) {

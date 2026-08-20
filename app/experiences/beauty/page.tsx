@@ -7,6 +7,7 @@ import { ParallaxImage } from "@/components/shared/parallax-image"
 import { PullQuote } from "@/components/shared/pull-quote"
 import { SectionDivider } from "@/components/shared/section-divider"
 import { SectionHeading } from "@/components/shared/section-heading"
+import { ServiceAreaNote } from "@/components/shared/service-area-note"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import {
@@ -19,33 +20,37 @@ import { media } from "@/lib/media"
 import { createPageMetadata, createServiceJsonLd } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
-  title: "Beauty | Facial Rituals | HWL by SMD",
+  title: "Facial Rituals & Skincare in Palm Springs | HWL by SMD",
   description:
-    "Facial rituals centered on thoughtful skin care and space to slow down.",
+    "Facial rituals, lymphatic care, and skin consultation with Shannon Mary Dixon in Palm Springs and the Coachella Valley.",
   path: "/beauty",
 })
 
 const offerings = [
   {
     title: "HWL Beauty & Being Ritual",
+    bookingHref: "/book?service=beauty-being-ritual#booking-inquiry",
     details: ["90 minutes", "Signature ritual", "Investment by consultation"],
     description:
       "A longer, layered beauty ritual shaped in conversation with Shannon. The exact modalities and pace are confirmed before you book.",
   },
   {
     title: "Restorative Facial",
+    bookingHref: "/book?service=restorative-facial#booking-inquiry",
     details: ["60 minutes", "Private session", "Investment by consultation"],
     description:
       "A facial centered on attentive skin care and unhurried massage, paced for comfort and a genuine moment of rest.",
   },
   {
     title: "Express Glow",
+    bookingHref: "/book?service=express-glow#booking-inquiry",
     details: ["45 minutes", "Private session", "Investment by consultation"],
     description:
       "A focused facial for visible radiance when time is limited, without rushing the care or the quiet around it.",
   },
   {
     title: "Skin Consultation",
+    bookingHref: "/book?service=skin-consultation#booking-inquiry",
     details: ["30 minutes", "One-to-one", "Investment by consultation"],
     description:
       "A thoughtful skin assessment with routine guidance for anyone who wants clarity before choosing an experience.",
@@ -294,6 +299,13 @@ export default function BeautyPage() {
               <p className="mt-6 max-w-xl text-base leading-[1.9] text-[var(--muted-foreground)]">
                 {offering.description}
               </p>
+              <Link
+                className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline"
+                href={offering.bookingHref}
+              >
+                Book this ritual
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
             </Card>
           ))}
         </div>
@@ -443,6 +455,7 @@ export default function BeautyPage() {
           </div>
         </div>
       </PageSection>
+      <ServiceAreaNote />
     </div>
   )
 }

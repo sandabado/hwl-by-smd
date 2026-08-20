@@ -68,8 +68,8 @@ export default async function AccountPage() {
               </>
             ) : (
               <p className="mt-5 leading-relaxed text-[var(--muted-foreground)]">
-                You&apos;re not a Den member yet. Your one-time rituals remain
-                yours.
+                Your one-time rituals remain yours. The Den will be here
+                whenever it feels right.
               </p>
             )}
           </article>
@@ -105,7 +105,8 @@ export default async function AccountPage() {
           ) : (
             <div className="mt-6">
               <p className="text-[var(--muted-foreground)]">
-                You haven&apos;t made any purchases yet.
+                Your purchase history is quiet for now. The store is here
+                whenever you feel like exploring.
               </p>
               <Button
                 asChild

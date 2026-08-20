@@ -1,6 +1,9 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
+  images: {
+    qualities: [75, 88],
+  },
   turbopack: {
     root: import.meta.dirname,
   },
@@ -13,12 +16,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/experiences/movement",
-        destination: "/body",
+        destination: "/yoga",
         permanent: true,
       },
       {
         source: "/experiences/ritual",
-        destination: "/being",
+        destination: "/tarot",
         permanent: true,
       },
       {
@@ -30,6 +33,26 @@ const nextConfig: NextConfig = {
         source: "/lift",
         destination: "/beauty/lift",
         permanent: true,
+      },
+      {
+        source: "/body",
+        destination: "/yoga",
+        statusCode: 301,
+      },
+      {
+        source: "/body/:path*",
+        destination: "/yoga/:path*",
+        statusCode: 301,
+      },
+      {
+        source: "/being",
+        destination: "/tarot",
+        statusCode: 301,
+      },
+      {
+        source: "/being/:path*",
+        destination: "/tarot/:path*",
+        statusCode: 301,
       },
     ]
   },

@@ -1,10 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useState } from "react"
 import type { ReactNode } from "react"
 import { usePathname } from "next/navigation"
 
+import { BreathLoader } from "@/components/shared/breath-loader"
+import { allowsAmbientMotion } from "@/lib/motion-policy"
 import { cn } from "@/lib/utils"
+
+const BREATH_SESSION_KEY = "hwl_breathed"
+
+type EntryBreathState = "checking" | "complete" | "showing"
 
 interface PageTransitionProps {
   children: ReactNode
@@ -44,10 +50,52 @@ function RouteReveal({
 
 export function PageTransition({ children, className }: PageTransitionProps) {
   const pathname = usePathname()
+  const loaderIsExcluded = !allowsAmbientMotion(pathname)
+  const [entryBreathState, setEntryBreathState] =
+    useState<EntryBreathState>("checking")
+
+  const completeEntryBreath = useCallback(() => {
+    try {
+      window.sessionStorage.setItem(BREATH_SESSION_KEY, "true")
+    } catch {
+      // The one-time pause still completes if session storage is unavailable.
+    }
+
+    setEntryBreathState("complete")
+  }, [])
+
+  useLayoutEffect(() => {
+    let cancelled = false
+    let nextState: EntryBreathState = "complete"
+
+    if (!loaderIsExcluded) {
+      try {
+        nextState =
+          window.sessionStorage.getItem(BREATH_SESSION_KEY) === "true"
+            ? "complete"
+            : "showing"
+      } catch {
+        nextState = "showing"
+      }
+    }
+
+    queueMicrotask(() => {
+      if (!cancelled) setEntryBreathState(nextState)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [loaderIsExcluded])
 
   return (
-    <RouteReveal className={className} key={pathname}>
-      {children}
-    </RouteReveal>
+    <>
+      {entryBreathState === "showing" && !loaderIsExcluded ? (
+        <BreathLoader onComplete={completeEntryBreath} />
+      ) : null}
+      <RouteReveal className={className} key={pathname}>
+        {children}
+      </RouteReveal>
+    </>
   )
 }

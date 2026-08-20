@@ -11,8 +11,8 @@ const footerColumns = [
     links: [
       { label: "About", href: "/about" },
       { label: "Beauty", href: "/beauty" },
-      { label: "Body", href: "/body" },
-      { label: "Being", href: "/being" },
+      { label: "Yoga", href: "/yoga" },
+      { label: "Tarot", href: "/tarot" },
       { label: "Retreats", href: "/retreats" },
       { label: "Journal", href: "/journal" },
     ],
@@ -20,10 +20,9 @@ const footerColumns = [
   {
     title: "Shop",
     links: [
-      { label: "LIFT Guide ($5.55)", href: "/beauty/lift" },
-      { label: "LIFT PDF ($3.33)", href: "/beauty/lift#download" },
-      { label: "The Den Membership ($11.11/mo)", href: "/store#the-den" },
-      { label: "All Products", href: "/store" },
+      { label: "LIFT Guide", href: "/beauty/lift" },
+      { label: "LIFT PDF", href: "/beauty/lift#download" },
+      { label: "Membership", href: "/store#the-den" },
     ],
   },
   {
@@ -31,8 +30,18 @@ const footerColumns = [
     links: [
       { label: "Sign In", href: "/login" },
       { label: "The Den", href: "/the-den" },
-      { label: "Book a Session", href: "/book" },
+      { label: "Book", href: "/book" },
       { label: "Contact", href: "/contact" },
+    ],
+  },
+  {
+    title: "Service Areas",
+    links: [
+      { label: "Palm Springs, CA" },
+      { label: "Joshua Tree, CA" },
+      { label: "Yucca Valley, CA" },
+      { label: "Desert Hot Springs, CA" },
+      { label: "Morongo Valley, CA" },
     ],
   },
 ] as const
@@ -81,33 +90,54 @@ export function Footer() {
           </address>
         </div>
 
-        <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-4">
           {footerColumns.map((column) => (
             <section key={column.title}>
               <h2 className="text-xs font-medium tracking-[0.24em] text-[var(--background)]/70 uppercase">
                 {column.title}
               </h2>
-              <nav
-                aria-label={`${column.title} footer links`}
-                className="mt-5 flex flex-col items-start gap-3"
-              >
-                {column.links.map((item) => (
-                  <Link
-                    className={footerLinkClass}
-                    href={item.href}
-                    key={item.label}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                {column.title === "Account" ? (
-                  <span className={footerLinkClass}>
-                    <Link href="/terms">Terms</Link>
-                    <span aria-hidden="true"> &amp; </span>
-                    <Link href="/privacy">Privacy</Link>
-                  </span>
-                ) : null}
-              </nav>
+              {column.title === "Service Areas" ? (
+                <>
+                  <div className="mt-5 flex flex-col items-start gap-3">
+                    {column.links.map((item) => (
+                      <span
+                        className="text-sm text-[var(--background)]/65"
+                        key={item.label}
+                      >
+                        {item.label}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="mt-5 max-w-56 text-xs leading-relaxed text-[var(--background)]/60">
+                    Based in Palm Springs. Serving the Coachella Valley and
+                    Hi-Desert.
+                  </p>
+                </>
+              ) : (
+                <nav
+                  aria-label={`${column.title} footer links`}
+                  className="mt-5 flex flex-col items-start gap-3"
+                >
+                  {column.links.map((item) =>
+                    "href" in item ? (
+                      <Link
+                        className={footerLinkClass}
+                        href={item.href}
+                        key={item.label}
+                      >
+                        {item.label}
+                      </Link>
+                    ) : null
+                  )}
+                  {column.title === "Account" ? (
+                    <span className={footerLinkClass}>
+                      <Link href="/terms">Terms</Link>
+                      <span aria-hidden="true"> &amp; </span>
+                      <Link href="/privacy">Privacy</Link>
+                    </span>
+                  ) : null}
+                </nav>
+              )}
             </section>
           ))}
         </div>

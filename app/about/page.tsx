@@ -21,9 +21,10 @@ import { media } from "@/lib/media"
 import { absoluteUrl, createPageMetadata, SITE_URL } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
-  title: "Meet Shannon | HWL by SMD",
+  title:
+    "Shannon Mary Dixon — Aesthetician, Yoga Teacher & Tarot Reader in Palm Springs",
   description:
-    "Meet Shannon Mary Dixon and explore the philosophy that brings Beauty, Body, and Being together at HWL by SMD.",
+    "Meet Shannon Mary Dixon: skincare alchemist, yoga guide, and tarot reader based in Palm Springs, California.",
   path: "/about",
 })
 
@@ -149,7 +150,8 @@ export default function AboutPage() {
                 className="mt-5 max-w-2xl text-white/88"
                 size="subheading"
               >
-                Beauty, body, and being — brought together with intention.
+                Beauty, body, and being — brought together with intention in
+                Palm Springs, California.
               </BreathingText>
             </Reveal>
           </div>

@@ -2,7 +2,7 @@ export const SITE_CONFIG = {
   name: "HWL by SMD",
   tagline: "Beauty · Body · Being",
   description:
-    "Luxury facial rituals, movement, and intentional wellness experiences designed to restore your glow from the inside out.",
+    "Beauty rituals, private yoga, tarot, and retreat experiences with Shannon Mary Dixon in Palm Springs.",
   email: "hello@howlbysmd.com",
   phone: "617.671.8636",
   instagramPersonal: "@shannmarydix",
@@ -16,6 +16,7 @@ export const SITE_CONFIG = {
 export const NAV_ITEMS = [
   { label: "About", href: "/about" },
   { label: "Beauty", href: "/beauty" },
-  { label: "Body", href: "/body" },
-  { label: "Being", href: "/being" },
+  { label: "Yoga", href: "/yoga" },
+  { label: "Tarot", href: "/tarot" },
+  { label: "Retreats", href: "/retreats" },
 ]

@@ -20,7 +20,7 @@ function createLocationServiceJsonLd(data: LocationPageData): JsonLdNode {
     description: data.introParagraphs[0],
     url: absoluteUrl(data.path),
     serviceType:
-      "Facial rituals, private yoga, sound baths, tarot readings, and retreat wellness programming",
+      "Facial rituals, private yoga, sound baths, astrology consultations, tarot readings, and retreat wellness programming",
     areaServed: {
       "@type": "Place",
       name: data.city,

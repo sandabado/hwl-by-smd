@@ -14,11 +14,12 @@ import { createPageMetadata } from "@/lib/seo"
 export const metadata = createPageMetadata({
   title: "The Journal | HWL by SMD",
   description:
-    "Notes from Shannon Mary Dixon's practice across beauty, yoga, tarot, and retreat living.",
+    "Notes from Shannon Mary Dixon's practice across beauty, yoga, astrology, tarot, and retreat living.",
   path: "/journal",
 })
 
-type JournalCategory = "Beauty" | "Yoga" | "Tarot" | "Retreat Living"
+type JournalCategory =
+  "Astrology" | "Beauty" | "Yoga" | "Tarot" | "Retreat Living"
 
 type Article = {
   category: JournalCategory
@@ -77,7 +78,7 @@ const articles: Article[] = [
       "Tarot is a reflective practice, not a predictive one. Understanding this distinction changes how readings work.",
   },
   {
-    category: "Tarot",
+    category: "Astrology",
     title: "Twenty Years of Symbols",
     excerpt:
       "Two decades studying astrology changes how you see the world—not because the stars control anything, but because patterns become visible.",

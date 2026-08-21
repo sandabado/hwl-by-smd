@@ -31,10 +31,10 @@ const pillars = [
     imageAlt: media.experiences.movementBoat.alt,
   },
   {
-    title: "Tarot",
+    title: "Astrology",
     description:
-      "Seasonal astrology, intuitive guidance, Reiki, and intentional ceremony.",
-    href: "/tarot",
+      "Seasonal astrology, tarot, intuitive guidance, Reiki, and intentional ceremony.",
+    href: "/astrology",
     imageSrc: media.experiences.ritualWolf.src,
     imageAlt: media.experiences.ritualWolf.alt,
   },

@@ -1,6 +1,6 @@
 # Whole Body OS — Phase 2
 
-> NOTE: This document references route names that have since been updated. /body is now /yoga. /being is now /tarot. The architecture and design decisions described herein remain valid.
+> NOTE: This document references route names that have since been updated. /body is now /yoga. /being and /tarot are now /astrology. The architecture and design decisions described herein remain valid.
 
 Phase 2 adds the first production commerce and member layer to HWL by SMD.
 
@@ -8,7 +8,7 @@ Phase 2 adds the first production commerce and member layer to HWL by SMD.
 
 ### Public
 
-- `/store` — LIFT PDF, LIFT Video + PDF, and The Den membership
+- `/store` — LIFT PDF, Complete LIFT (video + PDF), and The Den membership
 - `/lift` — public preview and direct purchase choices
 - `/login` — sign in and account creation
 - `/reset-password` and `/update-password` — recovery flow
@@ -52,7 +52,7 @@ Phase 2 adds the first production commerce and member layer to HWL by SMD.
    `LIFT_PDF_STORAGE_PATH`.
 4. Create three Stripe prices:
    - $3.33 one-time — LIFT PDF
-   - $5.55 one-time — LIFT Video + PDF
+   - $11.11 one-time — Complete LIFT, guided video + downloadable PDF
    - $11.11 monthly — The Den
 5. Register the Stripe webhook URL:
    `https://howlbysmd.com/api/stripe/webhook`.

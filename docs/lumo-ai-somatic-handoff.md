@@ -1,6 +1,6 @@
 # Paste This Into Lumo AI
 
-> NOTE: This document references route names that have since been updated. /body is now /yoga. /being is now /tarot. The architecture and design decisions described herein remain valid.
+> NOTE: This document references route names that have since been updated. /body is now /yoga. /being and /tarot are now /astrology. The architecture and design decisions described herein remain valid.
 
 You are helping Celeste and Codex finish **HWL by SMD / howlbysmd.com**, a
 luxury wellness platform for Shannon Mary Dixon.
@@ -24,7 +24,7 @@ The public rooms are:
 | `/about`       | Kitchen       | Intimate, vulnerable, lived-in |
 | `/beauty`      | Bathroom      | Cleansing, reflective, soft    |
 | `/yoga`        | Studio        | Grounded, spacious, in motion  |
-| `/tarot`       | Altar Room    | Mystical, quiet, reverent      |
+| `/astrology`   | Altar Room    | Mystical, quiet, reverent      |
 | `/retreats`    | Sunroom       | Expansive, airy, horizon-led   |
 | `/beauty/lift` | Dressing Room | Private, focused, ritualistic  |
 | `/journal`     | Library       | Thoughtful, warm, ordered      |
@@ -75,10 +75,10 @@ The final operating philosophy remains relationship-first:
 
 ### Public platform
 
-- Exact Beauty · Yoga · Tarot navigation.
+- Exact Beauty · Yoga + Sound · Astrology navigation.
 - Responsive desktop and mobile header.
 - Permanent legacy-route redirects.
-- Rebuilt Home, About, Beauty, Yoga, Tarot, Retreats, LIFT, Store, Journal,
+- Rebuilt Home, About, Beauty, Yoga + Sound, Astrology, Retreats, LIFT, Store, Journal,
   Book, Contact, Privacy, and Terms routes.
 - Branded footer.
 - Responsive section navigation, parallax, reveals, pull quotes, dividers,
@@ -113,7 +113,8 @@ approved.
 ### Products and member access
 
 - LIFT PDF — **$3.33** one-time.
-- LIFT Video + PDF — **$5.55** one-time and the featured starting product.
+- Complete LIFT — **$11.11** one-time, including guided video and the
+  downloadable PDF.
 - The Den — **$11.11/month**.
 - Ownership-aware Store states.
 - Authenticated paid access.
@@ -259,14 +260,14 @@ Provide:
 - “Beyond Skin Deep” paragraph.
 - Shannon’s LIFT welcome note and sign-off.
 - The Den welcome note.
-- Initial course list under Beauty, Yoga, and Tarot.
+- Initial course list under Beauty, Yoga, and Astrology.
 - Suggested lesson titles only; do not write fake credentials or results.
 
 ### 6. Journal starter set
 
 Give nine article briefs:
 
-- At least two per Beauty, Yoga, Tarot, and Retreat Living.
+- At least two per Beauty, Yoga, Astrology, and Retreat Living.
 - Title.
 - 1-sentence thesis.
 - 3-part outline.

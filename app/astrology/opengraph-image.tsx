@@ -4,13 +4,13 @@ import {
   OG_IMAGE_SIZE,
 } from "@/lib/og-image"
 
-export const alt = "Tarot, astrology, and ritual by HWL by SMD"
+export const alt = "Astrology, tarot, and ritual by HWL by SMD"
 export const size = OG_IMAGE_SIZE
 export const contentType = OG_IMAGE_CONTENT_TYPE
 
 export default function OpenGraphImage() {
   return createBrandOgImage({
-    eyebrow: "Tarot",
+    eyebrow: "Astrology",
     title: "A mirror, not a map.",
   })
 }

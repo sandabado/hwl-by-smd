@@ -23,9 +23,9 @@ const sections: LegalSection[] = [
     ],
   },
   {
-    title: "Tarot and astrology",
+    title: "Astrology and tarot",
     body: [
-      "Tarot and astrology readings are reflective practices offered for entertainment and personal insight. They do not constitute medical, psychological, legal, or financial advice.",
+      "Astrology and tarot readings are reflective practices offered for entertainment and personal insight. They do not constitute medical, psychological, legal, or financial advice.",
     ],
   },
   {

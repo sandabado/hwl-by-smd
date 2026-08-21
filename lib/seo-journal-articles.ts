@@ -101,7 +101,7 @@ export const seoJournalArticles = {
       },
     ],
     serviceLinks: [
-      { href: "/tarot", label: "Explore tarot readings" },
+      { href: "/astrology", label: "Explore astrology and tarot readings" },
       { href: "/book", label: "Request a private session" },
       { href: "/about", label: "Meet Shannon" },
     ],

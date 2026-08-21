@@ -11,6 +11,7 @@ import {
 import {
   getPriceId,
   getStripe,
+  isExpectedStripePrice,
   isProductCheckoutReady,
   isProductId,
   PRODUCTS,
@@ -75,6 +76,27 @@ export async function POST(request: Request) {
   const metadata = {
     product_type: body.productId,
     user_id: user.id,
+  }
+
+  try {
+    const configuredPrice = await stripe.prices.retrieve(price)
+    if (!isExpectedStripePrice(body.productId, configuredPrice)) {
+      return NextResponse.json(
+        {
+          error:
+            "This offering's secure price could not be verified. Checkout remains closed.",
+        },
+        { status: 503 }
+      )
+    }
+  } catch {
+    return NextResponse.json(
+      {
+        error:
+          "This offering's secure price could not be verified. Checkout remains closed.",
+      },
+      { status: 503 }
+    )
   }
 
   const session = await stripe.checkout.sessions.create({

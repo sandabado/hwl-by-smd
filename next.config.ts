@@ -51,7 +51,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/experiences/ritual",
-        destination: "/tarot",
+        destination: "/astrology",
         permanent: true,
       },
       {
@@ -76,12 +76,22 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/being",
-        destination: "/tarot",
+        destination: "/astrology",
         statusCode: 301,
       },
       {
         source: "/being/:path*",
-        destination: "/tarot/:path*",
+        destination: "/astrology/:path*",
+        statusCode: 301,
+      },
+      {
+        source: "/tarot",
+        destination: "/astrology",
+        statusCode: 301,
+      },
+      {
+        source: "/tarot/:path*",
+        destination: "/astrology/:path*",
         statusCode: 301,
       },
     ]

@@ -12,7 +12,7 @@ export function SiteEffects() {
   const pathname = usePathname()
   const allowAmbientMotion = allowsAmbientMotion(pathname)
 
-  if (pathname.startsWith("/admin")) return null
+  if (pathname === "/" || pathname.startsWith("/admin")) return null
 
   return (
     <>

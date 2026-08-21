@@ -1,4 +1,5 @@
 const AMBIENT_MOTION_EXCLUDED_ROUTES = [
+  "/",
   "/account",
   "/admin",
   "/auth",

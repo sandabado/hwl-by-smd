@@ -1,6 +1,11 @@
 # HWL by SMD / Whole Body OS
 
-> NOTE: This document references route names that have since been updated. /body is now /yoga. /being is now /tarot. The architecture and design decisions described herein remain valid.
+> NOTE: This document references route names that have since been updated. /body is now /yoga. /being and /tarot are now /astrology. The architecture and design decisions described herein remain valid.
+
+> PRICING UPDATE — August 20, 2026: the complete LIFT video + downloadable PDF
+> is now **$11.11 one-time**. The $5.55 figures below are retained only as a
+> historical record of the July 31 snapshot and must not be used for current
+> sales or Stripe configuration.
 
 ## Final Local Build Update for Lumo AI
 
@@ -27,7 +32,7 @@ marketing site:
 | `/about`       | Kitchen       | Complete locally; credentials remain visibly unverified         |
 | `/beauty`      | Bathroom      | Complete locally                                                |
 | `/yoga`        | Studio        | Complete locally                                                |
-| `/tarot`       | Altar Room    | Complete locally                                                |
+| `/astrology`   | Altar Room    | Complete locally                                                |
 | `/retreats`    | Sunroom       | Complete locally                                                |
 | `/beauty/lift` | Dressing Room | Complete locally; technique copy remains a marked draft         |
 | `/journal`     | Library       | Complete locally; briefs remain drafts                          |
@@ -43,7 +48,7 @@ Connection/Journey systems remain intact.
 
 ### Global architecture
 
-- Primary navigation is About, Beauty, Yoga, Tarot, Book, and account access.
+- Primary navigation is About, Beauty, Yoga + Sound, Astrology, Retreats, Store, Book, and account access.
 - Store products are available through the footer and contextual room links.
 - The mobile menu is a full-screen accessible sheet.
 - Public room routes do not carry redundant breadcrumb or sticky-page chrome.
@@ -56,7 +61,7 @@ Connection/Journey systems remain intact.
 **Living Room — Home**
 
 - Opens with “There is nothing wrong with you.”
-- Introduces Beauty, Yoga, and Tarot without statistics or a process funnel.
+- Introduces Beauty, Yoga + Sound, and Astrology without statistics or a process funnel.
 - Includes one verified Grace R. testimonial, the LIFT invitation, and a quiet
   invitation into the work.
 
@@ -79,7 +84,7 @@ Connection/Journey systems remain intact.
 - Presents private yoga, sound, and coaching/consultation pathways.
 - Contains no fabricated testimonials or persona claims.
 
-**Altar Room — Tarot**
+**Altar Room — Astrology**
 
 - Uses moon, candle, quiet, ritual, tarot, and astrology imagery.
 - Offers private and group ritual pathways without invented pricing.
@@ -104,7 +109,7 @@ Connection/Journey systems remain intact.
 
 **Library — Journal**
 
-- Functional Beauty, Yoga, Tarot, and Retreat Living filters.
+- Functional Beauty, Yoga, Astrology, and Retreat Living filters.
 - Nine honest draft briefs instead of fake publication dates or fake links.
 - Newsletter capture is implemented through the server email route.
 

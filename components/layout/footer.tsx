@@ -12,8 +12,8 @@ const footerColumns = [
       { label: "About", href: "/about" },
       { label: "All Experiences", href: "/experiences" },
       { label: "Beauty", href: "/beauty" },
-      { label: "Yoga + Sound", href: "/yoga" },
-      { label: "Tarot", href: "/tarot" },
+      { label: "Yoga", href: "/yoga" },
+      { label: "Astrology", href: "/astrology" },
       { label: "Retreats", href: "/retreats" },
       { label: "Journal", href: "/journal" },
     ],
@@ -56,7 +56,7 @@ const footerLinkClass =
 export function Footer() {
   const pathname = usePathname()
 
-  if (pathname.startsWith("/admin")) return null
+  if (pathname === "/" || pathname.startsWith("/admin")) return null
 
   return (
     <footer className="bg-[var(--primary)] text-[var(--background)]">

@@ -63,7 +63,7 @@ export function createWebsiteJsonLd(): JsonLdNode {
     name: SITE_NAME,
     url: absoluteUrl("/"),
     description:
-      "Beauty rituals, private yoga, tarot, and retreat experiences with Shannon Mary Dixon in Palm Springs.",
+      "Beauty rituals, private yoga, astrology, tarot, and retreat experiences with Shannon Mary Dixon in Palm Springs.",
     publisher: { "@id": `${SITE_URL}/#organization` },
     inLanguage: "en-US",
   }

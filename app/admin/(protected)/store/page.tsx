@@ -92,10 +92,8 @@ export default async function AdminStorePage() {
                       {product.access}
                     </td>
                     <td className="px-3 py-4">
-                      <StatusPill
-                        tone={priceConfigured ? "positive" : "warning"}
-                      >
-                        {priceConfigured ? "Configured" : product.status}
+                      <StatusPill tone={priceConfigured ? "quiet" : "warning"}>
+                        {priceConfigured ? "Price ID present" : product.status}
                       </StatusPill>
                     </td>
                     <td className="px-3 py-4 text-sm text-[#7b837b]">
@@ -141,7 +139,9 @@ export default async function AdminStorePage() {
             </div>
             <p className="text-xs leading-5 text-[#7a827a]">
               Secret values are never rendered. This panel reports only whether
-              the expected configuration is present.
+              the expected configuration is present. Checkout independently
+              verifies each Stripe Price amount, currency, and billing cadence
+              before it can open.
             </p>
           </div>
         </AdminPanel>

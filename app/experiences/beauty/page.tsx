@@ -441,7 +441,7 @@ export default function BeautyPage() {
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-5">
               <span className="font-serif text-4xl text-[var(--accent-on-dark)]">
-                $5.55
+                $11.11
               </span>
               <Button
                 asChild

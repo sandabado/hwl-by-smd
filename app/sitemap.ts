@@ -8,7 +8,7 @@ const routes = [
   { path: "/experiences", changeFrequency: "monthly", priority: 0.9 },
   { path: "/beauty", changeFrequency: "monthly", priority: 0.9 },
   { path: "/yoga", changeFrequency: "monthly", priority: 0.9 },
-  { path: "/tarot", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/astrology", changeFrequency: "monthly", priority: 0.9 },
   { path: "/retreats", changeFrequency: "monthly", priority: 0.9 },
   { path: "/journal", changeFrequency: "weekly", priority: 0.7 },
   {

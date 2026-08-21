@@ -27,9 +27,9 @@ const offers = [
     serviceType: "Private sound bath sessions",
   },
   {
-    name: "Tarot and Astrology Consultations",
-    path: "/tarot",
-    serviceType: "Tarot readings, astrology consultations, and ritual ceremony",
+    name: "Astrology and Tarot Consultations",
+    path: "/astrology",
+    serviceType: "Astrology consultations, tarot readings, and ritual ceremony",
   },
   {
     name: "Wellness Retreat Facilitation",
@@ -49,7 +49,7 @@ export function createLocalBusinessJsonLd(): JsonLdNode {
     image: absoluteUrl("/images/brand/shannon-window-portrait.webp"),
     logo: absoluteUrl("/og.png"),
     description:
-      "Facial rituals, private yoga, tarot readings, and retreat facilitation with Shannon Mary Dixon in Palm Springs and the surrounding desert communities.",
+      "Facial rituals, private yoga, astrology consultations, tarot readings, and retreat facilitation with Shannon Mary Dixon in Palm Springs and the surrounding desert communities.",
     email: SITE_CONFIG.email,
     telephone: "+1-617-671-8636",
     priceRange: "$$",

@@ -27,6 +27,26 @@ This stock landscape precursor is retained for provenance but is no longer used 
 
 The versioned directory is immutable. Future footage should use a new version rather than replacing `v3` in place.
 
+## LIFT facial ritual preview
+
+- Preview film: `public/video/lift/facial-lift-preview.mp4`
+- Poster: `public/images/editorial/lift-video-preview.jpg`
+- Source: `FACIAL LIFT VIDEO FINAL.mp4`, supplied directly by the site owner on 2026-08-20.
+- Source properties: 1920×1080, 3 minutes 54.526 seconds, approximately 563 MB, with video and audio tracks.
+- Local treatment: the opening 4.5 seconds were encoded as a lightweight 480×272 web preview. The site always presents this derivative muted, plays it once rather than looping it, and falls back to the poster for reduced-motion, reduced-data, Save-Data, and slow-connection visitors.
+- Privacy and access boundary: the full source is not copied into the public repository. It remains reserved for the private LIFT delivery workflow.
+
+## About Shannon editorial concepts v1
+
+- Files:
+  - `public/images/editorial/about-shannon-skating-concept-v1.webp`
+  - `public/images/editorial/about-shannon-motorcycle-concept-v1.webp`
+- Source: original AI-generated editorial concepts created for HWL by SMD on 2026-08-20. Shannon's existing window, standing-stretch, and smiling portraits were supplied as identity and physical references.
+- Skating art direction: a quiet indoor rink, technically plausible adult figure-skating posture, full skates and hands in frame, restrained aubergine athletic styling, and luminous natural morning light.
+- Motorcycle art direction: a controlled Palm Springs-style desert ride with California fan palms and mountain light, full protective clothing and helmet, realistic unbranded motorcycle geometry, and no stunt or high-speed behavior.
+- Local treatment: generated 1536×1024 PNG masters were converted to versioned WebP assets at quality 88. The generated masters remain in the local Codex generation archive.
+- Disclosure boundary: these are representational editorial concepts, not archival or documentary photographs of a particular skating session or motorcycle ride. Any public use must retain a visible “Editorial concept” caption. Replace them with real, rights-cleared photographs when Shannon supplies them.
+
 ## Tarot Rider-Waite-Smith spread v1
 
 - File: `public/images/experiences/tarot-rider-waite-spread-v1.webp`

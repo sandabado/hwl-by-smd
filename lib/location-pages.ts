@@ -4,7 +4,7 @@ export type LocationPageSlug =
 type LocationServiceEntry =
   | { title: "Beauty"; href: "/beauty"; description: string }
   | { title: "Yoga"; href: "/yoga"; description: string }
-  | { title: "Tarot"; href: "/tarot"; description: string }
+  | { title: "Astrology"; href: "/astrology"; description: string }
   | { title: "Book"; href: "/book"; description: string }
 
 export type LocationPageData = {
@@ -41,13 +41,13 @@ export const LOCATION_PAGES: Record<LocationPageSlug, LocationPageData> = {
     city: "Palm Springs",
     path: "/palm-springs",
     metadata: {
-      title: "Facial Rituals, Yoga & Tarot in Palm Springs | HWL by SMD",
+      title: "Facial Rituals, Yoga & Astrology in Palm Springs | HWL by SMD",
       description:
-        "Explore facial rituals, private yoga, sound, tarot readings, and retreat support with Shannon Mary Dixon in Palm Springs, California.",
+        "Explore facial rituals, private yoga, sound, astrology consultations, tarot readings, and retreat support with Shannon Mary Dixon in Palm Springs, California.",
     },
     heroTitle: "Wellness experiences with room to exhale in Palm Springs.",
     introParagraphs: [
-      "HWL by SMD brings beauty, movement, and reflective ritual into one considered practice for Palm Springs. Shannon Mary Dixon offers facial rituals, private yoga, sound-centered sessions, tarot, and custom retreat support with a calm, personal approach. Each experience begins with a conversation so the format can reflect the occasion, the available setting, and the people who will be present.",
+      "HWL by SMD brings beauty, movement, and reflective ritual into one considered practice for Palm Springs. Shannon Mary Dixon offers facial rituals, private yoga, sound-centered sessions, astrology, tarot, and custom retreat support with a calm, personal approach. Each experience begins with a conversation so the format can reflect the occasion, the available setting, and the people who will be present.",
       "You might be looking for quiet one-to-one care, a grounded session to share with a small group, or a thoughtful addition to a longer gathering. There is no standard itinerary to fit yourself around. An inquiry is simply a place to describe what you need, ask practical questions, and confirm whether an offering, time, and location are a good match.",
     ],
     placeHeading: "Care shaped for the pace of Palm Springs.",
@@ -69,10 +69,10 @@ export const LOCATION_PAGES: Record<LocationPageSlug, LocationPageData> = {
           "Consider private yoga, restorative movement, breath, or sound in a format shaped around your experience level and intention.",
       },
       {
-        title: "Tarot",
-        href: "/tarot",
+        title: "Astrology",
+        href: "/astrology",
         description:
-          "Choose tarot, astrology, or ritual as a reflective practice for a question, transition, gathering, or season of change.",
+          "Choose astrology, tarot, or ritual as a reflective practice for a question, transition, gathering, or season of change.",
       },
       {
         title: "Book",
@@ -96,13 +96,14 @@ export const LOCATION_PAGES: Record<LocationPageSlug, LocationPageData> = {
     city: "Joshua Tree",
     path: "/joshua-tree",
     metadata: {
-      title: "Yoga, Sound, Tarot & Facial Rituals in Joshua Tree | HWL by SMD",
+      title:
+        "Yoga, Sound, Astrology & Facial Rituals in Joshua Tree | HWL by SMD",
       description:
-        "Discover private yoga, sound, tarot readings, facial rituals, and retreat wellness support with Shannon Mary Dixon in Joshua Tree, California.",
+        "Discover private yoga, sound, astrology consultations, tarot readings, facial rituals, and retreat wellness support with Shannon Mary Dixon in Joshua Tree, California.",
     },
     heroTitle: "Quiet, grounded wellness experiences in Joshua Tree.",
     introParagraphs: [
-      "Joshua Tree invites attention without demanding it. HWL by SMD serves the area with private and small-group experiences that make space for care, movement, listening, and reflection. Shannon Mary Dixon brings facial ritual, yoga, sound, tarot, and retreat facilitation together through an approach that is personal, practical, and responsive to the people in the room.",
+      "Joshua Tree invites attention without demanding it. HWL by SMD serves the area with private and small-group experiences that make space for care, movement, listening, and reflection. Shannon Mary Dixon brings facial ritual, yoga, sound, astrology, tarot, and retreat facilitation together through an approach that is personal, practical, and responsive to the people in the room.",
       "A session can support time set aside for yourself, a shared weekend, or a gathering with a wider intention. Rather than promising a fixed atmosphere or outcome, Shannon starts with useful details: the service you are drawn to, the size of the group, the setting you have in mind, and the time available. From there, she can confirm what is realistic and appropriate.",
     ],
     placeHeading: "An offering that respects the high desert.",
@@ -124,10 +125,10 @@ export const LOCATION_PAGES: Record<LocationPageSlug, LocationPageData> = {
           "Request private yoga, restorative movement, breath, or a sound-centered session for an individual or small group.",
       },
       {
-        title: "Tarot",
-        href: "/tarot",
+        title: "Astrology",
+        href: "/astrology",
         description:
-          "Use tarot, astrology, or ritual as a non-predictive framework for reflection, conversation, and marking a meaningful threshold.",
+          "Use astrology, tarot, or ritual as a non-predictive framework for reflection, conversation, and marking a meaningful threshold.",
       },
       {
         title: "Book",
@@ -152,13 +153,13 @@ export const LOCATION_PAGES: Record<LocationPageSlug, LocationPageData> = {
     path: "/yucca-valley",
     metadata: {
       title:
-        "Facial Rituals, Private Yoga & Tarot in Yucca Valley | HWL by SMD",
+        "Facial Rituals, Private Yoga & Astrology in Yucca Valley | HWL by SMD",
       description:
-        "Explore facial rituals, private yoga, sound, tarot, and thoughtful group wellness experiences with Shannon Mary Dixon in Yucca Valley, California.",
+        "Explore facial rituals, private yoga, sound, astrology, tarot, and thoughtful group wellness experiences with Shannon Mary Dixon in Yucca Valley, California.",
     },
     heroTitle: "Personal wellness care for Yucca Valley and the high desert.",
     introParagraphs: [
-      "HWL by SMD serves Yucca Valley with a grounded mix of beauty, movement, sound, and reflective ritual. Shannon Mary Dixon works with individuals, small groups, and retreat hosts who want an experience that feels considered without becoming complicated. Facial rituals, private yoga, tarot, and custom wellness programming are approached with clear boundaries, warm attention, and respect for each guest's preferences.",
+      "HWL by SMD serves Yucca Valley with a grounded mix of beauty, movement, sound, and reflective ritual. Shannon Mary Dixon works with individuals, small groups, and retreat hosts who want an experience that feels considered without becoming complicated. Facial rituals, private yoga, astrology, tarot, and custom wellness programming are approached with clear boundaries, warm attention, and respect for each guest's preferences.",
       "The first step is not choosing from a rigid package. It is sharing what you are planning and what kind of support would be useful. Shannon can then discuss the possible format, the amount of time needed, and any practical considerations for the proposed setting. Nothing is confirmed until those details are understood, giving both sides a clear foundation for the experience.",
     ],
     placeHeading: "A steady rhythm for a lived-in desert town.",
@@ -180,10 +181,10 @@ export const LOCATION_PAGES: Record<LocationPageSlug, LocationPageData> = {
           "Explore private yoga, restorative movement, breath, and sound with options discussed for your pace and group.",
       },
       {
-        title: "Tarot",
-        href: "/tarot",
+        title: "Astrology",
+        href: "/astrology",
         description:
-          "Consider tarot, astrology, or ritual for reflection and self-inquiry, without predictive claims or pressure to believe.",
+          "Consider astrology, tarot, or ritual for reflection and self-inquiry, without predictive claims or pressure to believe.",
       },
       {
         title: "Book",
@@ -207,13 +208,14 @@ export const LOCATION_PAGES: Record<LocationPageSlug, LocationPageData> = {
     city: "Desert Hot Springs",
     path: "/desert-hot-springs",
     metadata: {
-      title: "Yoga, Tarot & Facial Rituals in Desert Hot Springs | HWL by SMD",
+      title:
+        "Yoga, Astrology & Facial Rituals in Desert Hot Springs | HWL by SMD",
       description:
-        "Explore private yoga, sound, tarot readings, facial rituals, and retreat wellness support with Shannon Mary Dixon in Desert Hot Springs, California.",
+        "Explore private yoga, sound, astrology consultations, tarot readings, facial rituals, and retreat wellness support with Shannon Mary Dixon in Desert Hot Springs, California.",
     },
     heroTitle: "Restorative time, thoughtfully held in Desert Hot Springs.",
     introParagraphs: [
-      "Desert Hot Springs has a long association with rest and mineral water, but every visit and gathering carries its own purpose. HWL by SMD adds a personal layer of beauty, movement, sound, and ritual without assuming what restoration should look like. Shannon Mary Dixon offers facial rituals, private yoga, tarot, and custom group experiences through a calm, collaborative process.",
+      "Desert Hot Springs has a long association with rest and mineral water, but every visit and gathering carries its own purpose. HWL by SMD adds a personal layer of beauty, movement, sound, and ritual without assuming what restoration should look like. Shannon Mary Dixon offers facial rituals, private yoga, astrology, tarot, and custom group experiences through a calm, collaborative process.",
       "Some inquiries begin with a specific service; others begin with a schedule, a group, or a desire to create one meaningful pause. Shannon listens for the practical shape of the request before recommending a format. Timing, group size, location, access, and expectations are discussed in advance, and an offering is confirmed only when those pieces can be brought together responsibly.",
     ],
     placeHeading: "A measured approach in a place known for rest.",
@@ -235,10 +237,10 @@ export const LOCATION_PAGES: Record<LocationPageSlug, LocationPageData> = {
           "Request private yoga, restorative movement, breath, or sound as a focused session or part of a gathering.",
       },
       {
-        title: "Tarot",
-        href: "/tarot",
+        title: "Astrology",
+        href: "/astrology",
         description:
-          "Invite tarot, astrology, or ritual into a reflective conversation held without prediction, certainty, or prescribed meaning.",
+          "Invite astrology, tarot, or ritual into a reflective conversation held without prediction, certainty, or prescribed meaning.",
       },
       {
         title: "Book",

@@ -1,19 +1,11 @@
+import Image from "next/image"
 import Link from "next/link"
-import {
-  ArrowRight,
-  Droplets,
-  Flower2,
-  MoonStar,
-  Sparkles,
-  Waves,
-  Wind,
-} from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 import { JsonLd } from "@/components/seo/json-ld"
 import { AmbientLight } from "@/components/shared/ambient-light"
 import { BreathingSection } from "@/components/shared/breathing-section"
 import { BreathingText } from "@/components/shared/breathing-text"
-import { ParallaxWindow } from "@/components/shared/parallax-window"
 import { Reveal } from "@/components/shared/reveal"
 import { TextureOverlay } from "@/components/shared/texture-overlay"
 import { Button } from "@/components/ui/button"
@@ -21,86 +13,19 @@ import { media } from "@/lib/media"
 import { absoluteUrl, createPageMetadata, SITE_URL } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
-  title:
-    "Shannon Mary Dixon — Aesthetician, Yoga Teacher & Tarot Reader in Palm Springs",
+  title: "Shannon Mary Dixon | About HWL by SMD",
   description:
-    "Meet Shannon Mary Dixon, a licensed aesthetician, 500-hour yoga instructor, Reiki practitioner, and aromatherapy specialist in Palm Springs.",
+    "Meet Shannon Mary Dixon and explore the movement, beauty, and reflective practices behind HWL by SMD in Palm Springs.",
   path: "/about",
 })
 
-const journey = [
-  {
-    title: "Beauty",
-    body: "Begin with what can be felt: skin, touch, and attention.",
-  },
-  {
-    title: "Body",
-    body: "Let breath, movement, and sound create room to soften.",
-  },
-  {
-    title: "Being",
-    body: "Make space for questions, transitions, and inner listening.",
-  },
-  {
-    title: "Integration",
-    body: "Bring each practice back to the whole person.",
-  },
-  {
-    title: "HWL",
-    body: "A home where Beauty, Body, and Being can be experienced together.",
-  },
-]
-
-const modalities = [
-  {
-    title: "Skin Rituals",
-    description: "Thoughtful care for skin, touch, and rest.",
-    icon: Flower2,
-  },
-  {
-    title: "Restorative Touch",
-    description: "Gentle, rhythmic touch held with patience and care.",
-    icon: Droplets,
-  },
-  {
-    title: "Yoga",
-    description: "Movement shaped by attention, breath, and embodiment.",
-    icon: Wind,
-  },
-  {
-    title: "Sound & Rest",
-    description: "An invitation to slow down and listen inward.",
-    icon: Waves,
-  },
-  {
-    title: "Tarot",
-    description: "A reflective practice for questions, clarity, and change.",
-    icon: Sparkles,
-  },
-  {
-    title: "Ritual Ceremony",
-    description:
-      "Astrology and ceremony for meaningful thresholds and transitions.",
-    icon: MoonStar,
-  },
-]
-
-const story = [
-  "Shannon started on ice. Figure skating — the discipline, the early mornings, the falls you don't talk about. Elite athletics taught her embodiment, resilience, and presence before she had words for them. When the body said stop, she listened. Not right away. But eventually.",
-  "Beauty came next. Licensed aesthetician. She learned the face like terrain — where tension collects, where lymph stalls, where a gentle hand can move what years of holding have locked. Aromatherapy study. Reiki training. The understanding that touch is a language the nervous system speaks before the mind translates.",
-  "Then the body. 500 hours of yoga instruction. Breath as regulation, not performance. Sound as vibration the body receives before the brain interprets. Private sessions customized for restorative flow, vinyasa strength, mobility work, or athletic recovery. Always with modifications. Always free of judgment.",
-  "Then the being. Twenty years studying astrology, symbolism, ritual, tarot, energetics. The practices women kept alive when institutions weren't listening. Not prediction. Reflection. Pattern-reading. Astrology for context, not fate. Tarot for clarity, not certainty.",
-  "Reiki wove through all of it. Energy moves where attention goes. Healing isn't something you do to someone — it's something you create space for.",
-  "Now it's one practice. HWL. Beauty, body, being. In the desert, where things are dry and clear and you can see further than you can hide.",
-] as const
-
 const credentials = [
-  "Licensed Aesthetician",
-  "500hr Yoga Instructor",
-  "Reiki Practitioner",
-  "Aromatherapy Specialist",
+  "Aesthetician",
+  "Yoga Teacher Training",
+  "Reiki Practice",
+  "Aromatherapy Study",
   "Wellness Facilitator",
-  "Former Elite Figure Skater",
+  "Figure Skating Background",
 ] as const
 
 const shannonJsonLd = {
@@ -112,249 +37,439 @@ const shannonJsonLd = {
   image: absoluteUrl(media.brand.windowPortrait.src),
 }
 
+const eyebrowClass =
+  "text-xs font-semibold tracking-[0.24em] text-[var(--accent)] uppercase"
+
 export default function AboutPage() {
   return (
     <>
       <JsonLd data={shannonJsonLd} id="shannon-person-schema" />
 
-      <section className="kitchen-hero relative -mt-16 overflow-hidden px-6 pt-28 pb-20 md:-mt-20 md:pt-32 md:pb-28">
+      <section className="relative isolate -mt-16 overflow-hidden bg-[var(--room-cream)] px-6 pt-28 pb-20 md:-mt-20 md:pt-36 md:pb-28">
         <AmbientLight position="top-left" tone="warm" />
         <AmbientLight position="bottom-right" tone="clay" />
         <TextureOverlay intensity="soft" variant="paper" />
 
-        <div className="relative z-10 mx-auto max-w-7xl">
-          <div className="relative overflow-hidden rounded-[2.5rem] shadow-[0_38px_110px_rgba(72,55,43,0.18)]">
-            <ParallaxWindow
-              alt={media.brand.windowPortrait.alt}
-              aspectRatio="16 / 10"
-              className="min-h-[36rem] rounded-[2.5rem] md:min-h-[43rem]"
-              frame="none"
-              imageClassName="object-cover object-[center_38%]"
-              preload
-              sizes="(max-width: 767px) 100vw, 90vw"
-              speed={0.12}
-              src={media.brand.windowPortrait.src}
-              texture="paper"
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(180deg,transparent_30%,rgba(31,25,22,0.74)_100%)]"
-            />
-            <Reveal className="absolute right-0 bottom-0 left-0 z-20 p-8 text-white md:p-14 lg:p-16">
-              <p className="mb-5 text-xs tracking-[0.28em] text-white/75 uppercase">
-                About
-              </p>
-              <BreathingText
-                as="h1"
-                className="max-w-3xl text-white md:text-7xl"
-                size="hero"
-              >
-                Shannon&apos;s Story
-              </BreathingText>
-              <BreathingText
-                className="mt-5 max-w-2xl text-white/88"
-                size="subheading"
-              >
-                One long way home.
-              </BreathingText>
-            </Reveal>
-          </div>
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
+          <Reveal className="max-w-xl lg:pb-14">
+            <p className={eyebrowClass}>Meet Shannon Mary Dixon</p>
+            <BreathingText
+              as="h1"
+              className="mt-6 max-w-[9ch] text-[var(--primary)]"
+              size="hero"
+            >
+              A life lived in motion.
+            </BreathingText>
+            <BreathingText
+              className="mt-7 max-w-lg text-[var(--muted-foreground)]"
+              size="subheading"
+            >
+              Aesthetician, movement teacher, astrologer, former skater—and a
+              person who has always paid close attention to what the body is
+              saying.
+            </BreathingText>
+            <p className="mt-8 max-w-md text-base leading-[1.85] text-[var(--muted-foreground)]">
+              HWL is where Shannon&apos;s worlds meet: beauty, movement, and
+              reflective practice, held with warmth and without performance.
+            </p>
+            <Link
+              className="mt-9 inline-flex min-h-12 items-center gap-2 rounded-full border border-[var(--border)] bg-white/55 px-6 py-3 text-sm font-semibold text-[var(--primary)] transition hover:bg-white focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-4 focus-visible:outline-none"
+              href="#ice"
+            >
+              Read her story
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </Link>
+          </Reveal>
+
+          <Reveal className="lg:pt-8" delay={100}>
+            <figure>
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-[var(--muted)] shadow-[0_38px_100px_rgba(72,55,43,0.16)] sm:aspect-[5/6]">
+                <Image
+                  alt={media.brand.windowPortrait.alt}
+                  className="object-cover object-[center_38%]"
+                  fill
+                  preload
+                  quality={88}
+                  sizes="(max-width: 1023px) 100vw, 58vw"
+                  src={media.brand.windowPortrait.src}
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,transparent_64%,rgba(35,30,27,0.34)_100%)]"
+                />
+              </div>
+              <figcaption className="mt-4 flex items-center justify-between gap-5 text-xs tracking-[0.14em] text-[var(--muted-foreground)] uppercase">
+                <span>Shannon Mary Dixon</span>
+                <span>Palm Springs, California</span>
+              </figcaption>
+            </figure>
+          </Reveal>
         </div>
       </section>
 
       <BreathingSection
-        contentClassName="mx-auto max-w-3xl px-6 text-center"
-        id="philosophy"
+        background="cool"
+        contentClassName="mx-auto grid w-full max-w-7xl items-center gap-12 px-6 lg:grid-cols-[1.16fr_0.84fr] lg:gap-20"
+        id="ice"
         padding="expansive"
         variant="kitchen"
       >
-        <div className="space-y-7 text-left">
-          {story.map((paragraph) => (
-            <BreathingText
-              className="text-[var(--muted-foreground)]"
-              key={paragraph}
-              size="body"
-            >
-              {paragraph}
-            </BreathingText>
-          ))}
-        </div>
+        <figure data-media-kind={media.editorial.aboutSkatingConcept.kind}>
+          <div className="relative aspect-[3/2] overflow-hidden rounded-[2rem] bg-[var(--muted)] shadow-[0_30px_90px_rgba(72,55,43,0.12)]">
+            <Image
+              alt={media.editorial.aboutSkatingConcept.alt}
+              className="object-cover object-center"
+              fill
+              quality={88}
+              sizes="(max-width: 1023px) 100vw, 58vw"
+              src={media.editorial.aboutSkatingConcept.src}
+            />
+          </div>
+          <figcaption className="mt-4 max-w-2xl text-xs leading-[1.7] tracking-[0.1em] text-[var(--muted-foreground)] uppercase">
+            <span className="font-semibold text-[var(--accent)]">
+              {media.editorial.aboutSkatingConcept.label}
+            </span>{" "}
+            · Visualization of Shannon&apos;s skating chapter.{" "}
+            {media.editorial.aboutSkatingConcept.disclosure}
+          </figcaption>
+        </figure>
 
-        <BreathingText
-          as="blockquote"
-          className="mx-auto mt-20 max-w-2xl border-l-2 border-[var(--room-clay)] pl-7 text-left font-serif text-3xl text-[var(--primary)] italic md:text-4xl"
-          size="subheading"
-        >
-          “The most powerful experiences don&apos;t ask us to become someone
-          new. They help us remember who we already are.”
-        </BreathingText>
+        <article className="max-w-xl">
+          <p className={eyebrowClass}>01 · The ice</p>
+          <BreathingText
+            as="h2"
+            className="mt-5 text-[var(--primary)]"
+            size="heading"
+          >
+            The body knew first.
+          </BreathingText>
+          <BreathingText
+            className="mt-7 text-[var(--muted-foreground)]"
+            size="body"
+          >
+            Shannon&apos;s story begins with figure skating: repetition,
+            balance, precision, and learning how to return after a fall.
+          </BreathingText>
+          <p className="mt-6 text-base leading-[1.85] text-[var(--muted-foreground)]">
+            She describes the ice as her earliest education in presence. Long
+            before wellness became her work, she understood that the body
+            notices everything—and that attention changes how we move through an
+            experience.
+          </p>
+        </article>
+      </BreathingSection>
+
+      <BreathingSection
+        contentClassName="mx-auto grid w-full max-w-7xl items-center gap-14 px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24"
+        id="movement"
+        padding="expansive"
+        variant="studio"
+      >
+        <article className="max-w-xl lg:pr-6">
+          <p className={eyebrowClass}>02 · Movement</p>
+          <BreathingText
+            as="h2"
+            className="mt-5 text-[var(--primary)]"
+            size="heading"
+          >
+            Strength became a softer kind of listening.
+          </BreathingText>
+          <BreathingText
+            className="mt-7 text-[var(--muted-foreground)]"
+            size="body"
+          >
+            Yoga gave Shannon another language for rhythm, effort, breath, and
+            rest.
+          </BreathingText>
+          <p className="mt-6 text-base leading-[1.85] text-[var(--muted-foreground)]">
+            Her teaching is grounded in choice. A session can be strong or
+            restorative, exacting or quiet, with room to modify and respond to
+            the person who arrived that day.
+          </p>
+          <Link
+            className="mt-8 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[var(--accent)] underline decoration-[var(--room-clay)] underline-offset-8 transition hover:text-[var(--primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-4 focus-visible:outline-none"
+            href="/yoga"
+          >
+            Explore yoga + sound
+            <ArrowRight aria-hidden="true" className="size-4" />
+          </Link>
+        </article>
+
+        <div className="grid grid-cols-[1.08fr_0.92fr] items-end gap-4 sm:gap-6">
+          <figure>
+            <div className="relative aspect-[2/3] overflow-hidden rounded-[2rem] bg-[var(--muted)]">
+              <Image
+                alt={media.experiences.movementBoat.alt}
+                className="object-cover object-center"
+                fill
+                quality={88}
+                sizes="(max-width: 1023px) 54vw, 34vw"
+                src={media.experiences.movementBoat.src}
+              />
+            </div>
+            <figcaption className="mt-3 text-xs tracking-[0.12em] text-[var(--muted-foreground)] uppercase">
+              Shannon in practice
+            </figcaption>
+          </figure>
+          <figure className="pb-10 sm:pb-16">
+            <div className="relative aspect-[2/3] overflow-hidden rounded-[2rem] bg-[var(--muted)]">
+              <Image
+                alt={media.brand.standingStretch.alt}
+                className="object-cover object-center"
+                fill
+                quality={88}
+                sizes="(max-width: 1023px) 42vw, 27vw"
+                src={media.brand.standingStretch.src}
+              />
+            </div>
+          </figure>
+        </div>
       </BreathingSection>
 
       <BreathingSection
         background="gradient"
         contentClassName="mx-auto w-full max-w-7xl px-6"
-        id="journey"
+        id="road"
         padding="expansive"
         variant="kitchen"
       >
-        <div className="mx-auto max-w-3xl text-center">
-          <BreathingText
-            className="text-[var(--accent)] uppercase"
-            size="caption"
-          >
-            The journey
-          </BreathingText>
-          <BreathingText
-            as="h2"
-            className="mt-5 text-[var(--primary)]"
-            size="heading"
-          >
-            Five invitations. One continuous practice.
-          </BreathingText>
+        <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-end lg:gap-20">
+          <p className={eyebrowClass}>03 · The open road</p>
+          <div>
+            <BreathingText
+              as="h2"
+              className="max-w-3xl text-[var(--primary)]"
+              size="heading"
+            >
+              Calm was never the same thing as standing still.
+            </BreathingText>
+            <p className="mt-6 max-w-2xl text-base leading-[1.85] text-[var(--muted-foreground)]">
+              Riding carries another side of Shannon&apos;s story: independence,
+              momentum, and the clear focus that comes from being fully inside a
+              moment.
+            </p>
+          </div>
         </div>
 
-        <ol className="kitchen-timeline mt-16 grid gap-8 md:grid-cols-5 md:gap-4">
-          {journey.map((item, index) => (
-            <Reveal as="li" delay={index * 90} key={item.title}>
-              <span className="relative z-10 grid size-10 place-items-center rounded-full border border-[var(--room-clay)] bg-[var(--background)] font-serif text-sm text-[var(--accent)] shadow-[0_8px_24px_rgba(72,55,43,0.08)]">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div className="mt-6 pl-14 md:pl-0">
-                <h3 className="text-2xl text-[var(--primary)]">{item.title}</h3>
-                <p className="mt-3 text-sm leading-[1.8] text-[var(--muted-foreground)]">
-                  {item.body}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </ol>
-      </BreathingSection>
-
-      <BreathingSection
-        contentClassName="mx-auto w-full max-w-7xl px-6"
-        id="modalities"
-        padding="expansive"
-        variant="kitchen"
-      >
-        <div className="mx-auto max-w-3xl text-center">
-          <BreathingText
-            className="text-[var(--accent)] uppercase"
-            size="caption"
-          >
-            Modalities
-          </BreathingText>
-          <BreathingText
-            as="h2"
-            className="mt-5 text-[var(--primary)]"
-            size="heading"
-          >
-            Different languages for the same care.
-          </BreathingText>
-        </div>
-
-        <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {modalities.map((modality, index) => {
-            const Icon = modality.icon
-
-            return (
-              <Reveal
-                as="article"
-                delay={(index % 3) * 90}
-                key={modality.title}
-              >
-                <div className="h-full rounded-[1.75rem] border border-[var(--border)] bg-white/52 p-7 shadow-[0_18px_55px_rgba(72,55,43,0.06)] transition duration-400 hover:bg-white/72 hover:shadow-[0_24px_70px_rgba(72,55,43,0.1)] motion-safe:hover:-translate-y-1">
-                  <Icon
-                    aria-hidden="true"
-                    className="size-5 text-[var(--accent)]"
-                    strokeWidth={1.4}
-                  />
-                  <h3 className="mt-8 text-3xl text-[var(--primary)]">
-                    {modality.title}
-                  </h3>
-                  <p className="mt-4 text-base leading-[1.8] text-[var(--muted-foreground)]">
-                    {modality.description}
-                  </p>
-                </div>
-              </Reveal>
-            )
-          })}
-        </div>
+        <figure
+          className="mt-12 md:mt-16"
+          data-media-kind={media.editorial.aboutMotorcycleConcept.kind}
+        >
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] bg-[var(--muted)] shadow-[0_32px_90px_rgba(72,55,43,0.14)] md:aspect-[3/2]">
+            <Image
+              alt={media.editorial.aboutMotorcycleConcept.alt}
+              className="object-cover object-[46%_center]"
+              fill
+              quality={88}
+              sizes="(max-width: 767px) 100vw, 90vw"
+              src={media.editorial.aboutMotorcycleConcept.src}
+            />
+          </div>
+          <figcaption className="mt-4 text-xs leading-[1.7] tracking-[0.1em] text-[var(--muted-foreground)] uppercase">
+            <span className="font-semibold text-[var(--accent)]">
+              {media.editorial.aboutMotorcycleConcept.label}
+            </span>{" "}
+            · Visualization of Shannon&apos;s motorcycle chapter.{" "}
+            {media.editorial.aboutMotorcycleConcept.disclosure}
+          </figcaption>
+        </figure>
       </BreathingSection>
 
       <BreathingSection
         background="cool"
-        contentClassName="mx-auto w-full max-w-6xl px-6"
-        id="credentials"
+        contentClassName="mx-auto grid w-full max-w-7xl items-center gap-14 px-6 lg:grid-cols-[1.18fr_0.82fr] lg:gap-24"
+        id="beauty"
         padding="expansive"
-        variant="kitchen"
+        variant="bathroom"
       >
-        <div className="mx-auto max-w-3xl text-center">
-          <BreathingText
-            className="text-[var(--accent)] uppercase"
-            size="caption"
-          >
-            Training &amp; credentials
-          </BreathingText>
+        <figure>
+          <div className="relative aspect-video overflow-hidden rounded-[2rem] bg-[var(--muted)] shadow-[0_30px_90px_rgba(72,55,43,0.12)]">
+            <Image
+              alt={media.editorial.liftVideoPreview.alt}
+              className="object-cover object-center"
+              fill
+              quality={88}
+              sizes="(max-width: 1023px) 100vw, 58vw"
+              src={media.editorial.liftVideoPreview.src}
+            />
+          </div>
+          <figcaption className="mt-4 text-xs tracking-[0.12em] text-[var(--muted-foreground)] uppercase">
+            Shannon practicing the LIFT facial ritual
+          </figcaption>
+        </figure>
+
+        <article className="max-w-xl">
+          <p className={eyebrowClass}>04 · Beauty + touch</p>
           <BreathingText
             as="h2"
             className="mt-5 text-[var(--primary)]"
             size="heading"
           >
-            One practice, many ways in.
+            Care became something tangible.
           </BreathingText>
-          <p className="mt-6 text-base leading-[1.8] text-[var(--muted-foreground)]">
-            Shannon&apos;s work brings beauty, movement, energy, and reflection
-            into one attentive practice.
+          <BreathingText
+            className="mt-7 text-[var(--muted-foreground)]"
+            size="body"
+          >
+            As an aesthetician, Shannon works through skin, touch, pace, and
+            thoughtful personal care.
+          </BreathingText>
+          <p className="mt-6 text-base leading-[1.85] text-[var(--muted-foreground)]">
+            Her beauty practice does not ask anyone to become a different
+            person. It creates time to pay attention, soften the pace, and build
+            a relationship with a ritual that can be repeated at home.
           </p>
-        </div>
+          <Link
+            className="mt-8 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[var(--accent)] underline decoration-[var(--room-clay)] underline-offset-8 transition hover:text-[var(--primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-4 focus-visible:outline-none"
+            href="/beauty/lift"
+          >
+            Experience the LIFT ritual
+            <ArrowRight aria-hidden="true" className="size-4" />
+          </Link>
+        </article>
+      </BreathingSection>
 
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
-          {credentials.map((credential) => (
-            <article
-              className="rounded-[1.5rem] border border-[var(--border)] bg-white/45 p-7"
-              key={credential}
-            >
-              <p className="text-xs tracking-[0.18em] text-[var(--accent)] uppercase">
-                Shannon Mary Dixon
-              </p>
-              <h3 className="mt-4 text-2xl text-[var(--primary)]">
-                {credential}
-              </h3>
-            </article>
-          ))}
-        </div>
+      <BreathingSection
+        contentClassName="mx-auto grid w-full max-w-7xl items-center gap-14 px-6 lg:grid-cols-[0.82fr_1.18fr] lg:gap-24"
+        id="practice"
+        padding="expansive"
+        variant="kitchen"
+      >
+        <article className="max-w-xl">
+          <p className={eyebrowClass}>05 · The practice now</p>
+          <BreathingText
+            as="h2"
+            className="mt-5 text-[var(--primary)]"
+            size="heading"
+          >
+            All of it belongs in the room.
+          </BreathingText>
+          <BreathingText
+            className="mt-7 text-[var(--muted-foreground)]"
+            size="body"
+          >
+            Today, HWL brings beauty, movement, sound, astrology, and reflective
+            ritual into one attentive practice.
+          </BreathingText>
+          <p className="mt-6 text-base leading-[1.85] text-[var(--muted-foreground)]">
+            The format may change, but Shannon&apos;s approach is consistent:
+            listen first, keep the language honest, and leave room for each
+            person to choose what feels useful.
+          </p>
+          <BreathingText
+            as="p"
+            className="mt-10 border-l border-[var(--room-clay)] pl-6 font-serif text-2xl text-[var(--primary)] italic md:text-3xl"
+            size="subheading"
+          >
+            The through-line is a return to relationship with yourself, not a
+            performance of becoming someone new.
+          </BreathingText>
+        </article>
+
+        <figure>
+          <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-[var(--muted)] shadow-[0_36px_100px_rgba(72,55,43,0.14)] sm:aspect-[5/6]">
+            <Image
+              alt={media.brand.destinationPortrait.alt}
+              className="object-cover object-[center_32%]"
+              fill
+              quality={88}
+              sizes="(max-width: 1023px) 100vw, 58vw"
+              src={media.brand.destinationPortrait.src}
+            />
+          </div>
+          <figcaption className="mt-4 text-xs tracking-[0.12em] text-[var(--muted-foreground)] uppercase">
+            Shannon Mary Dixon
+          </figcaption>
+        </figure>
       </BreathingSection>
 
       <BreathingSection
         background="dark"
+        contentClassName="mx-auto grid w-full max-w-6xl gap-12 px-6 lg:grid-cols-[0.74fr_1.26fr] lg:gap-20"
+        id="credentials"
+        padding="expansive"
+        variant="kitchen"
+      >
+        <div>
+          <p className="text-xs font-semibold tracking-[0.24em] text-[var(--room-clay)] uppercase">
+            Training &amp; experience
+          </p>
+          <BreathingText
+            as="h2"
+            className="mt-5 text-[var(--background)]"
+            size="heading"
+          >
+            The foundations she brings.
+          </BreathingText>
+        </div>
+
+        <div>
+          <ul
+            aria-label="Training and experience currently shared by Shannon"
+            className="flex flex-wrap gap-3"
+          >
+            {credentials.map((credential) => (
+              <li
+                className="rounded-full border border-white/18 bg-white/[0.055] px-5 py-3 text-sm text-white/88"
+                key={credential}
+              >
+                {credential}
+              </li>
+            ))}
+          </ul>
+
+          <aside className="mt-10 border-l border-[var(--room-clay)] pl-6">
+            <p className="text-xs font-semibold tracking-[0.2em] text-[var(--room-clay)] uppercase">
+              Verification note
+            </p>
+            <p className="mt-4 max-w-2xl text-sm leading-[1.8] text-white/68">
+              These titles reflect information Shannon provided for the site.
+              Exact licenses, awarding bodies, and supporting documentation have
+              not yet been independently verified for publication. This list
+              describes wellness training and experience; it does not represent
+              medical credentials or medical care.
+            </p>
+          </aside>
+        </div>
+      </BreathingSection>
+
+      <BreathingSection
+        background="gradient"
         contentClassName="mx-auto max-w-4xl px-6 text-center"
         id="invitation"
         padding="expansive"
         variant="kitchen"
       >
+        <p className={eyebrowClass}>An invitation</p>
         <BreathingText
           as="h2"
-          className="text-[var(--background)] md:text-6xl"
+          className="mx-auto mt-5 max-w-3xl text-[var(--primary)] md:text-6xl"
           size="heading"
         >
-          Work with Shannon.
+          Meet the practice in person.
         </BreathingText>
-        <Button
-          asChild
-          className="mt-10 h-12 rounded-full bg-[var(--background)] px-8 text-[var(--primary)] hover:bg-[var(--room-clay)] hover:text-[var(--room-charcoal)]"
-        >
-          <Link href="/book">
-            Work with Shannon
-            <ArrowRight aria-hidden="true" className="size-4" />
-          </Link>
-        </Button>
-        <Button
-          asChild
-          className="mt-4 h-12 rounded-full border-white/35 bg-transparent px-8 text-[var(--background)] hover:bg-white/10 hover:text-white md:mt-10 md:ml-3"
-          variant="outline"
-        >
-          <Link href="/journal">Read the Journal</Link>
-        </Button>
+        <p className="mx-auto mt-7 max-w-2xl text-lg leading-[1.8] text-[var(--muted-foreground)]">
+          Start with the experience that draws you in, or share what you are
+          looking for and let Shannon help you find the right place to begin.
+        </p>
+        <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+          <Button
+            asChild
+            className="h-12 rounded-full bg-[var(--primary)] px-8 text-[var(--primary-foreground)] hover:bg-[var(--accent)]"
+          >
+            <Link href="/book">
+              Book with Shannon
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </Link>
+          </Button>
+          <Button
+            asChild
+            className="h-12 rounded-full border-[var(--border)] bg-white/45 px-8 text-[var(--primary)] hover:bg-white/75"
+            variant="outline"
+          >
+            <Link href="/beauty/lift">Explore LIFT</Link>
+          </Button>
+        </div>
       </BreathingSection>
     </>
   )

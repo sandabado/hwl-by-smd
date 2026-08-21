@@ -127,8 +127,8 @@ export const adminTransactions = [
     id: "txn-002",
     date: "Jul 28",
     customer: "Elena Brooks",
-    product: "LIFT Video + PDF",
-    amount: "$5.55",
+    product: "Complete LIFT — Video + PDF",
+    amount: "$11.11",
     status: "Paid",
   },
   {
@@ -226,8 +226,8 @@ export const liftLessons = [
     status: "Draft",
   },
   {
-    id: "neck-drainage",
-    title: "Neck Drainage",
+    id: "neck-release",
+    title: "Neck Release",
     duration: "2:00",
     media: "Awaiting Mux playback ID",
     status: "Draft",
@@ -281,8 +281,8 @@ export const adminProducts = [
   },
   {
     id: "lift-guide",
-    name: "LIFT Video + PDF",
-    price: "$5.55",
+    name: "Complete LIFT — Video + PDF",
+    price: "$11.11",
     cadence: "One-time",
     access: "Browser video + protected PDF",
     status: "Awaiting media",

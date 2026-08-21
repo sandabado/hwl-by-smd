@@ -10,6 +10,7 @@ import {
 const LABELS: Record<string, string> = {
   about: "About",
   account: "Account",
+  astrology: "Astrology",
   beauty: "Beauty",
   being: "Being",
   body: "Body",
@@ -28,7 +29,6 @@ const LABELS: Record<string, string> = {
   retreats: "Retreats",
   ritual: "Ritual",
   store: "Products",
-  tarot: "Tarot",
   terms: "Terms",
   "the-den": "The Den",
 }
@@ -37,6 +37,7 @@ const HIDDEN_PREFIXES = [
   "/about",
   "/admin",
   "/api",
+  "/astrology",
   "/auth",
   "/beauty",
   "/being",
@@ -49,7 +50,6 @@ const HIDDEN_PREFIXES = [
   "/reset-password",
   "/retreats",
   "/store",
-  "/tarot",
   "/the-den",
   "/update-password",
   "/yoga",

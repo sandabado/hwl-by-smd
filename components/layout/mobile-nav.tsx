@@ -28,7 +28,7 @@ export function MobileNav() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-[var(--foreground)] lg:hidden"
+          className="size-11 text-[var(--foreground)] lg:hidden"
           aria-label="Open navigation menu"
         >
           <Menu className="size-5" aria-hidden="true" />

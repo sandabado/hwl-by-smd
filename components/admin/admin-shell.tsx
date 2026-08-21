@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LibraryBig,
   Menu,
+  Monitor,
   Newspaper,
   Settings,
   ShoppingBag,
@@ -24,6 +25,7 @@ import { cn } from "@/lib/utils"
 
 const navigation = [
   { icon: LayoutDashboard, label: "Overview", href: "/admin" },
+  { icon: Monitor, label: "Website", href: "/admin/website" },
   { icon: HeartHandshake, label: "Connection", href: "/admin/connection" },
   { icon: UsersRound, label: "Members", href: "/admin/members" },
   { icon: CalendarDays, label: "Bookings", href: "/admin/bookings" },

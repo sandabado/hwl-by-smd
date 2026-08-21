@@ -11,10 +11,10 @@ import { media } from "@/lib/media"
 import { createPageMetadata, createServiceJsonLd } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
-  title: "Tarot Readings & Astrology in Palm Springs | HWL by SMD",
+  title: "Astrology & Tarot Readings in Palm Springs | HWL by SMD",
   description:
-    "Private tarot readings, astrology consultations, and ritual ceremony in Palm Springs and the Hi-Desert.",
-  path: "/tarot",
+    "Private astrology consultations, tarot readings, and ritual ceremony in Palm Springs and the Hi-Desert.",
+  path: "/astrology",
 })
 
 const offerings = [
@@ -77,19 +77,19 @@ const seasons = [
   },
 ] as const
 
-export default function RitualPage() {
+export default function AstrologyPage() {
   return (
     <>
       <JsonLd
         data={createServiceJsonLd({
-          name: "HWL Tarot Experiences",
+          name: "HWL Astrology Experiences",
           description:
-            "Tarot, astrology, and intentional ritual offered as reflective wellness practices for private guests and groups.",
-          path: "/tarot",
+            "Astrology, tarot, and intentional ritual offered as reflective wellness practices for private guests and groups.",
+          path: "/astrology",
           serviceType: "Reflective ritual and intuitive guidance",
           image: media.experiences.tarotSpread.src,
         })}
-        id="tarot-service-schema"
+        id="astrology-service-schema"
       />
 
       <section className="relative -mt-16 flex min-h-[88vh] items-end overflow-hidden bg-[#211c22] px-6 py-24 pt-36 text-white md:-mt-20 md:pt-40">
@@ -107,7 +107,7 @@ export default function RitualPage() {
         />
         <div className="relative z-10 mx-auto w-full max-w-7xl pb-8 md:pb-16">
           <p className="text-xs tracking-[0.3em] text-[#dcc5a5] uppercase">
-            Tarot
+            Astrology
           </p>
           <h1 className="mt-6 max-w-4xl text-5xl leading-[1.02] font-medium text-white md:text-7xl lg:text-8xl">
             A mirror, not a map.
@@ -292,7 +292,7 @@ export default function RitualPage() {
         />
         <div className="relative mx-auto max-w-3xl">
           <p className="text-xs tracking-[0.3em] text-[#dcc5a5] uppercase">
-            Tarot
+            Astrology
           </p>
           <h2 className="mt-6 text-5xl leading-tight text-white md:text-7xl">
             Begin the inner work.

@@ -13,26 +13,31 @@ import { cn } from "@/lib/utils"
 export function Header() {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
-  const isHomeThreshold = pathname === "/" && !scrolled
+  const isHome = pathname === "/"
+  const isAdmin = pathname.startsWith("/admin")
 
   useEffect(() => {
+    if (isAdmin) return
+
     const onScroll = () => setScrolled(window.scrollY > 100)
 
     onScroll()
     window.addEventListener("scroll", onScroll, { passive: true })
 
     return () => window.removeEventListener("scroll", onScroll)
-  }, [])
+  }, [isAdmin])
 
-  if (pathname.startsWith("/admin")) return null
+  if (isAdmin) return null
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 max-h-[72px] border-b border-[var(--border)]/50 bg-[var(--background)]/80 backdrop-blur-md transition-[height,background-color,box-shadow,backdrop-filter] duration-300",
-        isHomeThreshold &&
-          "border-white/15 bg-[#0a2119]/20 shadow-none [--accent:#d7e6d2] [--background:#102a20] [--foreground:#f6f4e9] [--muted-foreground:#f6f4e9c7] [--primary:#f6f4e9]",
+        "top-0 z-50 max-h-[72px] border-b transition-[height,background-color,box-shadow,backdrop-filter] duration-300",
+        isHome
+          ? "absolute inset-x-0 border-white/20 bg-[rgba(7,25,18,0.86)] shadow-none [--accent:#d7e6d2] [--background:#102a20] [--foreground:#f6f4e9] [--muted-foreground:#f6f4e9d1] [--primary:#f6f4e9]"
+          : "sticky border-[var(--border)]/50 bg-[var(--background)]/80 backdrop-blur-md",
         scrolled &&
+          !isHome &&
           "max-h-14 bg-[var(--background)]/90 shadow-[0_8px_24px_rgba(43,39,36,0.06)] backdrop-blur-xl"
       )}
     >

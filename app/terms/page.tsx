@@ -20,7 +20,7 @@ const sections: LegalSection[] = [
     title: "Services and appropriate use",
     body: [
       "HWL by SMD offers aesthetician services, yoga instruction, Reiki, aromatherapy, tarot and astrology readings, retreat facilitation, digital products, and educational content for general wellness and personal development.",
-      "Tarot and astrology are reflective practices offered for entertainment and personal insight. They are not medical, psychological, legal, or financial advice. Wellness services do not diagnose, treat, or replace medical, mental-health, or emergency care.",
+      "Astrology and tarot are reflective practices offered for entertainment and personal insight. They are not medical, psychological, legal, or financial advice. Wellness services do not diagnose, treat, or replace medical, mental-health, or emergency care.",
       "Consult an appropriate licensed professional before beginning a practice when you have an injury, medical condition, pregnancy, allergy, medication concern, or other reason for caution. Stop any practice that causes pain or concerning symptoms.",
     ],
   },

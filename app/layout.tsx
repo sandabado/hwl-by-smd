@@ -16,17 +16,17 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "HWL by SMD — Skincare, Yoga, Tarot & Retreats in Palm Springs",
+  title: "HWL by SMD — Skincare, Yoga, Astrology & Retreats in Palm Springs",
   description:
-    "Shannon Mary Dixon offers facial rituals, private yoga, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
+    "Shannon Mary Dixon offers facial rituals, private yoga, astrology consultations, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "HWL by SMD — Skincare, Yoga, Tarot & Retreats in Palm Springs",
+    title: "HWL by SMD — Skincare, Yoga, Astrology & Retreats in Palm Springs",
     description:
-      "Shannon Mary Dixon offers facial rituals, private yoga, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
+      "Shannon Mary Dixon offers facial rituals, private yoga, astrology consultations, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
     images: [
       {
         url: "/og.png",
@@ -39,9 +39,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "HWL by SMD — Skincare, Yoga, Tarot & Retreats in Palm Springs",
+    title: "HWL by SMD — Skincare, Yoga, Astrology & Retreats in Palm Springs",
     description:
-      "Shannon Mary Dixon offers facial rituals, private yoga, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
+      "Shannon Mary Dixon offers facial rituals, private yoga, astrology consultations, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
     images: ["/og.png"],
   },
 }

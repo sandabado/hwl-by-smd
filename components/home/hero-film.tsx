@@ -193,8 +193,8 @@ export function HeroFilm({ source }: { source: string }) {
         }
         aria-pressed={isPlaying}
         className={cn(
-          "absolute right-5 bottom-5 z-20 grid size-11 place-items-center rounded-full border border-white/35 bg-[#102a20]/35 text-white shadow-[0_10px_30px_rgba(5,14,9,0.2)] backdrop-blur-md transition hover:bg-[#102a20]/60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white md:right-8 md:bottom-8",
-          !shouldLoad && "bg-[#102a20]/50"
+          "absolute top-20 right-4 z-20 grid size-11 place-items-center rounded-full border border-white/40 bg-[#102a20]/80 text-white shadow-[0_10px_30px_rgba(5,14,9,0.25)] transition hover:bg-[#102a20]/95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white md:top-auto md:right-8 md:bottom-8",
+          !shouldLoad && "bg-[#102a20]/90"
         )}
         onClick={handleToggle}
         type="button"

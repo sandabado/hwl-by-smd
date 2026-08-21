@@ -12,7 +12,7 @@ const sections: LegalSection[] = [
   {
     title: "Digital products",
     body: [
-      "LIFT PDF and LIFT Video + PDF purchases may be refunded within 14 days of purchase. Contact shannonmarydixon@gmail.com with the email used for checkout.",
+      "LIFT PDF and Complete LIFT (video + PDF) purchases may be refunded within 14 days of purchase. Contact shannonmarydixon@gmail.com with the email used for checkout.",
     ],
   },
   {

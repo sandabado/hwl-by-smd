@@ -52,9 +52,27 @@ export const media = {
     },
   },
   editorial: {
+    aboutSkatingConcept: {
+      src: "/images/editorial/about-shannon-skating-concept-v1.webp",
+      alt: "Editorial concept of a red-haired figure skater gliding across a bright indoor ice rink",
+      kind: "editorial-concept",
+      label: "Editorial concept",
+      disclosure: "Generated image, not documentary photography.",
+    },
+    aboutMotorcycleConcept: {
+      src: "/images/editorial/about-shannon-motorcycle-concept-v1.webp",
+      alt: "Editorial concept of a helmeted red-haired motorcycle rider on a Palm Springs desert road",
+      kind: "editorial-concept",
+      label: "Editorial concept",
+      disclosure: "Generated image, not documentary photography.",
+    },
     liftBotanicals: {
       src: "/images/editorial/lift-dried-botanicals.webp",
       alt: "Dried botanicals casting delicate shadows",
+    },
+    liftVideoPreview: {
+      src: "/images/editorial/lift-video-preview.jpg",
+      alt: "Shannon demonstrating a facial massage movement with her hands",
     },
   },
   retreats: {
@@ -90,6 +108,9 @@ export const media = {
   motion: {
     desertHero: {
       src: "/video/hwl-whole-brand-hero-v3/landscape.mp4",
+    },
+    liftPreview: {
+      src: "/video/lift/facial-lift-preview.mp4",
     },
   },
 } as const

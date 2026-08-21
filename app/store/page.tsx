@@ -90,8 +90,8 @@ const offers: Offer[] = [
     productId: "lift_guide",
     id: "lift-guide",
     eyebrow: "Streaming + PDF",
-    title: "LIFT Video + PDF",
-    price: "$5.55",
+    title: "Complete LIFT — Video + PDF",
+    price: "$11.11",
     cadence: "one time",
     description:
       "A full video walkthrough of all seven movements plus the downloadable guide. Learn each technique by seeing it demonstrated.",
@@ -100,7 +100,7 @@ const offers: Offer[] = [
       "Printable PDF",
       "Account-based access",
     ],
-    label: "Get the LIFT Guide — $5.55",
+    label: "Get Complete LIFT — $11.11",
     featured: true,
     icon: PlayCircle,
     ownedHref: "/course/lift-daily-facial-ritual",
@@ -113,7 +113,7 @@ const offers: Offer[] = [
     price: "$11.11",
     cadence: "per month",
     description:
-      "Full library access, a private connection with Shannon, guided journeys, and member pricing on sessions.",
+      "A growing member library, Complete LIFT, and a private connection with Shannon.",
     features: [
       "Everything in LIFT",
       "A growing member library",
@@ -179,11 +179,11 @@ export default async function StorePage() {
     productSchema.push(
       createProductJsonLd({
         id: "lift-video-pdf",
-        name: "LIFT Video + PDF",
+        name: "Complete LIFT — Video + PDF",
         description:
           "A guided in-browser facial massage video with a private printable guide.",
         path: "/store",
-        price: "5.55",
+        price: "11.11",
       })
     )
   }

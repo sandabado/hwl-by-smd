@@ -1,6 +1,6 @@
 # Whole Body OS - Phase 1 Foundation
 
-> NOTE: This document references route names that have since been updated. /body is now /yoga. /being is now /tarot. The architecture and design decisions described herein remain valid.
+> NOTE: This document references route names that have since been updated. /body is now /yoga. /being and /tarot are now /astrology. The architecture and design decisions described herein remain valid.
 
 HWL by SMD is the flagship implementation and visual reference for the future
 Whole Body OS platform. Phase 1 intentionally completes the public brand and

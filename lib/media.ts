@@ -1,9 +1,42 @@
+const shannon = {
+  beautyLift: {
+    src: "/images/shannon/shannon-beauty-lift.webp",
+    alt: "Shannon practicing her LIFT facial massage with both hands",
+  },
+  beautyPortrait: {
+    src: "/images/shannon/shannon-beauty-portrait.webp",
+    alt: "A luminous close portrait of Shannon Mary Dixon",
+  },
+  ritualSpace: {
+    src: "/images/shannon/shannon-ritual-space.webp",
+    alt: "Shannon preparing flowers, sound bowls, and cards for a private ritual",
+  },
+  retreatYoga: {
+    src: "/images/shannon/shannon-retreat-yoga.webp",
+    alt: "Shannon seated in a grounding yoga practice in the high desert",
+  },
+  desertGuide: {
+    src: "/images/shannon/shannon-desert-guide.webp",
+    alt: "Shannon walking a sunlit high-desert path in a flowing white dress",
+  },
+  desertEditorial: {
+    src: "/images/shannon/shannon-desert-editorial.webp",
+    alt: "Shannon moving with a woven textile in the high desert",
+  },
+  homeRitual: {
+    src: "/images/shannon/shannon-home-ritual.webp",
+    alt: "Shannon pausing with a warm cup beside a sunlit bath",
+  },
+  botanicalPortrait: {
+    src: "/images/shannon/shannon-botanical-portrait.webp",
+    alt: "Shannon surrounded by sculptural botanicals and eucalyptus",
+  },
+} as const
+
 export const media = {
+  shannon,
   brand: {
-    sanctuaryHero: {
-      src: "/images/brand/hwl-sanctuary-hero.webp",
-      alt: "A tranquil mineral pool surrounded by lush green plants and luminous morning mist",
-    },
+    sanctuaryHero: shannon.ritualSpace,
     standingStretch: {
       src: "/images/brand/shannon-standing-stretch.webp",
       alt: "Shannon standing in a soft neutral movement pose",
@@ -16,16 +49,10 @@ export const media = {
       src: "/images/brand/shannon-smiling-portrait.webp",
       alt: "A warm portrait of Shannon Mary Dixon",
     },
-    destinationPortrait: {
-      src: "/images/brand/shannon-destination-portrait.webp",
-      alt: "Shannon outdoors overlooking a city",
-    },
+    destinationPortrait: shannon.desertGuide,
   },
   experiences: {
-    beauty: {
-      src: "/images/experiences/beauty-peony.webp",
-      alt: "A blush peony illuminated by warm sunlight",
-    },
+    beauty: shannon.beautyPortrait,
     movementBoat: {
       src: "/images/experiences/movement-boat-pose.webp",
       alt: "Shannon practicing a strong seated balance",
@@ -38,79 +65,85 @@ export const media = {
       src: "/images/experiences/movement-seated-stretch.webp",
       alt: "Shannon reaching through a seated side stretch",
     },
-    tarotSpread: {
-      src: "/images/experiences/tarot-rider-waite-spread-v1.webp",
-      alt: "A seven-card Rider-Waite-Smith tarot spread beside candlelight, quartz, desert sage, and a Palm Springs pool",
-    },
+    tarotSpread: shannon.ritualSpace,
     ritualWolf: {
-      src: "/images/experiences/ritual-wolf-moon.webp",
-      alt: "A wolf howling beneath a luminous full moon",
+      src: "/images/home/hwl-home-being-celestial-v3.webp",
+      alt: "Shannon in luminous white fabric with celestial details across her cheek",
     },
-    ritualMoon: {
-      src: "/images/experiences/ritual-moon-forest.webp",
-      alt: "A full moon rising above a dark forest",
-    },
+    ritualMoon: shannon.botanicalPortrait,
   },
   editorial: {
     aboutSkatingConcept: {
-      src: "/images/editorial/about-shannon-skating-concept-v1.webp",
-      alt: "Editorial concept of a red-haired figure skater gliding across a bright indoor ice rink",
-      kind: "editorial-concept",
-      label: "Editorial concept",
-      disclosure: "Generated image, not documentary photography.",
+      src: "/images/home/hwl-home-body-studio-lunge-v2.webp",
+      alt: "Shannon reaching through a grounded studio movement practice",
+      kind: "original-photography",
+      label: "Shannon in movement",
+      disclosure: "Original photography from Shannon's archive.",
     },
     aboutMotorcycleConcept: {
-      src: "/images/editorial/about-shannon-motorcycle-concept-v1.webp",
-      alt: "Editorial concept of a helmeted red-haired motorcycle rider on a Palm Springs desert road",
-      kind: "editorial-concept",
-      label: "Editorial concept",
-      disclosure: "Generated image, not documentary photography.",
+      ...shannon.desertEditorial,
+      kind: "original-photography",
+      label: "Shannon in the high desert",
+      disclosure: "Original photography from Shannon's archive.",
     },
-    liftBotanicals: {
-      src: "/images/editorial/lift-dried-botanicals.webp",
-      alt: "Dried botanicals casting delicate shadows",
-    },
+    liftBotanicals: shannon.homeRitual,
     liftVideoPreview: {
       src: "/images/editorial/lift-video-preview.jpg",
       alt: "Shannon demonstrating a facial massage movement with her hands",
     },
   },
-  retreats: {
-    palmSpringsHero: {
-      src: "/images/retreats/retreats-palm-springs-hero-v1.webp",
-      alt: "A quiet desert pool set for movement and sound beneath the mountains and palms",
+  home: {
+    hero: {
+      src: "/images/home/hwl-home-hero-studio-movement.webp",
+      alt: "Shannon moving through a sculptural backbend in a pale studio",
     },
+    beauty: shannon.beautyLift,
+    body: {
+      src: "/images/home/hwl-home-beauty-touch-v2.webp",
+      alt: "An editorial study of Shannon's torso and natural skin",
+    },
+    being: {
+      src: "/images/home/hwl-home-being-celestial-v3.webp",
+      alt: "Shannon in luminous white fabric with celestial details across her cheek",
+    },
+    shannonPortrait: {
+      src: "/images/brand/shannon-smiling-portrait.webp",
+      alt: "Shannon Mary Dixon smiling warmly at the camera",
+    },
+    proofFacial: {
+      src: "/images/editorial/lift-video-preview.jpg",
+      alt: "Shannon demonstrating facial massage with both hands",
+    },
+    proofPrivateYoga: shannon.retreatYoga,
+    proofReadings: shannon.ritualSpace,
+    proofRetreat: shannon.desertEditorial,
+  },
+  retreats: {
+    palmSpringsHero: shannon.desertGuide,
     highDesertPath: {
       src: "/images/retreats/retreats-high-desert-path-v1.webp",
       alt: "A path winding through Joshua trees and sunlit high-desert boulders",
     },
-    groupPractice: {
-      src: "/images/retreats/retreats-group-practice-v1.webp",
-      alt: "A small outdoor movement practice beneath the desert mountains",
-    },
+    groupPractice: shannon.retreatYoga,
     fanPalmOasis: {
       src: "/images/retreats/retreats-fan-palm-oasis-v1.webp",
       alt: "California fan palms glowing along a quiet desert canyon path",
     },
-    facialRitual: {
-      src: "/images/hero/hwl-facial-ritual-v1.webp",
-      alt: "A warm facial ritual with botanical skincare in desert light",
-    },
-    outdoorYoga: {
-      src: "/images/hero/hwl-palm-springs-yoga-v1.webp",
-      alt: "An outdoor yoga practice framed by palms and desert mountains",
-    },
-    soundRitual: {
-      src: "/images/hero/hwl-sound-tarot-v1.webp",
-      alt: "Sound bowls and reflective ritual tools beside a desert pool",
-    },
+    facialRitual: shannon.beautyLift,
+    outdoorYoga: shannon.retreatYoga,
+    soundRitual: shannon.ritualSpace,
   },
   motion: {
-    desertHero: {
-      src: "/video/hwl-whole-brand-hero-v3/landscape.mp4",
-    },
     liftPreview: {
       src: "/video/lift/facial-lift-preview.mp4",
+    },
+    liftPrepPreview: {
+      poster: "/images/editorial/lift-prep-preview-poster.webp",
+      src: "/video/lift/prep-the-skin-preview.mp4",
+    },
+    liftJawlinePreview: {
+      poster: "/images/editorial/lift-jawline-preview-poster.webp",
+      src: "/video/lift/jawline-lift-preview.mp4",
     },
   },
 } as const

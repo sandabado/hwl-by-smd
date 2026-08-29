@@ -2,22 +2,22 @@ export const SITE_CONFIG = {
   name: "HWL by SMD",
   tagline: "Beauty · Body · Being",
   description:
-    "Beauty rituals, private yoga, astrology, tarot, and retreat experiences with Shannon Mary Dixon in Palm Springs.",
+    "Beauty, movement and ritual practices, products and experiences by Shannon Mary Dixon, with a real-world home in Palm Springs and Joshua Tree.",
   email: "shannonmarydixon@gmail.com",
   phone: "617.671.8636",
   instagramPersonal: "@shannmarydix",
   instagramBrand: "@hwl.bysmd",
   instagramPersonalUrl: "https://instagram.com/shannmarydix",
   instagramBrandUrl: "https://instagram.com/hwl.bysmd",
-  location: "Palm Springs, CA",
-  region: "Coachella Valley",
+  location: "Palm Springs · Joshua Tree · California",
+  region: "Coachella Valley + Hi-Desert",
 }
 
 export const NAV_ITEMS = [
-  { label: "About", href: "/about" },
   { label: "Beauty", href: "/beauty" },
-  { label: "Yoga", href: "/yoga" },
-  { label: "Astrology", href: "/astrology" },
+  { label: "Body", href: "/yoga" },
+  { label: "Being", href: "/astrology" },
+  { label: "LIFT", href: "/beauty/lift" },
   { label: "Retreats", href: "/retreats" },
-  { label: "Store", href: "/store" },
+  { label: "About", href: "/about" },
 ]

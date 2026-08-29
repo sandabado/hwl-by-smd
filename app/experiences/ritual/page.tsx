@@ -23,10 +23,10 @@ const offerings = [
     title: "Intuitive Tarot Reading",
     bookingHref: "/book?service=intuitive-tarot-reading#choose-time",
     summary:
-      "A personalized virtual reading for life transitions, decision-making, and reconnecting with inner wisdom.",
+      "A personalized reading for life transitions, decision-making, and reconnecting with inner wisdom.",
     detail:
       "Explore current circumstances, opportunities, challenges, and aligned next steps through reflective card work.",
-    format: "45–60 minutes · $222 · Virtual via Zoom",
+    format: "45–60 minutes · $222 · Virtual or in person",
   },
   {
     icon: MoonStar,
@@ -36,7 +36,7 @@ const offerings = [
       "A personalized astrological and lunar reading for clarity, timing, and connection to the immediate season.",
     detail:
       "Explore the current cosmic landscape and how its themes show up in your life, without treating astrology as fate.",
-    format: "45–60 minutes · $222 · Virtual via Zoom",
+    format: "45–60 minutes · $222 · Virtual or in person",
   },
   {
     icon: Sparkles,
@@ -45,8 +45,8 @@ const offerings = [
     summary:
       "Intuitive guidance followed by restorative Reiki support designed to balance, clarify, and renew.",
     detail:
-      "Begin with a virtual tarot reading, then continue with optional in-person Reiki locally or remote Reiki energy work.",
-    format: "60–75 minutes · $444 · Hybrid",
+      "Begin with reflective tarot guidance, then continue with restorative Reiki support in the same in-person session.",
+    format: "60–75 minutes · $444 · In person",
   },
 ] as const
 
@@ -149,9 +149,8 @@ export default function AstrologyPage() {
           <p className="font-serif text-xl leading-[2] text-[var(--primary)] md:text-2xl">
             For more than two decades she has studied astrology, symbolism,
             ritual, tarot, energetics, and personal transformation. Tarot and
-            astrology readings are offered virtually via Zoom. Meet from
-            wherever you are. The work doesn&apos;t require physical presence.
-            It requires presence.
+            moon oracle readings may be held virtually or in person; Tarot +
+            Reiki is an in-person experience. The work begins with presence.
           </p>
         </div>
         <PullQuote

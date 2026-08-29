@@ -34,11 +34,12 @@ export function Header() {
       className={cn(
         "top-0 z-50 max-h-[72px] border-b transition-[height,background-color,box-shadow,backdrop-filter] duration-300",
         isHome
-          ? "absolute inset-x-0 border-white/20 bg-[rgba(7,25,18,0.86)] shadow-none [--accent:#d7e6d2] [--background:#102a20] [--foreground:#f6f4e9] [--muted-foreground:#f6f4e9d1] [--primary:#f6f4e9]"
+          ? "fixed inset-x-0 border-white/15 bg-[rgba(24,32,27,0.9)] shadow-none backdrop-blur-md [--accent:#d9c19f] [--background:#20251f] [--foreground:#f7f3ec] [--muted-foreground:#f7f3ecd1] [--primary:#f7f3ec]"
           : "sticky border-[var(--border)]/50 bg-[var(--background)]/80 backdrop-blur-md",
         scrolled &&
-          !isHome &&
-          "max-h-14 bg-[var(--background)]/90 shadow-[0_8px_24px_rgba(43,39,36,0.06)] backdrop-blur-xl"
+          (isHome
+            ? "max-h-14 bg-[#18201b]/96 shadow-[0_8px_24px_rgba(20,25,21,0.14)] backdrop-blur-xl"
+            : "max-h-14 bg-[var(--background)]/90 shadow-[0_8px_24px_rgba(43,39,36,0.06)] backdrop-blur-xl")
       )}
     >
       <div
@@ -58,7 +59,7 @@ export function Header() {
             aria-hidden="true"
             className="mt-1.5 font-serif text-xs font-medium tracking-[0.2em] text-[var(--muted-foreground)] uppercase"
           >
-            Beauty · Body · Being
+            Body · Beauty · Being
           </span>
         </Link>
 

@@ -5,16 +5,19 @@ import { SITE_CONFIG } from "@/lib/constants"
 
 export type LegalSection = {
   body: string[]
+  id?: string
   items?: string[]
   title: string
 }
 
 export function LegalPage({
+  effectiveDate = "August 20, 2026",
   eyebrow,
   introduction,
   sections,
   title,
 }: {
+  effectiveDate?: string
   eyebrow: string
   introduction: string
   sections: LegalSection[]
@@ -31,11 +34,11 @@ export function LegalPage({
       <PageSection>
         <article className="mx-auto max-w-3xl">
           <p className="text-xs tracking-[0.2em] text-[var(--accent)] uppercase">
-            Effective August 20, 2026
+            Effective {effectiveDate}
           </p>
           <div className="mt-10 space-y-12">
             {sections.map((section) => (
-              <section key={section.title}>
+              <section id={section.id} key={section.title}>
                 <h2 className="text-3xl font-medium text-[var(--primary)]">
                   {section.title}
                 </h2>

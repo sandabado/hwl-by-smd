@@ -17,7 +17,13 @@ export const metadata = createPageMetadata({
   path: "/contact",
 })
 
-export default function ContactPage() {
+export default async function ContactPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string }>
+}) {
+  const { notice } = await searchParams
+
   return (
     <>
       <InteriorHero
@@ -38,6 +44,15 @@ export default function ContactPage() {
               subtitle="For bookings, use the Book page. For retreat partnerships, use the Retreats inquiry form. For everything else, send a note."
               title="Send a note"
             />
+            {notice === "connection" ? (
+              <p
+                className="mt-6 rounded-lg border border-[var(--accent)]/30 bg-white/55 px-5 py-4 text-sm leading-relaxed text-[var(--primary)]"
+                role="status"
+              >
+                Messages are coming soon. For now, reach Shannon directly
+                through this contact form.
+              </p>
+            ) : null}
             <div className="mt-8">
               <ContactForm
                 fields={[

@@ -2,8 +2,11 @@ import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
 import { Check, Circle, Clock3 } from "lucide-react"
 
+import { ContentLicenseNote } from "@/components/member/content-license-note"
 import { MemberNavigation } from "@/components/member/member-navigation"
+import { PrivateVideoPlayer } from "@/components/video/private-video-player"
 import { requireAccess } from "@/lib/access"
+import { media } from "@/lib/media"
 import { getCourseBySlug } from "@/lib/member-content"
 import { createClient } from "@/lib/supabase/server"
 
@@ -47,12 +50,16 @@ export default async function CoursePage({
       .filter((item) => item.completed)
       .map((item) => item.lesson_id)
   )
+  const isLiftCourse = result.course.access_tier === "lift"
+  const liftCaptionsReady = Boolean(
+    process.env.LIFT_VIDEO_CAPTIONS_STORAGE_PATH
+  )
 
   return (
     <section className="member-atmosphere min-h-screen px-6 py-12 md:py-20">
       <div className="mx-auto max-w-6xl">
         <div className="flex justify-end">
-          <MemberNavigation hasMembership={access.isMember} />
+          <MemberNavigation />
         </div>
         <div className="mt-12 max-w-3xl">
           <p className="text-xs tracking-[0.3em] text-[var(--accent)] uppercase">
@@ -65,6 +72,36 @@ export default async function CoursePage({
             {result.course.description}
           </p>
         </div>
+
+        {isLiftCourse ? (
+          <section className="mt-14" aria-labelledby="complete-lift-video">
+            <div className="mb-7 max-w-3xl">
+              <p className="text-xs tracking-[0.28em] text-[var(--accent)] uppercase">
+                Complete guided practice
+              </p>
+              <h2
+                className="mt-3 text-4xl font-medium text-[var(--primary)] md:text-5xl"
+                id="complete-lift-video"
+              >
+                Practice all seven movements with Shannon.
+              </h2>
+            </div>
+            <PrivateVideoPlayer
+              captionsSource={
+                liftCaptionsReady ? "/api/video/lift/captions" : undefined
+              }
+              poster={media.editorial.liftVideoPreview.src}
+              source="/api/video/lift"
+              title="Complete LIFT guided facial massage practice"
+            />
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-[var(--muted-foreground)]">
+              Written instructions for every movement are available in your
+              downloadable LIFT Guide PDF. English captions are planned as a
+              Phase 2 accessibility enhancement.
+            </p>
+            <ContentLicenseNote className="mt-5" />
+          </section>
+        ) : null}
 
         <div className="mt-14 grid gap-4">
           {result.lessons.length ? (

@@ -2,12 +2,34 @@ import "server-only"
 
 import Stripe from "stripe"
 
+import { isSupabaseAdminConfigured } from "@/lib/env"
+
 export type ProductId = "lift_guide" | "pdf_download" | "membership"
+
+export const CHECKOUT_CATALOG = {
+  "pdf-download-v1": {
+    expectedCurrency: "usd",
+    expectedPriceType: "one_time",
+    expectedUnitAmount: 1111,
+    mode: "payment",
+    productId: "pdf_download",
+  },
+  "lift-guide-v1": {
+    expectedCurrency: "usd",
+    expectedPriceType: "one_time",
+    expectedUnitAmount: 3333,
+    mode: "payment",
+    productId: "lift_guide",
+  },
+} as const
+
+export type CheckoutCatalogVersion = keyof typeof CHECKOUT_CATALOG
 
 export const PRODUCTS: Record<
   ProductId,
   {
     amount: string
+    catalogVersion: CheckoutCatalogVersion | null
     expectedCurrency: "usd"
     expectedPriceType: "one_time" | "recurring"
     expectedRecurringInterval?: "month"
@@ -21,25 +43,28 @@ export const PRODUCTS: Record<
   }
 > = {
   pdf_download: {
-    amount: "$3.33",
+    amount: "$11.11",
+    catalogVersion: "pdf-download-v1",
     expectedCurrency: "usd",
     expectedPriceType: "one_time",
-    expectedUnitAmount: 333,
+    expectedUnitAmount: 1111,
     envKey: "STRIPE_PDF_PRICE_ID",
     mode: "payment",
     name: "LIFT PDF Guide",
   },
   lift_guide: {
-    amount: "$11.11",
+    amount: "$33.33",
+    catalogVersion: "lift-guide-v1",
     expectedCurrency: "usd",
     expectedPriceType: "one_time",
-    expectedUnitAmount: 1111,
+    expectedUnitAmount: 3333,
     envKey: "STRIPE_LIFT_GUIDE_PRICE_ID",
     mode: "payment",
     name: "Complete LIFT — Video + PDF",
   },
   membership: {
     amount: "$11.11/month",
+    catalogVersion: null,
     expectedCurrency: "usd",
     expectedPriceType: "recurring",
     expectedRecurringInterval: "month",
@@ -70,10 +95,22 @@ export function isCommerceSalesReady() {
 }
 
 export function isProductCheckoutReady(productId: ProductId) {
+  if (productId === "membership") return false
+
+  const promisedMediaReady =
+    productId === "pdf_download"
+      ? Boolean(process.env.LIFT_PDF_STORAGE_PATH)
+      : Boolean(
+          process.env.LIFT_PDF_STORAGE_PATH &&
+          process.env.LIFT_VIDEO_STORAGE_PATH
+        )
+
   return Boolean(
     isCommerceSalesReady() &&
+    isSupabaseAdminConfigured() &&
     process.env.STRIPE_SECRET_KEY &&
     process.env.STRIPE_WEBHOOK_SECRET &&
+    promisedMediaReady &&
     getPriceId(productId)
   )
 }
@@ -104,6 +141,31 @@ export function isExpectedStripePrice(
     price.recurring?.interval === product.expectedRecurringInterval &&
     price.recurring?.interval_count === 1
   )
+}
+
+export function getCheckoutCatalog(value: unknown) {
+  return typeof value === "string" &&
+    Object.prototype.hasOwnProperty.call(CHECKOUT_CATALOG, value)
+    ? CHECKOUT_CATALOG[value as CheckoutCatalogVersion]
+    : null
+}
+
+export function isExpectedCatalogPrice(
+  catalogVersion: unknown,
+  price: Pick<Stripe.Price, "currency" | "recurring" | "type" | "unit_amount">
+) {
+  const catalog = getCheckoutCatalog(catalogVersion)
+  if (!catalog) return false
+
+  if (
+    price.currency !== catalog.expectedCurrency ||
+    price.unit_amount !== catalog.expectedUnitAmount ||
+    price.type !== catalog.expectedPriceType
+  ) {
+    return false
+  }
+
+  return price.recurring === null
 }
 
 export function isProductId(value: unknown): value is ProductId {

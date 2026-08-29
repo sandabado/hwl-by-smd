@@ -1,8 +1,12 @@
 import type Stripe from "stripe"
 
-import { sendTransactionalEmail } from "@/lib/email"
 import { createAdminClient } from "@/lib/supabase/server"
-import { getStripe, isProductId } from "@/lib/stripe"
+import {
+  getCheckoutCatalog,
+  getStripe,
+  isExpectedCatalogPrice,
+  isProductId,
+} from "@/lib/stripe"
 
 function membershipStatus(status: Stripe.Subscription.Status) {
   if (
@@ -30,6 +34,12 @@ function subscriptionId(subscription: string | Stripe.Subscription | null) {
   return typeof subscription === "string"
     ? subscription
     : (subscription?.id ?? null)
+}
+
+function paymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null) {
+  return typeof paymentIntent === "string"
+    ? paymentIntent
+    : (paymentIntent?.id ?? null)
 }
 
 async function syncSubscription(
@@ -96,20 +106,64 @@ export async function POST(request: Request) {
     return new Response("Invalid Stripe signature.", { status: 400 })
   }
 
-  const { data: existing } = await supabase
+  const { data: existingEvent, error: eventLookupError } = await supabase
     .from("stripe_events")
     .select("id")
     .eq("id", event.id)
     .maybeSingle()
-  if (existing) return new Response("Already processed.", { status: 200 })
+  if (eventLookupError) {
+    return new Response("Webhook state could not be checked.", { status: 500 })
+  }
+  if (existingEvent) {
+    return new Response("Already processed.", { status: 200 })
+  }
 
   try {
     if (event.type === "checkout.session.completed") {
-      const session = event.data.object
+      const eventSession = event.data.object
+      const session = await stripe.checkout.sessions.retrieve(eventSession.id, {
+        expand: ["line_items"],
+      })
       const userId = session.metadata?.user_id ?? session.client_reference_id
       const productType = session.metadata?.product_type
       if (!userId || !isProductId(productType)) {
         throw new Error("Checkout metadata is incomplete.")
+      }
+      if (productType !== "pdf_download" && productType !== "lift_guide") {
+        throw new Error("Checkout product is not enabled for this launch.")
+      }
+
+      const catalogVersion = session.metadata?.catalog_version
+      const catalog = getCheckoutCatalog(catalogVersion)
+      const expectedPriceId = session.metadata?.price_id
+      const lineItems = session.line_items?.data ?? []
+      const lineItem = lineItems[0]
+      const linePrice = lineItem?.price
+      if (
+        !catalog ||
+        catalog.productId !== productType ||
+        session.mode !== catalog.mode ||
+        session.payment_status !== "paid" ||
+        lineItems.length !== 1 ||
+        lineItem.quantity !== 1 ||
+        !linePrice ||
+        !expectedPriceId ||
+        linePrice.id !== expectedPriceId ||
+        !isExpectedCatalogPrice(catalogVersion, linePrice) ||
+        lineItem.amount_total !== catalog.expectedUnitAmount ||
+        session.amount_total !== catalog.expectedUnitAmount ||
+        session.currency !== catalog.expectedCurrency
+      ) {
+        throw new Error("Checkout fulfillment verification failed.")
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", userId)
+        .maybeSingle()
+      if (profileError || !profile) {
+        throw new Error("Checkout member profile is missing.")
       }
 
       const stripeCustomerId = customerId(session.customer)
@@ -121,10 +175,10 @@ export async function POST(request: Request) {
         if (error) throw error
       }
 
-      const paymentIntent =
-        typeof session.payment_intent === "string"
-          ? session.payment_intent
-          : (session.payment_intent?.id ?? null)
+      const paymentIntent = paymentIntentId(session.payment_intent)
+      if (!paymentIntent) {
+        throw new Error("Checkout payment identity is missing.")
+      }
 
       const { error: purchaseError } = await supabase.from("purchases").upsert(
         {
@@ -138,24 +192,6 @@ export async function POST(request: Request) {
         { onConflict: "stripe_checkout_session_id" }
       )
       if (purchaseError) throw purchaseError
-
-      if (productType === "membership" && session.subscription) {
-        const id =
-          typeof session.subscription === "string"
-            ? session.subscription
-            : session.subscription.id
-        await syncSubscription(await stripe.subscriptions.retrieve(id), userId)
-      }
-
-      const email =
-        session.customer_details?.email ?? session.customer_email ?? null
-      if (email) {
-        await sendTransactionalEmail({
-          html: `<div style="font-family:Arial,sans-serif;color:#5a4a3f;line-height:1.7"><h1 style="font-family:Georgia,serif">Your ritual is ready.</h1><p>Thank you for choosing HWL by SMD. Your purchase is now waiting inside your private library.</p><p><a href="${new URL("/the-den", request.url).toString()}">Enter The Den</a></p></div>`,
-          template: "purchase_confirmation",
-          to: email,
-        })
-      }
     }
 
     if (
@@ -186,11 +222,29 @@ export async function POST(request: Request) {
       }
     }
 
-    const { error: eventError } = await supabase.from("stripe_events").insert({
-      event_type: event.type,
-      id: event.id,
-    })
-    if (eventError && eventError.code !== "23505") throw eventError
+    if (event.type === "charge.refunded") {
+      const charge = event.data.object
+      const id = paymentIntentId(charge.payment_intent)
+
+      if (charge.refunded && id) {
+        const { error } = await supabase
+          .from("purchases")
+          .update({ status: "refunded" })
+          .eq("stripe_payment_intent_id", id)
+          .eq("status", "active")
+        if (error) throw error
+      }
+    }
+
+    const { error: processedEventError } = await supabase
+      .from("stripe_events")
+      .insert({
+        event_type: event.type,
+        id: event.id,
+      })
+    if (processedEventError && processedEventError.code !== "23505") {
+      throw processedEventError
+    }
   } catch (error) {
     console.error("Stripe webhook processing failed", error)
     return new Response("Webhook processing failed.", { status: 500 })

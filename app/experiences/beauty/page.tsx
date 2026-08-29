@@ -35,23 +35,30 @@ const offerings = [
       "A refreshing facial restoring radiance in moments, with cleansing, hydration, sculpting massage, and finishing touches.",
   },
   {
-    title: "Signature Retreat Facial",
+    title: "Reiki Aromatherapy Healing",
+    bookingHref: "/book?service=reiki-aromatherapy-healing#choose-time",
+    details: ["30–45 minutes", "$222 per guest", "In person"],
+    description:
+      "A restorative blend of aromatherapy and Reiki, held at an unhurried pace for grounding and renewal.",
+  },
+  {
+    title: "Signature Facial",
     bookingHref: "/book?service=signature-facial#choose-time",
-    details: ["60 minutes", "$277 per guest", "Group rate"],
+    details: ["60 minutes", "$277 per guest", "In person"],
     description:
       "A customized facial restoring glow, hydration, and balance while creating a meaningful moment of pause.",
   },
   {
-    title: "HWL Beauty & Being Ritual",
+    title: "Beauty & Being Ritual",
     bookingHref: "/book?service=beauty-being-ritual#choose-time",
-    details: ["90 minutes", "$333 per guest", "Group rate"],
+    details: ["90 minutes", "$333 per guest", "In person"],
     description:
       "A luxury facial blending customized skincare, aromatherapy, therapeutic and lymphatic massage, Reiki, and intentional restoration.",
   },
   {
-    title: "Wild Glow Luxury Facial Ritual",
+    title: "Wild Glow Luxury Facial",
     bookingHref: "/book?service=wild-glow-luxury-facial#choose-time",
-    details: ["120 minutes", "$444 per guest", "Group rate"],
+    details: ["120 minutes", "$444 per guest", "In person"],
     description:
       "A fully immersive experience with advanced skincare, extended massage, energy balancing, aromatherapy, and personalized ritual.",
   },
@@ -310,6 +317,22 @@ export default function BeautyPage() {
         </div>
       </PageSection>
 
+      <section className="bg-[#f3e9dc] px-6 py-24 text-center md:py-32">
+        <figure className="mx-auto max-w-4xl">
+          <blockquote className="font-serif text-3xl leading-[1.35] text-[var(--primary)] italic md:text-5xl">
+            “What a wonderful experience! Went in to get a facial for my
+            upcoming wedding — I was feeling quite stressed but felt immediately
+            soothed once Shannon started working her magic. My skin is still
+            showing the happy effects of being fed and massaged with all these
+            fancy concoctions. And honestly, I would pay again just to have that
+            meditative experience!”
+          </blockquote>
+          <figcaption className="mt-8 text-xs tracking-[0.22em] text-[var(--accent)] uppercase">
+            Zara K. · Beauty + facial client
+          </figcaption>
+        </figure>
+      </section>
+
       <PageSection className="py-24 md:py-32" id="benefits">
         <SectionHeading
           align="center"
@@ -418,13 +441,13 @@ export default function BeautyPage() {
       <PageSection className="py-24 md:py-32" id="lift">
         <div className="mx-auto grid max-w-6xl overflow-hidden rounded-[2.5rem] bg-[var(--primary)] text-[var(--background)] shadow-[0_35px_90px_rgba(43,39,36,0.18)] lg:grid-cols-[0.88fr_1.12fr]">
           <ParallaxImage
-            alt={media.editorial.liftBotanicals.alt}
+            alt={media.shannon.beautyLift.alt}
             aspectRatio="4 / 3"
             className="h-full min-h-80 rounded-none"
             imageClassName="object-cover opacity-85"
             sizes="(max-width: 1023px) 100vw, 42vw"
             speed={0.1}
-            src={media.editorial.liftBotanicals.src}
+            src={media.shannon.beautyLift.src}
           />
           <div className="flex flex-col justify-center p-8 md:p-12 lg:p-16">
             <p className="text-xs tracking-[0.3em] text-[var(--accent-on-dark)] uppercase">

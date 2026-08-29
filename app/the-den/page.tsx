@@ -11,11 +11,9 @@ import {
 } from "lucide-react"
 
 import { CourseCard } from "@/components/member/course-card"
-import { JourneyPauseControl } from "@/components/member/journey-pause-control"
 import { MemberNavigation } from "@/components/member/member-navigation"
 import { Button } from "@/components/ui/button"
 import { requireAccess } from "@/lib/access"
-import { getMemberConnectionSnapshot } from "@/lib/connection-engine"
 import { getPublishedCourses } from "@/lib/member-content"
 
 export const dynamic = "force-dynamic"
@@ -27,10 +25,7 @@ export const metadata: Metadata = {
 
 export default async function TheDenPage() {
   const { access, user } = await requireAccess("any_purchase", "/the-den")
-  const [courses, connection] = await Promise.all([
-    getPublishedCourses(),
-    getMemberConnectionSnapshot(),
-  ])
+  const courses = await getPublishedCourses()
   const visibleCourses = courses.filter(
     (course) =>
       access.isMember || (course.access_tier === "lift" && access.canAccessLift)
@@ -38,9 +33,6 @@ export default async function TheDenPage() {
   const firstName =
     String(user.user_metadata.full_name ?? "").split(" ")[0] || "love"
   const today = visibleCourses[0]
-  const activeJourneys = connection.data.enrollments.filter((enrollment) =>
-    ["active", "paused", "pending"].includes(enrollment.status)
-  )
   const renewalDate = access.membership?.current_period_end
     ? new Intl.DateTimeFormat("en-US", {
         day: "numeric",
@@ -65,15 +57,15 @@ export default async function TheDenPage() {
               Welcome back, {firstName}.
             </h1>
           </div>
-          <MemberNavigation hasMembership={access.isMember} />
+          <MemberNavigation />
         </div>
 
         <p className="mt-5 text-xl tracking-wide text-[var(--muted-foreground)]">
           Continue your ritual.
         </p>
         <p className="mt-4 max-w-3xl leading-relaxed text-[var(--muted-foreground)]">
-          Your practices. Your courses. Your private line to Shannon. Nothing
-          here is urgent. Everything here is yours.
+          Your practices. Your courses. Nothing here is urgent. Everything here
+          is yours.
         </p>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
@@ -142,100 +134,24 @@ export default async function TheDenPage() {
               <p className="mt-3 font-serif text-2xl leading-relaxed text-[var(--primary)] italic">
                 “Let consistency be an act of devotion, not pressure.”
               </p>
-              {access.isMember ? (
-                <Link
-                  className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)]"
-                  href="/the-den/connection"
-                >
-                  Open Connection Hub <ArrowRight className="size-4" />
-                </Link>
-              ) : (
-                <Link
-                  className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)]"
-                  href="/store#the-den"
-                >
-                  Explore Den membership <ArrowRight className="size-4" />
-                </Link>
-              )}
+              <Link
+                className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)]"
+                href="/contact"
+              >
+                Contact Shannon <ArrowRight className="size-4" />
+              </Link>
             </article>
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <article className="relative overflow-hidden rounded-[2rem] bg-[var(--primary)] p-7 text-white md:p-9">
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 [background-image:radial-gradient(circle_at_85%_15%,rgba(220,197,165,0.35),transparent_35%)] opacity-20"
-            />
-            <div className="relative">
-              <p className="text-xs tracking-[0.24em] text-[var(--accent-on-dark)] uppercase">
-                Your journeys
-              </p>
-              <h2 className="mt-3 text-4xl text-white">Move at your pace.</h2>
-              {activeJourneys.length ? (
-                <div className="mt-7 divide-y divide-white/10">
-                  {activeJourneys.slice(0, 3).map((enrollment) => {
-                    const completed = Math.max(
-                      0,
-                      Math.min(
-                        enrollment.milestone_count,
-                        enrollment.next_milestone_position - 1
-                      )
-                    )
-                    const progress = enrollment.milestone_count
-                      ? (completed / enrollment.milestone_count) * 100
-                      : 0
-
-                    return (
-                      <div
-                        className="grid gap-4 py-5 sm:grid-cols-[1fr_auto] sm:items-center"
-                        key={enrollment.id}
-                      >
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-medium text-white">
-                              {enrollment.journey.name}
-                            </p>
-                            <span className="rounded-full border border-white/15 px-2 py-0.5 text-[9px] tracking-wide text-white/55 uppercase">
-                              {enrollment.status}
-                            </span>
-                          </div>
-                          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
-                            <div
-                              className="h-full rounded-full bg-[var(--accent-on-dark)] transition-[width] duration-700"
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                          <p className="mt-2 text-[10px] text-white/45">
-                            {completed} of {enrollment.milestone_count} moments
-                          </p>
-                        </div>
-                        <JourneyPauseControl
-                          initialStatus={
-                            enrollment.status as "active" | "paused" | "pending"
-                          }
-                          journeyId={enrollment.journey_id}
-                        />
-                      </div>
-                    )
-                  })}
-                </div>
-              ) : (
-                <p className="mt-5 max-w-lg text-sm leading-[1.8] text-white/55">
-                  No guided journey is asking for your attention. The quiet is
-                  part of the practice.
-                </p>
-              )}
-            </div>
-          </article>
-
+        <div className="mt-8">
           <article className="den-card rounded-[2rem] p-7 md:p-9">
             <HeartHandshake
               className="size-5 text-[var(--accent)]"
               aria-hidden="true"
             />
             <p className="mt-6 text-xs tracking-[0.24em] text-[var(--muted-foreground)] uppercase">
-              Membership
+              Access
             </p>
             <h2 className="mt-3 text-4xl text-[var(--primary)]">
               {access.isMember ? "The Den is active." : "Your private access"}
@@ -244,7 +160,7 @@ export default async function TheDenPage() {
               {access.isMember
                 ? renewalDate
                   ? `Your current period continues through ${renewalDate}.`
-                  : "Your library and Connection Hub are open."
+                  : "Your private library is open."
                 : "Your purchased practices remain available in your library."}
             </p>
             <Link

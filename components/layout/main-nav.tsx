@@ -24,7 +24,7 @@ export function MainNav() {
             href={item.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "relative py-2 text-sm tracking-wide text-[var(--muted-foreground)] transition-colors duration-200 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:origin-left after:scale-x-0 after:bg-[var(--accent)] after:transition-transform after:duration-200 hover:text-[var(--foreground)]",
+              "relative py-2 text-xs font-medium tracking-[0.12em] text-[var(--muted-foreground)] uppercase transition-colors duration-200 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:origin-left after:scale-x-0 after:bg-[var(--accent)] after:transition-transform after:duration-200 hover:text-[var(--foreground)]",
               isActive && "text-[var(--foreground)] after:scale-x-100"
             )}
           >

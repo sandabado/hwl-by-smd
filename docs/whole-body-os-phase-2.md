@@ -18,7 +18,7 @@ Phase 2 adds the first production commerce and member layer to HWL by SMD.
 - `/the-den` — personalized welcome, today’s ritual, private note, session CTA
 - `/library` — entitled course collection, organized by practice
 - `/course/[slug]` — ordered lesson path and progress
-- `/lesson/[id]` — protected Mux player, completion, private PDF download
+- `/lesson/[id]` — protected lesson playback, completion, private PDF download
 - `/account` — membership, purchase history, billing portal, sign out
 
 ### Trusted server routes
@@ -28,6 +28,8 @@ Phase 2 adds the first production commerce and member layer to HWL by SMD.
 - `POST /api/portal` — creates the signed-in member’s Stripe billing portal
 - `POST /api/progress` — saves the signed-in member’s lesson progress
 - `GET /api/download/[lessonId]` — checks entitlement and creates an expiring PDF link
+- `GET /api/video/lift` — checks LIFT entitlement and redirects to a 3,600-second signed URL for the private launch video
+- `GET /api/video/lift/captions` — optional Phase 2 entitlement-checked redirect for a private captions file
 
 ## Access model
 
@@ -50,31 +52,50 @@ Phase 2 adds the first production commerce and member layer to HWL by SMD.
    - `https://howlbysmd.com/auth/callback`
 3. Upload the LIFT PDF to the private `member-content` bucket at the path in
    `LIFT_PDF_STORAGE_PATH`.
-4. Create three Stripe prices:
-   - $3.33 one-time — LIFT PDF
-   - $11.11 one-time — Complete LIFT, guided video + downloadable PDF
+4. Transcode the supplied archival LIFT master to an approved web-delivery MP4,
+   then upload it to the private `member-content` bucket at the path in
+   `LIFT_VIDEO_STORAGE_PATH`. An approved VTT captions file may be added later
+   at `LIFT_VIDEO_CAPTIONS_STORAGE_PATH`; Complete LIFT launch checkout requires
+   the PDF and video, with captions tracked as a Phase 2 enhancement.
+5. Create three Stripe prices:
+   - $11.11 one-time — LIFT Guide PDF
+   - $33.33 one-time — Complete LIFT, guided video + downloadable PDF
    - $11.11 monthly — The Den
-5. Register the Stripe webhook URL:
+6. Register the Stripe webhook URL:
    `https://howlbysmd.com/api/stripe/webhook`.
-6. Subscribe the webhook to:
+7. Subscribe the webhook to:
    - `checkout.session.completed`
    - `customer.subscription.created`
    - `customer.subscription.updated`
    - `customer.subscription.deleted`
    - `invoice.payment_failed`
-7. Configure the Stripe Customer Portal and brand Stripe Checkout to match HWL.
-8. Upload videos to Mux using a **signed** playback policy. Create a Mux signing
-   key and store its key ID and base64-encoded private PEM separately from the
-   Mux API token and secret.
-9. Add the values listed in `.env.example` to `.env.local` and to the production
-   host. Never paste service-role, Stripe secret, webhook, or Mux private keys
-   into client code.
-10. Verify the Resend sending domain and add its API key.
+8. Configure the Stripe Customer Portal and brand Stripe Checkout to match HWL.
+9. For launch, serve the private LIFT MP4 through the entitlement-checked
+   `/api/video/lift` route and a native HTML5 player. The route creates a
+   3,600-second signed redirect so browser range requests can seek within the
+   protected object. The public preview must never be treated as paid delivery.
+10. Keep the existing Mux signed-playback architecture for a future streaming
+    phase. When that phase is approved, upload videos using a **signed** playback
+    policy and store the signing key ID and base64-encoded private PEM separately
+    from the Mux API token and secret.
+11. Add the values listed in `.env.example` to `.env.local` and to the production
+    host. Never paste service-role, Stripe secret, webhook, or Mux private keys
+    into client code.
+12. Verify the Resend sending domain and add its API key.
+
+The steps above are a configuration sequence, not evidence of completion. As
+of August 28, 2026, the high-resolution master is archival and not web-ready;
+no transcode, hosted upload, environment mutation, or provider-backed playback
+test is authorized or recorded by this document. Complete LIFT must remain
+gated until the private object and the purchase-to-entitlement-to-playback flow
+pass end-to-end verification.
 
 ## Content to prepare
 
 - One cover image and short preparation note per course
-- Mux signed playback ID, duration, captions, and transcript per lesson
+- Launch-ready LIFT MP4, duration, captions, and transcript for the protected
+  Supabase delivery path
+- Mux signed playback ID per lesson when the future streaming phase is approved
 - PDF storage path when a lesson includes a download
 - The private welcome note from Shannon
 - Booking link or Cal.com event types for:

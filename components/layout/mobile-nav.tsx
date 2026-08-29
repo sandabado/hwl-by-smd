@@ -42,7 +42,7 @@ export function MobileNav() {
           <SheetTitle className="font-serif text-xl font-medium tracking-[0.12em] text-[var(--primary)]">
             HWL·SMD
             <span className="mt-2 block font-serif text-xs tracking-[0.2em] text-[var(--muted-foreground)] uppercase">
-              Beauty · Body · Being
+              Body · Beauty · Being
             </span>
           </SheetTitle>
           <SheetDescription className="sr-only">

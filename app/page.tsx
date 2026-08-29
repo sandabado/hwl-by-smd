@@ -5,9 +5,9 @@ import { getPublishedHomepageFeature } from "@/lib/site-content"
 export const revalidate = 3600
 
 export const metadata = createPageMetadata({
-  title: "HWL by SMD — Skincare, Yoga, Astrology & Retreats in Palm Springs",
+  title: "HWL by SMD — Body, Beauty & Being",
   description:
-    "Shannon Mary Dixon offers facial rituals, private yoga, astrology consultations, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
+    "Beauty, movement and ritual practices, products and experiences by Shannon Mary Dixon, online and in Palm Springs, Joshua Tree and the surrounding desert.",
   path: "/",
 })
 

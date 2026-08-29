@@ -52,7 +52,8 @@ Do not recommend replacing or removing the systems already built:
 - Next.js 16 / React 19 / Tailwind v4 application.
 - Supabase authentication, database, RLS, and entitlements.
 - Stripe Checkout, subscription, portal, and webhook architecture.
-- Mux signed in-browser video.
+- Entitlement-checked private video delivery for launch, with the existing Mux
+  signed-playback architecture preserved for a future streaming phase.
 - Private PDF delivery.
 - The Den, library, courses, lessons, progress, and account.
 - Whole Body OS admin.
@@ -112,13 +113,14 @@ approved.
 
 ### Products and member access
 
-- LIFT PDF — **$3.33** one-time.
-- Complete LIFT — **$11.11** one-time, including guided video and the
+- LIFT Guide — **$11.11** one-time.
+- Complete LIFT — **$33.33** one-time, including guided video and the
   downloadable PDF.
 - The Den — **$11.11/month**.
 - Ownership-aware Store states.
 - Authenticated paid access.
-- Protected Mux lessons.
+- Protected lessons; Complete LIFT uses the local private-video launch path and
+  Mux remains the future streaming architecture.
 - Protected PDF.
 - Stripe webhook entitlement sync.
 
@@ -302,3 +304,48 @@ Do not offer legal advice; flag what requires a lawyer.
 
 Be decisive. Preserve the working platform. Help us remove noise and make every
 room feel unmistakably like Shannon.
+
+## Appendix D — LIFT launch delivery boundary
+
+- The supplied master is
+  `/Users/cougarceleste/Downloads/FACIAL LIFT VIDEO FINAL HIGH RES.mov`:
+  3,310,422,032 bytes; 3:54.526; 1920×1080 at 23.976p; Apple ProRes 422 with
+  48 kHz stereo LPCM audio; SHA-256
+  `2e1a37fe5de424b26ac600fa03701b7c6137bfc01ef057b250f461ac60de2039`.
+- Treat that file as an archival master, not a browser-delivery asset. The
+  existing public preview is a separate 10-second, 480×272 H.264/AAC file and
+  must not be delivered as the paid Complete LIFT video.
+- The local launch design keeps an approved web MP4 private in Supabase
+  `member-content` at the environment-owned `LIFT_VIDEO_STORAGE_PATH`.
+  `/api/video/lift` checks authentication and LIFT entitlement before issuing
+  a 3,600-second signed redirect to a native HTML5 player. An optional private
+  VTT captions file can use `LIFT_VIDEO_CAPTIONS_STORAGE_PATH` and the matching
+  entitlement-checked captions route. Launch checkout requires the PDF and
+  video; English captions remain a Phase 2 enhancement.
+- Keep the future signed Mux architecture intact. Do not activate Complete
+  LIFT until the transcode, private upload, provider configuration, public
+  denial, entitled playback, seeking, expiry, checkout, webhook entitlement,
+  and refund-revocation paths have been verified end to end.
+- No transcode, hosted upload, provider mutation, deployment, or paid-flow E2E
+  is authorized or claimed by this handoff.
+
+## Appendix E — Personal-use and IP language
+
+- Use the brand names **HWL by SMD** and **LIFT** consistently. A `™` symbol may
+  communicate a claimed mark; it must not be described as a registration or as
+  proof of ownership.
+- LIFT digital purchases should grant one purchaser a limited,
+  non-transferable license for personal use. The purchaser may access the
+  included guide and video and make reasonable personal or accessibility
+  copies. They may not share, publish, publicly upload, resell, redistribute,
+  record, or use the materials to provide a commercial class or service
+  without written permission.
+- Ownership language must be qualified: original content owned by Shannon Mary
+  Dixon is protected, while photographs, licensed media, and other third-party
+  materials remain the property of their respective owners and are used under
+  license, permission, or applicable law.
+- Keep member reminders warm and brief: the practice was created by Shannon for
+  the purchaser’s personal use; please do not copy, record, share, or
+  redistribute it. Avoid threatening enforcement copy.
+- Final Terms, refund language, trademark usage, and rights-clearance claims
+  require professional legal review before public commerce launch.

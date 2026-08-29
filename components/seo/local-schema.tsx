@@ -4,6 +4,7 @@ import { absoluteUrl, SITE_NAME, SITE_URL, type JsonLdNode } from "@/lib/seo"
 
 export const SERVICE_AREAS = [
   "Palm Springs",
+  "Palm Desert",
   "Joshua Tree",
   "Yucca Valley",
   "Desert Hot Springs",

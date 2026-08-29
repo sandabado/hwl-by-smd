@@ -20,8 +20,8 @@ export function ServiceAreaNote() {
         Desert service area
       </h2>
       <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-[var(--primary)]">
-        Based in Palm Springs. Serving Joshua Tree, Yucca Valley, Desert Hot
-        Springs, and Morongo Valley.
+        Based in Palm Springs. Serving Palm Desert, Joshua Tree, Yucca Valley,
+        Desert Hot Springs, Morongo Valley, and surrounding desert communities.
       </p>
       <nav
         aria-label="Explore service areas"

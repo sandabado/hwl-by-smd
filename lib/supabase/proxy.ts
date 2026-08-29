@@ -11,7 +11,22 @@ const protectedPrefixes = [
   "/account",
 ]
 
+const deferredConnectionPaths = new Set([
+  "/den/connection",
+  "/den/messages",
+  "/the-den/connection",
+  "/the-den/messages",
+])
+
 export async function updateSession(request: NextRequest) {
+  if (deferredConnectionPaths.has(request.nextUrl.pathname)) {
+    const contactUrl = request.nextUrl.clone()
+    contactUrl.pathname = "/contact"
+    contactUrl.search = ""
+    contactUrl.searchParams.set("notice", "connection")
+    return NextResponse.redirect(contactUrl)
+  }
+
   if (!isSupabaseConfigured()) {
     return NextResponse.next({ request })
   }

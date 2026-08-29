@@ -30,17 +30,16 @@ const practices = [
   {
     title: "Private Yoga",
     bookingHref: "/book?service=private-yoga#choose-time",
-    detail:
-      "75–90 minutes · Starting at $555 for up to 4 guests · +$55 per additional guest",
+    detail: "75–90 minutes · $666 for 2–4 guests · +$66 per additional guest",
     image: media.experiences.movementBoat,
     description:
-      "A complete movement and integration experience with yoga, breathwork, meditation, and aromatherapy. A 90-minute format is available for an additional $55.",
+      "A complete movement and integration experience with yoga, breathwork, meditation, and aromatherapy, shaped around the group that arrives.",
   },
   {
     title: "Private Sound Healing",
     bookingHref: "/book?service=private-sound-healing#choose-time",
     detail:
-      "60 minutes · Starting at $555 for up to 4 guests · +$55 per additional guest",
+      "60–75 minutes · $444 for up to 8 guests · +$44 per additional guest",
     image: media.experiences.movementEagle,
     description:
       "An immersive sound bath using crystal singing bowls, guided meditation, breathwork, and restorative frequencies.",
@@ -48,11 +47,10 @@ const practices = [
   {
     title: "Private Yoga + Sound",
     bookingHref: "/book?service=private-yoga-and-sound#choose-time",
-    detail:
-      "60–75 minutes · Starting at $444 for up to 8 guests · +$44 per additional guest",
+    detail: "60 minutes · $555 for up to 4 guests · +$55 per additional guest",
     image: media.experiences.movementStretch,
     description:
-      "Yoga, movement, and sound healing woven together. A 90-minute format is available for an additional $55.",
+      "Yoga, movement, and sound healing woven together in one private group practice.",
   },
 ]
 

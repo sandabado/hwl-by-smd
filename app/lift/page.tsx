@@ -8,9 +8,11 @@ import { BreathingSection } from "@/components/shared/breathing-section"
 import { BreathingText } from "@/components/shared/breathing-text"
 import { FaqAccordion } from "@/components/shared/internal-page"
 import { LiftSequenceProgress } from "@/components/shared/lift-sequence-progress"
+import { PersonalUseLicense } from "@/components/shared/personal-use-license"
 import { Reveal } from "@/components/shared/reveal"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { PublicPreviewPlayer } from "@/components/video/public-preview-player"
 import { getAuthenticatedUser, getMemberAccess } from "@/lib/access"
 import { media } from "@/lib/media"
 import { createPageMetadata } from "@/lib/seo"
@@ -77,6 +79,18 @@ const movements = [
 const previewMovements = movements.slice(0, 2)
 const gatedMovements = movements.slice(2)
 const movementNames = movements.map(({ name }) => name)
+const previewFilms = [
+  {
+    duration: "18 seconds",
+    poster: media.motion.liftPrepPreview.poster,
+    source: media.motion.liftPrepPreview.src,
+  },
+  {
+    duration: "18 seconds",
+    poster: media.motion.liftJawlinePreview.poster,
+    source: media.motion.liftJawlinePreview.src,
+  },
+] as const
 
 const benefits = [
   "Lift & Sculpt — Support and define the natural contours of the face",
@@ -191,7 +205,7 @@ export default async function LiftPage() {
   const access = user ? await getMemberAccess(user.id) : null
   const pdfSalesReady = isProductCheckoutReady("pdf_download")
   const guideSalesReady = isProductCheckoutReady("lift_guide")
-  const membershipSalesReady = isProductCheckoutReady("membership")
+  const membershipSalesReady = false
 
   return (
     <>
@@ -222,12 +236,54 @@ export default async function LiftPage() {
             Seven movements. Five minutes. Your own two hands.
           </BreathingText>
           <div className="mt-10 flex flex-wrap gap-4">
-            <Button
-              asChild
-              className="min-h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
-            >
-              <Link href="/store">Get LIFT</Link>
-            </Button>
+            {access?.canAccessLift ? (
+              <Button
+                asChild
+                className="min-h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
+              >
+                <Link href="/course/lift-daily-facial-ritual">
+                  Watch Complete LIFT
+                </Link>
+              </Button>
+            ) : guideSalesReady ? (
+              <CheckoutButton
+                className="min-h-12 px-7"
+                label="Get Video + PDF — $33.33"
+                productId="lift_guide"
+              />
+            ) : pdfSalesReady ? (
+              <CheckoutButton
+                className="min-h-12 border-[var(--border)] bg-white/30 px-7 text-[var(--primary)] hover:bg-white/70"
+                label="Get the LIFT PDF — $11.11"
+                productId="pdf_download"
+                variant="outline"
+              />
+            ) : (
+              <Button
+                className="min-h-12 rounded-full bg-[var(--primary)] px-7 text-white"
+                disabled
+              >
+                LIFT checkout opening soon
+              </Button>
+            )}
+            {access?.canDownloadLift && !access.canAccessLift ? (
+              <Button
+                asChild
+                className="min-h-12 rounded-full border-[var(--border)] bg-white/30 px-7 text-[var(--primary)] hover:bg-white/70"
+                variant="outline"
+              >
+                <Link href="/api/download/lift" prefetch={false}>
+                  Download Your PDF
+                </Link>
+              </Button>
+            ) : pdfSalesReady && !access?.canDownloadLift ? (
+              <CheckoutButton
+                className="min-h-12 border-[var(--border)] bg-white/30 px-7 text-[var(--primary)] hover:bg-white/70"
+                label="PDF only — $11.11"
+                productId="pdf_download"
+                variant="outline"
+              />
+            ) : null}
             <Button
               asChild
               className="min-h-12 rounded-full border-[var(--border)] bg-white/30 px-7 text-[var(--primary)] hover:bg-white/70"
@@ -429,29 +485,17 @@ export default async function LiftPage() {
               id={`lift-step-${index + 1}`}
               key={name}
             >
-              <div
-                className={
-                  index % 2 === 1
-                    ? "relative grid min-h-72 place-items-center overflow-hidden rounded-[2rem] border border-white/70 bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,0.92),transparent_32%),linear-gradient(135deg,#dfcbb7,#f4ece2_56%,#c4a882)] lg:order-2"
-                    : "relative grid min-h-72 place-items-center overflow-hidden rounded-[2rem] border border-white/70 bg-[radial-gradient(circle_at_25%_15%,rgba(255,255,255,0.92),transparent_32%),linear-gradient(135deg,#dfcbb7,#f4ece2_56%,#c4a882)]"
-                }
-              >
-                <span
-                  aria-hidden="true"
-                  className="absolute -right-5 -bottom-12 font-serif text-[12rem] leading-none text-white/38"
-                >
-                  {index + 1}
-                </span>
-                <div className="relative z-10 text-center">
-                  <span className="mx-auto grid size-16 place-items-center rounded-full border border-white/70 bg-white/60 text-[var(--primary)] shadow-lg backdrop-blur-sm">
-                    <Play className="ml-1 size-5" aria-hidden="true" />
-                  </span>
-                  <p className="mt-5 text-xs font-medium tracking-[0.2em] text-[var(--primary)] uppercase">
-                    Preview film coming soon
-                  </p>
-                </div>
+              <div className={index % 2 === 1 ? "lg:order-2" : undefined}>
+                <PublicPreviewPlayer
+                  describedBy={`lift-step-${index + 1}-guidance`}
+                  duration={previewFilms[index].duration}
+                  label={`Movement ${index + 1}: ${name}`}
+                  poster={previewFilms[index].poster}
+                  source={previewFilms[index].source}
+                />
               </div>
               <div
+                id={`lift-step-${index + 1}-guidance`}
                 className={
                   index % 2 === 1
                     ? "flex flex-col justify-center rounded-[2rem] border border-[var(--border)] bg-white/60 p-8 md:p-12 lg:order-1"
@@ -482,11 +526,42 @@ export default async function LiftPage() {
             </article>
           ))}
 
+          {!access?.canAccessLift ? (
+            <aside className="mx-auto grid max-w-4xl gap-6 rounded-[2rem] border border-[var(--accent)]/28 bg-[#f5ecde] px-7 py-8 text-center shadow-[0_20px_55px_rgba(90,74,63,0.1)] md:grid-cols-[1fr_auto] md:items-center md:px-10 md:text-left">
+              <div>
+                <p className="text-xs font-medium tracking-[0.22em] text-[var(--accent)] uppercase">
+                  Continue the ritual
+                </p>
+                <h3 className="mt-3 font-serif text-2xl text-[var(--primary)] md:text-3xl">
+                  Learn all seven movements with Shannon.
+                </h3>
+                <p className="mt-3 text-sm leading-[1.75] text-[var(--muted-foreground)]">
+                  Complete LIFT includes the full guided video and downloadable
+                  PDF for $33.33.
+                </p>
+              </div>
+              {guideSalesReady ? (
+                <CheckoutButton
+                  className="min-h-12 min-w-56 px-7"
+                  label="Get Complete LIFT"
+                  productId="lift_guide"
+                />
+              ) : (
+                <Button
+                  className="min-h-12 min-w-56 rounded-full px-7"
+                  disabled
+                >
+                  Checkout opening soon
+                </Button>
+              )}
+            </aside>
+          ) : null}
+
           {access?.canAccessLift ? (
             <div className="space-y-7">
               <div className="rounded-[1.5rem] border border-[var(--accent)]/35 bg-[#f5ecde] px-6 py-5 text-center text-sm leading-relaxed text-[var(--primary)]">
-                Your complete LIFT ritual is unlocked. The guided films live in
-                your private library.
+                Your complete LIFT ritual is unlocked. The full guided video
+                lives in your private library.
               </div>
               {gatedMovements.map(({ instruction, name, supports }, index) => {
                 const step = index + 3
@@ -581,13 +656,24 @@ export default async function LiftPage() {
                 })}
               </div>
               <div className="mt-8 text-center">
-                <Button
-                  asChild
-                  className="min-h-12 rounded-full px-7"
-                  variant="outline"
-                >
-                  <Link href="/store">Unlock the Complete Ritual</Link>
-                </Button>
+                {guideSalesReady ? (
+                  <div className="mx-auto max-w-sm">
+                    <CheckoutButton
+                      className="min-h-12 px-7"
+                      label="Get Complete LIFT — $33.33"
+                      productId="lift_guide"
+                      variant="outline"
+                    />
+                  </div>
+                ) : (
+                  <Button
+                    className="min-h-12 rounded-full px-7"
+                    disabled
+                    variant="outline"
+                  >
+                    Complete LIFT checkout opening soon
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -653,26 +739,28 @@ export default async function LiftPage() {
           </BreathingText>
         </div>
 
-        <div className="mx-auto mt-14 grid max-w-5xl gap-5 md:grid-cols-3 md:items-stretch">
-          <Card className="flex h-full flex-col rounded-[2rem] border-[var(--border)] bg-white/60 p-7 text-center shadow-none">
-            <p className="text-xs font-medium tracking-[0.2em] text-[var(--accent)] uppercase">
+        <PersonalUseLicense className="mx-auto mt-9 max-w-3xl" />
+
+        <div className="mx-auto mt-12 grid max-w-5xl gap-5 md:grid-cols-3 md:items-stretch">
+          <Card className="relative flex h-full flex-col rounded-[2rem] border-[var(--accent)] bg-[var(--primary)] p-7 text-center text-[var(--background)] shadow-[0_28px_75px_rgba(90,74,63,0.2)] md:-translate-y-4">
+            <span className="mx-auto inline-flex rounded-full bg-[var(--accent)] px-3 py-1 text-[10px] font-semibold tracking-[0.16em] text-white uppercase">
+              First release
+            </span>
+            <p className="mt-5 text-xs font-medium tracking-[0.2em] text-[var(--accent-on-dark)] uppercase">
               Printable ritual
             </p>
-            <h3 className="mt-5 text-3xl font-medium text-[var(--primary)]">
-              LIFT PDF Guide
-            </h3>
-            <p className="mt-3 font-serif text-4xl text-[var(--accent)]">
-              $3.33
+            <h3 className="mt-5 text-3xl font-medium">LIFT PDF Guide</h3>
+            <p className="mt-3 font-serif text-4xl text-[var(--accent-on-dark)]">
+              $11.11
             </p>
-            <p className="mt-5 flex-1 text-sm leading-[1.8] text-[var(--muted-foreground)]">
+            <p className="mt-5 flex-1 text-sm leading-[1.8] text-white/78">
               Complete guide with instructions, benefits, preparation notes
             </p>
             <div className="mt-7">
               {access?.canDownloadLift ? (
                 <Button
                   asChild
-                  className="h-11 w-full rounded-full"
-                  variant="outline"
+                  className="h-11 w-full rounded-full bg-[var(--background)] text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
                 >
                   <Link href="/api/download/lift" prefetch={false}>
                     Access Now
@@ -680,8 +768,50 @@ export default async function LiftPage() {
                 </Button>
               ) : pdfSalesReady ? (
                 <CheckoutButton
+                  className="bg-[var(--background)] text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
                   label="Choose the PDF"
                   productId="pdf_download"
+                />
+              ) : (
+                <Button
+                  className="h-11 w-full rounded-full bg-[var(--background)] text-[var(--primary)]"
+                  disabled
+                >
+                  Opening soon
+                </Button>
+              )}
+            </div>
+          </Card>
+
+          <Card className="flex h-full flex-col rounded-[2rem] border-[var(--border)] bg-white/60 p-7 text-center shadow-none">
+            <p className="text-xs font-medium tracking-[0.2em] text-[var(--accent)] uppercase">
+              Watch and learn
+            </p>
+            <h3 className="mt-5 text-3xl font-medium text-[var(--primary)]">
+              Complete LIFT — Video + PDF
+            </h3>
+            <p className="mt-3 font-serif text-4xl text-[var(--accent)]">
+              $33.33
+            </p>
+            <p className="mt-5 flex-1 text-sm leading-[1.8] text-[var(--muted-foreground)]">
+              Full video walkthrough of all seven movements plus downloadable
+              guide
+            </p>
+            <div className="mt-7">
+              {access?.canAccessLift ? (
+                <Button
+                  asChild
+                  className="h-11 w-full rounded-full"
+                  variant="outline"
+                >
+                  <Link href="/course/lift-daily-facial-ritual">
+                    Access Now
+                  </Link>
+                </Button>
+              ) : guideSalesReady ? (
+                <CheckoutButton
+                  label="Get Complete LIFT — $33.33"
+                  productId="lift_guide"
                   variant="outline"
                 />
               ) : (
@@ -690,51 +820,7 @@ export default async function LiftPage() {
                   disabled
                   variant="outline"
                 >
-                  Opening soon
-                </Button>
-              )}
-            </div>
-          </Card>
-
-          <Card className="relative flex h-full flex-col rounded-[2rem] border-[var(--accent)] bg-[var(--primary)] p-7 text-center text-[var(--background)] shadow-[0_28px_75px_rgba(90,74,63,0.2)] md:-translate-y-4">
-            <span className="mx-auto inline-flex rounded-full bg-[var(--accent)] px-3 py-1 text-[10px] font-semibold tracking-[0.16em] text-white uppercase">
-              Recommended
-            </span>
-            <p className="mt-5 text-xs font-medium tracking-[0.2em] text-[var(--accent-on-dark)] uppercase">
-              Watch and learn
-            </p>
-            <h3 className="mt-5 text-3xl font-medium">
-              Complete LIFT — Video + PDF
-            </h3>
-            <p className="mt-3 font-serif text-4xl text-[var(--accent-on-dark)]">
-              $11.11
-            </p>
-            <p className="mt-5 flex-1 text-sm leading-[1.8] text-white/78">
-              Full video walkthrough of all seven movements plus downloadable
-              guide
-            </p>
-            <div className="mt-7">
-              {access?.canAccessLift ? (
-                <Button
-                  asChild
-                  className="h-11 w-full rounded-full bg-[var(--background)] text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
-                >
-                  <Link href="/course/lift-daily-facial-ritual">
-                    Access Now
-                  </Link>
-                </Button>
-              ) : guideSalesReady ? (
-                <CheckoutButton
-                  className="bg-[var(--background)] text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
-                  label="Get Complete LIFT — $11.11"
-                  productId="lift_guide"
-                />
-              ) : (
-                <Button
-                  className="h-11 w-full rounded-full bg-[var(--background)] text-[var(--primary)]"
-                  disabled
-                >
-                  Opening soon
+                  Coming soon
                 </Button>
               )}
             </div>
@@ -752,8 +838,7 @@ export default async function LiftPage() {
               <span className="text-sm">/month</span>
             </p>
             <p className="mt-5 flex-1 text-sm leading-[1.8] text-[var(--muted-foreground)]">
-              Full library access, Connection Hub, guided journeys, member
-              pricing
+              A growing private library and ongoing practices with Shannon
             </p>
             <div className="mt-7">
               {access?.isMember ? (
@@ -776,7 +861,7 @@ export default async function LiftPage() {
                   disabled
                   variant="outline"
                 >
-                  Opening soon
+                  Coming soon
                 </Button>
               )}
             </div>

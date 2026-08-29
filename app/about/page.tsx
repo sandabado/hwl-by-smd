@@ -20,12 +20,13 @@ export const metadata = createPageMetadata({
 })
 
 const credentials = [
-  "Aesthetician",
-  "Yoga Teacher Training",
-  "Reiki Practice",
-  "Aromatherapy Study",
+  "Licensed Aesthetician",
+  "500hr Yoga Instructor",
+  "Reiki Practitioner",
+  "Aromatherapy Specialist",
   "Wellness Facilitator",
-  "Figure Skating Background",
+  "Actress",
+  "Former Elite Figure Skater",
 ] as const
 
 const shannonJsonLd = {
@@ -129,7 +130,7 @@ export default function AboutPage() {
             <span className="font-semibold text-[var(--accent)]">
               {media.editorial.aboutSkatingConcept.label}
             </span>{" "}
-            · Visualization of Shannon&apos;s skating chapter.{" "}
+            · A visual echo of Shannon&apos;s skating chapter.{" "}
             {media.editorial.aboutSkatingConcept.disclosure}
           </figcaption>
         </figure>
@@ -269,7 +270,7 @@ export default function AboutPage() {
             <span className="font-semibold text-[var(--accent)]">
               {media.editorial.aboutMotorcycleConcept.label}
             </span>{" "}
-            · Visualization of Shannon&apos;s motorcycle chapter.{" "}
+            · A visual echo of Shannon&apos;s open-road chapter.{" "}
             {media.editorial.aboutMotorcycleConcept.disclosure}
           </figcaption>
         </figure>

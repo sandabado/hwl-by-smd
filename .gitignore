@@ -39,3 +39,6 @@ next-env.d.ts
 
 # Supabase CLI local project metadata
 supabase/.temp/
+
+# Private paid media and launch assets; never commit or serve publicly
+/private-content/

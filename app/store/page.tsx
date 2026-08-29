@@ -14,6 +14,7 @@ import { JsonLd } from "@/components/seo/json-ld"
 import { BreathingSection } from "@/components/shared/breathing-section"
 import { BreathingText } from "@/components/shared/breathing-text"
 import { FaqAccordion } from "@/components/shared/internal-page"
+import { PersonalUseLicense } from "@/components/shared/personal-use-license"
 import { Reveal } from "@/components/shared/reveal"
 import { Button } from "@/components/ui/button"
 import { getAuthenticatedUser, getMemberAccess } from "@/lib/access"
@@ -72,7 +73,7 @@ const offers: Offer[] = [
     id: "lift-pdf",
     eyebrow: "Downloadable PDF",
     title: "LIFT PDF Guide",
-    price: "$3.33",
+    price: "$11.11",
     cadence: "one time",
     description:
       "The complete seven-movement facial massage ritual, with instructions, benefits, and preparation notes.",
@@ -81,8 +82,8 @@ const offers: Offer[] = [
       "Printable format",
       "Private download",
     ],
-    label: "Get the PDF — $3.33",
-    featured: false,
+    label: "Get the PDF — $11.11",
+    featured: true,
     icon: FileText,
     ownedHref: "/api/download/lift",
   },
@@ -91,7 +92,7 @@ const offers: Offer[] = [
     id: "lift-guide",
     eyebrow: "Streaming + PDF",
     title: "Complete LIFT — Video + PDF",
-    price: "$11.11",
+    price: "$33.33",
     cadence: "one time",
     description:
       "A full video walkthrough of all seven movements plus the downloadable guide. Learn each technique by seeing it demonstrated.",
@@ -100,8 +101,8 @@ const offers: Offer[] = [
       "Printable PDF",
       "Account-based access",
     ],
-    label: "Get Complete LIFT — $11.11",
-    featured: true,
+    label: "Get Complete LIFT — $33.33",
+    featured: false,
     icon: PlayCircle,
     ownedHref: "/course/lift-daily-facial-ritual",
   },
@@ -113,11 +114,11 @@ const offers: Offer[] = [
     price: "$11.11",
     cadence: "per month",
     description:
-      "A growing member library, Complete LIFT, and a private connection with Shannon.",
+      "A growing member library, Complete LIFT, and future member-only practices from Shannon.",
     features: [
       "Everything in LIFT",
       "A growing member library",
-      "Private Connection Hub",
+      "Future member-only practices",
     ],
     label: "Join The Den — $11.11/mo",
     featured: false,
@@ -126,33 +127,43 @@ const offers: Offer[] = [
   },
 ]
 
-const faqs = [
-  {
-    question: "Where will I find my purchase?",
-    answer:
-      "Create or sign in to your HWL account before checkout. Your purchase will appear in The Den automatically after payment.",
-  },
-  {
-    question: "Can I watch the LIFT video in my browser?",
-    answer:
-      "Yes. The full guided practice plays inside your private lesson page on phone, tablet, or computer.",
-  },
-  {
-    question: "How does the PDF download work?",
-    answer:
-      "The download is delivered through your protected library. Its private link expires, so your purchase stays tied to your account.",
-  },
-  {
-    question: "Can I cancel The Den?",
-    answer:
-      "Yes. You can manage or cancel your membership from the secure billing portal in your account.",
-  },
-  {
-    question: "What is the refund policy?",
-    answer:
-      "Contact Shannon within 14 days for a full refund on a digital purchase. The Den can be canceled at any time; partial membership months are not refunded, and access continues through the billing period.",
-  },
-]
+function getFaqs({
+  completeLiftReady,
+  membershipReady,
+}: {
+  completeLiftReady: boolean
+  membershipReady: boolean
+}) {
+  return [
+    {
+      question: "Where will I find my purchase?",
+      answer:
+        "Create or sign in to your HWL account before checkout. Your purchase will appear in The Den automatically after payment.",
+    },
+    {
+      question: "When will the complete LIFT video be available?",
+      answer: completeLiftReady
+        ? "Complete LIFT is available now through your private HWL library."
+        : "Complete LIFT is coming soon. The full guided practice will open only after its protected browser delivery has been verified on phone, tablet, and computer.",
+    },
+    {
+      question: "How does the PDF download work?",
+      answer:
+        "The download is delivered through your protected library. Its private link expires, so your purchase stays tied to your account.",
+    },
+    {
+      question: "When will The Den open?",
+      answer: membershipReady
+        ? "The Den is open. Your membership and one-time LIFT purchases live together in your private library."
+        : "The Den membership is coming soon. Your one-time LIFT purchases remain available in your private library without a subscription.",
+    },
+    {
+      question: "What is the refund policy?",
+      answer:
+        "Contact Shannon within 14 days to request a refund on a digital purchase. Review the Refund Policy for the complete terms.",
+    },
+  ]
+}
 
 export default async function StorePage() {
   const user = await getAuthenticatedUser()
@@ -160,8 +171,12 @@ export default async function StorePage() {
   const checkoutReady = {
     pdf_download: isProductCheckoutReady("pdf_download"),
     lift_guide: isProductCheckoutReady("lift_guide"),
-    membership: isProductCheckoutReady("membership"),
+    membership: false,
   }
+  const faqs = getFaqs({
+    completeLiftReady: checkoutReady.lift_guide,
+    membershipReady: checkoutReady.membership,
+  })
   const productSchema: ReturnType<typeof createProductJsonLd>[] = []
 
   if (checkoutReady.pdf_download) {
@@ -171,7 +186,7 @@ export default async function StorePage() {
         name: "LIFT PDF",
         description: "A private printable facial massage ritual guide.",
         path: "/store",
-        price: "3.33",
+        price: "11.11",
       })
     )
   }
@@ -183,22 +198,10 @@ export default async function StorePage() {
         description:
           "A guided in-browser facial massage video with a private printable guide.",
         path: "/store",
-        price: "11.11",
+        price: "33.33",
       })
     )
   }
-  if (checkoutReady.membership) {
-    productSchema.push(
-      createProductJsonLd({
-        id: "the-den-membership",
-        name: "The Den Membership",
-        description: "A monthly member library with a private connection hub.",
-        path: "/store",
-        price: "11.11",
-      })
-    )
-  }
-
   return (
     <>
       {productSchema.length ? (
@@ -343,6 +346,7 @@ export default async function StorePage() {
             Guides and ongoing practice.
           </BreathingText>
         </div>
+        <PersonalUseLicense className="mx-auto mb-12 max-w-3xl" />
         <div className="grid gap-6 lg:grid-cols-3 lg:items-stretch">
           {offers.map((offer, index) => {
             const Icon = offer.icon
@@ -364,7 +368,7 @@ export default async function StorePage() {
                 >
                   {offer.featured ? (
                     <span className="absolute top-7 right-7 rounded-full bg-[var(--accent)] px-3 py-1 text-[10px] font-semibold tracking-[0.18em] text-white uppercase">
-                      Recommended
+                      First release
                     </span>
                   ) : null}
 
@@ -457,7 +461,10 @@ export default async function StorePage() {
                         disabled
                         variant={offer.featured ? "default" : "outline"}
                       >
-                        Opening soon
+                        {offer.productId === "membership" ||
+                        offer.productId === "lift_guide"
+                          ? "Coming soon"
+                          : "Opening soon"}
                       </Button>
                     )}
                   </div>
@@ -468,9 +475,11 @@ export default async function StorePage() {
         </div>
 
         <p className="mx-auto mt-10 max-w-2xl text-center text-xs leading-[1.8] text-[var(--muted-foreground)]">
-          Sales are closed until every promised file, lesson, entitlement, and
-          delivery path has been verified. When they open, secure checkout will
-          be handled by Stripe and access will live in your private library.
+          {checkoutReady.lift_guide
+            ? "The LIFT PDF and Complete LIFT are available through secure Stripe checkout. The Den will open after its membership delivery path is verified."
+            : checkoutReady.pdf_download
+              ? "The LIFT PDF is available through secure Stripe checkout. Complete LIFT and The Den will open after their promised media and membership delivery paths are verified."
+              : "Sales are closed until the private PDF, entitlement, webhook, and download path have been verified. Secure checkout will open only after that full test passes."}
         </p>
       </BreathingSection>
 

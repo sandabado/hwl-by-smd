@@ -37,7 +37,7 @@ export function NewsletterForm() {
       form.reset()
       setStatus("sent")
       setFeedback(
-        "Shannon received your request for journal updates. She’ll follow up when new notes are ready."
+        "Shannon received your request to join the list and will be in touch when a new note is ready."
       )
     } catch (error) {
       setStatus("error")
@@ -74,11 +74,10 @@ export function NewsletterForm() {
         className="min-h-11 rounded-full bg-[var(--primary)] px-6 text-white hover:bg-[var(--accent)]"
         disabled={status === "sending"}
       >
-        {status === "sending" ? "Sending…" : "Request journal updates"}
+        {status === "sending" ? "Joining…" : "Join the list"}
       </Button>
       <p className="text-xs leading-relaxed text-[var(--muted-foreground)] sm:basis-full">
-        This sends a private request to Shannon. It does not subscribe you to
-        automated marketing. See the{" "}
+        This sends a private request to Shannon. See the{" "}
         <a className="underline underline-offset-2" href="/privacy">
           privacy policy
         </a>

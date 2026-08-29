@@ -89,19 +89,19 @@ const formats = [
   {
     guests: "Up to 8 guests",
     title: "Small group",
-    investment: "$1,555/day",
+    investment: "Starting at $1,555/day",
     note: "Half-day, full-day, and multi-day formats available.",
   },
   {
     guests: "9–15 guests",
     title: "Medium group",
-    investment: "$2,222/day",
+    investment: "Starting at $2,222/day",
     note: "Shaped around the venue, schedule, and selected practices.",
   },
   {
     guests: "16–24 guests",
     title: "Large group",
-    investment: "$3,333/day",
+    investment: "Starting at $3,333/day",
     note: "Includes a custom program and realistic capacity plan.",
   },
   {
@@ -124,7 +124,7 @@ const seasonalExperiences = [
     investment: "From $777",
   },
   {
-    title: "Solstice & Equinox Ceremony",
+    title: "Solstice & Equinox Ceremonies",
     duration: "120+ min",
     investment: "From $888",
   },
@@ -168,7 +168,7 @@ const logistics = [
   {
     question: "How do travel and timing work?",
     answer:
-      "There is no travel fee within Palm Springs, Palm Desert, Joshua Tree, Yucca Valley, or surrounding desert communities. Additional travel and lodging may apply outside the Coachella Valley. Ten to fourteen days’ notice is preferred, though shorter windows may be possible.",
+      "There is no travel fee within Palm Springs, Palm Desert, Joshua Tree, Yucca Valley, or surrounding desert communities. Additional travel and lodging fees apply outside the Coachella Valley. Ten to fourteen days’ notice is preferred, though shorter windows may be possible.",
   },
 ] as const
 

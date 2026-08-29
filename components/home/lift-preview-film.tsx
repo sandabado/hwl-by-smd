@@ -27,8 +27,10 @@ export function LiftPreviewFilm({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const prefersReducedMotion = usePrefersReducedMotion()
-  const [shouldLoad, setShouldLoad] = useState(false)
+  const [allowsAutomaticPlayback, setAllowsAutomaticPlayback] = useState(false)
+  const [isNearViewport, setIsNearViewport] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
+  const shouldLoad = allowsAutomaticPlayback && isNearViewport
 
   useEffect(() => {
     const reducedData = window.matchMedia(REDUCED_DATA_QUERY)
@@ -39,7 +41,7 @@ export function LiftPreviewFilm({
         ? SLOW_CONNECTIONS.has(connection.effectiveType)
         : false
 
-      setShouldLoad(
+      setAllowsAutomaticPlayback(
         !prefersReducedMotion &&
           !reducedData.matches &&
           !connection?.saveData &&
@@ -56,6 +58,24 @@ export function LiftPreviewFilm({
       connection?.removeEventListener?.("change", syncPlaybackPolicy)
     }
   }, [prefersReducedMotion])
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+
+        setIsNearViewport(true)
+        observer.disconnect()
+      },
+      { rootMargin: "320px" }
+    )
+
+    observer.observe(video)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const video = videoRef.current

@@ -8,27 +8,19 @@ import { cn } from "@/lib/utils"
 const items = [
   ["Today", "/the-den"],
   ["Library", "/library"],
-  ["Connection", "/the-den/connection"],
   ["Book Shannon", "/book"],
   ["Account", "/account"],
 ]
 
-export function MemberNavigation({
-  hasMembership,
-}: {
-  hasMembership: boolean
-}) {
+export function MemberNavigation() {
   const pathname = usePathname()
-  const visibleItems = hasMembership
-    ? items
-    : items.filter(([, href]) => href !== "/the-den/connection")
 
   return (
     <nav
       className="flex max-w-full gap-1 overflow-x-auto rounded-full border border-white/60 bg-white/45 p-1 backdrop-blur"
       aria-label="Member area"
     >
-      {visibleItems.map(([label, href]) => {
+      {items.map(([label, href]) => {
         const isCurrent =
           pathname === href ||
           (href !== "/the-den" && pathname.startsWith(`${href}/`))

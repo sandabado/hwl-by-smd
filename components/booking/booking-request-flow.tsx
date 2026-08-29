@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react"
 import { CalendarDays, Check, Clock3 } from "lucide-react"
+import Image from "next/image"
 
-import { CalInlineEmbed } from "@/components/booking/cal-inline-embed"
 import { Button } from "@/components/ui/button"
 import {
   bookingPillars,
@@ -25,15 +25,9 @@ const inputClassName =
 
 export function BookingRequestFlow({
   initialServiceSlug,
-  liveCalEventTypes,
   minimumDate,
 }: {
   initialServiceSlug?: string
-  liveCalEventTypes: readonly {
-    lengthInMinutes: number
-    slug: string
-    url: string
-  }[]
   minimumDate: string
 }) {
   const initialSelection = findBookingService(initialServiceSlug)
@@ -49,11 +43,11 @@ export function BookingRequestFlow({
   const [feedback, setFeedback] = useState("")
   const schedulingPanelRef = useRef<HTMLDivElement>(null)
   const selectedService = findBookingService(selectedServiceSlug)?.service
-  const selectedCalEvent = liveCalEventTypes.find(
-    (eventType) => eventType.slug === selectedServiceSlug
-  )
-  const activeServices =
-    bookingPillars.find((pillar) => pillar.id === activePillar)?.services ?? []
+  const activePillarData =
+    bookingPillars.find((pillar) => pillar.id === activePillar) ??
+    bookingPillars[0]
+  const activeServices = activePillarData.services
+  const previewImage = selectedService?.image ?? activePillarData.image
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -142,9 +136,7 @@ export function BookingRequestFlow({
       form.reset()
       setIsFlexible(true)
       setStatus("sent")
-      setFeedback(
-        "Thank you. Shannon received your request and will reply with an available time."
-      )
+      setFeedback("Thank you. Shannon will respond personally within 48 hours.")
     } catch (error) {
       setStatus("error")
       setFeedback(
@@ -170,8 +162,8 @@ export function BookingRequestFlow({
               What would feel good?
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--muted-foreground)]">
-              Choose one private experience. You can change your mind before
-              sending the request.
+              Choose the experience you want to explore. You can change your
+              mind before sending the request.
             </p>
 
             <div
@@ -242,6 +234,25 @@ export function BookingRequestFlow({
             className="scroll-mt-24 rounded-[1.6rem] border border-[var(--border)] bg-white/68 p-5 shadow-[0_20px_65px_rgba(90,74,63,0.07)] sm:p-6"
             ref={schedulingPanelRef}
           >
+            <div className="relative mb-5 aspect-[16/9] overflow-hidden rounded-[1.15rem] bg-[var(--muted)]">
+              <Image
+                alt={previewImage.alt}
+                className="object-cover object-center"
+                fill
+                preload
+                sizes="(max-width: 1023px) 90vw, 44vw"
+                src={previewImage.src}
+              />
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-gradient-to-t from-[var(--primary)]/65 via-transparent to-transparent"
+              />
+              <p className="absolute right-4 bottom-4 left-4 text-xs font-semibold tracking-[0.18em] text-white uppercase">
+                {selectedService?.title ??
+                  `${activePillarData.title} with Shannon`}
+              </p>
+            </div>
+
             {selectedService ? (
               <>
                 <div className="flex flex-col justify-between gap-3 border-b border-[var(--border)] pb-4 sm:flex-row sm:items-start">
@@ -261,213 +272,207 @@ export function BookingRequestFlow({
                   </p>
                 </div>
 
-                {selectedCalEvent ? (
-                  <>
-                    <div className="mt-4 rounded-2xl bg-[var(--primary)]/[0.055] p-4">
-                      <div className="flex items-start gap-3">
-                        <CalendarDays
-                          aria-hidden="true"
-                          className="mt-0.5 size-4 shrink-0 text-[var(--accent)]"
-                        />
-                        <div>
-                          <p className="text-sm font-medium text-[var(--primary)]">
-                            Live calendar · {selectedCalEvent.lengthInMinutes}{" "}
-                            minutes
-                          </p>
-                          <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)]">
-                            These are Shannon’s currently published openings.
-                            Choose one to book and receive confirmation from
-                            Cal.com.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <CalInlineEmbed
-                      calLink={selectedCalEvent.url}
-                      className="mt-4"
-                      serviceTitle={selectedService.title}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <div className="mt-4 rounded-2xl bg-[var(--primary)]/[0.055] p-4">
-                      <div className="flex items-start gap-3">
-                        <CalendarDays
-                          aria-hidden="true"
-                          className="mt-0.5 size-4 shrink-0 text-[var(--accent)]"
-                        />
-                        <div>
-                          <p className="text-sm font-medium text-[var(--primary)]">
-                            Request Shannon’s next opening.
-                          </p>
-                          <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)]">
-                            This experience does not have a published live
-                            calendar yet. Share your timing below and Shannon
-                            will reply with an available option.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <fieldset className="mt-4">
-                      <legend className="text-xs font-medium tracking-[0.12em] text-[var(--primary)] uppercase">
-                        Timing
-                      </legend>
-                      <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                        <label
-                          className={cn(
-                            "cursor-pointer rounded-xl border p-3 transition",
-                            isFlexible
-                              ? "border-[var(--accent)] bg-[var(--accent)]/[0.07]"
-                              : "border-[var(--border)] bg-white/55"
-                          )}
-                        >
-                          <input
-                            checked={isFlexible}
-                            className="sr-only"
-                            name="bookingPreference"
-                            onChange={() => {
-                              setIsFlexible(true)
-                              resetFeedback()
-                            }}
-                            type="radio"
-                            value="Next available opening"
-                          />
-                          <span className="block text-sm font-medium text-[var(--primary)]">
-                            I’m flexible
-                          </span>
-                          <span className="mt-1 block text-xs text-[var(--muted-foreground)]">
-                            Send me the next opening.
-                          </span>
-                        </label>
-                        <label
-                          className={cn(
-                            "cursor-pointer rounded-xl border p-3 transition",
-                            !isFlexible
-                              ? "border-[var(--accent)] bg-[var(--accent)]/[0.07]"
-                              : "border-[var(--border)] bg-white/55"
-                          )}
-                        >
-                          <input
-                            checked={!isFlexible}
-                            className="sr-only"
-                            name="bookingPreference"
-                            onChange={() => {
-                              setIsFlexible(false)
-                              resetFeedback()
-                            }}
-                            type="radio"
-                            value="Preferred window"
-                          />
-                          <span className="block text-sm font-medium text-[var(--primary)]">
-                            I have a window
-                          </span>
-                          <span className="mt-1 block text-xs text-[var(--muted-foreground)]">
-                            Share a date and time of day.
-                          </span>
-                        </label>
-                      </div>
-                    </fieldset>
-
-                    {isFlexible ? (
-                      <input
-                        name="preferredWindow"
-                        type="hidden"
-                        value="Next available opening"
+                <>
+                  <div className="mt-4 rounded-2xl bg-[var(--primary)]/[0.055] p-4">
+                    <div className="flex items-start gap-3">
+                      <CalendarDays
+                        aria-hidden="true"
+                        className="mt-0.5 size-4 shrink-0 text-[var(--accent)]"
                       />
-                    ) : (
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
-                          Preferred date
-                          <input
-                            className={inputClassName}
-                            min={minimumDate}
-                            name="preferredDate"
-                            required
-                            type="date"
-                          />
-                        </label>
-                        <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
-                          Time of day
-                          <select
-                            className={inputClassName}
-                            defaultValue="Any time"
-                            name="preferredWindow"
-                          >
-                            <option>Any time</option>
-                            <option>Morning</option>
-                            <option>Afternoon</option>
-                            <option>Evening</option>
-                          </select>
-                        </label>
+                      <div>
+                        <p className="text-sm font-medium text-[var(--primary)]">
+                          Request Shannon’s next opening.
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)]">
+                          Share your timing below. Shannon will reply personally
+                          within 48 hours with an available option. Ten to
+                          fourteen days&apos; notice is preferred, but shorter
+                          windows may be possible.
+                        </p>
                       </div>
-                    )}
-
-                    <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
-                      <Clock3 aria-hidden="true" className="size-3.5" />
-                      Times interpreted in {timeZone}
                     </div>
+                  </div>
 
-                    <input
-                      name="service"
-                      type="hidden"
-                      value={selectedService.title}
-                    />
-                    <input
-                      name="serviceSlug"
-                      type="hidden"
-                      value={selectedService.slug}
-                    />
-                    <input name="timeZone" type="hidden" value={timeZone} />
-                    <label aria-hidden="true" className="sr-only">
-                      Website
-                      <input autoComplete="off" name="website" tabIndex={-1} />
-                    </label>
+                  <fieldset className="mt-4">
+                    <legend className="text-xs font-medium tracking-[0.12em] text-[var(--primary)] uppercase">
+                      Timing
+                    </legend>
+                    <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                      <label
+                        className={cn(
+                          "cursor-pointer rounded-xl border p-3 transition",
+                          isFlexible
+                            ? "border-[var(--accent)] bg-[var(--accent)]/[0.07]"
+                            : "border-[var(--border)] bg-white/55"
+                        )}
+                      >
+                        <input
+                          checked={isFlexible}
+                          className="sr-only"
+                          name="bookingPreference"
+                          onChange={() => {
+                            setIsFlexible(true)
+                            resetFeedback()
+                          }}
+                          type="radio"
+                          value="Next available opening"
+                        />
+                        <span className="block text-sm font-medium text-[var(--primary)]">
+                          I’m flexible
+                        </span>
+                        <span className="mt-1 block text-xs text-[var(--muted-foreground)]">
+                          Send me the next opening.
+                        </span>
+                      </label>
+                      <label
+                        className={cn(
+                          "cursor-pointer rounded-xl border p-3 transition",
+                          !isFlexible
+                            ? "border-[var(--accent)] bg-[var(--accent)]/[0.07]"
+                            : "border-[var(--border)] bg-white/55"
+                        )}
+                      >
+                        <input
+                          checked={!isFlexible}
+                          className="sr-only"
+                          name="bookingPreference"
+                          onChange={() => {
+                            setIsFlexible(false)
+                            resetFeedback()
+                          }}
+                          type="radio"
+                          value="Preferred window"
+                        />
+                        <span className="block text-sm font-medium text-[var(--primary)]">
+                          I have a window
+                        </span>
+                        <span className="mt-1 block text-xs text-[var(--muted-foreground)]">
+                          Share a date and time of day.
+                        </span>
+                      </label>
+                    </div>
+                  </fieldset>
 
+                  {isFlexible ? (
+                    <input
+                      name="preferredWindow"
+                      type="hidden"
+                      value="Next available opening"
+                    />
+                  ) : (
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
-                        Name
+                        Preferred date
                         <input
-                          autoComplete="name"
                           className={inputClassName}
-                          name="name"
+                          min={minimumDate}
+                          name="preferredDate"
                           required
+                          type="date"
                         />
                       </label>
                       <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
-                        Email
-                        <input
-                          autoComplete="email"
+                        Time of day
+                        <select
                           className={inputClassName}
-                          name="email"
-                          required
-                          type="email"
-                        />
+                          defaultValue="Any time"
+                          name="preferredWindow"
+                        >
+                          <option>Any time</option>
+                          <option>Morning</option>
+                          <option>Afternoon</option>
+                          <option>Evening</option>
+                        </select>
                       </label>
                     </div>
-                    <label className="mt-3 grid gap-1.5 text-xs font-medium text-[var(--primary)]">
-                      Anything Shannon should know?{" "}
-                      <span className="font-normal">Optional</span>
-                      <textarea
-                        className="min-h-20 w-full rounded-xl border border-[var(--border)] bg-white/82 px-4 py-3 text-sm text-[var(--foreground)] transition outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
-                        name="message"
-                        placeholder="Location, accessibility needs, or a second window that could work."
+                  )}
+
+                  <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
+                    <Clock3 aria-hidden="true" className="size-3.5" />
+                    Times interpreted in {timeZone}
+                  </div>
+
+                  <input
+                    name="service"
+                    type="hidden"
+                    value={selectedService.title}
+                  />
+                  <input
+                    name="serviceSlug"
+                    type="hidden"
+                    value={selectedService.slug}
+                  />
+                  <input name="timeZone" type="hidden" value={timeZone} />
+                  <label aria-hidden="true" className="sr-only">
+                    Website
+                    <input autoComplete="off" name="website" tabIndex={-1} />
+                  </label>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
+                      Name
+                      <input
+                        autoComplete="name"
+                        className={inputClassName}
+                        name="name"
+                        required
                       />
                     </label>
+                    <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
+                      Email
+                      <input
+                        autoComplete="email"
+                        className={inputClassName}
+                        name="email"
+                        required
+                        type="email"
+                      />
+                    </label>
+                  </div>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
+                      Number of guests
+                      <input
+                        className={inputClassName}
+                        max={100}
+                        min={1}
+                        name="guestCount"
+                        required
+                        type="number"
+                      />
+                    </label>
+                    <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
+                      Location
+                      <input
+                        className={inputClassName}
+                        name="location"
+                        placeholder="City, venue, or Virtual"
+                        required
+                      />
+                    </label>
+                  </div>
+                  <label className="mt-3 grid gap-1.5 text-xs font-medium text-[var(--primary)]">
+                    Anything Shannon should know?{" "}
+                    <span className="font-normal">Optional</span>
+                    <textarea
+                      className="min-h-20 w-full rounded-xl border border-[var(--border)] bg-white/82 px-4 py-3 text-sm text-[var(--foreground)] transition outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
+                      name="message"
+                      placeholder="Location, accessibility needs, or a second window that could work."
+                    />
+                  </label>
 
-                    <Button
-                      className="mt-4 min-h-11 w-full rounded-full bg-[var(--primary)] px-6 text-white hover:bg-[var(--accent)]"
-                      disabled={status === "sending"}
-                      type="submit"
-                    >
-                      {status === "sending"
-                        ? "Sending…"
-                        : isFlexible
-                          ? "Request the next opening"
-                          : "Send preferred window"}
-                    </Button>
-                  </>
-                )}
+                  <Button
+                    className="mt-4 min-h-11 w-full rounded-full bg-[var(--primary)] px-6 text-white hover:bg-[var(--accent)]"
+                    disabled={status === "sending"}
+                    type="submit"
+                  >
+                    {status === "sending"
+                      ? "Sending…"
+                      : isFlexible
+                        ? "Request the next opening"
+                        : "Send preferred window"}
+                  </Button>
+                </>
               </>
             ) : (
               <div className="grid min-h-64 place-items-center rounded-2xl border border-dashed border-[var(--border)] px-6 text-center">

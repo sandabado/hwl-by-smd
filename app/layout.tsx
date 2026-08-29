@@ -16,17 +16,17 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "HWL by SMD — Skincare, Yoga, Astrology & Retreats in Palm Springs",
+  title: "HWL by SMD — Body, Beauty & Being",
   description:
-    "Shannon Mary Dixon offers facial rituals, private yoga, astrology consultations, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
+    "Beauty, movement and ritual practices, products and experiences by Shannon Mary Dixon, online and in Palm Springs, Joshua Tree and the surrounding desert.",
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: "HWL by SMD — Skincare, Yoga, Astrology & Retreats in Palm Springs",
+    title: "HWL by SMD — Body, Beauty & Being",
     description:
-      "Shannon Mary Dixon offers facial rituals, private yoga, astrology consultations, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
+      "Beauty, movement and ritual practices, products and experiences by Shannon Mary Dixon, online and in Palm Springs, Joshua Tree and the surrounding desert.",
     images: [
       {
         url: "/og.png",
@@ -39,9 +39,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "HWL by SMD — Skincare, Yoga, Astrology & Retreats in Palm Springs",
+    title: "HWL by SMD — Body, Beauty & Being",
     description:
-      "Shannon Mary Dixon offers facial rituals, private yoga, astrology consultations, tarot readings, and retreat facilitation in Palm Springs, Joshua Tree, Yucca Valley, Desert Hot Springs, and Morongo Valley.",
+      "Beauty, movement and ritual practices, products and experiences by Shannon Mary Dixon, online and in Palm Springs, Joshua Tree and the surrounding desert.",
     images: ["/og.png"],
   },
 }

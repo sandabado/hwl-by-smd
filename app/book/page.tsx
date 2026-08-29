@@ -2,8 +2,6 @@ import Link from "next/link"
 
 import { BookingRequestFlow } from "@/components/booking/booking-request-flow"
 import { CtaBlock } from "@/components/shared/cta-block"
-import { findBookingService } from "@/lib/booking-services"
-import { getCalcomPublicEventTypes } from "@/lib/calcom"
 import { createPageMetadata } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
@@ -18,13 +16,7 @@ export default async function BookPage({
 }: {
   searchParams: Promise<{ service?: string }>
 }) {
-  const [params, calcomResult] = await Promise.all([
-    searchParams,
-    getCalcomPublicEventTypes(),
-  ])
-  const liveCalEventTypes = calcomResult.eventTypes.filter((eventType) =>
-    Boolean(findBookingService(eventType.slug))
-  )
+  const params = await searchParams
   const palmSpringsDateParts = new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
     month: "2-digit",
@@ -54,13 +46,15 @@ export default async function BookPage({
               Book with Shannon
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--muted-foreground)] md:text-base">
-              Choose your experience, then select a live opening when it is
-              available—or ask Shannon for the next one.
+              Choose your experience and share the timing that feels possible.
+              Shannon will reply personally within 48 hours.
             </p>
           </div>
           <p className="max-w-md text-xs leading-relaxed text-[var(--muted-foreground)] md:text-right md:text-sm">
-            Virtual readings are available from anywhere. In-person sessions are
-            offered in the Coachella Valley. Group experiences live under{" "}
+            Tarot and moon oracle readings may be virtual or in person.
+            In-person sessions are offered across Palm Springs, Palm Desert,
+            Joshua Tree, Yucca Valley, and surrounding desert communities.
+            Larger gatherings live under{" "}
             <Link className="underline underline-offset-4" href="/retreats">
               Retreats
             </Link>
@@ -71,7 +65,6 @@ export default async function BookPage({
 
       <BookingRequestFlow
         initialServiceSlug={params.service}
-        liveCalEventTypes={liveCalEventTypes}
         minimumDate={minimumDate}
       />
 

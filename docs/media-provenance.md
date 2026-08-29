@@ -1,5 +1,42 @@
 # Media provenance
 
+## Shannon-first archive edit · 2026-08-28
+
+The following public derivatives were created only from photographs and video
+supplied directly by the site owner. No generative imagery was used in this
+edit.
+
+- `public/images/shannon/shannon-beauty-lift.webp`
+  - Source: `FACIAL LIFT VIDEO FINAL HIGH RES.mov`
+  - Treatment: a decoded still was cropped to 4:5, resized, and given a subtle
+    neutral color grade.
+- `public/images/shannon/shannon-beauty-portrait.webp`
+  - Source: `HWL pro photos.zip` → `ShannonMaryDixon-2026-27.jpeg`
+- `public/images/shannon/shannon-ritual-space.webp`
+  - Source: `HWL BTS.zip` → `IMG_1220.jpeg`
+- `public/images/shannon/shannon-retreat-yoga.webp`
+  - Source: `HWL BTS.zip` → `IMG_4883.jpeg`
+- `public/images/shannon/shannon-desert-guide.webp`
+  - Source: `HWL pro photos.zip` → `DSC01038.jpg`
+- `public/images/shannon/shannon-desert-editorial.webp`
+  - Source: `HWL pro photos.zip` → `DSC02317 2.JPG`
+- `public/images/shannon/shannon-home-ritual.webp`
+  - Source: `HWL pro photos.zip` → `IMG_0601.JPG`
+- `public/images/shannon/shannon-botanical-portrait.webp`
+  - Source: `HWL pro photos.zip` → `_PAP0935.jpg`
+
+Local treatment for the still photographs was limited to EXIF orientation,
+crop, resize, WebP encoding, and restrained brightness/saturation adjustments.
+The supplied archives remain outside the public repository. The site owner
+supplied the media; photographer and publication-right documentation was not
+independently verified in this edit.
+
+These assets replace the non-Shannon model, anonymous client/group imagery,
+and AI human concepts in the active public interface. Two model-free campaign
+landscapes remain in active use within the Retreats experience to establish the
+low- and high-desert settings; they are destination concepts, not documentary
+images of a named venue or an actual HWL retreat.
+
 ## Homepage desert film v1
 
 - File: `public/video/hwl-desert-hero-v1/landscape.mp4`
@@ -31,10 +68,27 @@ The versioned directory is immutable. Future footage should use a new version ra
 
 - Preview film: `public/video/lift/facial-lift-preview.mp4`
 - Poster: `public/images/editorial/lift-video-preview.jpg`
-- Source: `FACIAL LIFT VIDEO FINAL.mp4`, supplied directly by the site owner on 2026-08-20.
-- Source properties: 1920×1080, 3 minutes 54.526 seconds, approximately 563 MB, with video and audio tracks.
-- Local treatment: the opening 4.5 seconds were encoded as a lightweight 480×272 web preview. The site always presents this derivative muted, plays it once rather than looping it, and falls back to the poster for reduced-motion, reduced-data, Save-Data, and slow-connection visitors.
-- Privacy and access boundary: the full source is not copied into the public repository. It remains reserved for the private LIFT delivery workflow.
+- Movement 1 preview: `public/video/lift/prep-the-skin-preview.mp4`
+- Movement 1 poster: `public/images/editorial/lift-prep-preview-poster.webp`
+- Movement 2 preview: `public/video/lift/jawline-lift-preview.mp4`
+- Movement 2 poster: `public/images/editorial/lift-jawline-preview-poster.webp`
+- Current archival master: `/Users/cougarceleste/Downloads/FACIAL LIFT VIDEO FINAL HIGH RES.mov`, supplied directly by the site owner.
+- Master SHA-256: `2e1a37fe5de424b26ac600fa03701b7c6137bfc01ef057b250f461ac60de2039`.
+- Master properties: 3,310,422,032 bytes; 3 minutes 54.526 seconds; 1920×1080 at 23.976 progressive frames per second; Apple ProRes 422 video with 48 kHz stereo LPCM audio.
+- Master classification: archival/high-resolution source. At roughly 3.31 GB and approximately 113 Mb/s, it is not a web-ready delivery file and must be transcoded before protected launch use.
+- Existing preview properties: 10 seconds; 480×272; H.264 video with AAC audio; 1,127,780 bytes. It is a lightweight public preview only and is not the paid Complete LIFT delivery asset.
+- Presentation: the site presents the preview muted and falls back to the poster for reduced-motion, reduced-data, Save-Data, and slow-connection visitors.
+- Movement preview treatment: two 18.02-second, silent, 960×540 H.264
+  derivatives were exported from the protected Complete LIFT delivery file.
+  `Prep the Skin` uses 00:02.000–00:20.000; `Jawline Lift` uses
+  00:23.750–00:41.750. Both require an intentional play action, load no video
+  source before that action, and sit beside the complete written movement
+  guidance.
+- Privacy and access boundary: the full master is not copied into the public
+  repository. The protected web-delivery derivative is stored in the private
+  staging `member-content` bucket at `lift/complete-lift-v1.mp4`; its hosted
+  byte match, signed range request, and anonymous denial are recorded in the
+  launch packet. Only the two short silent movement derivatives are public.
 
 ## About Shannon editorial concepts v1
 

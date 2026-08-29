@@ -2,11 +2,14 @@ import Link from "next/link"
 import { Download, ArrowLeft, ArrowRight } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
 
+import { ContentLicenseNote } from "@/components/member/content-license-note"
 import { MarkCompleteButton } from "@/components/member/lesson-actions"
 import { MemberNavigation } from "@/components/member/member-navigation"
 import { MuxPlayerWrapper } from "@/components/video/mux-player-wrapper"
+import { PrivateVideoPlayer } from "@/components/video/private-video-player"
 import { Button } from "@/components/ui/button"
 import { requireAccess } from "@/lib/access"
+import { media } from "@/lib/media"
 import { getLessonById } from "@/lib/member-content"
 import { createMuxPlaybackToken } from "@/lib/mux"
 import { createClient } from "@/lib/supabase/server"
@@ -38,12 +41,17 @@ export default async function LessonPage({
       .eq("user_id", user.id)
       .eq("lesson_id", result.lesson.id)
       .maybeSingle()) ?? {}
-  const token = result.lesson.video_playback_id
-    ? await createMuxPlaybackToken(
-        result.lesson.video_playback_id,
-        result.lesson.duration_seconds
-      )
-    : null
+  const isLiftCourse = result.course.access_tier === "lift"
+  const liftCaptionsReady = Boolean(
+    process.env.LIFT_VIDEO_CAPTIONS_STORAGE_PATH
+  )
+  const token =
+    !isLiftCourse && result.lesson.video_playback_id
+      ? await createMuxPlaybackToken(
+          result.lesson.video_playback_id,
+          result.lesson.duration_seconds
+        )
+      : null
   const currentIndex = result.siblings.findIndex(
     (lesson) => lesson.id === result.lesson.id
   )
@@ -65,17 +73,36 @@ export default async function LessonPage({
             <ArrowLeft className="size-4" aria-hidden="true" />
             {result.course.title}
           </Link>
-          <MemberNavigation hasMembership={access.isMember} />
+          <MemberNavigation />
         </div>
 
         <div className="mt-10">
-          <MuxPlayerWrapper
-            playbackId={result.lesson.video_playback_id}
-            title={result.lesson.title}
-            token={token}
-            videoId={result.lesson.id}
-          />
+          {isLiftCourse ? (
+            <PrivateVideoPlayer
+              captionsSource={
+                liftCaptionsReady ? "/api/video/lift/captions" : undefined
+              }
+              poster={media.editorial.liftVideoPreview.src}
+              source="/api/video/lift"
+              title="Complete LIFT guided facial massage practice"
+            />
+          ) : (
+            <MuxPlayerWrapper
+              playbackId={result.lesson.video_playback_id}
+              title={result.lesson.title}
+              token={token}
+              videoId={result.lesson.id}
+            />
+          )}
         </div>
+        {isLiftCourse ? (
+          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-[var(--muted-foreground)]">
+            Written instructions for every movement are available in your
+            downloadable LIFT Guide PDF. English captions are planned as a Phase
+            2 accessibility enhancement.
+          </p>
+        ) : null}
+        <ContentLicenseNote className="mt-5" />
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_auto]">
           <div>
@@ -90,12 +117,14 @@ export default async function LessonPage({
             </p>
             <details className="den-card mt-8 rounded-[1.5rem] p-6">
               <summary className="cursor-pointer font-serif text-2xl text-[var(--primary)]">
-                Preparation & transcript
+                Preparation & accessibility
               </summary>
               <p className="mt-4 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                Arrive with clean hands, soften your shoulders, and let the
-                practice move at the pace of your breath. Captions and the full
-                lesson transcript will appear here with the final video upload.
+                {isLiftCourse
+                  ? liftCaptionsReady
+                    ? "Arrive with clean hands, soften your shoulders, and let the practice move at the pace of your breath. English captions are available from the video controls, and the downloadable guide provides the written sequence."
+                    : "Arrive with clean hands, soften your shoulders, and let the practice move at the pace of your breath. The downloadable guide provides written instructions for every movement; English captions are planned as a Phase 2 accessibility enhancement."
+                  : "Arrive with clean hands, soften your shoulders, and let the practice move at the pace of your breath. Captions and the full lesson transcript will appear here with the final video upload."}
               </p>
             </details>
           </div>

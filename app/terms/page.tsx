@@ -25,9 +25,12 @@ const sections: LegalSection[] = [
     ],
   },
   {
+    id: "digital-products-and-access",
     title: "Digital products and access",
     body: [
-      "Digital purchases provide a personal, limited, non-transferable license to access the purchased material. Videos, PDFs, course materials, and private links may not be copied, shared, resold, published, recorded, or used to train another service without written permission.",
+      "A LIFT digital purchase gives one person a limited, personal, non-transferable license to use the purchased guide and, when included, the private video. You may access the materials on your personal devices, keep a private backup, and make reasonable personal or accessibility copies. Purchase does not transfer ownership of the materials.",
+      "You may not share your account or private links; publish, record, upload, redistribute, or resell the purchased materials; copy the recordings, writing, images, or branded materials into a commercial class or service; or remove notices or branding without written permission.",
+      "This personal-use license does not limit rights that cannot lawfully be waived. Contact Shannon for written permission before making any use beyond it.",
       "Access depends on a working account and supported device or browser. Reasonable efforts will be made to restore access after a technical interruption.",
     ],
   },
@@ -56,7 +59,9 @@ const sections: LegalSection[] = [
   {
     title: "Intellectual property",
     body: [
-      "The HWL by SMD name, Whole Body OS experience, writing, videos, course structures, graphics, photography, and original materials are protected by applicable intellectual-property laws. No ownership transfers through purchase or membership.",
+      "Unless otherwise stated, original content owned by Shannon Mary Dixon is protected by applicable intellectual-property law. No ownership transfers through a purchase or membership.",
+      "Third-party materials remain the property of their respective owners and are used under license, permission, or applicable law.",
+      "HWL by SMD™ and LIFT™ are marks used in connection with Shannon's offerings. The ™ symbol does not indicate federal registration.",
     ],
   },
   {
@@ -77,6 +82,7 @@ const sections: LegalSection[] = [
 export default function Page() {
   return (
     <LegalPage
+      effectiveDate="August 28, 2026"
       eyebrow="Terms"
       introduction="A clear foundation for digital rituals, memberships, conversations, and booked experiences."
       sections={sections}

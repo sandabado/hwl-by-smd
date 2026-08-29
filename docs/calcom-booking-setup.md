@@ -1,17 +1,18 @@
 # Cal.com booking setup
 
-Last audited: August 20, 2026
+Last audited: August 28, 2026
 
-## What the website does
+## Launch state
 
-The `/book` page reads the public event types published under
-`https://cal.com/hwlbysmd`.
+The active `/book` page uses Shannon's manual inquiry flow. It does not read
+Cal.com availability or embed a calendar. Cal.com is retained only as a Phase
+2 option after Shannon confirms a working schedule, conflict calendars, and
+location rules.
 
-- A service shows a live, event-specific Cal.com calendar when a published
-  event type has the same slug as the website service.
-- A service without a matching published event type keeps the booking-request
-  fallback. The site never fabricates availability.
-- No API key is required for this public read or for the Cal.com embed.
+- The website never fabricates availability.
+- The manual inquiry form is the launch booking path for all services.
+- No Cal.com event type should replace that flow without a separately approved
+  Phase 2 implementation and browser verification.
 - `CALCOM_API_KEY`, if added for future server-side work, must remain server-only.
 
 ## Current account state
@@ -36,19 +37,19 @@ need an approved conferencing location.
 Cal.com event types must use these exact slugs for the website to recognize
 them.
 
-| Website service                | Required Cal.com slug        | Website duration | Format    | Cal.com duration decision                       |
-| ------------------------------ | ---------------------------- | ---------------- | --------- | ----------------------------------------------- |
-| Wild Glow Express Facial       | `wild-glow-express-facial`   | 15–20 min        | In person | Confirm one fixed duration                      |
-| Reiki Aromatherapy Healing     | `reiki-aromatherapy-healing` | 30–45 min        | In person | Confirm one fixed duration                      |
-| Signature Facial               | `signature-facial`           | 60 min           | In person | 60 min                                          |
-| HWL Beauty & Being Ritual      | `beauty-being-ritual`        | 90 min           | In person | 90 min                                          |
-| Wild Glow Luxury Facial Ritual | `wild-glow-luxury-facial`    | 120 min          | In person | 120 min                                         |
-| Private Yoga + Sound           | `private-yoga-and-sound`     | 60–75 min        | In person | Confirm one fixed duration                      |
-| Private Sound Healing          | `private-sound-healing`      | 60 min           | In person | 60 min                                          |
-| Private Yoga                   | `private-yoga`               | 75–90 min        | In person | Confirm one fixed duration                      |
-| Intuitive Tarot Reading        | `intuitive-tarot-reading`    | 45–60 min        | Virtual   | Confirm one fixed duration and conferencing app |
-| Moon Oracle Reading            | `moon-oracle-reading`        | 45–60 min        | Virtual   | Confirm one fixed duration and conferencing app |
-| Tarot + Reiki Experience       | `tarot-and-reiki`            | 60–75 min        | Hybrid    | Confirm one fixed duration and location choices |
+| Website service            | Required Cal.com slug        | Fixed Phase 2 duration | Format               |
+| -------------------------- | ---------------------------- | ---------------------- | -------------------- |
+| Wild Glow Express Facial   | `wild-glow-express-facial`   | 20 min                 | In person            |
+| Reiki Aromatherapy Healing | `reiki-aromatherapy-healing` | 45 min                 | In person            |
+| Signature Facial           | `signature-facial`           | 60 min                 | In person            |
+| Beauty & Being Ritual      | `beauty-being-ritual`        | 90 min                 | In person            |
+| Wild Glow Luxury Facial    | `wild-glow-luxury-facial`    | 120 min                | In person            |
+| Private Yoga + Sound       | `private-yoga-and-sound`     | 60 min                 | In person            |
+| Private Sound Healing      | `private-sound-healing`      | 75 min                 | In person            |
+| Private Yoga               | `private-yoga`               | 90 min                 | In person            |
+| Intuitive Tarot Reading    | `intuitive-tarot-reading`    | 60 min                 | Virtual or in person |
+| Moon Oracle Reading        | `moon-oracle-reading`        | 60 min                 | Virtual or in person |
+| Tarot + Reiki Experience   | `tarot-and-reiki`            | 75 min                 | In person            |
 
 ## Safe launch checklist
 
@@ -68,8 +69,8 @@ Complete these in Cal.com before publishing the first event type:
 ## Verification after each publish
 
 1. Open the public Cal.com event URL and confirm that valid openings appear.
-2. Open `/book?service=<slug>` and confirm that the live calendar replaces the
-   request form for that service only.
+2. Keep `/book?service=<slug>` on the manual inquiry flow until Phase 2 is
+   explicitly approved and implemented.
 3. Verify timezone display, location, duration, buffers, confirmation email,
    conflict blocking, rescheduling, and cancellation with a real test booking.
 4. Remove the test booking and confirm that the slot becomes available again.

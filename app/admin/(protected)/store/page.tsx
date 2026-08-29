@@ -32,7 +32,7 @@ export default async function AdminStorePage() {
   return (
     <>
       <AdminPageHeader
-        description="The three offers stay focused: a printable ritual, the complete guided practice, and the private member sanctuary."
+        description="The printable LIFT ritual is the only launch candidate. Complete LIFT and The Den remain deferred until their delivery paths are verified."
         eyebrow="Commerce"
         title="Store"
       >
@@ -51,7 +51,7 @@ export default async function AdminStorePage() {
             <div>
               <p className="text-sm font-medium">Product catalog</p>
               <p className="text-xs text-[#7d847c]">
-                Three defined launch offers
+                One launch candidate · two deferred offers
               </p>
             </div>
           </div>
@@ -74,6 +74,7 @@ export default async function AdminStorePage() {
             <tbody>
               {adminProducts.map((product, index) => {
                 const priceConfigured = stripeReady && present(priceKeys[index])
+                const deferred = product.id !== "lift-pdf"
                 return (
                   <tr
                     className="border-b border-[#e0dbd1] last:border-0"
@@ -92,8 +93,16 @@ export default async function AdminStorePage() {
                       {product.access}
                     </td>
                     <td className="px-3 py-4">
-                      <StatusPill tone={priceConfigured ? "quiet" : "warning"}>
-                        {priceConfigured ? "Price ID present" : product.status}
+                      <StatusPill
+                        tone={
+                          !deferred && priceConfigured ? "quiet" : "warning"
+                        }
+                      >
+                        {deferred
+                          ? "Deferred"
+                          : priceConfigured
+                            ? "Values present · unverified"
+                            : product.status}
                       </StatusPill>
                     </td>
                     <td className="px-3 py-4 text-sm text-[#7b837b]">
@@ -126,7 +135,7 @@ export default async function AdminStorePage() {
             <div className="flex items-center justify-between border-b border-[#ddd7cd] pb-3">
               <span className="text-sm text-[#5d675e]">Account keys</span>
               <StatusPill tone={stripeReady ? "positive" : "warning"}>
-                {stripeReady ? "Configured" : "Waiting"}
+                {stripeReady ? "Values present" : "Waiting"}
               </StatusPill>
             </div>
             <div className="flex items-center justify-between border-b border-[#ddd7cd] pb-3">
@@ -139,9 +148,10 @@ export default async function AdminStorePage() {
             </div>
             <p className="text-xs leading-5 text-[#7a827a]">
               Secret values are never rendered. This panel reports only whether
-              the expected configuration is present. Checkout independently
-              verifies each Stripe Price amount, currency, and billing cadence
-              before it can open.
+              the expected configuration is present, not whether Stripe has
+              accepted it. Checkout independently verifies the launch Price,
+              account profile, private asset, currency, and amount before it can
+              open.
             </p>
           </div>
         </AdminPanel>

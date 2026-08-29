@@ -74,9 +74,8 @@ export default async function AccountPage() {
               </>
             ) : (
               <p className="mt-5 leading-relaxed text-[var(--muted-foreground)]">
-                You don&apos;t have an active membership. The Den is
-                $11.11/month — your private library, your direct line to
-                Shannon, and your ongoing practice.
+                The Den membership is coming soon. Your one-time purchases stay
+                available in your private library without a subscription.
               </p>
             )}
           </article>
@@ -128,11 +127,7 @@ export default async function AccountPage() {
 
         <Link
           className="den-card mt-6 flex items-center justify-between gap-5 rounded-[2rem] p-8 transition hover:-translate-y-0.5 hover:border-[var(--accent)]"
-          href={
-            access.isMember
-              ? "/account/preferences/communication"
-              : "/store#the-den"
-          }
+          href="/contact"
         >
           <div className="flex items-start gap-4">
             <HeartHandshake
@@ -141,14 +136,11 @@ export default async function AccountPage() {
             />
             <div>
               <h2 className="text-3xl text-[var(--primary)]">
-                {access.isMember
-                  ? "Connection preferences"
-                  : "The Den connection"}
+                Contact Shannon
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                {access.isMember
-                  ? "Choose whether Shannon may include booking invitations in a guided Journey."
-                  : "Private Connection is available with an active Den membership."}
+                Private Connection is coming soon. For now, send Shannon a
+                direct note through the contact page.
               </p>
             </div>
           </div>
@@ -170,7 +162,7 @@ export default async function AccountPage() {
               </Link>
             </Button>
           )}
-          <AccountActions hasBilling={access.purchases.length > 0} />
+          <AccountActions hasBilling={Boolean(membership)} />
         </div>
       </div>
     </section>

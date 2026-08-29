@@ -37,8 +37,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!supabase) return
+    let isCurrent = true
 
-    supabase.auth.getSession().then(({ data }) => {
+    void supabase.auth.getSession().then(({ data }) => {
+      if (!isCurrent) return
       setSession(data.session)
       setLoading(false)
     })
@@ -46,11 +48,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (!isCurrent) return
       setSession(nextSession)
       setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      isCurrent = false
+      subscription.unsubscribe()
+    }
   }, [supabase])
 
   async function signOut() {

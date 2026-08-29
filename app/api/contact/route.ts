@@ -13,13 +13,17 @@ const MAXIMUM_MESSAGE_LENGTH = 5_000
 const MAXIMUM_FIELD_LENGTH = 500
 const ALLOWED_DETAIL_FIELDS = new Set([
   "bookingPreference",
+  "datePreference",
   "email",
   "eventDate",
   "format",
+  "guestCount",
   "groupSize",
+  "interests",
   "location",
   "message",
   "name",
+  "organization",
   "phone",
   "preferredDate",
   "preferredWindow",

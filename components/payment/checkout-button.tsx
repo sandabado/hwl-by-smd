@@ -77,7 +77,7 @@ export function CheckoutButton({
         caught instanceof DOMException && caught.name === "AbortError"
           ? cancelledByUserRef.current
             ? "Checkout preparation canceled. Nothing was charged; your cart is saved."
-            : "Secure checkout took too long to respond. Nothing was charged; your cart is saved—please try again."
+            : "Secure checkout took too long to respond. Check your email and account before trying again; your cart is saved."
           : caught instanceof Error
             ? caught.message
             : "Checkout is not available yet."

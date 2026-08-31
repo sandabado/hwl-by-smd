@@ -26,6 +26,14 @@ function readableDate(value: string | null | undefined) {
   }).format(new Date(value))
 }
 
+function purchaseStatusLabel(status: string) {
+  if (status === "active") return "Active"
+  if (status === "refunded") return "Refunded"
+  if (status === "disputed") return "Disputed"
+  if (status === "cancelled") return "Cancelled"
+  return status.replaceAll("_", " ")
+}
+
 export default async function AccountPage() {
   const { access, user } = await requireAccess("authenticated", "/account")
   const membership = access.membership
@@ -100,9 +108,11 @@ export default async function AccountPage() {
                     <p className="font-medium text-[var(--primary)] capitalize">
                       {purchase.product_type.replaceAll("_", " ")}
                     </p>
-                    <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                      {readableDate(purchase.purchased_at)}
-                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--muted-foreground)]">
+                      <span>{readableDate(purchase.purchased_at)}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>{purchaseStatusLabel(purchase.status)}</span>
+                    </div>
                   </div>
                   <p>${Number(purchase.amount_paid).toFixed(2)}</p>
                 </div>

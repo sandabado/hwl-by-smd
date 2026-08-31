@@ -617,7 +617,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "Secure checkout could not be prepared. Nothing was charged; your cart is saved.",
+            "We could not verify your payment status. Check your email and account before trying again; your cart is saved.",
         },
         { status: 503 }
       )
@@ -627,7 +627,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "The secure checkout identity did not match this account. Nothing was charged.",
+            "The secure checkout identity did not match this account. Check your email and account before trying again.",
         },
         { status: 503 }
       )
@@ -705,7 +705,7 @@ export async function POST(request: Request) {
   return NextResponse.json(
     {
       error:
-        "Secure checkout could not be prepared. Nothing was charged; your cart is saved.",
+        "We could not verify your payment status. Check your email and account before trying again; your cart is saved.",
     },
     { status: 503 }
   )

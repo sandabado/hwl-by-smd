@@ -73,7 +73,6 @@ export async function getMemberAccess(userId: string): Promise<MemberAccess> {
       .eq("deployment_target", deploymentTarget)
       .eq("stripe_account_id", stripeAccountId)
       .eq("stripe_livemode", stripeLivemode)
-      .eq("status", "active")
       .order("purchased_at", { ascending: false }),
     supabase
       .from("memberships")
@@ -89,6 +88,9 @@ export async function getMemberAccess(userId: string): Promise<MemberAccess> {
   ])
 
   const purchaseList = purchases ?? []
+  const activePurchases = purchaseList.filter(
+    (purchase) => purchase.status === "active"
+  )
   const membershipRecord = memberships ?? null
   const membershipEndsAt = membershipRecord?.current_period_end
     ? new Date(membershipRecord.current_period_end).getTime()
@@ -98,17 +100,19 @@ export async function getMemberAccess(userId: string): Promise<MemberAccess> {
   const membership = isMember ? membershipRecord : null
   const canAccessLift =
     isMember ||
-    purchaseList.some((purchase) => purchase.product_type === "lift_guide")
+    activePurchases.some((purchase) => purchase.product_type === "lift_guide")
   const canDownloadLift =
     canAccessLift ||
-    purchaseList.some((purchase) => purchase.product_type === "pdf_download")
+    activePurchases.some((purchase) => purchase.product_type === "pdf_download")
 
   return {
     canDownloadLift,
     canAccessLift,
     hasAnyPurchase:
       isMember ||
-      purchaseList.some((purchase) => purchase.product_type !== "membership"),
+      activePurchases.some(
+        (purchase) => purchase.product_type !== "membership"
+      ),
     isMember,
     membership,
     purchases: purchaseList,

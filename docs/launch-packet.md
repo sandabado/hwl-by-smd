@@ -16,12 +16,15 @@ public Preview, and Production have not yet passed their required end-to-end
 launch tests.
 
 **Release boundary:** Work is on
-`checkpoint/platform-overhaul-2026-08-20` at commit `555cead` plus local,
-uncommitted launch changes. This pass rotated the sandbox-only Stripe test key,
-authorized the Stripe CLI directly to the canonical sandbox, applied the exact
-reviewed migrations 012–014 to hosted staging, and installed and verified the
-corrected canonical PDF in private staging storage. It did not create a domain
-or persistent webhook, commit, push, deploy, touch a live Stripe key, or take
+`checkpoint/platform-overhaul-2026-08-20`. The functional launch source is
+captured through local commits `1945a0c` and `787b1db`; this packet refresh
+follows those commits, and none of the launch commits has been pushed.
+This pass rotated the sandbox-only Stripe test key, authorized the Stripe CLI
+directly to the canonical sandbox, applied the exact reviewed migrations
+012–014 to hosted staging, installed and verified the corrected canonical PDF
+in private staging storage, and created ten fail-closed, branch-scoped Preview
+configuration records that contain no private provider credentials. It did not
+create a domain or persistent webhook, deploy, touch a live Stripe key, or take
 real money. Nothing in this launch pass has been pushed to `main`. The current
 launch candidate has not been deployed to Preview or promoted to Production.
 
@@ -33,12 +36,12 @@ launch candidate has not been deployed to Preview or promoted to Production.
 | Implemented in the working tree | READY FOR INTEGRATION             | One $11.11 video + PDF offer; persistent cart and sheet; server-validated Checkout; target/account/mode-scoped webhook, authenticated recovery, and durable scheduled recovery; private reconciliation status; protected media routes; Cal.com discovery/embed with manual inquiry fallback; DB-first inquiry route |
 | Locally verified                | PASS                              | TypeScript, ESLint, SEO validation, 54 commerce tests, 18 launch-boundary tests, 7 inquiry-boundary tests, 5 booking-boundary tests, 1 accessibility-markup test, 10 Preview-policy tests, and a Next.js 16.3.1 Webpack production build all pass on August 29; a rendered axe sweep also passes on the audited desktop/mobile local journeys |
 | Supabase staging                | SCHEMA + ASSETS VERIFIED / E2E PENDING | Project is healthy; the remote ledger contains migrations 001–014 and a current linked dry-run is a no-op. Hosted schema/RPC probes match the 012–014 boundaries. The private 46,514,399-byte video remains verified, and the corrected 6,036,808-byte PDF returned a signed HTTP 200 with byte-identical SHA-256 while anonymous access returned 400. Current-code purchase, inquiry, recovery, and administrator journeys still require hosted/public-Preview repeats |
-| Stripe sandbox                  | PROVIDER OBJECTS VERIFIED / CURRENT E2E PENDING | The refreshed local sandbox secret resolves by read-only API to canonical account `acct_1U9cEQAdcj2oNOF4`; the active $11.11 Price/Product and metadata match the launch catalog. The account's public Terms, privacy, and support URLs are unset. An earlier path passed real sandbox Checkout and lifecycle tests, but the exact current candidate has not repeated that provider journey |
-| Cal.com                         | ACCOUNT READY, EVENTS UNPUBLISHED | `HWLbySMD` / `hwlbysmd` is authenticated. A fresh August 29 public-profile fetch rendered `eventTypes: []` and “No links set up”; the requested category-specific hours are not configured                                                                                          |
-| Inquiry delivery                | STAGING SCHEMA READY / DELIVERY PENDING | Migration 013 is ledger-applied and its private tables/RPC boundary is present in staging. The isolated journey proved persistence-before-email, truthful pending responses, atomic limiting, browser denial, and the private admin inbox; a fresh hosted submission, verified administrator, valid Resend sender, and mailbox delivery remain pending |
+| Stripe sandbox                  | PROVIDER OBJECTS VERIFIED / CURRENT E2E PENDING | A fresh read-only API check resolves to canonical account `acct_1U9cEQAdcj2oNOF4`; its active test Product/Price are one-time USD 1111 and match the launch catalog. The account still reports `charges_enabled=false`, `payouts_enabled=false`, and `details_submitted=false`. An earlier path passed real sandbox Checkout and lifecycle tests, but the exact current candidate has not repeated that provider journey |
+| Cal.com                         | ACCOUNT READY, EVENTS UNPUBLISHED | `HWLbySMD` / `hwlbysmd` is authenticated. The six approved conflict calendars were enabled and `BILLS` remained excluded, but a fresh exact-header public API request still returned `eventTypes: []` and the public profile rendered “No links set up.” Family schedules, locations, group intake, confirmation, and no-Cal-payment settings still require provider verification before publication |
+| Inquiry delivery                | PERSISTENCE VERIFIED / HUMAN DELIVERY BLOCKED | Migration 013 is ledger-applied and its private tables/RPC boundary is present in staging. One synthetic hosted submission is durably stored, but its latest notification state is `failed` / provider rejected. There are zero verified administrator profiles, so Shannon currently has neither a confirmed email alert nor verified human inbox access |
 | Supabase Auth email             | PROVIDER SETUP / E2E PENDING      | A fresh public settings read shows signup enabled and email confirmation required (`mailer_autoconfirm=false`). Custom SMTP, verified-domain sending, exact Preview/Production redirect allowlists, rate limits, disabled link tracking, and real non-team-email delivery have not been proven |
 | Scheduled recovery             | STAGING SCHEMA READY / HOSTED RUN PENDING | Migration 014 is ledger-applied and its private queue/attempt tables plus narrow service-role RPCs are present in staging. The authenticated cron route, shared verifier, durable leases/retries/manual-review state, sanitized reporting, and admin queue view pass locally; a distinct encrypted Preview `CRON_SECRET`, deployed invocation, alert routing, and cadence acceptance remain pending |
-| Current launch Preview          | PENDING                           | Commit `555cead` has an older Ready Preview; current changes are local. The offline Preview policy passes 10/10 fixtures, while its real repository preflight correctly blocks the dirty tree and absent ignored Preview environment snapshot. `preview.howlbysmd.com` does not currently resolve; required hosted configuration and a Stripe-reachable, automation-bypass-qualified webhook remain unverified |
+| Current launch Preview          | PENDING                           | The remote branch and Ready Preview remain at older commit `555cead`; functional launch source is captured locally through `787b1db` and has not been pushed. Ten of 22 required names are now branch-scoped and fail closed, but private provider credentials, sender settings, fresh cron/rate secrets, stable hostname, and Stripe-reachable automation-bypass-qualified webhook remain absent. `preview.howlbysmd.com` does not currently resolve |
 | Production / live money         | PENDING OWNER GATE                | Production publicly serves older commit `145112cd` and checkout truthfully returns 503; Stripe activation and coherent live Product/Price/webhook/Production variables remain incomplete                                    |
 
 Passing local compilation does not prove provider integration, a paid journey,
@@ -80,6 +83,11 @@ Preview; this packet does not claim third-party Stripe Checkout conformance.
   account, and Stripe mode. The isolated database admitted separate
   development and Preview orders, rejected a duplicate Preview reservation,
   and reused only an order with the exact expected `site_url`.
+- Checkout timeouts and ambiguous provider retrieval failures no longer claim
+  that nothing was charged; the customer is told to check email and account
+  history before retrying. The account history includes active, refunded,
+  disputed, and cancelled purchases, while entitlement continues to derive
+  only from active purchases.
 - Webhooks verify Stripe's signature from the raw request body, reject the
   wrong account or test/live mode, enforce target/account/mode Event
   idempotency, and
@@ -299,11 +307,11 @@ The current inquiry concurrency and notification-state proof is more specific:
 | Dispute and event-order safety                                      | PRIOR PATH PASS / CURRENT REPEAT PENDING — Stripe's dispute test card produced a sandbox Dispute; completion observed the terminal Charge, recorded `disputed`, denied all assets, and the later direct dispute event remained terminal before the latest shared-verifier hardening                                                                      |
 | Authenticated reconciliation on public Preview                      | NOT RUN — route/auth/cookie/origin/client refresh and persistent webhook interaction still require the current custom Preview boundary; provider-free shared-helper and isolated DB transition coverage pass locally                                                        |
 | Current launch Preview browser journey                              | NOT RUN — current changes are not deployed                                                                                                                                                                                                                               |
-| Inquiry persistence → notification fallback                         | PASS — durable row created before email; missing sender recorded `not_configured`; HTTP 202 truthfully reported received/pending; no real email sent                                                                                                                     |
+| Inquiry persistence → notification fallback                         | PARTIAL PASS — one hosted synthetic inquiry is durably stored before email and the route returned HTTP 202, but Resend rejected the notification; the row is retained with `notification_status=failed`, proving no data loss while also proving human delivery is not ready                                                            |
 | Inquiry abuse, privacy, and admin boundaries                        | PASS — malformed/cross-origin/oversize payloads rejected; first five rate claims persisted and sixth returned 429; browser table reads denied; verified admin saw the record; anonymous admin denied                                                                     |
 | Launch environment preflight                                        | PASS — explicit deployment target is mandatory; development/Preview closed and sandbox-open fixtures pass; target mismatches, partial/live Preview config, and shared cron/inquiry secrets fail; Production intentionally fails because no separate Production Supabase boundary has been created or owner-approved                         |
-| Current configured launch environment                               | BLOCKED — the local validator's only current configuration failure is the invalid or missing `RESEND_API_KEY`; the captions path is optional and may remain unset until a verified VTT object exists                                                                                                             |
-| Live Vercel Preview configuration inventory                         | BLOCKED — the last inventory contained only `COMMERCE_SALES_READY`, both LIFT paths, and `CONTACT_TO_EMAIL`; sensitive values are intentionally unreadable; required Supabase, Stripe, webhook, Resend, rate-limit, cron, target, and site URL names remain unverified/absent in the current candidate                                           |
+| Current configured launch environment                               | BLOCKED — the full local validator's only configuration failure is the invalid `RESEND_API_KEY`; the captions path is optional and may remain unset until a verified VTT object exists. The canonical sandbox account/Product/Price remain valid, while live account activation remains incomplete                                                   |
+| Live Vercel Preview configuration inventory                         | BLOCKED — ten required names are now encrypted and branch-scoped to `checkpoint/platform-overhaul-2026-08-20`; one additional required contact recipient exists only as a global Preview record. Eleven effective required names remain absent, and `CONTACT_TO_EMAIL` still lacks branch isolation. No private provider credential has been transmitted in this pass |
 | Current public Production safety probe                              | PASS — homepage HTTP 200; unauthenticated LIFT Checkout HTTP 503 with truthful not-ready copy; no charge attempted                                                                                                                                                       |
 | Cal.com booking → conflict block → confirmation → cancel/reschedule | NOT RUN                                                                                                                                                                                                                                                                  |
 
@@ -683,6 +691,11 @@ schedule or from this recommendation.
   `received: true`. Five rate-limited requests persisted and the sixth returned
   HTTP 429; direct anon/authenticated table reads were denied; a verified admin
   could read the durable record; an anonymous admin request was redirected.
+- A fresh hosted staging submission also returned HTTP 202 and persisted one
+  inquiry. Its Resend notification was rejected and the durable row moved to
+  `notification_status=failed`; no inquiry was lost. Hosted staging currently
+  has zero administrator profiles, so this row is not yet available to a
+  verified human inbox user.
 
 The safe launch target is: save the inquiry first, return success after that
 save, and use Resend only to notify Shannon. A Resend outage must not lose the
@@ -694,17 +707,24 @@ The newest automatic checkpoint Preview is Ready as deployment
 `dpl_AhkgfivPDCowE55gCFdewiC6ax7d`, but it still stops at commit `555cead`.
 It is not the current candidate: a protected fetch of `/beauty/lift` still
 rendered the superseded $33.33 Complete LIFT offer and The Den card instead of
-the single $11.11 launch product. The current launch work remains a dirty local
-tree. Live Vercel inspection found eight environment-variable records: the
-same four names repeated once for Preview and once for Development —
-`COMMERCE_SALES_READY`, both LIFT storage paths, and `CONTACT_TO_EMAIL`.
-Vercel stores the Preview records as sensitive, so their values intentionally
-cannot be retrieved and are not claimed valid.
-No required deployment-target, Supabase, Stripe, webhook, Resend,
-inquiry-rate-limit, cron, or site URL variable name exists in the last Preview
-inventory. A temporary
-environment pull was used only to confirm Vercel's `[SENSITIVE]` placeholders
-and was immediately deleted; no secret value was printed or retained.
+the single $11.11 launch product. Functional launch source is captured locally
+through `787b1db` and has not been pushed.
+
+Ten fail-closed variables now exist only for the checkpoint branch:
+`HWL_DEPLOYMENT_TARGET`, `HWL_LOCAL_BUILD`, `NEXT_PUBLIC_SITE_URL`,
+`COMMERCE_SALES_READY`, `STRIPE_LIVEMODE`, `CALCOM_PROFILE_URL`,
+`INQUIRY_RATE_LIMIT_MAX`, both LIFT storage paths, and
+`NEXT_PUBLIC_SUPABASE_URL`. Vercel stores them as sensitive, so their values
+cannot be read back and are not used as proof of value correctness. The prior
+global Preview `CONTACT_TO_EMAIL` remains effective but is not yet branch
+isolated. Eleven required effective names remain absent:
+`CONTACT_FROM_EMAIL`, `CRON_SECRET`, `INQUIRY_RATE_LIMIT_SECRET`,
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `RESEND_API_KEY`,
+`STRIPE_ACCOUNT_ID`, `STRIPE_LIFT_GUIDE_PRICE_ID`,
+`STRIPE_LIFT_PRODUCT_ID`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and
+`SUPABASE_SERVICE_ROLE_KEY`. No private provider credential was transmitted in
+this configuration pass.
+
 Production has zero environment-variable records, and
 `preview.howlbysmd.com` is not currently assigned to a deployment.
 
@@ -738,10 +758,12 @@ npm run validate:launch-env -- --target=production --expect-sales=open
 
 The new `scripts/preflight-preview-release.ts` and
 `docs/preview-release-runbook.md` add a dry, offline checkpoint policy before
-any Preview action. Its 10/10 policy fixtures pass. The current real repository
-preflight correctly remains blocked because the launch tree is dirty and the
-ignored `.env.preview.local` snapshot is absent; passing the policy suite is not
-permission to commit, push, deploy, assign a hostname, or change a provider.
+any Preview action. Its 10/10 policy fixtures pass. The repository-only
+preflight passed on the clean committed candidate after a fresh fetch, proving
+the checkpoint branch was ahead and not behind its tracked upstream. The full
+environment preflight remains blocked until all 22 branch-scoped values are
+available; passing repository policy is not permission to push, deploy, assign
+a hostname, or change a provider.
 
 This validator proves configuration shape only. Hosted staging schema and asset
 existence are verified separately above; webhook reachability, Cal.com

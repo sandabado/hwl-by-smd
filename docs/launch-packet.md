@@ -11,10 +11,10 @@ journey. The current hardened fulfillment and recovery source passes
 provider-free and isolated-database verification but still requires a fresh
 real sandbox repeat. The DB-first inquiry journey also passes against the
 isolated database. Hosted staging now has migrations 001–014 plus byte-verified
-private video and PDF assets. Cal.com provider configuration is now published,
-while the website booking journey, provider email delivery, the current public
-Preview, and Production have not yet passed their required end-to-end launch
-tests.
+private video and PDF assets. Cal.com provider configuration is published and
+a real request, manual confirmation, reschedule, and cancellation lifecycle has
+passed, while human inbox receipt, the current public Preview, and Production
+have not yet passed their required end-to-end launch tests.
 
 **Release boundary:** Work is on
 `checkpoint/platform-overhaul-2026-08-20`. Commit `c74fe61` is the latest
@@ -42,7 +42,7 @@ push `main`, or promote anything to Production.
 | Locally verified                | PASS                              | TypeScript, ESLint, SEO validation, 54 commerce tests, 18 launch-boundary tests, 7 inquiry-boundary tests, 5 booking-boundary tests, 1 accessibility-markup test, 10 Preview-policy tests, and a Next.js 16.3.1 Webpack production build all pass on August 31; a rendered axe sweep also passes on the audited desktop/mobile local journeys |
 | Supabase staging                | SCHEMA + ASSETS VERIFIED / E2E PENDING | Project is healthy; the remote ledger contains migrations 001–014 and a current linked dry-run is a no-op. Hosted schema/RPC probes match the 012–014 boundaries. The private 46,514,399-byte video remains verified, and the corrected 6,036,808-byte PDF returned a signed HTTP 200 with byte-identical SHA-256 while anonymous access returned 400. Current-code purchase, inquiry, recovery, and administrator journeys still require hosted/public-Preview repeats |
 | Stripe sandbox                  | PROVIDER OBJECTS VERIFIED / CURRENT E2E PENDING | A fresh read-only API check resolves to canonical account `acct_1U9cEQAdcj2oNOF4`; its active test Product/Price are one-time USD 1111 and match the launch catalog. The account still reports `charges_enabled=false`, `payouts_enabled=false`, and `details_submitted=false`. An earlier path passed real sandbox Checkout and lifecycle tests, but the exact current candidate has not repeated that provider journey |
-| Cal.com                         | CONFIGURED + PUBLIC / E2E PENDING | `HWLbySMD` / `hwlbysmd` publicly lists the ten exact website event types. Three schedule families, conflict/destination calendars, required intake, manual confirmation, no-Cal-payment boundary, notice, buffers, horizon, and per-event daily caps are provider-configured. Wild Glow Express remains inquiry-only. A real website date/slot, conflict, request, confirmation, cancellation, and rescheduling journey is still required |
+| Cal.com                         | OPERATIONAL / INBOX RECEIPT PENDING | `HWLbySMD` / `hwlbysmd` publicly lists the ten exact website event types. A real Signature Facial request entered the organizer's unconfirmed queue with the required guest count and location, passed manual confirmation, moved from 10:00 to 11:00 AM Pacific, and was then canceled with the final provider page confirming cancellation. Cal collected no payment. Cal reported sending lifecycle emails, but human inbox receipt is not independently verified. Wild Glow Express remains inquiry-only |
 | Inquiry delivery                | PERSISTENCE VERIFIED / HUMAN DELIVERY BLOCKED | Migration 013 is ledger-applied and its private tables/RPC boundary is present in staging. One synthetic hosted submission is durably stored, but its latest notification state is `failed` / provider rejected. There are zero verified administrator profiles, so Shannon currently has neither a confirmed email alert nor verified human inbox access |
 | Supabase Auth email             | PROVIDER SETUP / E2E PENDING      | A fresh public settings read shows signup enabled and email confirmation required (`mailer_autoconfirm=false`). Custom SMTP, verified-domain sending, exact Preview/Production redirect allowlists, rate limits, disabled link tracking, and real non-team-email delivery have not been proven |
 | Scheduled recovery             | STAGING RUN VERIFIED / PREVIEW RUN PENDING | Migration 014 is ledger-applied and its private queue/attempt tables plus narrow service-role RPCs are present in staging. On August 31, an authenticated local worker run against hosted staging reported and claimed the two expired current-candidate sandbox orders, resolved both as terminal, and left both jobs complete with zero alerts, errors, or manual-review reasons. A distinct sensitive branch-scoped Preview `CRON_SECRET` exists; deployed Preview invocation, alert routing, and cadence acceptance remain pending |
@@ -297,6 +297,7 @@ The current inquiry concurrency and notification-state proof is more specific:
 | Changed/untracked launch-file secret-shape scan                     | PASS — no real Stripe, webhook, Supabase, Resend, or JWT secret-shaped values; every shape hit is an explicitly synthetic fixture in the launch/Preview test harness or the packet's redacted fixture note                                                                 |
 | Prior `/book` fallback with 0 public Cal.com events                 | PASS — inquiry fallback, service switching, no iframe, no console errors; historical fallback proof only, because ten exact event types are now public                                                                                                                     |
 | Current website → Cal.com live-selector handoff                     | PASS — a network-enabled local `/book` run discovered all ten exact public events; Signature Facial, Private Yoga, and Moon Oracle Reading rendered genuine Beauty, Yoga + Sound, and Consultation / Tarot dates and times; Wild Glow Express remained inquiry-only; HTTP 200 and no Next.js error overlay |
+| Current real Cal.com booking lifecycle                              | PASS — a public Signature Facial request for September 3 entered the authenticated organizer queue as unconfirmed with required guest count and attendee address; the organizer manually confirmed it, rescheduled it from 10:00 to 11:00 AM Pacific with a stated test reason, and canceled it with a stated completion reason. The final provider page says the event is canceled; no Cal payment was configured or collected. Cal stated that lifecycle email was sent, but human inbox receipt remains unverified |
 | Current live Cal.com selector at 390×844                            | PASS — `/book?service=signature-facial` rendered enabled dates and six visible time buttons; `innerWidth`, document client width, and document scroll width were all 390; no horizontal overflow or Next.js error overlay. Keyboard and mobile pointer/touch activation were not verified |
 | Current `/beauty/lift` + cart at 390×844                            | PASS — browser inner width 390; document client/scroll width both 375; no horizontal overflow; full-height cart showed one $11.11 LIFT Video + PDF item, included assets, truthful closed-sales checkout, and Stripe/license/refund/help links; zero console errors             |
 | Current inquiry-only Wild Glow booking at 390×844                   | PASS — `/book?service=wild-glow-express-facial` rendered guest minimum/default 4, inquiry-only explanation, timing choices, privacy notice, and no live calendar; document client/scroll width both 375; zero console errors                                                   |
@@ -671,9 +672,13 @@ fresh network-enabled local run rendered genuine public dates and times for
 Beauty, Yoga + Sound, and Consultation / Tarot while keeping Wild Glow Express
 inquiry-only. The Signature Facial selector also rendered enabled dates and six
 visible time buttons at 390×844 without horizontal overflow or a Next.js error
-overlay. Keyboard selection, conflict blocking, a submitted pending request,
-confirmation, cancellation, rescheduling, and notifications still require
-end-to-end verification. No test booking result is claimed here.
+overlay. A clearly labeled real Signature Facial test request then entered the
+organizer's unconfirmed queue with the required guest count and location,
+passed manual confirmation, was rescheduled from 10:00 to 11:00 AM Pacific,
+and was canceled. The final provider page confirms cancellation, so no test
+appointment remains active. Cal stated that it sent the lifecycle emails;
+human inbox receipt, deliberate conflict blocking, and keyboard/mobile pointer
+activation still require separate verification.
 
 ## Inquiry and Resend State
 

@@ -28,6 +28,7 @@ const CAL_UI_CONFIG = {
 } as const
 
 type EmbedStatus = "error" | "loading" | "ready"
+const EMBED_READY_TIMEOUT_MS = 12_000
 
 export interface CalInlineEmbedProps {
   calLink: string
@@ -66,6 +67,19 @@ function CalEmbedInstance({
 
     return `hwl-${safeLink}-${safeId}`
   }, [calLink, reactId])
+  const headingId = `${namespace}-heading`
+  const descriptionId = `${namespace}-description`
+  const iframeId = `${namespace}-iframe`
+  const iframeTitle = `Choose a date and time for ${serviceTitle}`
+  const embedConfig = useMemo(
+    () => ({
+      ...CAL_EMBED_CONFIG,
+      iframeAttrs: {
+        id: iframeId,
+      },
+    }),
+    [iframeId]
+  )
   const externalUrl = canonicalCalUrl(calLink)
 
   useEffect(() => {
@@ -73,11 +87,26 @@ function CalEmbedInstance({
     let api: Awaited<ReturnType<typeof getCalApi>> | undefined
 
     const handleReady = () => {
-      if (active) setStatus("ready")
+      if (!active) return
+
+      window.clearTimeout(readyTimeout)
+
+      const iframe = document.getElementById(iframeId)
+      if (iframe instanceof HTMLIFrameElement) iframe.title = iframeTitle
+
+      setStatus("ready")
     }
     const handleFailure = () => {
-      if (active) setStatus("error")
+      if (!active) return
+
+      window.clearTimeout(readyTimeout)
+      setStatus("error")
     }
+
+    const readyTimeout = window.setTimeout(
+      handleFailure,
+      EMBED_READY_TIMEOUT_MS
+    )
 
     void getCalApi({ namespace })
       .then((calApi) => {
@@ -92,61 +121,86 @@ function CalEmbedInstance({
 
     return () => {
       active = false
+      window.clearTimeout(readyTimeout)
       api?.("off", { action: "linkReady", callback: handleReady })
       api?.("off", { action: "linkFailed", callback: handleFailure })
     }
-  }, [namespace])
+  }, [iframeId, iframeTitle, namespace])
 
   return (
     <section
-      aria-label={`Available appointment times for ${serviceTitle}`}
+      aria-busy={status === "loading"}
+      aria-describedby={descriptionId}
+      aria-labelledby={headingId}
       className={cn(
         "overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[#faf7f2] shadow-[0_24px_70px_rgba(43,39,36,0.08)]",
         className
       )}
     >
       <div className="border-b border-[var(--border)] px-5 py-4 sm:px-7">
-        <p className="text-sm leading-relaxed text-[var(--muted-foreground)]">
+        <h4 className="font-serif text-xl text-[var(--primary)]" id={headingId}>
+          Available dates and times
+        </h4>
+        <p
+          className="mt-1 text-sm leading-relaxed text-[var(--muted-foreground)]"
+          id={descriptionId}
+        >
           Choose an available time for {serviceTitle}. Times remain visible in
           your local timezone.
         </p>
       </div>
 
-      <div className="relative min-h-[42rem] sm:min-h-[46rem] lg:min-h-[44rem]">
-        {status !== "ready" ? (
+      <div
+        className={cn(
+          "relative",
+          status === "error"
+            ? "min-h-40"
+            : "min-h-[42rem] sm:min-h-[46rem] lg:min-h-[44rem]"
+        )}
+      >
+        {status === "loading" ? (
           <div
             aria-live="polite"
             className="absolute inset-x-0 top-0 z-10 flex min-h-32 items-center justify-center bg-[#faf7f2]/92 px-6 text-center backdrop-blur-sm"
             role="status"
           >
             <div>
-              {status === "loading" ? (
-                <>
-                  <span
-                    aria-hidden="true"
-                    className="mx-auto block size-7 animate-pulse rounded-full border border-[var(--accent)] bg-[var(--accent)]/12 motion-reduce:animate-none"
-                  />
-                  <span className="mt-3 block text-sm text-[var(--muted-foreground)]">
-                    Gathering Shannon&apos;s available times…
-                  </span>
-                </>
-              ) : (
-                <span className="block text-sm text-[var(--muted-foreground)]">
-                  The calendar could not load here. Open Cal.com below to see
-                  current availability.
-                </span>
-              )}
+              <span
+                aria-hidden="true"
+                className="mx-auto block size-7 animate-pulse rounded-full border border-[var(--accent)] bg-[var(--accent)]/12 motion-reduce:animate-none"
+              />
+              <span className="mt-3 block text-sm text-[var(--muted-foreground)]">
+                Gathering Shannon&apos;s available times…
+              </span>
             </div>
           </div>
         ) : null}
 
-        <Cal
-          calLink={calLink}
-          className="min-h-[42rem] w-full sm:min-h-[46rem] lg:min-h-[44rem]"
-          config={CAL_EMBED_CONFIG}
-          key={calLink}
-          namespace={namespace}
-        />
+        {status === "error" ? (
+          <div
+            aria-live="polite"
+            className="grid min-h-40 place-items-center px-6 text-center"
+            role="status"
+          >
+            <div className="max-w-md">
+              <p className="text-sm font-medium text-[var(--primary)]">
+                The live calendar could not load here.
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                Send Shannon a booking request below, or open Cal.com in a new
+                tab to check the current availability.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <Cal
+            calLink={calLink}
+            className="min-h-[42rem] w-full sm:min-h-[46rem] lg:min-h-[44rem]"
+            config={embedConfig}
+            key={calLink}
+            namespace={namespace}
+          />
+        )}
       </div>
 
       <div className="flex justify-end border-t border-[var(--border)] px-5 py-4 sm:px-7">

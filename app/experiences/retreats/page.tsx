@@ -604,7 +604,7 @@ export default function RetreatsPage() {
               Share what you know now. Dates can be flexible, and the practice
               mix can be shaped together.
             </p>
-            <p className="mt-7 text-sm leading-[1.75] text-white/55">
+            <p className="mt-7 text-sm leading-[1.75] text-white/[0.56]">
               Prefer email? Write directly through the{" "}
               <Link
                 className="font-semibold text-[#f3dfc4] underline decoration-white/30 underline-offset-4 hover:text-white"

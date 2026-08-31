@@ -4,7 +4,7 @@ import { createPageMetadata } from "@/lib/seo"
 export const metadata = createPageMetadata({
   title: "Terms | HWL by SMD",
   description:
-    "Terms for HWL by SMD products, memberships, digital content, bookings, and wellness experiences.",
+    "Terms for HWL by SMD products, digital content, bookings, and wellness experiences.",
   path: "/terms",
 })
 
@@ -12,7 +12,7 @@ const sections: LegalSection[] = [
   {
     title: "Using HWL by SMD",
     body: [
-      "By using this site, creating an account, purchasing digital content, joining The Den, or booking an experience, you agree to these terms. If you do not agree, do not use the service.",
+      "By using this site, creating an account, purchasing digital content, or booking an experience, you agree to these terms. If you do not agree, do not use the service.",
       "You are responsible for accurate account information, protecting your sign-in credentials, and activity under your account. Please notify HWL by SMD if you believe access has been compromised.",
     ],
   },
@@ -28,17 +28,17 @@ const sections: LegalSection[] = [
     id: "digital-products-and-access",
     title: "Digital products and access",
     body: [
-      "A LIFT digital purchase gives one person a limited, personal, non-transferable license to use the purchased guide and, when included, the private video. You may access the materials on your personal devices, keep a private backup, and make reasonable personal or accessibility copies. Purchase does not transfer ownership of the materials.",
+      "A LIFT digital purchase gives one person a limited, personal, non-transferable license to use the private guided video and downloadable PDF. You may access the materials on your personal devices, keep a private backup, and make reasonable personal or accessibility copies. Purchase does not transfer ownership of the materials.",
       "You may not share your account or private links; publish, record, upload, redistribute, or resell the purchased materials; copy the recordings, writing, images, or branded materials into a commercial class or service; or remove notices or branding without written permission.",
       "This personal-use license does not limit rights that cannot lawfully be waived. Contact Shannon for written permission before making any use beyond it.",
       "Access depends on a working account and supported device or browser. Reasonable efforts will be made to restore access after a technical interruption.",
     ],
   },
   {
-    title: "Payments, memberships, and cancellations",
+    title: "Payments and cancellations",
     body: [
-      "Prices are shown before checkout and payments are processed by Stripe. The Den renews monthly until canceled. You can manage or cancel renewal from the secure billing portal; access continues through the paid period unless otherwise stated.",
-      "Digital products may be refunded within 14 days of purchase by contacting HWL by SMD. The Den is $11.11 per month and can be canceled at any time. Partial membership months are not refunded; access continues through the current billing period.",
+      "Prices are shown before checkout and payments are processed by Stripe. LIFT is a one-time $11.11 purchase containing the guided video and downloadable PDF; it is not a subscription.",
+      "Digital products may be refunded within 14 days of purchase by contacting HWL by SMD.",
     ],
   },
   {
@@ -59,7 +59,7 @@ const sections: LegalSection[] = [
   {
     title: "Intellectual property",
     body: [
-      "Unless otherwise stated, original content owned by Shannon Mary Dixon is protected by applicable intellectual-property law. No ownership transfers through a purchase or membership.",
+      "Unless otherwise stated, original content owned by Shannon Mary Dixon is protected by applicable intellectual-property law. No ownership transfers through a purchase.",
       "Third-party materials remain the property of their respective owners and are used under license, permission, or applicable law.",
       "HWL by SMD™ and LIFT™ are marks used in connection with Shannon's offerings. The ™ symbol does not indicate federal registration.",
     ],
@@ -82,9 +82,9 @@ const sections: LegalSection[] = [
 export default function Page() {
   return (
     <LegalPage
-      effectiveDate="August 28, 2026"
+      effectiveDate="August 29, 2026"
       eyebrow="Terms"
-      introduction="A clear foundation for digital rituals, memberships, conversations, and booked experiences."
+      introduction="A clear foundation for digital rituals, conversations, and booked experiences."
       sections={sections}
       title="Terms, in plain language."
     />

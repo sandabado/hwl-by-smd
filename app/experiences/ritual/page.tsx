@@ -97,7 +97,7 @@ export default function AstrologyPage() {
           alt={media.experiences.tarotSpread.alt}
           className="object-cover object-[67%_center] [filter:saturate(.82)_contrast(1.02)] md:object-center"
           fill
-          preload
+          loading="eager"
           sizes="100vw"
           src={media.experiences.tarotSpread.src}
         />

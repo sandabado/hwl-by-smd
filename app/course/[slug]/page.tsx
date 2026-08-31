@@ -23,7 +23,7 @@ export default async function CoursePage({
 }) {
   const { slug } = await params
   const { access, user } = await requireAccess(
-    "any_purchase",
+    "authenticated",
     `/course/${slug}`
   )
   const result = await getCourseBySlug(slug)
@@ -32,7 +32,7 @@ export default async function CoursePage({
     redirect("/store?access=membership_only")
   }
   if (result.course.access_tier === "lift" && !access.canAccessLift) {
-    redirect("/store?access=lift_guide_only")
+    redirect("/beauty/lift?access=lift_guide_only")
   }
 
   const supabase = await createClient()

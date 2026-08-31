@@ -3,6 +3,11 @@
 import { useState, type FormEvent } from "react"
 
 import { BreathingButton } from "@/components/shared/breathing-button"
+import { InquiryPrivacyNotice } from "@/components/shared/inquiry-privacy-notice"
+import {
+  inquiryReceiptMessage,
+  useInquirySubmission,
+} from "@/components/shared/use-inquiry-submission"
 
 type ContactField = {
   label: string
@@ -27,6 +32,7 @@ export function ContactForm({
     "idle"
   )
   const [feedback, setFeedback] = useState("")
+  const submitInquiry = useInquirySubmission()
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -37,20 +43,19 @@ export function ContactForm({
     const values = Object.fromEntries(new FormData(form).entries())
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, source }),
-      })
-      const result = (await response.json()) as { message?: string }
-
-      if (!response.ok) {
-        throw new Error(result.message ?? "Your note could not be sent.")
-      }
+      const receipt = await submitInquiry(
+        { ...values, source },
+        "Your note could not be sent."
+      )
 
       form.reset()
       setStatus("sent")
-      setFeedback("Thank you. Your note is on its way to Shannon.")
+      setFeedback(
+        inquiryReceiptMessage(
+          receipt,
+          "Thank you. Shannon’s email provider accepted the private alert."
+        )
+      )
     } catch (error) {
       setStatus("error")
       setFeedback(
@@ -101,6 +106,7 @@ export function ContactForm({
           required
         />
       </label>
+      <InquiryPrivacyNotice />
       <BreathingButton
         breathVariant="primary"
         className="mt-2 rounded-full bg-[var(--primary)] text-white hover:bg-[var(--accent)]"

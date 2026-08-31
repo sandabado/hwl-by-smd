@@ -273,8 +273,7 @@ export const websiteEditorDefaults = {
       status: "draft",
       eyebrow: "LIFT · Guided facial massage",
       headline: "A five-minute facial ritual.",
-      description:
-        "LIFT Guide · $11.11 one time. Complete video + guide · $33.33.",
+      description: "Guided video + downloadable PDF · $11.11 one time.",
       ctaLabel: "Experience LIFT",
       ctaHref: "/beauty/lift",
       mediaKey: "lift-video-preview",
@@ -521,7 +520,7 @@ export const homepageFeatureCodeDefault: PublishedHomepageFeature = {
   key: "lift-daily-ritual",
   eyebrow: "LIFT · Guided facial massage",
   headline: "A five-minute facial ritual.",
-  description: "LIFT Guide · $11.11 one time. Complete video + guide · $33.33.",
+  description: "Guided video + downloadable PDF · $11.11 one time.",
   ctaLabel: "Experience LIFT",
   ctaHref: "/beauty/lift",
   media: {

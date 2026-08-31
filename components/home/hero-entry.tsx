@@ -97,7 +97,7 @@ export function HeroEntry({
           alt={media.home.hero.alt}
           className="object-contain object-right-bottom"
           fill
-          preload
+          loading="eager"
           quality={88}
           sizes="100vw"
           src={media.home.hero.src}
@@ -166,7 +166,7 @@ export function HeroEntry({
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-5 border-b border-[#20251f]/15 pb-9 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-semibold tracking-[0.28em] text-[#697268] uppercase">
+              <p className="text-xs font-semibold tracking-[0.28em] text-[#626a61] uppercase">
                 The HWL world
               </p>
               <h2 className="mt-4 text-4xl font-medium text-[#20251f] sm:text-5xl">
@@ -198,7 +198,7 @@ export function HeroEntry({
                     0{index + 1}
                   </span>
                 </Link>
-                <p className="mt-7 text-xs font-semibold tracking-[0.2em] text-[#697268] uppercase">
+                <p className="mt-7 text-xs font-semibold tracking-[0.2em] text-[#626a61] uppercase">
                   {world.detail}
                 </p>
                 <h3 className="mt-3 text-4xl font-medium text-[#20251f]">

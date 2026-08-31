@@ -1,4 +1,11 @@
-import { BadgePercent, PackageOpen, Plus, ShoppingBag } from "lucide-react"
+import {
+  AlertCircle,
+  BadgePercent,
+  PackageOpen,
+  Plus,
+  RefreshCw,
+  ShoppingBag,
+} from "lucide-react"
 import Link from "next/link"
 
 import {
@@ -11,28 +18,38 @@ import {
   StatusPill,
 } from "@/components/admin/admin-ui"
 import { adminProducts } from "@/lib/admin-preview-data"
+import { getAdminReconciliationStatus } from "@/lib/commerce/admin-reconciliation"
 import { requireAdmin } from "@/lib/admin-auth"
 import { isStripeConfigured } from "@/lib/env"
 
 export const dynamic = "force-dynamic"
 
-const priceKeys = [
-  process.env.STRIPE_PDF_PRICE_ID,
-  process.env.STRIPE_LIFT_GUIDE_PRICE_ID,
-  process.env.STRIPE_MEMBERSHIP_PRICE_ID,
-]
+const launchPrice = process.env.STRIPE_LIFT_GUIDE_PRICE_ID
 
 const present = (value: string | undefined) =>
   Boolean(value && !value.startsWith("your_"))
 
 export default async function AdminStorePage() {
   await requireAdmin()
+  const reconciliation = await getAdminReconciliationStatus()
   const stripeReady = isStripeConfigured()
+  const priceConfigured = stripeReady && present(launchPrice)
+  const reconciliationJobs =
+    reconciliation.status === "ready" ? reconciliation.jobs : []
+  const manualReviewCount = reconciliationJobs.filter(
+    ({ state }) => state === "manual_review"
+  ).length
+  const recoveryCount = reconciliationJobs.filter(({ state }) =>
+    ["leased", "pending", "retry_wait"].includes(state)
+  ).length
+  const monitoringCount = reconciliationJobs.filter(
+    ({ state }) => state === "monitoring"
+  ).length
 
   return (
     <>
       <AdminPageHeader
-        description="The printable LIFT ritual is the only launch candidate. Complete LIFT and The Den remain deferred until their delivery paths are verified."
+        description="LIFT launches as one $11.11 product containing the complete guided video and downloadable PDF. No PDF-only or membership checkout is offered."
         eyebrow="Commerce"
         title="Store"
       >
@@ -50,9 +67,7 @@ export default async function AdminStorePage() {
             </span>
             <div>
               <p className="text-sm font-medium">Product catalog</p>
-              <p className="text-xs text-[#7d847c]">
-                One launch candidate · two deferred offers
-              </p>
+              <p className="text-xs text-[#7d847c]">One launch product</p>
             </div>
           </div>
           <PreviewPill />
@@ -72,9 +87,7 @@ export default async function AdminStorePage() {
               </tr>
             </thead>
             <tbody>
-              {adminProducts.map((product, index) => {
-                const priceConfigured = stripeReady && present(priceKeys[index])
-                const deferred = product.id !== "lift-pdf"
+              {adminProducts.map((product) => {
                 return (
                   <tr
                     className="border-b border-[#e0dbd1] last:border-0"
@@ -93,16 +106,10 @@ export default async function AdminStorePage() {
                       {product.access}
                     </td>
                     <td className="px-3 py-4">
-                      <StatusPill
-                        tone={
-                          !deferred && priceConfigured ? "quiet" : "warning"
-                        }
-                      >
-                        {deferred
-                          ? "Deferred"
-                          : priceConfigured
-                            ? "Values present · unverified"
-                            : product.status}
+                      <StatusPill tone={priceConfigured ? "quiet" : "warning"}>
+                        {priceConfigured
+                          ? "Values present · unverified"
+                          : product.status}
                       </StatusPill>
                     </td>
                     <td className="px-3 py-4 text-sm text-[#7b837b]">
@@ -124,6 +131,131 @@ export default async function AdminStorePage() {
         </div>
       </AdminPanel>
 
+      <AdminPanel className="mt-5">
+        <div className="flex flex-col justify-between gap-3 border-b border-[#d9d3c8] pb-5 sm:flex-row sm:items-center">
+          <PanelHeading
+            detail="Durable webhook and checkout recovery — read only"
+            eyebrow="Payment operations"
+            title="Reconciliation queue"
+          />
+          {reconciliation.status === "ready" && (
+            <StatusPill tone={manualReviewCount ? "warning" : "positive"}>
+              {manualReviewCount
+                ? `${manualReviewCount} need manual review`
+                : "No manual review alerts"}
+            </StatusPill>
+          )}
+        </div>
+
+        {reconciliation.status === "local_preview" ? (
+          <div className="mt-5">
+            <EmptyState
+              description="The signed local design preview cannot read hosted payment operations. Sign in as a verified Supabase administrator to inspect the queue."
+              icon={RefreshCw}
+              title="Operational queue stays private"
+            />
+          </div>
+        ) : reconciliation.status === "not_configured" ? (
+          <div className="mt-5">
+            <EmptyState
+              description="The exact deployment, Stripe account, mode, and Supabase administrator connection must all be configured before queue status can be read."
+              icon={RefreshCw}
+              title="Recovery boundary is not configured"
+            />
+          </div>
+        ) : reconciliation.status === "unavailable" ? (
+          <div className="mt-5">
+            <EmptyState
+              description="Queue status could not be read safely. No cached or sample substitute is shown; checkout remains governed by the fail-closed payment boundary."
+              icon={AlertCircle}
+              title="Recovery status is temporarily unavailable"
+            />
+          </div>
+        ) : reconciliationJobs.length === 0 ? (
+          <div className="mt-5">
+            <EmptyState
+              description="No Checkout Session has entered the durable recovery queue in this environment."
+              icon={RefreshCw}
+              title="No reconciliation work"
+            />
+          </div>
+        ) : (
+          <>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl bg-[#f4efe7]/75 px-4 py-3">
+                <p className="text-[9px] font-semibold tracking-[0.15em] text-[#858b84] uppercase">
+                  Recovering
+                </p>
+                <p className="mt-1 font-serif text-2xl">{recoveryCount}</p>
+              </div>
+              <div className="rounded-xl bg-[#f4efe7]/75 px-4 py-3">
+                <p className="text-[9px] font-semibold tracking-[0.15em] text-[#858b84] uppercase">
+                  Monitoring
+                </p>
+                <p className="mt-1 font-serif text-2xl">{monitoringCount}</p>
+              </div>
+              <div className="rounded-xl bg-[#f4efe7]/75 px-4 py-3">
+                <p className="text-[9px] font-semibold tracking-[0.15em] text-[#858b84] uppercase">
+                  Manual review
+                </p>
+                <p className="mt-1 font-serif text-2xl">{manualReviewCount}</p>
+              </div>
+            </div>
+
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-[760px] border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-[#d9d3c8] text-[9px] font-semibold tracking-[0.16em] text-[#868d86] uppercase">
+                    <th className="px-3 py-4">Order reference</th>
+                    <th className="px-3 py-4">State</th>
+                    <th className="px-3 py-4">Claims</th>
+                    <th className="px-3 py-4">Last outcome</th>
+                    <th className="px-3 py-4">Machine reason</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reconciliationJobs.map((job) => (
+                    <tr
+                      className="border-b border-[#e0dbd1] last:border-0"
+                      key={job.order_id}
+                    >
+                      <td className="px-3 py-4 font-mono text-xs text-[#707970]">
+                        {job.order_id.slice(0, 8)}
+                      </td>
+                      <td className="px-3 py-4">
+                        <StatusPill
+                          tone={
+                            job.state === "manual_review"
+                              ? "warning"
+                              : job.state === "monitoring" ||
+                                  job.state === "complete"
+                                ? "positive"
+                                : "quiet"
+                          }
+                        >
+                          {job.state.replace("_", " ")}
+                        </StatusPill>
+                      </td>
+                      <td className="px-3 py-4 text-sm text-[#687168]">
+                        {job.claim_count}
+                      </td>
+                      <td className="px-3 py-4 text-sm text-[#687168]">
+                        {job.last_outcome?.replaceAll("_", " ") ?? "—"}
+                      </td>
+                      <td className="px-3 py-4 text-sm text-[#687168]">
+                        {(
+                          job.manual_review_reason ?? job.last_error_code
+                        )?.replaceAll("_", " ") ?? "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </AdminPanel>
+
       <div className="mt-5 grid gap-5 lg:grid-cols-[0.8fr_1.2fr]">
         <AdminPanel>
           <PanelHeading
@@ -140,10 +272,8 @@ export default async function AdminStorePage() {
             </div>
             <div className="flex items-center justify-between border-b border-[#ddd7cd] pb-3">
               <span className="text-sm text-[#5d675e]">Price IDs</span>
-              <StatusPill
-                tone={priceKeys.every(present) ? "positive" : "warning"}
-              >
-                {priceKeys.filter(present).length} of 3
+              <StatusPill tone={priceConfigured ? "positive" : "warning"}>
+                {priceConfigured ? "1 of 1" : "0 of 1"}
               </StatusPill>
             </div>
             <p className="text-xs leading-5 text-[#7a827a]">

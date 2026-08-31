@@ -41,6 +41,7 @@ const sections: LegalSection[] = [
     title: "Service providers",
     body: [
       "Trusted providers process information only as needed to operate the service. These may include Supabase for authentication, data storage, and protected media; Stripe for payments; Mux for future protected streaming; Resend for transactional email; Cal.com for scheduling; OpenStreetMap for map tiles; and hosting or monitoring providers.",
+      "Website inquiry content is stored in the restricted private inbox before any optional email alert is attempted. The Resend alert contains an inquiry identifier, source, and protected inbox link—not the visitor’s submitted contact details or message.",
       "Each provider processes information under its own terms and security practices. Services are configured to minimize unnecessary access wherever practical.",
     ],
   },

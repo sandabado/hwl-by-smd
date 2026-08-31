@@ -2,6 +2,10 @@
 
 import { useState, type FormEvent } from "react"
 
+import {
+  inquiryReceiptMessage,
+  useInquirySubmission,
+} from "@/components/shared/use-inquiry-submission"
 import { Button } from "@/components/ui/button"
 
 export function NewsletterForm() {
@@ -9,6 +13,7 @@ export function NewsletterForm() {
     "idle"
   )
   const [feedback, setFeedback] = useState("")
+  const submitInquiry = useInquirySubmission()
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -19,25 +24,22 @@ export function NewsletterForm() {
     const values = Object.fromEntries(new FormData(form).entries())
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const receipt = await submitInquiry(
+        {
           ...values,
           source: "journal-newsletter",
           message: "Please add me to the HWL by SMD journal list.",
-        }),
-      })
-      const result = (await response.json()) as { message?: string }
-
-      if (!response.ok) {
-        throw new Error(result.message ?? "Your request could not be sent.")
-      }
+        },
+        "Your request could not be sent."
+      )
 
       form.reset()
       setStatus("sent")
       setFeedback(
-        "Shannon received your request to join the list and will be in touch when a new note is ready."
+        inquiryReceiptMessage(
+          receipt,
+          "Your request is safely recorded, and Shannon’s email provider accepted the private alert."
+        )
       )
     } catch (error) {
       setStatus("error")

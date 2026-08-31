@@ -1,9 +1,21 @@
 "use client"
 
-import { useEffect, useRef, useState, type FormEvent } from "react"
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type MouseEvent,
+} from "react"
 import { CalendarDays, Check, Clock3 } from "lucide-react"
+import dynamic from "next/dynamic"
 import Image from "next/image"
 
+import {
+  inquiryReceiptMessage,
+  useInquirySubmission,
+} from "@/components/shared/use-inquiry-submission"
+import { InquiryPrivacyNotice } from "@/components/shared/inquiry-privacy-notice"
 import { Button } from "@/components/ui/button"
 import {
   bookingPillars,
@@ -11,6 +23,24 @@ import {
   type BookingPillarId,
 } from "@/lib/booking-services"
 import { cn } from "@/lib/utils"
+
+const CalInlineEmbed = dynamic(
+  () =>
+    import("@/components/booking/cal-inline-embed").then(
+      (module) => module.CalInlineEmbed
+    ),
+  {
+    loading: () => (
+      <p
+        className="mt-4 rounded-2xl border border-[var(--border)] bg-[#faf7f2] p-6 text-center text-sm text-[var(--muted-foreground)]"
+        role="status"
+      >
+        Preparing Shannon&apos;s live calendar…
+      </p>
+    ),
+    ssr: false,
+  }
+)
 
 type SubmissionStatus = "error" | "idle" | "sending" | "sent"
 
@@ -20,13 +50,49 @@ const pillarLabels: Record<BookingPillarId, string> = {
   ritual: "Tarot + Reiki",
 }
 
+const availabilityLabels: Record<BookingPillarId, string> = {
+  beauty: "Beauty availability",
+  movement: "Yoga + Sound availability",
+  ritual: "Tarot, Reiki + virtual availability",
+}
+
 const inputClassName =
   "min-h-11 w-full rounded-xl border border-[var(--border)] bg-white/82 px-4 text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
 
+function describeGuestRange({
+  maximum,
+  minimum,
+}: {
+  maximum?: number
+  minimum: number
+}) {
+  if (maximum && minimum > 1) return `${minimum}–${maximum} guests`
+  if (maximum) return `Up to ${maximum} guests`
+  if (minimum > 1) return `Minimum ${minimum} guests`
+  return ""
+}
+
+function guestRangeError({
+  maximum,
+  minimum,
+}: {
+  maximum?: number
+  minimum: number
+}) {
+  if (maximum && minimum > 1) {
+    return `Choose between ${minimum} and ${maximum} guests for this experience.`
+  }
+  if (maximum)
+    return `Choose no more than ${maximum} guests for this experience.`
+  return `This experience requires at least ${minimum} guests.`
+}
+
 export function BookingRequestFlow({
+  calLinksByServiceSlug,
   initialServiceSlug,
   minimumDate,
 }: {
+  calLinksByServiceSlug: Readonly<Record<string, string>>
   initialServiceSlug?: string
   minimumDate: string
 }) {
@@ -42,12 +108,20 @@ export function BookingRequestFlow({
   const [status, setStatus] = useState<SubmissionStatus>("idle")
   const [feedback, setFeedback] = useState("")
   const schedulingPanelRef = useRef<HTMLDivElement>(null)
+  const submitInquiry = useInquirySubmission()
   const selectedService = findBookingService(selectedServiceSlug)?.service
   const activePillarData =
     bookingPillars.find((pillar) => pillar.id === activePillar) ??
     bookingPillars[0]
   const activeServices = activePillarData.services
   const previewImage = selectedService?.image ?? activePillarData.image
+  const selectedCalLink =
+    selectedService?.calendarBooking.kind === "exact-event"
+      ? calLinksByServiceSlug[selectedService.slug]
+      : undefined
+  const guestRangeLabel = selectedService
+    ? describeGuestRange(selectedService.guestRange)
+    : ""
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -75,11 +149,11 @@ export function BookingRequestFlow({
     resetFeedback()
   }
 
-  function chooseService(serviceSlug: string) {
+  function chooseService(serviceSlug: string, shouldScroll: boolean) {
     setSelectedServiceSlug(serviceSlug)
     resetFeedback()
 
-    if (window.matchMedia("(max-width: 1023px)").matches) {
+    if (shouldScroll && window.matchMedia("(max-width: 1023px)").matches) {
       window.requestAnimationFrame(() => {
         schedulingPanelRef.current?.scrollIntoView({
           behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
@@ -112,6 +186,19 @@ export function BookingRequestFlow({
       return
     }
 
+    const guestCount = Number(values.guestCount)
+    const { maximum, minimum } = selectedService.guestRange
+
+    if (
+      !Number.isInteger(guestCount) ||
+      guestCount < minimum ||
+      (maximum !== undefined && guestCount > maximum)
+    ) {
+      setStatus("error")
+      setFeedback(guestRangeError(selectedService.guestRange))
+      return
+    }
+
     const note = typeof values.message === "string" ? values.message.trim() : ""
     values.message =
       note ||
@@ -120,23 +207,20 @@ export function BookingRequestFlow({
         : `Preferred-window request for ${selectedService.title}.`)
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, source: "booking-request" }),
-      })
-      const result = (await response.json()) as { message?: string }
-
-      if (!response.ok) {
-        throw new Error(
-          result.message ?? "Your booking request could not be sent."
-        )
-      }
+      const receipt = await submitInquiry(
+        { ...values, source: "booking-request" },
+        "Your booking request could not be sent."
+      )
 
       form.reset()
       setIsFlexible(true)
       setStatus("sent")
-      setFeedback("Thank you. Shannon will respond personally within 48 hours.")
+      setFeedback(
+        inquiryReceiptMessage(
+          receipt,
+          "Thank you. Your booking request is safely recorded, and Shannon’s email provider accepted the private alert. She will respond personally within 48 hours."
+        )
+      )
     } catch (error) {
       setStatus("error")
       setFeedback(
@@ -148,7 +232,7 @@ export function BookingRequestFlow({
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form aria-label="Book an experience with Shannon" onSubmit={handleSubmit}>
       <section
         className="scroll-mt-24 border-y border-[var(--border)] bg-white/38 px-5 py-7 sm:px-6 md:py-9"
         id="choose-time"
@@ -173,9 +257,10 @@ export function BookingRequestFlow({
             >
               {bookingPillars.map((pillar) => (
                 <button
+                  aria-controls="booking-service-options"
                   aria-pressed={activePillar === pillar.id}
                   className={cn(
-                    "min-h-11 rounded-full border px-2.5 py-2 text-xs font-medium transition sm:text-sm",
+                    "min-h-11 rounded-full border px-2.5 py-2 text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none sm:text-sm",
                     activePillar === pillar.id
                       ? "border-[var(--primary)] bg-[var(--primary)] text-white"
                       : "border-[var(--border)] bg-white/58 text-[var(--primary)] hover:border-[var(--accent)]"
@@ -192,6 +277,7 @@ export function BookingRequestFlow({
             <div
               aria-label={`${pillarLabels[activePillar]} services`}
               className="mt-4 grid gap-2 sm:grid-cols-2"
+              id="booking-service-options"
               role="group"
             >
               {activeServices.map((service) => {
@@ -199,15 +285,18 @@ export function BookingRequestFlow({
 
                 return (
                   <button
+                    aria-controls="booking-scheduling-panel"
                     aria-pressed={selected}
                     className={cn(
-                      "grid min-h-[4.35rem] grid-cols-[1fr_auto] items-center gap-4 rounded-2xl border px-4 py-3 text-left transition",
+                      "grid min-h-[4.35rem] grid-cols-[1fr_auto] items-center gap-4 rounded-2xl border px-4 py-3 text-left transition focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none",
                       selected
                         ? "border-[var(--accent)] bg-white shadow-[0_12px_35px_rgba(90,74,63,0.08)] ring-2 ring-[var(--accent)]/12"
                         : "border-[var(--border)] bg-white/55 hover:border-[var(--accent)]/60 hover:bg-white/78"
                     )}
                     key={service.slug}
-                    onClick={() => chooseService(service.slug)}
+                    onClick={(event: MouseEvent<HTMLButtonElement>) =>
+                      chooseService(service.slug, event.detail > 0)
+                    }
                     type="button"
                   >
                     <span className="min-w-0">
@@ -231,9 +320,21 @@ export function BookingRequestFlow({
           </div>
 
           <div
+            aria-label={selectedService ? undefined : "Booking details"}
+            aria-labelledby={
+              selectedService ? "booking-selected-service-title" : undefined
+            }
             className="scroll-mt-24 rounded-[1.6rem] border border-[var(--border)] bg-white/68 p-5 shadow-[0_20px_65px_rgba(90,74,63,0.07)] sm:p-6"
+            id="booking-scheduling-panel"
             ref={schedulingPanelRef}
+            role="region"
           >
+            <p aria-atomic="true" aria-live="polite" className="sr-only">
+              {selectedService
+                ? `${selectedService.title} selected. ${selectedService.duration}. ${selectedService.price}. ${selectedCalLink ? "Live dates and appointment times are available below." : "Send Shannon a request for the next opening below."}`
+                : `${pillarLabels[activePillar]} category selected. Choose a service to continue.`}
+            </p>
+
             <div className="relative mb-5 aspect-[16/9] overflow-hidden rounded-[1.15rem] bg-[var(--muted)]">
               <Image
                 alt={previewImage.alt}
@@ -260,7 +361,10 @@ export function BookingRequestFlow({
                     <p className="text-[10px] font-medium tracking-[0.18em] text-[var(--accent)] uppercase">
                       Your experience
                     </p>
-                    <h3 className="mt-1 font-serif text-2xl leading-tight text-[var(--primary)]">
+                    <h3
+                      className="mt-1 font-serif text-2xl leading-tight text-[var(--primary)]"
+                      id="booking-selected-service-title"
+                    >
                       {selectedService.title}
                     </h3>
                     <p className="mt-1 text-xs text-[var(--muted-foreground)]">
@@ -273,7 +377,45 @@ export function BookingRequestFlow({
                 </div>
 
                 <>
-                  <div className="mt-4 rounded-2xl bg-[var(--primary)]/[0.055] p-4">
+                  {selectedCalLink ? (
+                    <div className="mt-5">
+                      <div className="rounded-2xl bg-[var(--accent)]/[0.09] p-4">
+                        <div className="flex items-start gap-3">
+                          <CalendarDays
+                            aria-hidden="true"
+                            className="mt-0.5 size-4 shrink-0 text-[var(--accent)]"
+                          />
+                          <div>
+                            <p className="text-sm font-medium text-[var(--primary)]">
+                              {availabilityLabels[activePillar]}
+                            </p>
+                            <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)]">
+                              These live dates and times are specific to this
+                              experience. Cal.com will guide you through
+                              confirmation.
+                            </p>
+                            <a
+                              className="mt-2 inline-flex text-xs font-medium text-[var(--accent)] underline underline-offset-4 focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
+                              href="#alternative-booking-request"
+                            >
+                              Need a different time? Skip to the request form.
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+
+                      <CalInlineEmbed
+                        calLink={selectedCalLink}
+                        className="mt-4"
+                        serviceTitle={selectedService.title}
+                      />
+                    </div>
+                  ) : null}
+
+                  <div
+                    className="mt-4 scroll-mt-24 rounded-2xl bg-[var(--primary)]/[0.055] p-4"
+                    id="alternative-booking-request"
+                  >
                     <div className="flex items-start gap-3">
                       <CalendarDays
                         aria-hidden="true"
@@ -281,13 +423,20 @@ export function BookingRequestFlow({
                       />
                       <div>
                         <p className="text-sm font-medium text-[var(--primary)]">
-                          Request Shannon’s next opening.
+                          {selectedService.calendarBooking.kind ===
+                          "inquiry-only"
+                            ? "Arrange this group facial with Shannon."
+                            : selectedCalLink
+                              ? "Need another time?"
+                              : "Request Shannon’s next opening."}
                         </p>
                         <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)]">
-                          Share your timing below. Shannon will reply personally
-                          within 48 hours with an available option. Ten to
-                          fourteen days&apos; notice is preferred, but shorter
-                          windows may be possible.
+                          {selectedService.calendarBooking.kind ===
+                          "inquiry-only"
+                            ? "Wild Glow Express is 15–20 minutes per guest and begins with four guests. Share your group timing so Shannon can reserve the full appointment without guessing; she’ll reply personally within 48 hours."
+                            : selectedCalLink
+                              ? "Share your timing below and Shannon will reply personally within 48 hours with an alternate option."
+                              : "Share your timing below. Shannon will reply personally within 48 hours with an available option. Ten to fourteen days’ notice is preferred, but shorter windows may be possible."}
                         </p>
                       </div>
                     </div>
@@ -300,7 +449,7 @@ export function BookingRequestFlow({
                     <div className="mt-2 grid gap-2 sm:grid-cols-2">
                       <label
                         className={cn(
-                          "cursor-pointer rounded-xl border p-3 transition",
+                          "cursor-pointer rounded-xl border p-3 transition focus-within:ring-2 focus-within:ring-[var(--accent)] focus-within:ring-offset-2 focus-within:outline-none",
                           isFlexible
                             ? "border-[var(--accent)] bg-[var(--accent)]/[0.07]"
                             : "border-[var(--border)] bg-white/55"
@@ -326,7 +475,7 @@ export function BookingRequestFlow({
                       </label>
                       <label
                         className={cn(
-                          "cursor-pointer rounded-xl border p-3 transition",
+                          "cursor-pointer rounded-xl border p-3 transition focus-within:ring-2 focus-within:ring-[var(--accent)] focus-within:ring-offset-2 focus-within:outline-none",
                           !isFlexible
                             ? "border-[var(--accent)] bg-[var(--accent)]/[0.07]"
                             : "border-[var(--border)] bg-white/55"
@@ -431,11 +580,20 @@ export function BookingRequestFlow({
                   </div>
                   <div className="mt-3 grid gap-3 sm:grid-cols-2">
                     <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
-                      Number of guests
+                      <span className="flex items-baseline justify-between gap-3">
+                        <span>Number of guests</span>
+                        {guestRangeLabel ? (
+                          <span className="font-normal text-[var(--muted-foreground)]">
+                            {guestRangeLabel}
+                          </span>
+                        ) : null}
+                      </span>
                       <input
                         className={inputClassName}
-                        max={100}
-                        min={1}
+                        defaultValue={selectedService.guestRange.minimum}
+                        key={selectedService.slug}
+                        max={selectedService.guestRange.maximum ?? 100}
+                        min={selectedService.guestRange.minimum}
                         name="guestCount"
                         required
                         type="number"
@@ -461,6 +619,7 @@ export function BookingRequestFlow({
                     />
                   </label>
 
+                  <InquiryPrivacyNotice className="mt-4" />
                   <Button
                     className="mt-4 min-h-11 w-full rounded-full bg-[var(--primary)] px-6 text-white hover:bg-[var(--accent)]"
                     disabled={status === "sending"}

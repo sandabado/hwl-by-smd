@@ -2,10 +2,25 @@ import { media } from "@/lib/media"
 
 export type BookingPillarId = "beauty" | "movement" | "ritual"
 
+export type CalendarBooking =
+  | {
+      durationMinutes: number
+      kind: "exact-event"
+    }
+  | {
+      kind: "inquiry-only"
+      reason: "group-duration-unconfirmed"
+    }
+
 export type BookingService = {
+  calendarBooking: CalendarBooking
   description: string
   duration: string
   format: "In person" | "Virtual" | "Virtual or in person"
+  guestRange: {
+    maximum?: number
+    minimum: number
+  }
   image: { alt: string; src: string }
   price: string
   slug: string
@@ -30,51 +45,64 @@ export const bookingPillars: readonly BookingPillar[] = [
     image: media.shannon.beautyPortrait,
     services: [
       {
+        calendarBooking: {
+          kind: "inquiry-only",
+          reason: "group-duration-unconfirmed",
+        },
         slug: "wild-glow-express-facial",
         title: "Wild Glow Express Facial",
         duration: "15–20 min · minimum 4 guests",
         price: "$111/guest",
         format: "In person",
+        guestRange: { minimum: 4 },
         description:
           "A focused facial ritual for fresh, luminous skin when time is brief.",
         image: media.shannon.beautyLift,
       },
       {
+        calendarBooking: { durationMinutes: 45, kind: "exact-event" },
         slug: "reiki-aromatherapy-healing",
         title: "Reiki Aromatherapy Healing",
         duration: "30–45 min",
         price: "$222/guest",
         format: "In person",
+        guestRange: { minimum: 1 },
         description:
           "A quiet blend of aromatherapy and Reiki held at an unhurried pace.",
         image: media.shannon.botanicalPortrait,
       },
       {
+        calendarBooking: { durationMinutes: 60, kind: "exact-event" },
         slug: "signature-facial",
         title: "Signature Facial",
         duration: "60 min",
         price: "$277/guest",
         format: "In person",
+        guestRange: { minimum: 1 },
         description:
           "Personalized professional skin care with massage and room to soften.",
         image: media.shannon.beautyLift,
       },
       {
+        calendarBooking: { durationMinutes: 90, kind: "exact-event" },
         slug: "beauty-being-ritual",
         title: "Beauty & Being Ritual",
         duration: "90 min",
         price: "$333/guest",
         format: "In person",
+        guestRange: { minimum: 1 },
         description:
           "An extended facial and restorative ritual for skin, senses, and stillness.",
         image: media.shannon.beautyPortrait,
       },
       {
+        calendarBooking: { durationMinutes: 120, kind: "exact-event" },
         slug: "wild-glow-luxury-facial",
         title: "Wild Glow Luxury Facial",
         duration: "120 min",
         price: "$444/guest",
         format: "In person",
+        guestRange: { minimum: 1 },
         description:
           "Shannon’s most spacious facial experience, shaped as a complete ceremony of care.",
         image: media.shannon.beautyLift,
@@ -89,31 +117,37 @@ export const bookingPillars: readonly BookingPillar[] = [
     image: media.experiences.movementStretch,
     services: [
       {
+        calendarBooking: { durationMinutes: 60, kind: "exact-event" },
         slug: "private-yoga-and-sound",
         title: "Private Yoga + Sound",
         duration: "60 min · up to 4 guests · +$55 each",
         price: "$555",
         format: "In person",
+        guestRange: { maximum: 4, minimum: 1 },
         description:
           "Breath-led private movement followed by a restorative sound experience.",
         image: media.experiences.movementEagle,
       },
       {
+        calendarBooking: { durationMinutes: 75, kind: "exact-event" },
         slug: "private-sound-healing",
         title: "Private Sound Healing",
         duration: "60–75 min · up to 8 guests · +$44 each",
         price: "$444",
         format: "In person",
+        guestRange: { maximum: 8, minimum: 1 },
         description:
           "A private sound practice designed for rest, reflection, and spacious attention.",
         image: media.brand.sanctuaryHero,
       },
       {
+        calendarBooking: { durationMinutes: 90, kind: "exact-event" },
         slug: "private-yoga",
         title: "Private Yoga",
         duration: "75–90 min · 2–4 guests · +$66 each",
         price: "$666",
         format: "In person",
+        guestRange: { maximum: 4, minimum: 2 },
         description:
           "A private practice shaped around your body, breath, experience, and energy that day.",
         image: media.brand.standingStretch,
@@ -128,31 +162,37 @@ export const bookingPillars: readonly BookingPillar[] = [
     image: media.experiences.ritualWolf,
     services: [
       {
+        calendarBooking: { durationMinutes: 60, kind: "exact-event" },
         slug: "intuitive-tarot-reading",
         title: "Intuitive Tarot Reading",
         duration: "45–60 min",
         price: "$222",
         format: "Virtual or in person",
+        guestRange: { minimum: 1 },
         description:
           "Reflective card work for transitions, choices, patterns, and the season you are in.",
         image: media.shannon.ritualSpace,
       },
       {
+        calendarBooking: { durationMinutes: 60, kind: "exact-event" },
         slug: "moon-oracle-reading",
         title: "Moon Oracle Reading",
         duration: "45–60 min",
         price: "$222",
         format: "Virtual or in person",
+        guestRange: { minimum: 1 },
         description:
           "A lunar and astrological reading for reflection, timing, and present-season clarity.",
         image: media.experiences.ritualWolf,
       },
       {
+        calendarBooking: { durationMinutes: 75, kind: "exact-event" },
         slug: "tarot-and-reiki",
         title: "Tarot + Reiki Experience",
         duration: "60–75 min",
         price: "$444",
         format: "In person",
+        guestRange: { minimum: 1 },
         description:
           "Intuitive guidance followed by restorative Reiki support in person.",
         image: media.shannon.ritualSpace,
@@ -170,4 +210,21 @@ export function findBookingService(serviceSlug?: string) {
   }
 
   return null
+}
+
+export function isExactCalEventForBookingService(
+  service: BookingService,
+  eventType: {
+    lengthInMinutes: number
+    slug: string
+    title: string
+  }
+) {
+  if (service.calendarBooking.kind !== "exact-event") return false
+
+  return (
+    eventType.slug === service.slug &&
+    eventType.lengthInMinutes === service.calendarBooking.durationMinutes &&
+    eventType.title.trim() === service.title
+  )
 }

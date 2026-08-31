@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowRight, Check, Droplets, Sparkles } from "lucide-react"
 
+import { AddToCartButton } from "@/components/cart/add-to-cart-button"
 import { JsonLd } from "@/components/seo/json-ld"
 import { PageSection } from "@/components/shared/internal-page"
 import { ParallaxImage } from "@/components/shared/parallax-image"
@@ -193,7 +194,7 @@ export default function BeautyPage() {
             <p className="hero-reveal hero-reveal--3 mx-auto mt-7 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)] md:mx-0 md:text-xl">
               The face holds what the body carries.
             </p>
-            <div className="hero-reveal hero-reveal--4 mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
+            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
               <Button
                 asChild
                 className="h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
@@ -466,14 +467,10 @@ export default function BeautyPage() {
               <span className="font-serif text-4xl text-[var(--accent-on-dark)]">
                 $11.11
               </span>
-              <Button
-                asChild
+              <AddToCartButton
                 className="h-12 rounded-full bg-[var(--background)] px-7 text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
-              >
-                <Link href="/beauty/lift">
-                  Get the LIFT Guide <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
+                label="Add LIFT to cart"
+              />
             </div>
           </div>
         </div>

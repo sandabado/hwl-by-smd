@@ -7,13 +7,15 @@ export async function GET(request: Request) {
   const user = await getAuthenticatedUser()
   if (!user) {
     return NextResponse.redirect(
-      new URL("/login?redirectTo=/the-den", request.url)
+      new URL("/login?redirectTo=/library", request.url)
     )
   }
 
   const access = await getMemberAccess(user.id)
   if (!access.canDownloadLift) {
-    return NextResponse.redirect(new URL("/store?access=lift_pdf", request.url))
+    return NextResponse.redirect(
+      new URL("/beauty/lift?access=lift_guide_only", request.url)
+    )
   }
 
   const storagePath = process.env.LIFT_PDF_STORAGE_PATH

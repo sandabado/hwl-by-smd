@@ -42,8 +42,29 @@ jobs:
       - name: Validate SEO
         run: npm run validate:seo
 
+      - name: Test launch environment gate
+        run: npm run test:launch-env
+
+      - name: Test Preview release policy
+        run: npm run test:preview-release
+
+      - name: Test inquiry privacy and abuse boundaries
+        run: npm run test:inquiries
+
+      - name: Test booking catalog and Cal.com discovery boundaries
+        run: npm run test:booking
+
+      - name: Test accessibility markup boundaries
+        run: npm run test:accessibility
+
+      - name: Test commerce reconciliation policy
+        run: npm run test:commerce
+
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=moderate
 
-      - name: Build production application
-        run: npm run build
+      - name: Compile production application
+        # Deployment builds use `npm run build`, which requires the complete
+        # environment-specific provider gate. CI has no provider secrets, so it
+        # tests that gate with synthetic fixtures above and compiles separately.
+        run: npm run build:ci

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { AuthLinks } from "@/components/auth/auth-links"
+import { CartTrigger } from "@/components/cart/cart-trigger"
 import { MainNav } from "@/components/layout/main-nav"
 import { MobileNav } from "@/components/layout/mobile-nav"
 import { Button } from "@/components/ui/button"
@@ -65,7 +66,7 @@ export function Header() {
 
         <MainNav />
 
-        <div className="hidden items-center gap-4 lg:flex">
+        <div className="hidden items-center gap-3 lg:flex">
           <Button
             asChild
             size="sm"
@@ -74,9 +75,13 @@ export function Header() {
             <Link href="/book">Book</Link>
           </Button>
           <AuthLinks />
+          <CartTrigger />
         </div>
 
-        <MobileNav />
+        <div className="flex items-center gap-1 lg:hidden">
+          <MobileNav />
+          <CartTrigger compact />
+        </div>
       </div>
     </header>
   )

@@ -189,27 +189,25 @@ export default async function AdminJourneyInsightsPage() {
       <div className="mt-5 grid gap-5 xl:grid-cols-[0.75fr_1.25fr]">
         <AdminPanel>
           <PanelHeading
-            detail="Sample membership context"
-            eyebrow="Circle makeup"
+            detail="Sample purchase context"
+            eyebrow="Library makeup"
             title="Who is participating"
           />
           <div className="mt-6 space-y-4">
-            {[
-              ["The Den", "58%", "#6e806b"],
-              ["LIFT Guide", "29%", "#9d8464"],
-              ["LIFT PDF", "13%", "#b9a997"],
-            ].map(([label, value, color]) => (
-              <div className="flex items-center justify-between" key={label}>
-                <span className="flex items-center gap-2 text-sm text-[#5c675d]">
-                  <span
-                    className="size-2 rounded-full"
-                    style={{ backgroundColor: color }}
-                  />
-                  {label}
-                </span>
-                <span className="text-sm font-medium">{value}</span>
-              </div>
-            ))}
+            {[["LIFT — Video + PDF", "100%", "#6e806b"]].map(
+              ([label, value, color]) => (
+                <div className="flex items-center justify-between" key={label}>
+                  <span className="flex items-center gap-2 text-sm text-[#5c675d]">
+                    <span
+                      className="size-2 rounded-full"
+                      style={{ backgroundColor: color }}
+                    />
+                    {label}
+                  </span>
+                  <span className="text-sm font-medium">{value}</span>
+                </div>
+              )
+            )}
           </div>
         </AdminPanel>
 

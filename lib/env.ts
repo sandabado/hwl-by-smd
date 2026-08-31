@@ -4,18 +4,22 @@ const present = (value: string | undefined) =>
 export const publicEnv = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  supabaseKey:
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
 }
 
 export function isSupabaseConfigured() {
-  return present(publicEnv.supabaseUrl) && present(publicEnv.supabaseKey)
+  return (
+    present(publicEnv.supabaseUrl) &&
+    present(publicEnv.supabaseKey) &&
+    publicEnv.supabaseKey?.startsWith("sb_publishable_") === true
+  )
 }
 
 export function isSupabaseAdminConfigured() {
   return (
-    isSupabaseConfigured() && present(process.env.SUPABASE_SERVICE_ROLE_KEY)
+    isSupabaseConfigured() &&
+    present(process.env.SUPABASE_SERVICE_ROLE_KEY) &&
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.startsWith("sb_secret_") === true
   )
 }
 

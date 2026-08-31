@@ -13,6 +13,11 @@ import type {
 } from "@/lib/connection-engine/types"
 import { DEFAULT_CONNECTION_PREFERENCES } from "@/lib/connection-engine/types"
 import { getSiteUrl } from "@/lib/env"
+import {
+  getCommerceDeploymentTarget,
+  getExpectedStripeAccountId,
+  getExpectedStripeLivemode,
+} from "@/lib/stripe"
 import { createAdminClient } from "@/lib/supabase/server"
 
 type MemberIdentity = {
@@ -297,6 +302,13 @@ async function loadDeliveryContext(
   supabase: SupabaseClient,
   delivery: JourneyDeliveryRecord
 ): Promise<DeliveryContext> {
+  const stripeAccountId = getExpectedStripeAccountId()
+  const stripeLivemode = getExpectedStripeLivemode()
+  const deploymentTarget = getCommerceDeploymentTarget()
+  if (!deploymentTarget || !stripeAccountId || stripeLivemode === null) {
+    throw new InactiveMembershipError()
+  }
+
   const [{ data: milestone }, { data: enrollment }] = await Promise.all([
     supabase
       .from("journey_milestones")
@@ -340,6 +352,9 @@ async function loadDeliveryContext(
       .from("memberships")
       .select("current_period_end, status")
       .eq("user_id", typedEnrollment.member_id)
+      .eq("deployment_target", deploymentTarget)
+      .eq("stripe_account_id", stripeAccountId)
+      .eq("stripe_livemode", stripeLivemode)
       .in("status", ["active", "trialing"])
       .order("current_period_end", { ascending: false })
       .limit(1)

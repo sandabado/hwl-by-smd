@@ -1,15 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
-import {
-  ArrowRight,
-  Check,
-  FileText,
-  LibraryBig,
-  PlayCircle,
-  type LucideIcon,
-} from "lucide-react"
+import { ArrowRight, Check, PlayCircle, type LucideIcon } from "lucide-react"
 
-import { CheckoutButton } from "@/components/payment/checkout-button"
+import { AddToCartButton } from "@/components/cart/add-to-cart-button"
 import { JsonLd } from "@/components/seo/json-ld"
 import { BreathingSection } from "@/components/shared/breathing-section"
 import { BreathingText } from "@/components/shared/breathing-text"
@@ -25,7 +18,7 @@ import { isProductCheckoutReady } from "@/lib/stripe"
 export const metadata = createPageMetadata({
   title: "Beauty Products, Magical Tools & Digital Guides | HWL by SMD",
   description:
-    "Shop Shannon's beauty shelf, magical tools, digital LIFT guides, and The Den membership from HWL by SMD.",
+    "Shop Shannon's beauty shelf, magical tools, and complete LIFT video and PDF ritual from HWL by SMD.",
   path: "/store",
 })
 
@@ -63,36 +56,17 @@ type Offer = {
   label: string
   ownedHref: string
   price: string
-  productId: "lift_guide" | "membership" | "pdf_download"
+  productId: "lift_guide"
   title: string
 }
 
 const offers: Offer[] = [
   {
-    productId: "pdf_download",
-    id: "lift-pdf",
-    eyebrow: "Downloadable PDF",
-    title: "LIFT PDF Guide",
-    price: "$11.11",
-    cadence: "one time",
-    description:
-      "The complete seven-movement facial massage ritual, with instructions, benefits, and preparation notes.",
-    features: [
-      "Seven guided movements",
-      "Printable format",
-      "Private download",
-    ],
-    label: "Get the PDF — $11.11",
-    featured: true,
-    icon: FileText,
-    ownedHref: "/api/download/lift",
-  },
-  {
     productId: "lift_guide",
     id: "lift-guide",
     eyebrow: "Streaming + PDF",
-    title: "Complete LIFT — Video + PDF",
-    price: "$33.33",
+    title: "LIFT — Video + PDF",
+    price: "$11.11",
     cadence: "one time",
     description:
       "A full video walkthrough of all seven movements plus the downloadable guide. Learn each technique by seeing it demonstrated.",
@@ -101,61 +75,30 @@ const offers: Offer[] = [
       "Printable PDF",
       "Account-based access",
     ],
-    label: "Get Complete LIFT — $33.33",
-    featured: false,
+    label: "Add LIFT to cart · $11.11",
+    featured: true,
     icon: PlayCircle,
     ownedHref: "/course/lift-daily-facial-ritual",
   },
-  {
-    productId: "membership",
-    id: "the-den",
-    eyebrow: "The growing library",
-    title: "The Den Membership",
-    price: "$11.11",
-    cadence: "per month",
-    description:
-      "A growing member library, Complete LIFT, and future member-only practices from Shannon.",
-    features: [
-      "Everything in LIFT",
-      "A growing member library",
-      "Future member-only practices",
-    ],
-    label: "Join The Den — $11.11/mo",
-    featured: false,
-    icon: LibraryBig,
-    ownedHref: "/the-den",
-  },
 ]
 
-function getFaqs({
-  completeLiftReady,
-  membershipReady,
-}: {
-  completeLiftReady: boolean
-  membershipReady: boolean
-}) {
+function getFaqs({ liftReady }: { liftReady: boolean }) {
   return [
     {
       question: "Where will I find my purchase?",
       answer:
-        "Create or sign in to your HWL account before checkout. Your purchase will appear in The Den automatically after payment.",
+        "Create or sign in to your HWL account before checkout. Your purchase will appear in your private HWL library automatically after payment.",
     },
     {
-      question: "When will the complete LIFT video be available?",
-      answer: completeLiftReady
-        ? "Complete LIFT is available now through your private HWL library."
-        : "Complete LIFT is coming soon. The full guided practice will open only after its protected browser delivery has been verified on phone, tablet, and computer.",
+      question: "What is included with LIFT?",
+      answer: liftReady
+        ? "Your purchase includes the complete guided video and downloadable PDF in your private HWL library."
+        : "LIFT will include the complete guided video and downloadable PDF. Checkout opens only after both protected files and the full delivery path are verified.",
     },
     {
       question: "How does the PDF download work?",
       answer:
         "The download is delivered through your protected library. Its private link expires, so your purchase stays tied to your account.",
-    },
-    {
-      question: "When will The Den open?",
-      answer: membershipReady
-        ? "The Den is open. Your membership and one-time LIFT purchases live together in your private library."
-        : "The Den membership is coming soon. Your one-time LIFT purchases remain available in your private library without a subscription.",
     },
     {
       question: "What is the refund policy?",
@@ -168,37 +111,19 @@ function getFaqs({
 export default async function StorePage() {
   const user = await getAuthenticatedUser()
   const access = user ? await getMemberAccess(user.id) : null
-  const checkoutReady = {
-    pdf_download: isProductCheckoutReady("pdf_download"),
-    lift_guide: isProductCheckoutReady("lift_guide"),
-    membership: false,
-  }
-  const faqs = getFaqs({
-    completeLiftReady: checkoutReady.lift_guide,
-    membershipReady: checkoutReady.membership,
-  })
+  const liftSalesReady = isProductCheckoutReady("lift_guide")
+  const faqs = getFaqs({ liftReady: liftSalesReady })
   const productSchema: ReturnType<typeof createProductJsonLd>[] = []
 
-  if (checkoutReady.pdf_download) {
-    productSchema.push(
-      createProductJsonLd({
-        id: "lift-pdf",
-        name: "LIFT PDF",
-        description: "A private printable facial massage ritual guide.",
-        path: "/store",
-        price: "11.11",
-      })
-    )
-  }
-  if (checkoutReady.lift_guide) {
+  if (liftSalesReady) {
     productSchema.push(
       createProductJsonLd({
         id: "lift-video-pdf",
-        name: "Complete LIFT — Video + PDF",
+        name: "LIFT — Video + PDF",
         description:
           "A guided in-browser facial massage video with a private printable guide.",
         path: "/store",
-        price: "33.33",
+        price: "11.11",
       })
     )
   }
@@ -234,8 +159,8 @@ export default async function StorePage() {
             className="mt-7 max-w-3xl text-[var(--muted-foreground)]"
             size="body"
           >
-            Explore beauty products, magical tools, digital guides, and The Den.
-            The first physical collections are being gathered now.
+            Explore beauty products, magical tools, and Shannon&apos;s complete
+            LIFT ritual. The first physical collections are being gathered now.
           </BreathingText>
           <div className="mt-10 flex flex-wrap gap-4">
             <Button
@@ -343,18 +268,14 @@ export default async function StorePage() {
             className="mt-5 font-medium text-[var(--primary)]"
             size="heading"
           >
-            Guides and ongoing practice.
+            One complete digital practice.
           </BreathingText>
         </div>
         <PersonalUseLicense className="mx-auto mb-12 max-w-3xl" />
-        <div className="grid gap-6 lg:grid-cols-3 lg:items-stretch">
+        <div className="mx-auto max-w-2xl">
           {offers.map((offer, index) => {
             const Icon = offer.icon
-            const owned =
-              (offer.productId === "pdf_download" && access?.canDownloadLift) ||
-              (offer.productId === "lift_guide" && access?.canAccessLift) ||
-              (offer.productId === "membership" && access?.isMember)
-            const ready = checkoutReady[offer.productId]
+            const owned = access?.canAccessLift
 
             return (
               <Reveal as="article" delay={index * 80} key={offer.productId}>
@@ -429,43 +350,18 @@ export default async function StorePage() {
                         }
                         variant={offer.featured ? "default" : "outline"}
                       >
-                        <Link
-                          href={offer.ownedHref}
-                          prefetch={
-                            offer.productId === "pdf_download"
-                              ? false
-                              : undefined
-                          }
-                        >
-                          Access Now
-                        </Link>
+                        <Link href={offer.ownedHref}>Access Now</Link>
                       </Button>
-                    ) : ready ? (
-                      <CheckoutButton
+                    ) : (
+                      <AddToCartButton
                         className={
                           offer.featured
                             ? "bg-[var(--background)] text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
                             : undefined
                         }
                         label={offer.label}
-                        productId={offer.productId}
                         variant={offer.featured ? "default" : "outline"}
                       />
-                    ) : (
-                      <Button
-                        className={
-                          offer.featured
-                            ? "h-11 w-full rounded-full bg-[var(--background)] px-6 text-[var(--primary)]"
-                            : "h-11 w-full rounded-full px-6"
-                        }
-                        disabled
-                        variant={offer.featured ? "default" : "outline"}
-                      >
-                        {offer.productId === "membership" ||
-                        offer.productId === "lift_guide"
-                          ? "Coming soon"
-                          : "Opening soon"}
-                      </Button>
                     )}
                   </div>
                 </div>
@@ -475,11 +371,9 @@ export default async function StorePage() {
         </div>
 
         <p className="mx-auto mt-10 max-w-2xl text-center text-xs leading-[1.8] text-[var(--muted-foreground)]">
-          {checkoutReady.lift_guide
-            ? "The LIFT PDF and Complete LIFT are available through secure Stripe checkout. The Den will open after its membership delivery path is verified."
-            : checkoutReady.pdf_download
-              ? "The LIFT PDF is available through secure Stripe checkout. Complete LIFT and The Den will open after their promised media and membership delivery paths are verified."
-              : "Sales are closed until the private PDF, entitlement, webhook, and download path have been verified. Secure checkout will open only after that full test passes."}
+          {liftSalesReady
+            ? "One purchase unlocks the complete LIFT video and downloadable PDF inside your private HWL library."
+            : "Sales are closed until the private video, PDF, entitlement, webhook, and delivery paths have been verified together."}
         </p>
       </BreathingSection>
 

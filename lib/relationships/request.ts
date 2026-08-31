@@ -7,9 +7,12 @@ export function isUuid(value: unknown): value is string {
   return typeof value === "string" && UUID_PATTERN.test(value)
 }
 
-export function isSameOriginMutation(request: Request) {
+export function isSameOriginMutation(
+  request: Request,
+  options: { requireOrigin?: boolean } = {}
+) {
   const origin = request.headers.get("origin")
-  if (!origin) return true
+  if (!origin) return options.requireOrigin !== true
 
   try {
     const requestUrl = new URL(request.url)
@@ -43,11 +46,12 @@ export function hasAcceptableBodySize(request: Request, maximumBytes: number) {
   return Number.isFinite(parsed) && parsed >= 0 && parsed <= maximumBytes
 }
 
-export async function readLimitedJson<T>(
+export async function readLimitedBytes(
   request: Request,
   maximumBytes: number
 ): Promise<
-  { ok: true; value: T } | { ok: false; reason: "invalid" | "too_large" }
+  | { ok: true; value: Uint8Array }
+  | { ok: false; reason: "invalid" | "too_large" }
 > {
   if (!hasAcceptableBodySize(request, maximumBytes)) {
     return { ok: false, reason: "too_large" }
@@ -78,10 +82,26 @@ export async function readLimitedJson<T>(
       offset += chunk.byteLength
     }
 
+    return { ok: true, value: bytes }
+  } catch {
+    return { ok: false, reason: "invalid" }
+  }
+}
+
+export async function readLimitedJson<T>(
+  request: Request,
+  maximumBytes: number
+): Promise<
+  { ok: true; value: T } | { ok: false; reason: "invalid" | "too_large" }
+> {
+  const bytes = await readLimitedBytes(request, maximumBytes)
+  if (!bytes.ok) return bytes
+
+  try {
     return {
       ok: true,
       value: JSON.parse(
-        new TextDecoder("utf-8", { fatal: true }).decode(bytes)
+        new TextDecoder("utf-8", { fatal: true }).decode(bytes.value)
       ) as T,
     }
   } catch {

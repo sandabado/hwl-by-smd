@@ -2,6 +2,11 @@ import Link from "next/link"
 
 import { BookingRequestFlow } from "@/components/booking/booking-request-flow"
 import { CtaBlock } from "@/components/shared/cta-block"
+import {
+  findBookingService,
+  isExactCalEventForBookingService,
+} from "@/lib/booking-services"
+import { getCalcomPublicEventTypes } from "@/lib/calcom"
 import { createPageMetadata } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
@@ -16,7 +21,25 @@ export default async function BookPage({
 }: {
   searchParams: Promise<{ service?: string }>
 }) {
-  const params = await searchParams
+  const [params, calcomResult] = await Promise.all([
+    searchParams,
+    getCalcomPublicEventTypes(),
+  ])
+  const calLinksByServiceSlug: Record<string, string> = {}
+
+  if (calcomResult.status === "available") {
+    for (const eventType of calcomResult.eventTypes) {
+      const bookingService = findBookingService(eventType.slug)?.service
+
+      if (
+        bookingService &&
+        isExactCalEventForBookingService(bookingService, eventType)
+      ) {
+        calLinksByServiceSlug[bookingService.slug] = eventType.url
+      }
+    }
+  }
+
   const palmSpringsDateParts = new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
     month: "2-digit",
@@ -46,8 +69,8 @@ export default async function BookPage({
               Book with Shannon
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--muted-foreground)] md:text-base">
-              Choose your experience and share the timing that feels possible.
-              Shannon will reply personally within 48 hours.
+              Choose your experience. Live dates and times appear for services
+              ready to book; if you need another time, send Shannon a request.
             </p>
           </div>
           <p className="max-w-md text-xs leading-relaxed text-[var(--muted-foreground)] md:text-right md:text-sm">
@@ -64,6 +87,7 @@ export default async function BookPage({
       </section>
 
       <BookingRequestFlow
+        calLinksByServiceSlug={calLinksByServiceSlug}
         initialServiceSlug={params.service}
         minimumDate={minimumDate}
       />

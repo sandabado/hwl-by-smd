@@ -2,7 +2,12 @@ import "server-only"
 
 import { redirect } from "next/navigation"
 
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient, createClient } from "@/lib/supabase/server"
+import {
+  getCommerceDeploymentTarget,
+  getExpectedStripeAccountId,
+  getExpectedStripeLivemode,
+} from "@/lib/stripe"
 
 export type AccessRequirement =
   "authenticated" | "any_purchase" | "membership_only" | "lift_guide_only"
@@ -37,8 +42,19 @@ export async function getAuthenticatedUser() {
 }
 
 export async function getMemberAccess(userId: string): Promise<MemberAccess> {
-  const supabase = await createClient()
-  if (!supabase) {
+  // Every caller first authenticates the current user and passes that exact ID.
+  // Keep financial rows behind the server boundary so a browser session cannot
+  // enumerate its development and Preview records from the shared staging DB.
+  const supabase = createAdminClient()
+  const deploymentTarget = getCommerceDeploymentTarget()
+  const stripeAccountId = getExpectedStripeAccountId()
+  const stripeLivemode = getExpectedStripeLivemode()
+  if (
+    !supabase ||
+    !deploymentTarget ||
+    !stripeAccountId ||
+    stripeLivemode === null
+  ) {
     return {
       canDownloadLift: false,
       canAccessLift: false,
@@ -54,12 +70,18 @@ export async function getMemberAccess(userId: string): Promise<MemberAccess> {
       .from("purchases")
       .select("amount_paid, product_type, purchased_at, status")
       .eq("user_id", userId)
+      .eq("deployment_target", deploymentTarget)
+      .eq("stripe_account_id", stripeAccountId)
+      .eq("stripe_livemode", stripeLivemode)
       .eq("status", "active")
       .order("purchased_at", { ascending: false }),
     supabase
       .from("memberships")
       .select("cancel_at_period_end, current_period_end, status")
       .eq("user_id", userId)
+      .eq("deployment_target", deploymentTarget)
+      .eq("stripe_account_id", stripeAccountId)
+      .eq("stripe_livemode", stripeLivemode)
       .in("status", ["active", "trialing"])
       .order("current_period_end", { ascending: false })
       .limit(1)
@@ -118,7 +140,9 @@ export async function requireAccess(
         : access.canAccessLift
 
   if (!allowed) {
-    redirect(`/store?access=${requirement}`)
+    const destination =
+      requirement === "lift_guide_only" ? "/beauty/lift" : "/store"
+    redirect(`${destination}?access=${requirement}`)
   }
 
   return { access, user }

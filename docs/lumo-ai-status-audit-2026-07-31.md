@@ -2,12 +2,12 @@
 
 > NOTE: This document references route names that have since been updated. /body is now /yoga. /being and /tarot are now /astrology. The architecture and design decisions described herein remain valid.
 
-> PRICING UPDATE — August 28, 2026: current owner-confirmed pricing is
-> **$11.11 one-time** for the LIFT Guide, **$33.33 one-time** for Complete
-> LIFT, and **$11.11/month** for The Den. The $3.33, $5.55, and $11.11
-> Complete LIFT figures below are retained only as a historical record of the
-> July 31 snapshot and must not be used for current sales or Stripe
-> configuration.
+> PRICING UPDATE — August 29, 2026: current owner-confirmed pricing is one
+> **$11.11 one-time** LIFT offer containing the complete guided video and
+> downloadable PDF. There is no PDF-only product and The Den membership is
+> deferred. All older product and price figures below are retained only as a
+> historical record of the July 31 snapshot and must not be used for current
+> sales or Stripe configuration.
 
 ## Final Local Build Update for Lumo AI
 

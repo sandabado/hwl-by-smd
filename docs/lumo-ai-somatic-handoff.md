@@ -113,10 +113,10 @@ approved.
 
 ### Products and member access
 
-- LIFT Guide — **$11.11** one-time.
-- Complete LIFT — **$33.33** one-time, including guided video and the
-  downloadable PDF.
-- The Den — **$11.11/month**.
+- LIFT — **$11.11** one-time, including the complete guided video and
+  downloadable PDF in one purchase.
+- No PDF-only product is offered.
+- The Den membership is deferred and has no checkout yet.
 - Ownership-aware Store states.
 - Authenticated paid access.
 - Protected lessons; Complete LIFT uses the local private-video launch path and

@@ -2,6 +2,11 @@
 
 import { useState, type FormEvent } from "react"
 
+import {
+  inquiryReceiptMessage,
+  useInquirySubmission,
+} from "@/components/shared/use-inquiry-submission"
+import { InquiryPrivacyNotice } from "@/components/shared/inquiry-privacy-notice"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -28,6 +33,7 @@ export function RetreatInquiryForm() {
   )
   const [status, setStatus] = useState<SubmissionStatus>("idle")
   const [feedback, setFeedback] = useState("")
+  const submitInquiry = useInquirySubmission()
 
   function resetFeedback() {
     if (status === "error" || status === "sent") {
@@ -57,10 +63,8 @@ export function RetreatInquiryForm() {
     }
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const receipt = await submitInquiry(
+        {
           ...values,
           preferredDate:
             datePreference === "flexible"
@@ -71,19 +75,18 @@ export function RetreatInquiryForm() {
               ? selectedInterests.join(", ")
               : "Open to Shannon’s guidance",
           source: "retreat-partnership-inquiry",
-        }),
-      })
-      const result = (await response.json()) as { message?: string }
-
-      if (!response.ok) {
-        throw new Error(result.message ?? "Your inquiry could not be sent.")
-      }
+        },
+        "Your inquiry could not be sent."
+      )
 
       form.reset()
       setDatePreference("flexible")
       setStatus("sent")
       setFeedback(
-        "Your retreat inquiry has been sent to Shannon. No date is reserved yet; she’ll reply to talk through fit, timing, and next steps."
+        inquiryReceiptMessage(
+          receipt,
+          "Your retreat inquiry is safely recorded, and Shannon’s email provider accepted the private alert. No date is reserved yet; she’ll reply to talk through fit, timing, and next steps."
+        )
       )
     } catch (error) {
       setStatus("error")
@@ -125,9 +128,7 @@ export function RetreatInquiryForm() {
         <label className={labelClassName}>
           <span>
             Organization or host name{" "}
-            <span className="font-normal text-[var(--muted-foreground)]">
-              Optional
-            </span>
+            <span className="font-normal text-[#594e41]">Optional</span>
           </span>
           <input
             autoComplete="organization"
@@ -170,7 +171,7 @@ export function RetreatInquiryForm() {
             <span className="block text-sm font-medium text-[var(--primary)]">
               My timing is flexible
             </span>
-            <span className="mt-0.5 block text-xs text-[var(--muted-foreground)]">
+            <span className="mt-0.5 block text-xs text-[#594e41]">
               We’re still shaping the retreat.
             </span>
           </label>
@@ -193,7 +194,7 @@ export function RetreatInquiryForm() {
             <span className="block text-sm font-medium text-[var(--primary)]">
               I have a preferred date
             </span>
-            <span className="mt-0.5 block text-xs text-[var(--muted-foreground)]">
+            <span className="mt-0.5 block text-xs text-[#594e41]">
               Share the best date you know today.
             </span>
           </label>
@@ -242,9 +243,7 @@ export function RetreatInquiryForm() {
       <fieldset className="mt-5">
         <legend className="text-xs font-medium tracking-[0.02em] text-[var(--primary)]">
           Practices you’re considering
-          <span className="ml-1 font-normal text-[var(--muted-foreground)]">
-            Optional
-          </span>
+          <span className="ml-1 font-normal text-[#594e41]">Optional</span>
         </legend>
         <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {interests.map((interest) => (
@@ -280,6 +279,7 @@ export function RetreatInquiryForm() {
         <input autoComplete="off" name="website" tabIndex={-1} />
       </label>
 
+      <InquiryPrivacyNotice className="mt-5 text-[#594e41]" />
       <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
         <Button
           className="min-h-11 w-full rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)] sm:w-auto"
@@ -288,7 +288,7 @@ export function RetreatInquiryForm() {
         >
           {status === "sending" ? "Sending inquiry…" : "Send retreat inquiry"}
         </Button>
-        <p className="text-xs leading-5 text-[var(--muted-foreground)]">
+        <p className="text-xs leading-5 text-[#594e41]">
           This begins a conversation. It does not reserve a date.
         </p>
       </div>

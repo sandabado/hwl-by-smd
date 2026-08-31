@@ -1,0 +1,223 @@
+import assert from "node:assert/strict"
+import test from "node:test"
+
+import {
+  auditPreviewGitSnapshot,
+  auditPreviewRepositoryFiles,
+  PREVIEW_BRANCH,
+  type PreviewCheck,
+  type PreviewRepositoryFiles,
+} from "./preflight-preview-release.ts"
+
+function repositoryFixture(): PreviewRepositoryFiles {
+  return {
+    ci: `
+      - run: npm run test:launch-env
+      - run: npm run test:preview-release
+      - run: npm run build:ci
+    `,
+    envExample: `
+HWL_DEPLOYMENT_TARGET=development
+HWL_LOCAL_BUILD=false
+NEXT_PUBLIC_SITE_URL=https://www.howlbysmd.com
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+COMMERCE_SALES_READY=false
+STRIPE_LIVEMODE=false
+STRIPE_ACCOUNT_ID=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_LIFT_PRODUCT_ID=
+STRIPE_LIFT_GUIDE_PRICE_ID=
+LIFT_PDF_STORAGE_PATH=lift/lift-guide.pdf
+LIFT_VIDEO_STORAGE_PATH=lift/complete-lift-v1.mp4
+RESEND_API_KEY=
+CONTACT_TO_EMAIL=owner@example.com
+CONTACT_FROM_EMAIL=HWL <hello@howlbysmd.com>
+INQUIRY_RATE_LIMIT_SECRET=
+INQUIRY_RATE_LIMIT_MAX=5
+CALCOM_PROFILE_URL=https://cal.com/hwlbysmd
+CRON_SECRET=
+MUX_ACCESS_TOKEN=
+MUX_SECRET_KEY=
+MUX_PRIVATE_KEY=
+    `,
+    packageJson: JSON.stringify({
+      scripts: {
+        build:
+          "npm run validate:deploy-env && npm run validate:seo && next build --webpack",
+        "preflight:preview": "node scripts/preflight-preview-release.ts",
+        "preflight:preview:post-push":
+          "node scripts/preflight-preview-release.ts --repository-only --require-upstream-sync",
+        "preflight:preview:repository":
+          "node scripts/preflight-preview-release.ts --repository-only",
+        "test:launch-env": "node scripts/test-launch-env.ts",
+        "test:preview-release":
+          "node --test scripts/test-preview-release-preflight.ts",
+      },
+    }),
+    vercelJson: JSON.stringify({
+      $schema: "https://openapi.vercel.sh/vercel.json",
+      crons: [
+        {
+          path: "/api/cron/commerce-reconciliation",
+          schedule: "17 15 * * *",
+        },
+      ],
+    }),
+  }
+}
+
+function failures(checks: PreviewCheck[]) {
+  return checks.filter((item) => item.status === "fail")
+}
+
+test("reviewed Preview repository policy passes", () => {
+  assert.deepEqual(
+    failures(auditPreviewRepositoryFiles(repositoryFixture())),
+    []
+  )
+})
+
+test("Production deployment command in CI fails", () => {
+  const fixture = repositoryFixture()
+  fixture.ci += "\n- run: vercel deploy --prod\n"
+
+  assert.match(
+    failures(auditPreviewRepositoryFiles(fixture))
+      .map((item) => item.name)
+      .join("\n"),
+    /CI deployment authority/
+  )
+})
+
+test("Next build without the deployment gate fails", () => {
+  const fixture = repositoryFixture()
+  const parsed = JSON.parse(fixture.packageJson) as {
+    scripts: Record<string, string>
+  }
+  parsed.scripts.build = "next build --webpack"
+  fixture.packageJson = JSON.stringify(parsed)
+
+  assert.match(
+    failures(auditPreviewRepositoryFiles(fixture))
+      .map((item) => item.name)
+      .join("\n"),
+    /Build gate ordering/
+  )
+})
+
+test("wrong reconciliation cron fails", () => {
+  const fixture = repositoryFixture()
+  fixture.vercelJson = JSON.stringify({
+    crons: [
+      {
+        path: "/api/cron/commerce-reconciliation",
+        schedule: "* * * * *",
+      },
+    ],
+  })
+
+  assert.match(
+    failures(auditPreviewRepositoryFiles(fixture))
+      .map((item) => item.name)
+      .join("\n"),
+    /Vercel cron declaration/
+  )
+})
+
+test("populated secret in the committed template fails", () => {
+  const fixture = repositoryFixture()
+  fixture.envExample = fixture.envExample.replace(
+    "STRIPE_SECRET_KEY=",
+    "STRIPE_SECRET_KEY=sk_live_this_must_not_ship"
+  )
+
+  assert.match(
+    failures(auditPreviewRepositoryFiles(fixture))
+      .map((item) => item.name)
+      .join("\n"),
+    /Environment template secrecy/
+  )
+})
+
+test("clean synchronized checkpoint snapshot passes Git policy", () => {
+  const checks = auditPreviewGitSnapshot({
+    branch: PREVIEW_BRANCH,
+    divergence: { ahead: 0, behind: 0 },
+    head: "555cead97245451e8e18eb628daf421e731beb41",
+    statusLines: [],
+    upstream: `origin/${PREVIEW_BRANCH}`,
+  })
+
+  assert.deepEqual(failures(checks), [])
+  assert.ok(checks.some((item) => item.name === "Remote freshness"))
+})
+
+test("clean local candidate ahead of upstream passes pre-push policy", () => {
+  const checks = auditPreviewGitSnapshot({
+    branch: PREVIEW_BRANCH,
+    divergence: { ahead: 1, behind: 0 },
+    head: "666cead97245451e8e18eb628daf421e731beb42",
+    statusLines: [],
+    upstream: `origin/${PREVIEW_BRANCH}`,
+  })
+
+  assert.deepEqual(failures(checks), [])
+  assert.match(
+    checks.find((item) => item.name === "Pre-push upstream position")?.detail ??
+      "",
+    /ahead 1 commit/
+  )
+})
+
+test("post-push policy requires exact local upstream synchronization", () => {
+  const snapshot = {
+    branch: PREVIEW_BRANCH,
+    divergence: { ahead: 1, behind: 0 },
+    head: "666cead97245451e8e18eb628daf421e731beb42",
+    statusLines: [],
+    upstream: `origin/${PREVIEW_BRANCH}`,
+  }
+
+  assert.match(
+    failures(auditPreviewGitSnapshot(snapshot, { requireUpstreamSync: true }))
+      .map((item) => item.name)
+      .join("\n"),
+    /Post-push upstream synchronization/
+  )
+})
+
+test("dirty candidate fails explicitly", () => {
+  const checks = auditPreviewGitSnapshot({
+    branch: PREVIEW_BRANCH,
+    divergence: { ahead: 0, behind: 0 },
+    head: "555cead97245451e8e18eb628daf421e731beb41",
+    statusLines: [" M package.json", "?? scripts/new-file.ts"],
+    upstream: `origin/${PREVIEW_BRANCH}`,
+  })
+
+  assert.match(
+    failures(checks)
+      .map((item) => item.name)
+      .join("\n"),
+    /Candidate worktree/
+  )
+})
+
+test("wrong branch and being behind local tracking fail", () => {
+  const checks = auditPreviewGitSnapshot({
+    branch: "main",
+    divergence: { ahead: 1, behind: 2 },
+    head: "555cead97245451e8e18eb628daf421e731beb41",
+    statusLines: [],
+    upstream: "origin/main",
+  })
+  const names = failures(checks)
+    .map((item) => item.name)
+    .join("\n")
+
+  assert.match(names, /Preview branch/)
+  assert.match(names, /Pre-push upstream position/)
+})

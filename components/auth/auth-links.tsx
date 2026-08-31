@@ -44,14 +44,14 @@ export function AuthLinks({
 
   return (
     <Link
-      href="/the-den"
+      href="/library"
       onClick={onNavigate}
       className={cn(
         "inline-flex min-h-8 items-center justify-center rounded-full border border-[var(--accent)] px-4 py-1.5 text-sm text-[var(--primary)] transition-colors duration-200 hover:bg-[var(--accent)] hover:text-[var(--background)]",
         mobile && "min-h-11 w-full py-2"
       )}
     >
-      The Den
+      Library
     </Link>
   )
 }

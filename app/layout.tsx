@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 
 import { AuthProvider } from "@/components/auth/auth-provider"
+import { CartProvider } from "@/components/cart/cart-provider"
+import { CartSheet } from "@/components/cart/cart-sheet"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
 import { SiteBreadcrumbs } from "@/components/layout/site-breadcrumbs"
@@ -11,6 +13,7 @@ import { LocalSchema } from "@/components/seo/local-schema"
 import { MotionPreference } from "@/components/shared/motion-preference"
 import { PageTransition } from "@/components/shared/page-transition"
 import { createWebsiteJsonLd, SITE_URL } from "@/lib/seo"
+import { isProductCheckoutReady } from "@/lib/stripe"
 import "leaflet/dist/leaflet.css"
 import "./globals.css"
 
@@ -51,23 +54,28 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const liftCheckoutReady = isProductCheckoutReady("lift_guide")
+
   return (
     <html lang="en" data-scroll-behavior="smooth">
       <body>
         <LocalSchema />
         <JsonLd data={createWebsiteJsonLd()} id="site-schema" />
         <AuthProvider>
-          <div className="flex min-h-screen flex-col" data-app-shell="">
-            <SkipLink />
-            <SiteEffects />
-            <Header />
-            <SiteBreadcrumbs />
-            <main className="flex-1" id="main-content" tabIndex={-1}>
-              <PageTransition>{children}</PageTransition>
-            </main>
-            <MotionPreference />
-            <Footer />
-          </div>
+          <CartProvider checkoutReady={liftCheckoutReady}>
+            <div className="flex min-h-screen flex-col" data-app-shell="">
+              <SkipLink />
+              <SiteEffects />
+              <Header />
+              <SiteBreadcrumbs />
+              <main className="flex-1" id="main-content" tabIndex={-1}>
+                <PageTransition>{children}</PageTransition>
+              </main>
+              <MotionPreference />
+              <Footer />
+            </div>
+            <CartSheet />
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

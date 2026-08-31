@@ -42,8 +42,8 @@ const monthlyRevenue = [
 const activity = [
   {
     icon: UserPlus,
-    title: "New member",
-    detail: "Maya Chen joined The Den",
+    title: "New customer",
+    detail: "Maya Chen opened her LIFT library",
     ago: "14m",
   },
   {
@@ -228,7 +228,7 @@ export default async function AdminOverviewPage() {
       <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_0.7fr]">
         <AdminPanel>
           <PanelHeading
-            detail="Recent sample events across membership, commerce, and care."
+            detail="Recent sample events across library access, commerce, and care."
             eyebrow="In motion"
             title="Recent activity"
           />

@@ -111,8 +111,8 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
 
       {!supabase && (
         <p className="mt-5 rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 p-4 text-sm leading-relaxed text-[var(--primary)]">
-          The Den is built and waiting for its secure Supabase connection.
-          Account creation will open as soon as the project keys are added.
+          Secure library access is waiting for its Supabase connection. Account
+          creation will open as soon as the project keys are added.
         </p>
       )}
 
@@ -178,7 +178,7 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
           {pending && (
             <LoaderCircle className="animate-spin" aria-hidden="true" />
           )}
-          {mode === "signin" ? "Enter The Den" : "Create My Account"}
+          {mode === "signin" ? "Sign In to Continue" : "Create My Account"}
         </Button>
       </form>
 

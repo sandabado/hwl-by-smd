@@ -8,6 +8,7 @@ import {
   CircleDollarSign,
   ExternalLink,
   HeartHandshake,
+  Inbox,
   LayoutDashboard,
   LibraryBig,
   Menu,
@@ -29,6 +30,7 @@ const navigation = [
   { icon: HeartHandshake, label: "Connection", href: "/admin/connection" },
   { icon: UsersRound, label: "Members", href: "/admin/members" },
   { icon: CalendarDays, label: "Bookings", href: "/admin/bookings" },
+  { icon: Inbox, label: "Inquiries", href: "/admin/inquiries" },
   { icon: CircleDollarSign, label: "Revenue", href: "/admin/revenue" },
   { icon: LibraryBig, label: "Courses", href: "/admin/courses" },
   { icon: Newspaper, label: "Content", href: "/admin/content" },
@@ -113,6 +115,7 @@ function Sidebar({
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const isOperationalInbox = pathname.startsWith("/admin/inquiries")
   const current =
     navigation.find(({ href }) => activeFor(pathname, href)) ?? navigation[0]
 
@@ -162,13 +165,15 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{current.label}</p>
                 <p className="truncate text-[9px] tracking-[0.18em] text-[#8d7559] uppercase">
-                  Private preview · Read only
+                  {isOperationalInbox
+                    ? "Private operations · Restricted"
+                    : "Private preview · Read only"}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <span className="hidden rounded-full bg-[#9d8464]/10 px-3 py-2 text-[9px] font-semibold tracking-[0.16em] text-[#856846] uppercase sm:inline-flex">
-                Sample data
+                {isOperationalInbox ? "Inquiry ledger" : "Sample data"}
               </span>
               <Link
                 className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#d2cabd] bg-white/48 px-3.5 text-xs font-medium text-[#566158] transition hover:bg-white/70"
@@ -184,9 +189,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto w-full max-w-[1600px] px-4 py-7 sm:px-6 lg:px-8 lg:py-9">
           <div className="mb-6 flex items-start gap-3 rounded-2xl border border-[#d9cfbe] bg-[#f7f1e7]/65 px-4 py-3 text-xs leading-5 text-[#766b5c]">
             <span className="mt-1 size-1.5 shrink-0 rounded-full bg-[#9d8464]" />
-            This is a private, read-only design preview. Business records shown
-            here are sample data; connection indicators reflect this
-            environment.
+            {isOperationalInbox
+              ? "This private operational view contains real website inquiry records when a verified Supabase administrator is signed in."
+              : "This is a private, read-only design preview. Business records shown here are sample data; connection indicators reflect this environment."}
           </div>
           {children}
         </div>

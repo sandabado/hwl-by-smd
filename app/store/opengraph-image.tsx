@@ -5,7 +5,7 @@ import {
 } from "@/lib/og-image"
 
 export const alt =
-  "HWL by SMD beauty products, magical tools, digital guides, and membership"
+  "HWL by SMD beauty products, magical tools, and the complete LIFT ritual"
 export const size = OG_IMAGE_SIZE
 export const contentType = OG_IMAGE_CONTENT_TYPE
 

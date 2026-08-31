@@ -183,7 +183,7 @@ export default function MovementPage() {
             <p className="hero-reveal hero-reveal--3 mx-auto mt-7 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)] md:mx-0 md:text-xl">
               Movement as nervous system care.
             </p>
-            <div className="hero-reveal hero-reveal--4 mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
+            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
               <Button
                 asChild
                 className="h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[#68735f]"

@@ -51,11 +51,9 @@ export function LiftSequenceProgress({ steps }: { steps: string[] }) {
     activeIndex < 0 ? 0 : ((activeIndex + 1) / steps.length) * 100
 
   return (
-    <div
-      className="sticky top-20 z-20 mx-auto mt-10 max-w-5xl rounded-[1.5rem] border border-white/70 bg-[var(--background)]/90 p-4 shadow-[0_14px_42px_rgba(90,74,63,0.1)] backdrop-blur-md md:top-24"
-      aria-label="LIFT sequence progress"
-    >
+    <div className="sticky top-20 z-20 mx-auto mt-10 max-w-5xl rounded-[1.5rem] border border-white/70 bg-[var(--background)]/90 p-4 shadow-[0_14px_42px_rgba(90,74,63,0.1)] backdrop-blur-md md:top-24">
       <div
+        aria-label="LIFT sequence progress"
         aria-valuemax={steps.length}
         aria-valuemin={0}
         aria-valuenow={activeIndex + 1}

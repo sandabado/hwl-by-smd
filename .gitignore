@@ -10,6 +10,7 @@
 
 # testing
 /coverage
+/.playwright-mcp/
 
 # next.js
 /.next/
@@ -42,3 +43,8 @@ supabase/.temp/
 
 # Private paid media and launch assets; never commit or serve publicly
 /private-content/
+
+# Local launch QA captures; preserve on disk but never ship with the app
+/hwl-store-license-mobile.png
+/hwl-store-license-mobile-expanded.png
+/tmp/

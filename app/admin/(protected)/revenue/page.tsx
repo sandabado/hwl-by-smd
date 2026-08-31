@@ -44,7 +44,7 @@ export default async function AdminRevenuePage() {
   return (
     <>
       <AdminPageHeader
-        description="Follow recurring membership and one-time ritual purchases without losing the human scale of the business."
+        description="Follow LIFT purchases without losing the human scale of the business. Membership commerce remains deferred."
         eyebrow="Financial rhythm"
         title="Revenue"
       >
@@ -117,19 +117,18 @@ export default async function AdminRevenuePage() {
           />
           <div className="mt-7 flex flex-col items-center gap-7 sm:flex-row xl:flex-col">
             <div
-              aria-label="Sample revenue mix: 58 percent membership, 29 percent LIFT guide, 13 percent PDF"
+              aria-label="Sample revenue mix: 100 percent LIFT video and PDF"
               className="grid size-44 shrink-0 place-items-center rounded-full"
               role="img"
               style={{
-                background:
-                  "conic-gradient(#6e806b 0 58%, #9d8464 58% 87%, #c9bca8 87% 100%)",
+                background: "conic-gradient(#9d8464 0 100%)",
               }}
             >
               <div className="grid size-28 place-items-center rounded-full bg-[#f2ede4] text-center">
                 <div>
-                  <p className="font-serif text-3xl">58%</p>
+                  <p className="font-serif text-3xl">100%</p>
                   <p className="text-[9px] tracking-[0.15em] text-[#7e867e] uppercase">
-                    Recurring
+                    LIFT
                   </p>
                 </div>
               </div>
@@ -137,24 +136,10 @@ export default async function AdminRevenuePage() {
             <div className="w-full space-y-3 text-xs text-[#697369]">
               <div className="flex justify-between">
                 <span className="flex items-center gap-2">
-                  <span className="size-2 rounded-full bg-[#6e806b]" />
-                  The Den
-                </span>
-                <span>58%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="flex items-center gap-2">
                   <span className="size-2 rounded-full bg-[#9d8464]" />
-                  LIFT Guide
+                  LIFT — Video + PDF
                 </span>
-                <span>29%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="flex items-center gap-2">
-                  <span className="size-2 rounded-full bg-[#c9bca8]" />
-                  LIFT PDF
-                </span>
-                <span>13%</span>
+                <span>100%</span>
               </div>
             </div>
           </div>

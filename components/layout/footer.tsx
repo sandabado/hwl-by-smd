@@ -3,13 +3,9 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
+import { useAuth } from "@/components/auth/auth-provider"
 import { SITE_CONFIG } from "@/lib/constants"
 import { MAIN_NAV } from "@/lib/nav-config"
-
-const actionLinks = [
-  { label: "Book", href: "/book" },
-  { label: "Sign In", href: "/login" },
-] as const
 
 const legalLinks = [
   { label: "Privacy", href: "/privacy" },
@@ -24,6 +20,15 @@ const footerLinkClass =
 
 export function Footer() {
   const pathname = usePathname()
+  const { loading, user } = useAuth()
+  const actionLinks = [
+    { label: "Book", href: "/book" },
+    loading
+      ? { label: "Account", href: "/login" }
+      : user
+        ? { label: "Library", href: "/library" }
+        : { label: "Sign In", href: "/login" },
+  ]
 
   if (pathname.startsWith("/admin")) return null
 

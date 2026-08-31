@@ -22,7 +22,7 @@ export default async function LessonPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const { access, user } = await requireAccess("any_purchase", `/lesson/${id}`)
+  const { access, user } = await requireAccess("authenticated", `/lesson/${id}`)
   const result = await getLessonById(id)
   if (!result) notFound()
 
@@ -30,7 +30,7 @@ export default async function LessonPage({
     redirect("/store?access=membership_only")
   }
   if (result.course.access_tier === "lift" && !access.canAccessLift) {
-    redirect("/store?access=lift_guide_only")
+    redirect("/beauty/lift?access=lift_guide_only")
   }
 
   const supabase = await createClient()

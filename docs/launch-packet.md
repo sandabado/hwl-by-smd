@@ -17,18 +17,20 @@ Preview, and Production have not yet passed their required end-to-end launch
 tests.
 
 **Release boundary:** Work is on
-`checkpoint/platform-overhaul-2026-08-20`. The remote checkpoint currently ends
-at earlier launch commit `555cead`; the functional launch source through local
-commit `d05a5bf` and this packet refresh have not yet been pushed.
+`checkpoint/platform-overhaul-2026-08-20`. Commit `c74fe61` is pushed to the
+checkpoint branch and exactly synchronized with its upstream. `main` remains
+untouched.
 This pass rotated the sandbox-only Stripe test key, authorized the Stripe CLI
 directly to the canonical sandbox, applied the exact reviewed migrations
 012–014 to hosted staging, installed and verified the corrected canonical PDF
 in private staging storage, published the ten approved Cal.com event types, and
-created 20 fail-closed, sensitive, branch-scoped Preview configuration records.
-It did not create a domain or persistent hosted webhook, deploy, touch a live
-Stripe key, or take real money. Local commits `1945a0c`, `787b1db`, and
-`d05a5bf` remain unpushed; nothing has been pushed to `main`. The current launch
-candidate has not been deployed to Preview or promoted to Production.
+created 21 fail-closed, sensitive, branch-scoped Preview configuration records,
+including a dedicated persistent Stripe sandbox webhook signing secret. The
+first automatic `c74fe61` Preview build failed safely at the launch validator
+because `RESEND_API_KEY` was absent and the hosted Stripe set was not yet
+complete. The Stripe set is now complete; Resend remains the sole missing
+Preview variable. This pass did not touch a live Stripe key, take real money,
+push `main`, or promote anything to Production.
 
 ## Status by Evidence Boundary
 
@@ -43,7 +45,7 @@ candidate has not been deployed to Preview or promoted to Production.
 | Inquiry delivery                | PERSISTENCE VERIFIED / HUMAN DELIVERY BLOCKED | Migration 013 is ledger-applied and its private tables/RPC boundary is present in staging. One synthetic hosted submission is durably stored, but its latest notification state is `failed` / provider rejected. There are zero verified administrator profiles, so Shannon currently has neither a confirmed email alert nor verified human inbox access |
 | Supabase Auth email             | PROVIDER SETUP / E2E PENDING      | A fresh public settings read shows signup enabled and email confirmation required (`mailer_autoconfirm=false`). Custom SMTP, verified-domain sending, exact Preview/Production redirect allowlists, rate limits, disabled link tracking, and real non-team-email delivery have not been proven |
 | Scheduled recovery             | STAGING SCHEMA READY / HOSTED RUN PENDING | Migration 014 is ledger-applied and its private queue/attempt tables plus narrow service-role RPCs are present in staging. The authenticated cron route, shared verifier, durable leases/retries/manual-review state, sanitized reporting, and admin queue view pass locally. A distinct sensitive branch-scoped Preview `CRON_SECRET` now exists; deployed invocation, alert routing, and cadence acceptance remain pending |
-| Current launch Preview          | CONFIGURATION 20/22 / DEPLOY PENDING | The remote branch and Ready Preview remain at older commit `555cead`; functional launch source is captured locally through `d05a5bf` and has not been pushed. Twenty of 22 required names are now sensitive and branch-scoped. `RESEND_API_KEY` awaits owner acceptance of the Resend Marketplace terms; `STRIPE_WEBHOOK_SECRET` awaits a persistent post-deploy endpoint. Production has zero environment records. No push, deploy, domain, DNS, `main`, or Production change has occurred |
+| Current launch Preview          | CONFIGURATION 21/22 / BUILD BLOCKED | Checkpoint commit `c74fe61` is pushed and upstream-synchronized. Automatic Preview `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo` failed safely before compilation because the provider set was incomplete. A dedicated protected Stripe sandbox endpoint and branch-only hosted signing secret now complete the Stripe set. `RESEND_API_KEY` alone awaits owner acceptance of the Resend Marketplace terms. Production has zero environment records; `main` is untouched |
 | Production / live money         | PENDING OWNER GATE                | Production publicly serves older commit `145112cd` and checkout truthfully returns 503; Stripe activation and coherent live Product/Price/webhook/Production variables remain incomplete                                    |
 
 Passing local compilation does not prove provider integration, a paid journey,
@@ -282,11 +284,13 @@ The current inquiry concurrency and notification-state proof is more specific:
 | `npm run lint`                                                      | PASS                                                                                                                                                                                                                                                                     |
 | `npm run validate:seo`                                              | PASS — 21 pages, 21 metadata records, 7 long-form documents                                                                                                                                                                                                              |
 | `npm run build:ci`                                                  | PASS — SEO 21 pages / 21 metadata records / 7 long-form documents; Next.js 16.3.1 Webpack build; 63 static pages generated; build manifest includes `/api/cron/commerce-reconciliation`                                                                                   |
+| `npm audit --omit=dev` and full `npm audit`                         | PASS — zero vulnerabilities across 141 production dependencies and 554 total dependencies at checkpoint `c74fe61`; GitHub's 19 alerts reproduce only against the older `origin/main` lockfile                                                                      |
 | `npm run test:launch-env`                                           | PASS — all 18 synthetic launch-boundary fixtures, including explicit rejection of legacy Supabase browser/server keys, missing/short `CRON_SECRET`, and reuse of the inquiry-rate-limit secret as cron authority, produced the expected exit and message without exposing fixture secrets |
 | `npm run test:inquiries`                                            | PASS — 7 provider-free boundary cases cover trusted Vercel addressing, spoof rejection, missing deployed identity, short/missing HMAC authority, keyed fingerprints and payload digests, 1–20 limit clamping/defaulting, and the explicit local-development fallback          |
 | `npm run test:booking`                                              | PASS — 5 booking-boundary cases cover 11 unique canonical slugs, Wild Glow Express as inquiry-only, exact slug/title/duration matching for the other 10 services, and published guest limits                                                                                |
 | `npm run test:accessibility`                                        | PASS — rendered markup proves the actual LIFT progressbar directly owns its accessible name and truthful 0–7 initial value semantics                                                                                                                                       |
 | `npm run test:preview-release`                                      | PASS — 10 offline Preview-policy cases cover repository policy, forbidden Production deploy commands, deployment-gate ordering, exact cron declaration, committed-template secrecy, clean checkpoint state, pre-push ahead state, post-push exact synchronization, dirty-tree rejection, and branch/upstream mismatch rejection |
+| Preview repository preflight before and after push                  | PASS — clean checkpoint candidate was four commits ahead and not behind before push; after the authorized checkpoint-only push, HEAD `c74fe61` exactly matched `origin/checkpoint/platform-overhaul-2026-08-20`                                                       |
 | `npm run test:commerce`                                             | PASS — 54 provider-free cases: 10 request/limit/namespace policy cases, 22 shared-verifier/expiry/repair cases, and 22 cron/scheduled-worker cases covering exact identity, fail-closed write ordering, customer-bookkeeping isolation, terminal monitoring, leases, report validation, deadline release, sanitized failure categories/responses, and replay repair |
 | Targeted Prettier and `git diff --check`                            | PASS                                                                                                                                                                                                                                                                     |
 | Changed/untracked launch-file secret-shape scan                     | PASS — no real Stripe, webhook, Supabase, Resend, or JWT secret-shaped values; every shape hit is an explicitly synthetic fixture in the launch/Preview test harness or the packet's redacted fixture note                                                                 |
@@ -328,7 +332,8 @@ The current inquiry concurrency and notification-state proof is more specific:
 | Inquiry abuse, privacy, and admin boundaries                        | PASS — malformed/cross-origin/oversize payloads rejected; first five rate claims persisted and sixth returned 429; browser table reads denied; verified admin saw the record; anonymous admin denied                                                                     |
 | Launch environment preflight                                        | PASS — explicit deployment target is mandatory; development/Preview closed and sandbox-open fixtures pass; target mismatches, partial/live Preview config, and shared cron/inquiry secrets fail; Production intentionally fails because no separate Production Supabase boundary has been created or owner-approved                         |
 | Current configured launch environment                               | BLOCKED — the full local validator's only configuration failure is the invalid `RESEND_API_KEY`; the captions path is optional and may remain unset until a verified VTT object exists. The canonical sandbox account/Product/Price remain valid, while live account activation remains incomplete                                                   |
-| Live Vercel Preview configuration inventory                         | BLOCKED 20/22 — twenty required names are sensitive and branch-scoped to `checkpoint/platform-overhaul-2026-08-20`. `RESEND_API_KEY` awaits owner acceptance of the Resend Marketplace terms; hosted `STRIPE_WEBHOOK_SECRET` awaits a persistent post-deploy endpoint and must not reuse the local Stripe CLI secret. Production remains at zero environment records |
+| First `c74fe61` automatic Preview build                             | EXPECTED FAIL-CLOSED — `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo` stopped at the launch validator because `RESEND_API_KEY` and the then-incomplete hosted Stripe set were absent; application compilation/deployment did not proceed                                                    |
+| Live Vercel Preview configuration inventory                         | BLOCKED 21/22 — twenty-one required names are sensitive and branch-scoped to `checkpoint/platform-overhaul-2026-08-20`. The persistent hosted Stripe signing secret now belongs to the dedicated sandbox endpoint; `RESEND_API_KEY` alone awaits owner acceptance of the Resend Marketplace terms. Production remains at zero environment records |
 | Current public Production safety probe                              | PASS — homepage HTTP 200; unauthenticated LIFT Checkout HTTP 503 with truthful not-ready copy; no charge attempted                                                                                                                                                       |
 | Cal.com booking → conflict block → confirmation → cancel/reschedule | NOT RUN                                                                                                                                                                                                                                                                  |
 
@@ -546,8 +551,15 @@ for exactly `checkout.session.completed`, `checkout.session.expired`,
 `http://localhost:3000/api/stripe/webhook`. Its signing secret is installed only
 in local `.env.local`; the dev server was restarted afterward. Process
 inspection confirmed the listener has neither `--api-key` nor an API key value
-in its arguments. There is still **no persistent Preview event destination**,
-and no current-candidate purchase has been run. Local `STRIPE_LIVEMODE=false`
+in its arguments. A separate enabled persistent sandbox endpoint now targets
+the stable checkpoint alias with a dedicated, non-default Vercel automation
+bypass and exactly `checkout.session.completed`, `checkout.session.expired`,
+`charge.refunded`, and `charge.dispute.created`. Its fresh signing secret is a
+sensitive exact-branch Preview variable; the localhost CLI secret was not
+reused. Deployment Protection remains enabled and the unqualified endpoint
+returns 401. Because the last Ready deployment predates the new bypass, signed
+delivery still requires proof on the next successful Preview. No
+current-candidate purchase has been completed. Local `STRIPE_LIVEMODE=false`
 and `COMMERCE_SALES_READY=false` keep the payment boundary in test mode and keep
 sales closed.
 
@@ -716,14 +728,16 @@ inquiry.
 
 ## Preview Release Candidate — Pending
 
-The newest automatic checkpoint Preview is Ready as deployment
-`dpl_AhkgfivPDCowE55gCFdewiC6ax7d`, but it still stops at commit `555cead`.
-It is not the current candidate: a protected fetch of `/beauty/lift` still
-rendered the superseded $33.33 Complete LIFT offer and The Den card instead of
-the single $11.11 launch product. Functional launch source is captured locally
-through `d05a5bf` and has not been pushed.
+Checkpoint `c74fe61` is pushed and exactly synchronized with
+`origin/checkpoint/platform-overhaul-2026-08-20`. Its first automatic Preview,
+`dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo`, failed safely at the launch environment
+validator before application compilation. At that moment both
+`RESEND_API_KEY` and the persistent `STRIPE_WEBHOOK_SECRET` were absent, so the
+validator rejected the incomplete provider configuration. The last Ready
+Preview remains `dpl_AhkgfivPDCowE55gCFdewiC6ax7d` at older commit `555cead`;
+it is not the launch candidate.
 
-Twenty of the 22 required variables now exist as sensitive records scoped only
+Twenty-one of the 22 required variables now exist as sensitive records scoped only
 to `checkpoint/platform-overhaul-2026-08-20`:
 
 - ten baseline records: `HWL_DEPLOYMENT_TARGET`, `HWL_LOCAL_BUILD`,
@@ -733,31 +747,29 @@ to `checkpoint/platform-overhaul-2026-08-20`:
 - six additional non-Stripe records: `CONTACT_FROM_EMAIL`, `CONTACT_TO_EMAIL`,
   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
   `CRON_SECRET`, and `INQUIRY_RATE_LIMIT_SECRET`; and
-- four sandbox Stripe records: `STRIPE_ACCOUNT_ID`,
+- five sandbox Stripe records: `STRIPE_ACCOUNT_ID`,
   `STRIPE_LIFT_PRODUCT_ID`, `STRIPE_LIFT_GUIDE_PRICE_ID`, and
-  `STRIPE_SECRET_KEY`.
+  `STRIPE_SECRET_KEY`, plus the persistent `STRIPE_WEBHOOK_SECRET`.
 
 Vercel's sensitive/write-only storage prevents value readback, so inventory is
-not value-correctness or runtime evidence. `RESEND_API_KEY` is still absent
-pending owner acceptance of the Resend Marketplace terms. The persistent
-hosted `STRIPE_WEBHOOK_SECRET` is also absent until the post-deploy endpoint is
-created; the local Stripe CLI `whsec_…` is ephemeral localhost authority and
-must not be copied into Preview.
+not value-correctness or runtime evidence. `RESEND_API_KEY` is the only missing
+required name and awaits owner acceptance of the Resend Marketplace terms. The
+hosted Stripe signing secret belongs to the dedicated persistent sandbox
+endpoint; the ephemeral localhost Stripe CLI authority was not copied into
+Preview.
 
 Production has zero environment-variable records, and
-`preview.howlbysmd.com` is not currently assigned to a deployment. No
-checkpoint push, deployment, domain, DNS, `main`, or Production mutation has
-occurred.
+`preview.howlbysmd.com` is not currently assigned to a deployment. The
+checkpoint branch alone was pushed; no custom-domain, DNS, `main`, or
+Production mutation occurred.
 
-Vercel sign-in protection currently redirects unauthenticated requests on the
-branch Preview URL, so a plain Stripe webhook URL cannot deliver there. Keep
-Deployment Protection enabled globally. The safe E2E route is an owner-approved
-custom Preview hostname such as `preview.howlbysmd.com`, plus a dedicated
-Vercel Protection Bypass for Automation secret installed only in the Stripe
-sandbox endpoint URL as the `x-vercel-protection-bypass` query parameter. The
-same endpoint without that bypass must remain protected. Never commit, print,
-or reuse the bypass secret. Vercel explicitly documents this method for Stripe
-and other third-party webhooks:
+Vercel sign-in protection still redirects unauthenticated requests on the
+branch Preview URL. Deployment Protection remains enabled globally. A
+dedicated non-default Protection Bypass for Automation is installed only in the
+Stripe sandbox endpoint URL as the `x-vercel-protection-bypass` query
+parameter. The same endpoint without that bypass remains protected. Never
+commit, print, or reuse the bypass secret. Vercel explicitly documents this
+method for Stripe and other third-party webhooks:
 <https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation>.
 
 `scripts/validate-launch-env.ts` now provides a value-safe configuration gate.
@@ -782,8 +794,8 @@ The new `scripts/preflight-preview-release.ts` and
 any Preview action. Its 10/10 policy fixtures pass. The repository-only
 preflight passed on the clean committed candidate after a fresh fetch, proving
 the checkpoint branch was ahead and not behind its tracked upstream. The full
-environment preflight remains blocked until a valid Resend key and persistent
-hosted Stripe webhook secret complete all 22 branch-scoped values; passing
+environment preflight remains blocked until a valid Resend key completes all 22
+branch-scoped values; passing
 repository policy is not permission to push, deploy, assign a hostname, or
 change a provider.
 
@@ -816,17 +828,17 @@ Before describing a Preview as the release candidate:
 4. Preserve the verified Cal.com publication and repeat the real website
    date/slot, conflict, request, confirmation, cancellation, and rescheduling
    journey.
-5. Review the diff, exclude unrelated local screenshots, and commit only the
-   intended launch candidate on
-   `checkpoint/platform-overhaul-2026-08-20`.
-6. Push that checkpoint branch and deploy a new Vercel Preview.
-7. Configure coherent, branch-scoped Preview-only test credentials and public
-   identifiers; never mix a live Stripe key with a sandbox Price or staging
-   database. Keep `COMMERCE_SALES_READY=false` for the first deployment.
-8. Create the custom Preview hostname and dedicated Vercel automation bypass,
-   then install the bypass-qualified Stripe sandbox webhook without disabling
-   Deployment Protection globally.
-9. Redeploy, then enable commerce only for the coherent test Preview and repeat
+5. Preserve exact upstream synchronization at checkpoint `c74fe61`; do not
+   push `main`.
+6. Accept the Resend Marketplace terms, provision the Free resource, install
+   its exact-branch Preview key, and redeploy with `COMMERCE_SALES_READY=false`.
+7. Verify the existing dedicated bypass-qualified Stripe sandbox endpoint on
+   the fresh Preview: unqualified protection, unsigned application rejection,
+   signed delivery, and staging receipt.
+8. Treat `preview.howlbysmd.com` as a separate owner/DNS gate; the current
+   stable branch alias remains the verified webhook target unless that hostname
+   is explicitly approved and configured.
+9. Enable commerce only for the coherent test Preview and repeat
    cart, checkout, webhook, entitlement, refund, inquiry, booking, scheduled
    recovery, admin queue visibility, keyboard, mobile, and console checks on
    the actual Preview URL.
@@ -908,10 +920,11 @@ outstanding:
    15-minute cadence. Opened disputes suspend access under the accepted policy;
    document and verify the manual review and resolution path because the app has
    no automatic `charge.dispute.closed` restoration.
-7. **Preview provider boundary:** approve creation of the custom
-   `preview.howlbysmd.com` hostname, a dedicated Vercel automation-bypass
-   secret, and its persistent bypass-qualified sandbox webhook before those
-   external changes are made. Deployment Protection remains enabled globally.
+7. **Preview provider boundary:** the dedicated branch-alias automation bypass
+   and persistent sandbox webhook now exist while Deployment Protection remains
+   enabled globally. After Resend allows a successful Preview, verify signed
+   delivery and staging receipt. Creation and DNS configuration of custom
+   `preview.howlbysmd.com` remain a separate owner gate.
 8. **Production database:** only one HWL Supabase project currently exists.
    Explicitly approve whether Production may use it or authorize creation and
    verification of a separate Production project; staging must not be silently

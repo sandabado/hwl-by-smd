@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** August 30, 2026
+**Updated:** August 31, 2026
 
 **Launch decision:** **Not live yet.** The current working tree implements the
 single $11.11 LIFT offer, protected fulfillment, a persistent cart, a guarded
@@ -11,22 +11,24 @@ journey. The current hardened fulfillment and recovery source passes
 provider-free and isolated-database verification but still requires a fresh
 real sandbox repeat. The DB-first inquiry journey also passes against the
 isolated database. Hosted staging now has migrations 001–014 plus byte-verified
-private video and PDF assets; booking, provider email delivery, the current
-public Preview, and Production have not yet passed their required end-to-end
-launch tests.
+private video and PDF assets. Cal.com provider configuration is now published,
+while the website booking journey, provider email delivery, the current public
+Preview, and Production have not yet passed their required end-to-end launch
+tests.
 
 **Release boundary:** Work is on
-`checkpoint/platform-overhaul-2026-08-20`. The functional launch source is
-captured through local commits `1945a0c` and `787b1db`; this packet refresh
-follows those commits, and none of the launch commits has been pushed.
+`checkpoint/platform-overhaul-2026-08-20`. The remote checkpoint currently ends
+at earlier launch commit `555cead`; the functional launch source through local
+commit `d05a5bf` and this packet refresh have not yet been pushed.
 This pass rotated the sandbox-only Stripe test key, authorized the Stripe CLI
 directly to the canonical sandbox, applied the exact reviewed migrations
 012–014 to hosted staging, installed and verified the corrected canonical PDF
-in private staging storage, and created ten fail-closed, branch-scoped Preview
-configuration records that contain no private provider credentials. It did not
-create a domain or persistent webhook, deploy, touch a live Stripe key, or take
-real money. Nothing in this launch pass has been pushed to `main`. The current
-launch candidate has not been deployed to Preview or promoted to Production.
+in private staging storage, published the ten approved Cal.com event types, and
+created 20 fail-closed, sensitive, branch-scoped Preview configuration records.
+It did not create a domain or persistent hosted webhook, deploy, touch a live
+Stripe key, or take real money. Local commits `1945a0c`, `787b1db`, and
+`d05a5bf` remain unpushed; nothing has been pushed to `main`. The current launch
+candidate has not been deployed to Preview or promoted to Production.
 
 ## Status by Evidence Boundary
 
@@ -34,14 +36,14 @@ launch candidate has not been deployed to Preview or promoted to Production.
 | Boundary                        | Status                            | Authoritative evidence                                                                                                                                                                                                      |
 | ------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Implemented in the working tree | READY FOR INTEGRATION             | One $11.11 video + PDF offer; persistent cart and sheet; server-validated Checkout; target/account/mode-scoped webhook, authenticated recovery, and durable scheduled recovery; private reconciliation status; protected media routes; Cal.com discovery/embed with manual inquiry fallback; DB-first inquiry route |
-| Locally verified                | PASS                              | TypeScript, ESLint, SEO validation, 54 commerce tests, 18 launch-boundary tests, 7 inquiry-boundary tests, 5 booking-boundary tests, 1 accessibility-markup test, 10 Preview-policy tests, and a Next.js 16.3.1 Webpack production build all pass on August 29; a rendered axe sweep also passes on the audited desktop/mobile local journeys |
+| Locally verified                | PASS                              | TypeScript, ESLint, SEO validation, 54 commerce tests, 18 launch-boundary tests, 7 inquiry-boundary tests, 5 booking-boundary tests, 1 accessibility-markup test, 10 Preview-policy tests, and a Next.js 16.3.1 Webpack production build all pass on August 31; a rendered axe sweep also passes on the audited desktop/mobile local journeys |
 | Supabase staging                | SCHEMA + ASSETS VERIFIED / E2E PENDING | Project is healthy; the remote ledger contains migrations 001–014 and a current linked dry-run is a no-op. Hosted schema/RPC probes match the 012–014 boundaries. The private 46,514,399-byte video remains verified, and the corrected 6,036,808-byte PDF returned a signed HTTP 200 with byte-identical SHA-256 while anonymous access returned 400. Current-code purchase, inquiry, recovery, and administrator journeys still require hosted/public-Preview repeats |
 | Stripe sandbox                  | PROVIDER OBJECTS VERIFIED / CURRENT E2E PENDING | A fresh read-only API check resolves to canonical account `acct_1U9cEQAdcj2oNOF4`; its active test Product/Price are one-time USD 1111 and match the launch catalog. The account still reports `charges_enabled=false`, `payouts_enabled=false`, and `details_submitted=false`. An earlier path passed real sandbox Checkout and lifecycle tests, but the exact current candidate has not repeated that provider journey |
-| Cal.com                         | ACCOUNT READY, EVENTS UNPUBLISHED | `HWLbySMD` / `hwlbysmd` is authenticated. The six approved conflict calendars were enabled and `BILLS` remained excluded, but a fresh exact-header public API request still returned `eventTypes: []` and the public profile rendered “No links set up.” Family schedules, locations, group intake, confirmation, and no-Cal-payment settings still require provider verification before publication |
+| Cal.com                         | CONFIGURED + PUBLIC / E2E PENDING | `HWLbySMD` / `hwlbysmd` publicly lists the ten exact website event types. Three schedule families, conflict/destination calendars, required intake, manual confirmation, no-Cal-payment boundary, notice, buffers, horizon, and per-event daily caps are provider-configured. Wild Glow Express remains inquiry-only. A real website date/slot, conflict, request, confirmation, cancellation, and rescheduling journey is still required |
 | Inquiry delivery                | PERSISTENCE VERIFIED / HUMAN DELIVERY BLOCKED | Migration 013 is ledger-applied and its private tables/RPC boundary is present in staging. One synthetic hosted submission is durably stored, but its latest notification state is `failed` / provider rejected. There are zero verified administrator profiles, so Shannon currently has neither a confirmed email alert nor verified human inbox access |
 | Supabase Auth email             | PROVIDER SETUP / E2E PENDING      | A fresh public settings read shows signup enabled and email confirmation required (`mailer_autoconfirm=false`). Custom SMTP, verified-domain sending, exact Preview/Production redirect allowlists, rate limits, disabled link tracking, and real non-team-email delivery have not been proven |
-| Scheduled recovery             | STAGING SCHEMA READY / HOSTED RUN PENDING | Migration 014 is ledger-applied and its private queue/attempt tables plus narrow service-role RPCs are present in staging. The authenticated cron route, shared verifier, durable leases/retries/manual-review state, sanitized reporting, and admin queue view pass locally; a distinct encrypted Preview `CRON_SECRET`, deployed invocation, alert routing, and cadence acceptance remain pending |
-| Current launch Preview          | PENDING                           | The remote branch and Ready Preview remain at older commit `555cead`; functional launch source is captured locally through `787b1db` and has not been pushed. Ten of 22 required names are now branch-scoped and fail closed, but private provider credentials, sender settings, fresh cron/rate secrets, stable hostname, and Stripe-reachable automation-bypass-qualified webhook remain absent. `preview.howlbysmd.com` does not currently resolve |
+| Scheduled recovery             | STAGING SCHEMA READY / HOSTED RUN PENDING | Migration 014 is ledger-applied and its private queue/attempt tables plus narrow service-role RPCs are present in staging. The authenticated cron route, shared verifier, durable leases/retries/manual-review state, sanitized reporting, and admin queue view pass locally. A distinct sensitive branch-scoped Preview `CRON_SECRET` now exists; deployed invocation, alert routing, and cadence acceptance remain pending |
+| Current launch Preview          | CONFIGURATION 20/22 / DEPLOY PENDING | The remote branch and Ready Preview remain at older commit `555cead`; functional launch source is captured locally through `d05a5bf` and has not been pushed. Twenty of 22 required names are now sensitive and branch-scoped. `RESEND_API_KEY` awaits owner acceptance of the Resend Marketplace terms; `STRIPE_WEBHOOK_SECRET` awaits a persistent post-deploy endpoint. Production has zero environment records. No push, deploy, domain, DNS, `main`, or Production change has occurred |
 | Production / live money         | PENDING OWNER GATE                | Production publicly serves older commit `145112cd` and checkout truthfully returns 503; Stripe activation and coherent live Product/Price/webhook/Production variables remain incomplete                                    |
 
 Passing local compilation does not prove provider integration, a paid journey,
@@ -115,10 +117,12 @@ Preview; this packet does not claim third-party Stripe Checkout conformance.
   `HWL_DEPLOYMENT_TARGET=production`, `VERCEL_ENV=production`, `VERCEL=1`, and
   `NODE_ENV=production`. Isolated tests remain test-only even if other Stripe
   values are shaped like live configuration.
-- Full refunds and newly opened charge disputes revoke access. The
-  reconciliation path preserves a revoked tombstone when Stripe delivers
-  refund, dispute, and completion events out of order, while historical
-  revocation remains valid after a later Product or Price rotation.
+- Partial refunds retain access; full refunds revoke it. A newly opened dispute
+  moves the purchase into `disputed` status and suspends private access pending
+  manual review. The reconciliation path preserves refund/dispute state when
+  Stripe delivers events out of order, while historical state remains valid
+  after a later Product or Price rotation. No automatic
+  `charge.dispute.closed` restoration exists.
 - Purchases, memberships, Stripe Events, Stripe customers, and checkout orders
   are deployment-target/account/mode scoped. Financial/customer/order rows use
   `ON DELETE RESTRICT` profile foreign keys so an Auth deletion cannot cascade
@@ -189,16 +193,27 @@ remain closed.
 
 The five booking-boundary tests pass for unique canonical slugs, inquiry-only
 Wild Glow Express handling, exact Cal.com matching, and published guest limits.
-The exact provider-neutral catalog, three proposed schedule families, current
-price/location/capacity ambiguities, 12 owner decisions, and pilot publication
-sequence are frozen in `docs/calcom-booking-setup.md`. That document does not
-invent hours, buffers, notice, locations, payment collection, or publication
-authority.
-The locally checked zero-event state correctly retained the inquiry flow,
-allowed service switching, mounted no calendar iframe, and produced no browser
-console error. A live accessible calendar cannot be claimed until at least one
-real event is published and tested with keyboard, timezone, confirmation,
-rescheduling, cancellation, and conflict-calendar behavior.
+Provider setup is now complete for the ten exact-match services: three approved
+schedules, six conflict calendars with `BILLS` excluded, `FIREBIRDS` as the
+destination, required guest-count and location questions, manual confirmation,
+no Cal.com payments or seats, 48-hour notice, 60-minute before/after buffers, a
+rolling 30-day horizon, and per-event daily caps. Only Intuitive Tarot Reading
+and Moon Oracle Reading offer Cal Video alongside an attendee address; the
+other eight use attendee address only. The exact configuration and remaining
+customer-journey evidence are recorded in `docs/calcom-booking-setup.md`.
+
+The prior local zero-event check proved the inquiry fallback. A fresh
+network-enabled local run now also proves the other side of the boundary:
+`/book` discovered all ten exact public events, Signature Facial, Private Yoga,
+and Moon Oracle Reading each rendered genuine family-specific dates and times,
+and Wild Glow Express remained inquiry-only without a Cal.com link or iframe.
+The page returned HTTP 200 with no Next.js error overlay. At 390×844,
+`/book?service=signature-facial` rendered enabled dates and six visible time
+buttons; `innerWidth`, document client width, and document scroll width were all
+390, with no horizontal overflow or Next.js error overlay. Keyboard date and
+slot selection was not verified. Conflict blocking, a submitted pending
+request, confirmation, rescheduling, cancellation, and notification behavior
+remain required before booking is described as fully launch-verified.
 
 ### Inquiry durability
 
@@ -258,7 +273,7 @@ The current inquiry concurrency and notification-state proof is more specific:
   applied and is no longer current delivery evidence; repeat the request
   against staging before claiming hosted persistence or notification.
 
-## Verification — August 29–30
+## Verification — August 29–31
 
 <!-- prettier-ignore -->
 | Check                                                               | Result                                                                                                                                                                                                                                                                   |
@@ -275,12 +290,14 @@ The current inquiry concurrency and notification-state proof is more specific:
 | `npm run test:commerce`                                             | PASS — 54 provider-free cases: 10 request/limit/namespace policy cases, 22 shared-verifier/expiry/repair cases, and 22 cron/scheduled-worker cases covering exact identity, fail-closed write ordering, customer-bookkeeping isolation, terminal monitoring, leases, report validation, deadline release, sanitized failure categories/responses, and replay repair |
 | Targeted Prettier and `git diff --check`                            | PASS                                                                                                                                                                                                                                                                     |
 | Changed/untracked launch-file secret-shape scan                     | PASS — no real Stripe, webhook, Supabase, Resend, or JWT secret-shaped values; every shape hit is an explicitly synthetic fixture in the launch/Preview test harness or the packet's redacted fixture note                                                                 |
-| `/book` with 0 public Cal.com events                                | PASS — inquiry fallback, service switching, no iframe, no console errors                                                                                                                                                                                                 |
+| Prior `/book` fallback with 0 public Cal.com events                 | PASS — inquiry fallback, service switching, no iframe, no console errors; historical fallback proof only, because ten exact event types are now public                                                                                                                     |
+| Current website → Cal.com live-selector handoff                     | PASS — a network-enabled local `/book` run discovered all ten exact public events; Signature Facial, Private Yoga, and Moon Oracle Reading rendered genuine Beauty, Yoga + Sound, and Consultation / Tarot dates and times; Wild Glow Express remained inquiry-only; HTTP 200 and no Next.js error overlay |
+| Current live Cal.com selector at 390×844                            | PASS — `/book?service=signature-facial` rendered enabled dates and six visible time buttons; `innerWidth`, document client width, and document scroll width were all 390; no horizontal overflow or Next.js error overlay. Keyboard and mobile pointer/touch activation were not verified |
 | Current `/beauty/lift` + cart at 390×844                            | PASS — browser inner width 390; document client/scroll width both 375; no horizontal overflow; full-height cart showed one $11.11 LIFT Video + PDF item, included assets, truthful closed-sales checkout, and Stripe/license/refund/help links; zero console errors             |
 | Current inquiry-only Wild Glow booking at 390×844                   | PASS — `/book?service=wild-glow-express-facial` rendered guest minimum/default 4, inquiry-only explanation, timing choices, privacy notice, and no live calendar; document client/scroll width both 375; zero console errors                                                   |
 | Local desktop/mobile axe sweep                                      | PASS — 18 public, store, legal, auth, and member-entry journeys at 1440×1000 and 390×844 produced zero WCAG 2 A/AA, 2.1 A/AA, or 2.2 AA axe violations after the contrast/progress fixes; six additional checkout-result, protected-auth, and password journeys passed at 390×844; no audited page overflowed or logged a console error |
 | Local keyboard and reduced-motion checks                            | PASS — skip navigation moved focus to `main`; mobile navigation and the cart trapped focus, closed with Escape, and restored their triggers; keyboard service activation preserved focus; four representative routes reported zero active animations under reduced motion                                                                  |
-| Remaining accessibility/provider verification                      | **NOT RUN** — the local sweep does not prove authenticated paid-library content, the real inquiry-admin inbox, live Cal.com date/slot/confirmation/cancel/reschedule behavior, third-party Stripe Checkout, 200% zoom across every route, or a manual screen-reader journey                                                                  |
+| Remaining accessibility/provider verification                      | **PARTIAL** — live Cal.com dates and times now render for all three schedule families and the Signature Facial mobile selector fits at 390 px, but the sweep does not prove keyboard or mobile pointer/touch Cal selection, a completed Cal request, conflict blocking, confirmation/cancel/reschedule notifications, authenticated paid-library content, the real inquiry-admin inbox, 200% zoom across every route, or a manual screen-reader journey |
 | Current local `/beauty/lift` browser verification                   | PASS — rendered LIFT hero, accessible navigation, cart trigger, public preview, seven movement links, and $11.11 video+PDF copy; meaningful DOM present; no Next.js error overlay or browser warning/error logs                                                                                                                           |
 | Local same-origin page probes                                       | PASS — `GET /`, `GET /book`, and `GET /beauty/lift` each returned HTTP 200                                                                                                                                                                                               |
 | Contact same-origin boundary                                        | PASS — missing Origin and foreign Origin returned HTTP 403; the correct localhost Origin reached the route and returned a truthful HTTP 503 in the pre-migration host test. Now that migration 013 is applied, hosted persistence requires a fresh repeat                                                                                |
@@ -311,7 +328,7 @@ The current inquiry concurrency and notification-state proof is more specific:
 | Inquiry abuse, privacy, and admin boundaries                        | PASS — malformed/cross-origin/oversize payloads rejected; first five rate claims persisted and sixth returned 429; browser table reads denied; verified admin saw the record; anonymous admin denied                                                                     |
 | Launch environment preflight                                        | PASS — explicit deployment target is mandatory; development/Preview closed and sandbox-open fixtures pass; target mismatches, partial/live Preview config, and shared cron/inquiry secrets fail; Production intentionally fails because no separate Production Supabase boundary has been created or owner-approved                         |
 | Current configured launch environment                               | BLOCKED — the full local validator's only configuration failure is the invalid `RESEND_API_KEY`; the captions path is optional and may remain unset until a verified VTT object exists. The canonical sandbox account/Product/Price remain valid, while live account activation remains incomplete                                                   |
-| Live Vercel Preview configuration inventory                         | BLOCKED — ten required names are now encrypted and branch-scoped to `checkpoint/platform-overhaul-2026-08-20`; one additional required contact recipient exists only as a global Preview record. Eleven effective required names remain absent, and `CONTACT_TO_EMAIL` still lacks branch isolation. No private provider credential has been transmitted in this pass |
+| Live Vercel Preview configuration inventory                         | BLOCKED 20/22 — twenty required names are sensitive and branch-scoped to `checkpoint/platform-overhaul-2026-08-20`. `RESEND_API_KEY` awaits owner acceptance of the Resend Marketplace terms; hosted `STRIPE_WEBHOOK_SECRET` awaits a persistent post-deploy endpoint and must not reuse the local Stripe CLI secret. Production remains at zero environment records |
 | Current public Production safety probe                              | PASS — homepage HTTP 200; unauthenticated LIFT Checkout HTTP 503 with truthful not-ready copy; no charge attempted                                                                                                                                                       |
 | Cal.com booking → conflict block → confirmation → cancel/reschedule | NOT RUN                                                                                                                                                                                                                                                                  |
 
@@ -591,9 +608,10 @@ approval.
    retry exhaustion/manual review, stale-token rejection, and private admin
    visibility. Configure the owner alert destination; `alert_pending` is a
    durable signal but does not itself notify a person.
-6. Approve and implement the dispute-closure policy. The current
-   `charge.dispute.created` behavior revokes access permanently; no
-   `charge.dispute.closed` path restores access after a won dispute.
+6. Implement and verify the accepted dispute-resolution runbook. The current
+   `charge.dispute.created` behavior suspends access in `disputed` status
+   pending manual review; no automatic `charge.dispute.closed` path or audited
+   operator restoration control exists after a won dispute.
 7. Complete Stripe's private business verification, create the matching live
    Product/Price and webhook, and run the minimal real-money smoke test only
    after separate Production approval.
@@ -607,32 +625,27 @@ readiness.
 
 ## Cal.com Booking State
 
-| Property                      | Current/last authenticated evidence                    |
-| ----------------------------- | ------------------------------------------------------ |
-| Account                       | `HWLbySMD`                                             |
-| Username                      | `hwlbysmd`                                             |
-| Public profile                | `https://cal.com/hwlbysmd` — HTTP 200                  |
-| Public event types            | **0** — public API returned `data=[]`                  |
-| Timezone                      | `America/Los_Angeles`                                  |
-| Existing default availability | Sunday and Wednesday–Saturday, 9:00 AM–5:00 PM Pacific |
-| Calendar connection           | Apple Calendar connected                               |
-| Destination calendar          | FIREBIRDS                                              |
-| Conflict calendars            | None enabled at the last audit                         |
-| Virtual location              | Cal Video available and set as default                 |
+| Property                      | Current authenticated/public evidence                                          |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| Account                       | `HWLbySMD` (`hwlbysmd`)                                                        |
+| Public profile                | `https://cal.com/hwlbysmd` lists ten exact-match website events                |
+| Timezone                      | `America/Los_Angeles`                                                          |
+| Beauty schedule               | `2303131` — Wednesday–Thursday, 10:00 AM–4:00 PM Pacific                       |
+| Yoga + Sound schedule         | `2303132` — Friday–Saturday, 9:00 AM–2:00 PM Pacific                           |
+| Consultation / Tarot schedule | `2303130` — Sunday, 12:00–5:00 PM Pacific                                      |
+| Destination calendar          | `FIREBIRDS`                                                                    |
+| Conflict calendars            | `FIREBIRDS`, `WHOLEBODY`, `LIONWOLF`, `ACTOR`, `YOGA`, `HWL`; `BILLS` excluded |
+| Confirmation                  | Always required; unconfirmed requests block the slot                           |
+| Booking window                | 48-hour notice; 60 minutes before/after; rolling 30 calendar days              |
+| Intake                        | Required guest count and required location details; guest invitations hidden   |
+| Payments / seats              | Disabled for every event                                                       |
 
-The existing single schedule does not satisfy the owner's requested booking
-system. Launch needs three truthful availability schedules with open slots that
-vary by service family:
-
-1. Beauty / aesthetician hours
-2. Yoga + Sound hours
-3. Consultations / Tarot / virtual hours
-
-Shannon must supply the exact days and hours for all three. The recommended
-initial safety posture is to check conflicts against FIREBIRDS, WHOLEBODY,
-LIONWOLF, ACTOR, YOGA, and HWL; exclude BILLS; send new bookings to FIREBIRDS;
-and require Shannon's confirmation for every service initially. This remains a
-recommendation, not an applied provider setting.
+All ten exact repo titles, slugs, and fixed durations are active and public.
+Beauty and Yoga + Sound events have a per-event daily cap of two; Consultation
+/ Tarot events have a per-event daily cap of three. Intuitive Tarot Reading and
+Moon Oracle Reading offer Cal Video or attendee address. The other eight events
+use attendee address only. One booking remains one manually reviewed party
+request; Cal.com does not calculate group pricing or collect payment.
 
 `Wild Glow Express Facial` remains inquiry-only. The offer says 15–20 minutes
 per guest with a minimum of four, so the website now rejects even an otherwise
@@ -640,14 +653,14 @@ matching 20-minute Cal.com event instead of under-reserving Shannon's time. The
 owner must approve the truthful total reservation duration, including setup and
 turnover, before a future event type and website mapping are reviewed together.
 
-No event types, schedules, conflict settings, buffers, notice windows, intake
-questions, or public booking links have been changed in Cal.com. Publishing
-requires Shannon's exact hours and the owner's explicit action-time approval.
-`Intuitive Tarot Reading` is the current 60-minute pilot recommendation, but
-its schedule, Cal Video location, confirmation policy, notice, horizon,
-buffers, capacity, intake, cancellation terms, and payment boundary all remain
-unapproved. No default limits may be inferred from the existing account
-schedule or from this recommendation.
+Provider publication and the website discovery/embed handoff are complete. A
+fresh network-enabled local run rendered genuine public dates and times for
+Beauty, Yoga + Sound, and Consultation / Tarot while keeping Wild Glow Express
+inquiry-only. The Signature Facial selector also rendered enabled dates and six
+visible time buttons at 390×844 without horizontal overflow or a Next.js error
+overlay. Keyboard selection, conflict blocking, a submitted pending request,
+confirmation, cancellation, rescheduling, and notifications still require
+end-to-end verification. No test booking result is claimed here.
 
 ## Inquiry and Resend State
 
@@ -656,10 +669,10 @@ schedule or from this recommendation.
   `HWL by SMD <hello@howlbysmd.com>` shape. This is configuration evidence only;
   it must not be treated as delivery authority until the domain is verified in
   Resend.
-- The present Resend credential did not validate in the provider audit.
-- The current browser session reaches the Resend login page, not an
-  authenticated account. No account, domain, key, or billing integration was
-  created or changed.
+- The present local Resend credential did not validate in the provider audit.
+- Resend Free provisioning through Vercel was authorized and attempted, but
+  Vercel requires the owner to accept the Resend Marketplace terms first. No
+  Marketplace resource or valid `RESEND_API_KEY` has been created yet.
 - No sender-domain delivery test has passed.
 - Public DNS currently returns no MX or TXT record at `send.howlbysmd.com`, no
   TXT at the common `resend._domainkey.howlbysmd.com` selector, no root MX/TXT,
@@ -708,25 +721,33 @@ The newest automatic checkpoint Preview is Ready as deployment
 It is not the current candidate: a protected fetch of `/beauty/lift` still
 rendered the superseded $33.33 Complete LIFT offer and The Den card instead of
 the single $11.11 launch product. Functional launch source is captured locally
-through `787b1db` and has not been pushed.
+through `d05a5bf` and has not been pushed.
 
-Ten fail-closed variables now exist only for the checkpoint branch:
-`HWL_DEPLOYMENT_TARGET`, `HWL_LOCAL_BUILD`, `NEXT_PUBLIC_SITE_URL`,
-`COMMERCE_SALES_READY`, `STRIPE_LIVEMODE`, `CALCOM_PROFILE_URL`,
-`INQUIRY_RATE_LIMIT_MAX`, both LIFT storage paths, and
-`NEXT_PUBLIC_SUPABASE_URL`. Vercel stores them as sensitive, so their values
-cannot be read back and are not used as proof of value correctness. The prior
-global Preview `CONTACT_TO_EMAIL` remains effective but is not yet branch
-isolated. Eleven required effective names remain absent:
-`CONTACT_FROM_EMAIL`, `CRON_SECRET`, `INQUIRY_RATE_LIMIT_SECRET`,
-`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `RESEND_API_KEY`,
-`STRIPE_ACCOUNT_ID`, `STRIPE_LIFT_GUIDE_PRICE_ID`,
-`STRIPE_LIFT_PRODUCT_ID`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and
-`SUPABASE_SERVICE_ROLE_KEY`. No private provider credential was transmitted in
-this configuration pass.
+Twenty of the 22 required variables now exist as sensitive records scoped only
+to `checkpoint/platform-overhaul-2026-08-20`:
+
+- ten baseline records: `HWL_DEPLOYMENT_TARGET`, `HWL_LOCAL_BUILD`,
+  `NEXT_PUBLIC_SITE_URL`, `COMMERCE_SALES_READY`, `STRIPE_LIVEMODE`,
+  `CALCOM_PROFILE_URL`, `INQUIRY_RATE_LIMIT_MAX`, both LIFT storage paths, and
+  `NEXT_PUBLIC_SUPABASE_URL`;
+- six additional non-Stripe records: `CONTACT_FROM_EMAIL`, `CONTACT_TO_EMAIL`,
+  `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
+  `CRON_SECRET`, and `INQUIRY_RATE_LIMIT_SECRET`; and
+- four sandbox Stripe records: `STRIPE_ACCOUNT_ID`,
+  `STRIPE_LIFT_PRODUCT_ID`, `STRIPE_LIFT_GUIDE_PRICE_ID`, and
+  `STRIPE_SECRET_KEY`.
+
+Vercel's sensitive/write-only storage prevents value readback, so inventory is
+not value-correctness or runtime evidence. `RESEND_API_KEY` is still absent
+pending owner acceptance of the Resend Marketplace terms. The persistent
+hosted `STRIPE_WEBHOOK_SECRET` is also absent until the post-deploy endpoint is
+created; the local Stripe CLI `whsec_…` is ephemeral localhost authority and
+must not be copied into Preview.
 
 Production has zero environment-variable records, and
-`preview.howlbysmd.com` is not currently assigned to a deployment.
+`preview.howlbysmd.com` is not currently assigned to a deployment. No
+checkpoint push, deployment, domain, DNS, `main`, or Production mutation has
+occurred.
 
 Vercel sign-in protection currently redirects unauthenticated requests on the
 branch Preview URL, so a plain Stripe webhook URL cannot deliver there. Keep
@@ -761,9 +782,10 @@ The new `scripts/preflight-preview-release.ts` and
 any Preview action. Its 10/10 policy fixtures pass. The repository-only
 preflight passed on the clean committed candidate after a fresh fetch, proving
 the checkpoint branch was ahead and not behind its tracked upstream. The full
-environment preflight remains blocked until all 22 branch-scoped values are
-available; passing repository policy is not permission to push, deploy, assign
-a hostname, or change a provider.
+environment preflight remains blocked until a valid Resend key and persistent
+hosted Stripe webhook secret complete all 22 branch-scoped values; passing
+repository policy is not permission to push, deploy, assign a hostname, or
+change a provider.
 
 This validator proves configuration shape only. Hosted staging schema and asset
 existence are verified separately above; webhook reachability, Cal.com
@@ -791,7 +813,9 @@ Before describing a Preview as the release candidate:
    paths in coherent branch-scoped Preview configuration.
 3. Preserve the passing isolated Stripe and inquiry evidence; repeat both
    against hosted staging through the deployed current candidate.
-4. Publish and verify Cal.com event types against the approved schedules.
+4. Preserve the verified Cal.com publication and repeat the real website
+   date/slot, conflict, request, confirmation, cancellation, and rescheduling
+   journey.
 5. Review the diff, exclude unrelated local screenshots, and commit only the
    intended launch candidate on
    `checkpoint/platform-overhaul-2026-08-20`.
@@ -867,36 +891,34 @@ outstanding:
    Name the exact intended administrator, verify the matching confirmed
    Auth/profile identity, approve the narrow privilege change separately, and
    prove real inbox access plus logged-out denial.
-4. **Cal.com publication:** approve the conflict/destination/confirmation
-   settings and publish plan after Shannon supplies the three category-specific
-   schedules.
-5. **Supabase Auth delivery:** configure custom SMTP from the verified HWL
+4. **Supabase Auth delivery:** configure custom SMTP from the verified HWL
    sender domain, set the canonical Site URL to `https://www.howlbysmd.com`,
    allow the exact Preview and Production callbacks, disable SMTP link
    tracking, review Auth rate limits, and verify signup confirmation plus
    password recovery with a non-team address.
-6. **Tax and purchase-time Terms:** obtain the owner/accountant decision on
+5. **Tax and purchase-time Terms:** obtain the owner/accountant decision on
    whether the $11.11 digital product is taxable and whether any tax is
    inclusive. Also decide whether Stripe Checkout must collect explicit Terms
    acceptance; the sandbox account's public Terms, privacy, and support URLs
    are currently unset. Do not enable Stripe Tax later without updating and
    testing the fulfillment amount model.
-7. **Payment recovery cadence, alert routing, and dispute policy:** choose the
-   human destination/owner for durable manual-review alerts and either accept
-   the Hobby daily recovery backstop or approve a Pro upgrade plus tested
-   15-minute cadence. Separately decide whether a won dispute restores access;
-   current behavior fails closed and keeps dispute-created revocation terminal.
-8. **Preview provider boundary:** approve creation of the custom
+6. **Payment recovery cadence, alert routing, and dispute operations:** choose
+   the human destination/owner for durable manual-review alerts and either
+   accept the Hobby daily recovery backstop or approve a Pro upgrade plus tested
+   15-minute cadence. Opened disputes suspend access under the accepted policy;
+   document and verify the manual review and resolution path because the app has
+   no automatic `charge.dispute.closed` restoration.
+7. **Preview provider boundary:** approve creation of the custom
    `preview.howlbysmd.com` hostname, a dedicated Vercel automation-bypass
    secret, and its persistent bypass-qualified sandbox webhook before those
    external changes are made. Deployment Protection remains enabled globally.
-9. **Production database:** only one HWL Supabase project currently exists.
+8. **Production database:** only one HWL Supabase project currently exists.
    Explicitly approve whether Production may use it or authorize creation and
    verification of a separate Production project; staging must not be silently
    inherited.
-10. **Production:** separately approve live environment configuration and
-    promotion after reviewing the tested Preview packet.
-11. **Git:** no `main` push is authorized. Any later request to merge or push
+9. **Production:** separately approve live environment configuration and
+   promotion after reviewing the tested Preview packet.
+10. **Git:** no `main` push is authorized. Any later request to merge or push
     `main` must be explicit.
 
 ## Private Owner Inputs Still Needed
@@ -906,20 +928,18 @@ commit history.
 
 - Owner approval for a coordinated retirement of the now-compromised legacy
   Supabase `service_role` JWT after every deployed environment is confirmed on
-  the modern key. The modern project secret is verified locally and must later
-  be installed through encrypted, branch-scoped Preview configuration.
-- A valid Resend API key plus a verified `CONTACT_FROM_EMAIL` sender.
-- A distinct, stable, random 32+ character `INQUIRY_RATE_LIMIT_SECRET` in each
-  deployed environment. A private local value is already installed and must
-  not be copied into source or this packet.
-- A distinct, stable, random 32+ character `CRON_SECRET` in each deployed
-  environment. It must never reuse the inquiry, Stripe, Supabase, or webhook
-  secret.
+  the modern key. The modern project secret is verified locally and installed
+  as a sensitive checkpoint-branch Preview record; Production remains empty.
+- Owner acceptance of the Resend Marketplace terms, followed by a valid
+  `RESEND_API_KEY` and verified `CONTACT_FROM_EMAIL` sender.
+- Distinct `INQUIRY_RATE_LIMIT_SECRET` and `CRON_SECRET` values are installed as
+  sensitive checkpoint-branch Preview records. Production still needs its own
+  independently generated values after separate approval; neither value may be
+  copied into source, this packet, or another environment.
 - Stripe's private business, representative, banking, and tax verification
   details, entered by the owner directly in Stripe.
-- Shannon's exact Beauty, Yoga + Sound, and Consultation/Tarot availability,
-  plus minimum notice, booking horizon, buffers, daily limits, cancellation,
-  location, and intake-question decisions.
+- Shannon's cancellation, rescheduling, no-show, and late-arrival terms for the
+  now-published Cal.com services.
 
 ## Launch Sequence
 
@@ -934,8 +954,9 @@ commit history.
    path and verify private admin visibility and manual-review alert routing.
 4. Repeat DB-first inquiry receipt on staging, then configure and verify Resend
    without making email the receipt boundary.
-5. Apply the approved Cal.com schedules/settings, publish one pilot service,
-   verify it, then publish and test the remaining services.
+5. Preserve the published Cal.com configuration and test all three schedule
+   families through the website, including conflict blocking, manual
+   confirmation, cancellation, rescheduling, and notification delivery.
 6. Commit only the reviewed launch candidate on the checkpoint branch, deploy
    a new Preview, and repeat every end-to-end and accessibility check there.
 7. Complete Stripe live activation and live provider configuration.
@@ -955,9 +976,9 @@ source must repeat it. The isolated DB-first inquiry journey passes. Hosted
 staging now has the verified 001–014 ledger, current schema/RPC boundaries, and
 byte-identical canonical private PDF/video assets. The remaining work is the
 public provider and release proof: coordinated retirement of the compromised
-legacy Supabase key, a distinct hosted `CRON_SECRET`, valid Resend/sender
-configuration, verified administrator bootstrap, actual Cal.com event
-publication, owner acceptance of the recovery cadence and alert routing, the
-dispute-closure policy decision, the remaining mobile/keyboard/provider
+legacy Supabase key, deployed cron execution, valid Resend/sender configuration,
+verified administrator bootstrap, Cal.com website booking E2E,
+owner acceptance of the recovery cadence and alert routing, the dispute manual
+review/resolution runbook, the remaining mobile/keyboard/provider
 journeys, a current public Preview repeat, live Stripe activation, and explicit
 Production approval.

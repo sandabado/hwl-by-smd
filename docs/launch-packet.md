@@ -17,8 +17,9 @@ Preview, and Production have not yet passed their required end-to-end launch
 tests.
 
 **Release boundary:** Work is on
-`checkpoint/platform-overhaul-2026-08-20`. Commit `c74fe61` is pushed to the
-checkpoint branch and exactly synchronized with its upstream. `main` remains
+`checkpoint/platform-overhaul-2026-08-20`. Commit `c74fe61` is the latest
+pushed checkpoint; the current local documentation candidate is one commit
+ahead and awaits the next authorized checkpoint-only push. `main` remains
 untouched.
 This pass rotated the sandbox-only Stripe test key, authorized the Stripe CLI
 directly to the canonical sandbox, applied the exact reviewed migrations
@@ -45,7 +46,7 @@ push `main`, or promote anything to Production.
 | Inquiry delivery                | PERSISTENCE VERIFIED / HUMAN DELIVERY BLOCKED | Migration 013 is ledger-applied and its private tables/RPC boundary is present in staging. One synthetic hosted submission is durably stored, but its latest notification state is `failed` / provider rejected. There are zero verified administrator profiles, so Shannon currently has neither a confirmed email alert nor verified human inbox access |
 | Supabase Auth email             | PROVIDER SETUP / E2E PENDING      | A fresh public settings read shows signup enabled and email confirmation required (`mailer_autoconfirm=false`). Custom SMTP, verified-domain sending, exact Preview/Production redirect allowlists, rate limits, disabled link tracking, and real non-team-email delivery have not been proven |
 | Scheduled recovery             | STAGING SCHEMA READY / HOSTED RUN PENDING | Migration 014 is ledger-applied and its private queue/attempt tables plus narrow service-role RPCs are present in staging. The authenticated cron route, shared verifier, durable leases/retries/manual-review state, sanitized reporting, and admin queue view pass locally. A distinct sensitive branch-scoped Preview `CRON_SECRET` now exists; deployed invocation, alert routing, and cadence acceptance remain pending |
-| Current launch Preview          | CONFIGURATION 21/22 / BUILD BLOCKED | Checkpoint commit `c74fe61` is pushed and upstream-synchronized. Automatic Preview `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo` failed safely before compilation because the provider set was incomplete. A dedicated protected Stripe sandbox endpoint and branch-only hosted signing secret now complete the Stripe set. `RESEND_API_KEY` alone awaits owner acceptance of the Resend Marketplace terms. Production has zero environment records; `main` is untouched |
+| Current launch Preview          | CONFIGURATION 21/22 / BUILD BLOCKED | Checkpoint commit `c74fe61` is pushed; the local documentation candidate is one commit ahead. Automatic Preview `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo` failed safely before compilation because the provider set was incomplete. A dedicated protected Stripe sandbox endpoint and branch-only hosted signing secret now complete the Stripe set. Resend Marketplace terms were accepted, but its provider rejected the requested Free resource because that plan is disabled; a direct Resend Free key is now the remaining configuration gate. Production has zero environment records; `main` is untouched |
 | Production / live money         | PENDING OWNER GATE                | Production publicly serves older commit `145112cd` and checkout truthfully returns 503; Stripe activation and coherent live Product/Price/webhook/Production variables remain incomplete                                    |
 
 Passing local compilation does not prove provider integration, a paid journey,
@@ -682,9 +683,12 @@ end-to-end verification. No test booking result is claimed here.
   it must not be treated as delivery authority until the domain is verified in
   Resend.
 - The present local Resend credential did not validate in the provider audit.
-- Resend Free provisioning through Vercel was authorized and attempted, but
-  Vercel requires the owner to accept the Resend Marketplace terms first. No
-  Marketplace resource or valid `RESEND_API_KEY` has been created yet.
+- Resend Marketplace terms were accepted and Free provisioning through Vercel
+  was attempted. The provider rejected the request because its Marketplace
+  Free plan is disabled; only paid Marketplace plans were enabled at the time
+  of the check. No paid plan was selected. A direct Resend Free account/key is
+  the approved zero-cost path, but owner sign-in and a valid `RESEND_API_KEY`
+  are still pending.
 - No sender-domain delivery test has passed.
 - Public DNS currently returns no MX or TXT record at `send.howlbysmd.com`, no
   TXT at the common `resend._domainkey.howlbysmd.com` selector, no root MX/TXT,
@@ -728,8 +732,9 @@ inquiry.
 
 ## Preview Release Candidate — Pending
 
-Checkpoint `c74fe61` is pushed and exactly synchronized with
-`origin/checkpoint/platform-overhaul-2026-08-20`. Its first automatic Preview,
+Checkpoint `c74fe61` is pushed to
+`origin/checkpoint/platform-overhaul-2026-08-20`; the current local
+documentation candidate is one commit ahead. The first automatic Preview,
 `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo`, failed safely at the launch environment
 validator before application compilation. At that moment both
 `RESEND_API_KEY` and the persistent `STRIPE_WEBHOOK_SECRET` were absent, so the
@@ -753,10 +758,11 @@ to `checkpoint/platform-overhaul-2026-08-20`:
 
 Vercel's sensitive/write-only storage prevents value readback, so inventory is
 not value-correctness or runtime evidence. `RESEND_API_KEY` is the only missing
-required name and awaits owner acceptance of the Resend Marketplace terms. The
-hosted Stripe signing secret belongs to the dedicated persistent sandbox
-endpoint; the ephemeral localhost Stripe CLI authority was not copied into
-Preview.
+required name. Marketplace terms are accepted, but Marketplace Free resource
+creation was rejected because that plan is disabled; the direct Resend Free
+account/key remains pending. The hosted Stripe signing secret belongs to the
+dedicated persistent sandbox endpoint; the ephemeral localhost Stripe CLI
+authority was not copied into Preview.
 
 Production has zero environment-variable records, and
 `preview.howlbysmd.com` is not currently assigned to a deployment. The
@@ -828,10 +834,12 @@ Before describing a Preview as the release candidate:
 4. Preserve the verified Cal.com publication and repeat the real website
    date/slot, conflict, request, confirmation, cancellation, and rescheduling
    journey.
-5. Preserve exact upstream synchronization at checkpoint `c74fe61`; do not
-   push `main`.
-6. Accept the Resend Marketplace terms, provision the Free resource, install
-   its exact-branch Preview key, and redeploy with `COMMERCE_SALES_READY=false`.
+5. Push only the reviewed local candidate to the checkpoint branch, prove exact
+   upstream synchronization afterward, and do not push `main`.
+6. Complete owner sign-in to a direct Resend Free account, create a valid key,
+   install its exact-branch Preview value, and redeploy with
+   `COMMERCE_SALES_READY=false`. Do not select a paid Marketplace plan without
+   separate approval.
 7. Verify the existing dedicated bypass-qualified Stripe sandbox endpoint on
    the fresh Preview: unqualified protection, unsigned application rejection,
    signed delivery, and staging receipt.
@@ -943,8 +951,9 @@ commit history.
   Supabase `service_role` JWT after every deployed environment is confirmed on
   the modern key. The modern project secret is verified locally and installed
   as a sensitive checkpoint-branch Preview record; Production remains empty.
-- Owner acceptance of the Resend Marketplace terms, followed by a valid
-  `RESEND_API_KEY` and verified `CONTACT_FROM_EMAIL` sender.
+- Owner sign-in to the approved direct Resend Free account, followed by a valid
+  `RESEND_API_KEY` and verified `CONTACT_FROM_EMAIL` sender. Marketplace terms
+  are already accepted; Marketplace Free provisioning is provider-disabled.
 - Distinct `INQUIRY_RATE_LIMIT_SECRET` and `CRON_SECRET` values are installed as
   sensitive checkpoint-branch Preview records. Production still needs its own
   independently generated values after separate approval; neither value may be

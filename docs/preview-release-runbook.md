@@ -5,12 +5,20 @@ no authority to push, deploy, change provider configuration, assign a domain,
 or promote Production. Every provider or hosted-state step below requires
 direct owner approval first.
 
+The owner changed the launch domain to `hwlbysmd.com` on September 4, 2026.
+Production canonicals use `https://www.hwlbysmd.com`, matching Vercel's existing
+apex-to-www redirect. The custom Preview below is a required target, not an
+already configured hostname. Keep the existing sandbox branch-alias webhook
+until the new Preview hostname, environment, Auth redirects, and webhook have
+been coherently configured and verified. Preserve existing mail-forwarding
+records when adding the new domain's exact Resend sending records.
+
 ## Fixed Preview boundary
 
 | Boundary            | Required Preview value                    |
 | ------------------- | ----------------------------------------- |
 | Git branch          | `checkpoint/platform-overhaul-2026-08-20` |
-| Stable origin       | `https://preview.howlbysmd.com`           |
+| Stable origin       | `https://preview.hwlbysmd.com`           |
 | Deployment target   | `preview`                                 |
 | Stripe mode         | Sandbox/test only                         |
 | Stripe account      | `acct_1U9cEQAdcj2oNOF4`                   |
@@ -67,7 +75,7 @@ Production, and do not reuse local webhook, cron, or inquiry secrets.
 
 - `HWL_DEPLOYMENT_TARGET=preview`
 - `HWL_LOCAL_BUILD=false`
-- `NEXT_PUBLIC_SITE_URL=https://preview.howlbysmd.com`
+- `NEXT_PUBLIC_SITE_URL=https://preview.hwlbysmd.com`
 
 ### Staging Supabase
 
@@ -81,8 +89,8 @@ application uses their tables or RPCs.
 
 Supabase Auth must separately use production-capable custom SMTP from the
 verified HWL sender domain. The project URL allowlist must include the exact
-Preview callback `https://preview.howlbysmd.com/auth/callback`, the canonical
-Production callback `https://www.howlbysmd.com/auth/callback`, and only the
+Preview callback `https://preview.hwlbysmd.com/auth/callback`, the canonical
+Production callback `https://www.hwlbysmd.com/auth/callback`, and only the
 intended localhost callbacks. Disable SMTP link tracking, review provider and
 Supabase Auth rate limits, and prove signup confirmation plus password recovery
 using a non-team email address. The application's Resend notification key does
@@ -104,7 +112,7 @@ after approval, keep Deployment Protection enabled globally, and install the
 persistent sandbox endpoint with the secret in its query parameter:
 
 ```text
-https://preview.howlbysmd.com/api/stripe/webhook?x-vercel-protection-bypass=<dedicated-secret>
+https://preview.hwlbysmd.com/api/stripe/webhook?x-vercel-protection-bypass=<dedicated-secret>
 ```
 
 The bypass secret belongs only in Vercel's protected project setting and the
@@ -134,7 +142,7 @@ security change and requires owner approval.
 - `LIFT_VIDEO_CAPTIONS_STORAGE_PATH` only after a VTT object is verified
 - `RESEND_API_KEY` for the approved Resend account
 - `CONTACT_TO_EMAIL` for Shannon's destination
-- `CONTACT_FROM_EMAIL` on the verified `howlbysmd.com` sender domain
+- `CONTACT_FROM_EMAIL` on the verified `hwlbysmd.com` sender domain
 - `INQUIRY_RATE_LIMIT_SECRET` — unique random value of at least 32 characters
 - `INQUIRY_RATE_LIMIT_MAX=5`
 - `CRON_SECRET` — a separate unique random value of at least 32 characters
@@ -171,7 +179,7 @@ untested until a separately authorized Production smoke test.
    merge `main` as part of Preview preparation. Then run
    `npm run preflight:preview:post-push` and require exact synchronization
    before deploying that commit.
-6. Deploy with closed sales. Assign `preview.howlbysmd.com`, then prove the
+6. Deploy with closed sales. Assign `preview.hwlbysmd.com`, then prove the
    public application, inquiry fallback, booking fallback, protected routes,
    unsigned webhook rejection, and cron authorization rejection.
 7. Create the persistent sandbox webhook and install only its Preview signing

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 
-export const SITE_URL = "https://www.howlbysmd.com"
+export const SITE_URL = "https://www.hwlbysmd.com"
 export const SITE_NAME = "HWL by SMD"
 export const DEFAULT_SOCIAL_IMAGE = "/og.png"
 

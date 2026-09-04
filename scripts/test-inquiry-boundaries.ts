@@ -50,7 +50,7 @@ test("inquiry abuse controls preserve the trusted-address and secret boundaries"
     () => {
       const trustedAddress = "198.51.100.14"
       const spoofedAddress = "203.0.113.27"
-      const request = new Request("https://preview.howlbysmd.com/api/contact", {
+      const request = new Request("https://preview.hwlbysmd.com/api/contact", {
         headers: {
           "x-forwarded-for": spoofedAddress,
           "x-real-ip": spoofedAddress,
@@ -68,7 +68,7 @@ test("inquiry abuse controls preserve the trusted-address and secret boundaries"
       )
 
       const genericHeadersOnly = new Request(
-        "https://preview.howlbysmd.com/api/contact",
+        "https://preview.hwlbysmd.com/api/contact",
         { headers: { "x-forwarded-for": spoofedAddress } }
       )
       assert.equal(
@@ -95,7 +95,7 @@ test("inquiry abuse controls preserve the trusted-address and secret boundaries"
       setEnvironment("VERCEL", "1")
 
       const result = prepareInquirySubmissionClaim(
-        new Request("https://preview.howlbysmd.com/api/contact", {
+        new Request("https://preview.hwlbysmd.com/api/contact", {
           headers: { "x-forwarded-for": "203.0.113.27" },
         })
       )
@@ -114,7 +114,7 @@ test("inquiry abuse controls preserve the trusted-address and secret boundaries"
     setEnvironment("NODE_ENV", "production")
     setEnvironment("VERCEL", "1")
 
-    const request = new Request("https://preview.howlbysmd.com/api/contact", {
+    const request = new Request("https://preview.hwlbysmd.com/api/contact", {
       headers: { "x-vercel-forwarded-for": "198.51.100.14" },
     })
 
@@ -138,7 +138,7 @@ test("inquiry abuse controls preserve the trusted-address and secret boundaries"
       setEnvironment("VERCEL", "1")
 
       const result = prepareInquirySubmissionClaim(
-        new Request("https://preview.howlbysmd.com/api/contact", {
+        new Request("https://preview.hwlbysmd.com/api/contact", {
           headers: { "x-vercel-forwarded-for": trustedAddress },
         })
       )
@@ -151,7 +151,7 @@ test("inquiry abuse controls preserve the trusted-address and secret boundaries"
 
       setEnvironment("INQUIRY_RATE_LIMIT_MAX", "0")
       const minimum = prepareInquirySubmissionClaim(
-        new Request("https://preview.howlbysmd.com/api/contact", {
+        new Request("https://preview.hwlbysmd.com/api/contact", {
           headers: { "x-vercel-forwarded-for": trustedAddress },
         })
       )
@@ -159,7 +159,7 @@ test("inquiry abuse controls preserve the trusted-address and secret boundaries"
 
       setEnvironment("INQUIRY_RATE_LIMIT_MAX", "not-a-number")
       const fallback = prepareInquirySubmissionClaim(
-        new Request("https://preview.howlbysmd.com/api/contact", {
+        new Request("https://preview.hwlbysmd.com/api/contact", {
           headers: { "x-vercel-forwarded-for": trustedAddress },
         })
       )

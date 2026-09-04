@@ -27,7 +27,7 @@ const legacySupabaseFixtureSecrets = {
 const developmentFixture: NodeJS.ProcessEnv = {
   CALCOM_PROFILE_URL: "https://cal.com/hwlbysmd",
   COMMERCE_SALES_READY: "false",
-  CONTACT_FROM_EMAIL: "HWL by SMD <hello@howlbysmd.com>",
+  CONTACT_FROM_EMAIL: "HWL by SMD <hello@hwlbysmd.com>",
   CONTACT_TO_EMAIL: "shannonmarydixon@gmail.com",
   HWL_DEPLOYMENT_TARGET: "development",
   INQUIRY_RATE_LIMIT_MAX: "5",
@@ -47,12 +47,13 @@ type Fixture = {
   expectedExit: 0 | 1
   expectedText: string
   name: string
+  unexpectedText?: string[]
 }
 
 const previewFixture: NodeJS.ProcessEnv = {
   ...developmentFixture,
   HWL_DEPLOYMENT_TARGET: "preview",
-  NEXT_PUBLIC_SITE_URL: "https://preview.howlbysmd.com",
+  NEXT_PUBLIC_SITE_URL: "https://preview.hwlbysmd.com",
   VERCEL: "1",
   VERCEL_ENV: "preview",
 }
@@ -64,6 +65,19 @@ const previewStripeFixture: NodeJS.ProcessEnv = {
   STRIPE_LIFT_GUIDE_PRICE_ID: "price_1U9s49Adcj2oNOF4jcyMjyDB",
   STRIPE_LIFT_PRODUCT_ID: "prod_VACTsFboJAEOF0",
   ...stripeFixtureSecrets,
+}
+
+const productionStripeFixture: NodeJS.ProcessEnv = {
+  ...previewStripeFixture,
+  COMMERCE_SALES_READY: "true",
+  HWL_DEPLOYMENT_TARGET: "production",
+  NEXT_PUBLIC_SITE_URL: "https://www.hwlbysmd.com",
+  STRIPE_ACCOUNT_ID: "acct_1U9cEIPTLuM8Maxa",
+  STRIPE_LIFT_GUIDE_PRICE_ID: "price_fixtureLivePrice",
+  STRIPE_LIFT_PRODUCT_ID: "prod_fixtureLiveProduct",
+  STRIPE_LIVEMODE: "true",
+  STRIPE_SECRET_KEY: "sk_live_fixture_private_value",
+  VERCEL_ENV: "production",
 }
 
 const fixtures: Fixture[] = [
@@ -90,6 +104,17 @@ const fixtures: Fixture[] = [
     expectedText:
       "Launch environment preflight passed for preview (open sales).",
     name: "preview sandbox open",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      NEXT_PUBLIC_SITE_URL: "https://preview.howlbysmd.com",
+    },
+    expectedExit: 1,
+    expectedText:
+      "NEXT_PUBLIC_SITE_URL: launch Preview must use https://preview.hwlbysmd.com",
+    name: "retired Preview domain fails",
   },
   {
     args: ["--target=preview", "--expect-sales=closed"],
@@ -222,27 +247,40 @@ const fixtures: Fixture[] = [
     },
     expectedExit: 1,
     expectedText:
-      "CONTACT_FROM_EMAIL: must use the owner-controlled howlbysmd.com sender domain",
+      "CONTACT_FROM_EMAIL: must use the owner-controlled hwlbysmd.com sender domain",
     name: "unapproved sender domain fails",
   },
   {
-    args: ["--target=production", "--expect-sales=open"],
+    args: ["--target=preview", "--expect-sales=closed"],
     env: {
-      ...previewStripeFixture,
-      COMMERCE_SALES_READY: "true",
-      HWL_DEPLOYMENT_TARGET: "production",
-      NEXT_PUBLIC_SITE_URL: "https://www.howlbysmd.com",
-      STRIPE_ACCOUNT_ID: "acct_1U9cEIPTLuM8Maxa",
-      STRIPE_LIFT_GUIDE_PRICE_ID: "price_fixtureLivePrice",
-      STRIPE_LIFT_PRODUCT_ID: "prod_fixtureLiveProduct",
-      STRIPE_LIVEMODE: "true",
-      STRIPE_SECRET_KEY: "sk_live_fixture_private_value",
-      VERCEL_ENV: "production",
+      ...previewFixture,
+      CONTACT_FROM_EMAIL: "HWL by SMD <hello@howlbysmd.com>",
     },
     expectedExit: 1,
     expectedText:
+      "CONTACT_FROM_EMAIL: must use the owner-controlled hwlbysmd.com sender domain",
+    name: "retired sender domain fails",
+  },
+  ...[
+    "https://howlbysmd.com",
+    "https://www.howlbysmd.com",
+    "https://hwlbysmd.com",
+  ].map((siteUrl): Fixture => ({
+    args: ["--target=production", "--expect-sales=open"],
+    env: { ...productionStripeFixture, NEXT_PUBLIC_SITE_URL: siteUrl },
+    expectedExit: 1,
+    expectedText:
+      "NEXT_PUBLIC_SITE_URL: Production must use https://www.hwlbysmd.com",
+    name: `noncanonical Production origin fails: ${siteUrl}`,
+  })),
+  {
+    args: ["--target=production", "--expect-sales=open"],
+    env: productionStripeFixture,
+    expectedExit: 1,
+    expectedText:
       "the canonical Production Supabase project has not been owner-approved",
-    name: "Production remains closed without approved database",
+    name: "new www Production origin passes domain guard but remains closed without approved database",
+    unexpectedText: ["NEXT_PUBLIC_SITE_URL:", "CONTACT_FROM_EMAIL:"],
   },
 ]
 
@@ -284,6 +322,11 @@ for (const fixture of fixtures) {
     failures.push(
       `${fixture.name}: expected output was not present (${fixture.expectedText})`
     )
+  }
+  for (const text of fixture.unexpectedText ?? []) {
+    if (combinedOutput.includes(text)) {
+      failures.push(`${fixture.name}: unexpected output was present (${text})`)
+    }
   }
 
   for (const secret of [

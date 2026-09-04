@@ -4,9 +4,17 @@ import { resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
 export const PREVIEW_BRANCH = "checkpoint/platform-overhaul-2026-08-20"
-export const PREVIEW_ORIGIN = "https://preview.howlbysmd.com"
+export const PREVIEW_ORIGIN = "https://preview.hwlbysmd.com"
 export const RECONCILIATION_CRON_PATH = "/api/cron/commerce-reconciliation"
 export const RECONCILIATION_CRON_SCHEDULE = "17 15 * * *"
+
+const PRODUCTION_HOSTNAMES = new Set([
+  "hwlbysmd.com",
+  "www.hwlbysmd.com",
+  // Retired domains remain outside Preview's deployment authority.
+  "howlbysmd.com",
+  "www.howlbysmd.com",
+])
 
 type CheckStatus = "fail" | "pass" | "warning"
 
@@ -107,6 +115,36 @@ function parseJsonObject(source: string, label: string) {
   }
 }
 
+function containsProductionHostname(value: unknown): boolean {
+  if (typeof value === "string") {
+    const reference = value.trim()
+    const explicitUrl = /^[a-z][a-z0-9+.-]*:\/\//i.test(reference)
+    const protocolRelativeUrl = reference.startsWith("//")
+    // A bare email address is informational data, not URL userinfo. Actual
+    // URLs with userinfo still resolve to and block their Production hostname.
+    if (!explicitUrl && !protocolRelativeUrl && reference.includes("@")) {
+      return false
+    }
+    try {
+      const hostname = new URL(
+        explicitUrl
+          ? reference
+          : protocolRelativeUrl
+            ? `https:${reference}`
+            : `https://${reference}`
+      ).hostname.replace(/\.$/, "")
+      return PRODUCTION_HOSTNAMES.has(hostname)
+    } catch {
+      return false
+    }
+  }
+  if (Array.isArray(value)) return value.some(containsProductionHostname)
+  if (value && typeof value === "object") {
+    return Object.values(value).some(containsProductionHostname)
+  }
+  return false
+}
+
 export function auditPreviewRepositoryFiles(
   files: PreviewRepositoryFiles
 ): PreviewCheck[] {
@@ -143,9 +181,8 @@ export function auditPreviewRepositoryFiles(
           )
     )
 
-    const serializedVercel = JSON.stringify(vercel.value)
     checks.push(
-      serializedVercel.includes("https://www.howlbysmd.com") ||
+      containsProductionHostname(vercel.value) ||
         Object.hasOwn(vercel.value, "alias")
         ? check(
             "fail",

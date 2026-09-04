@@ -186,7 +186,7 @@ function defaultSender(): JourneyMessageSender | null {
     const response = await fetch("https://api.resend.com/emails", {
       body: JSON.stringify({
         from:
-          process.env.CONTACT_FROM_EMAIL ?? "HWL by SMD <hello@howlbysmd.com>",
+          process.env.CONTACT_FROM_EMAIL ?? "HWL by SMD <hello@hwlbysmd.com>",
         html: email.bodyHtml,
         reply_to: email.replyTo,
         subject: email.subject,

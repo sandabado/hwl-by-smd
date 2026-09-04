@@ -122,7 +122,7 @@ export function createBrandOgImage({
           }}
         >
           <span>Beauty · Body · Being</span>
-          <span>howlbysmd.com</span>
+          <span>hwlbysmd.com</span>
         </div>
       </div>
     </div>,

@@ -2,7 +2,7 @@
 
 > NOTE: This document references route names that have since been updated. /body is now /yoga. /being and /tarot are now /astrology. The architecture and design decisions described herein remain valid.
 
-You are helping Celeste and Codex finish **HWL by SMD / howlbysmd.com**, a
+You are helping Celeste and Codex finish **HWL by SMD / hwlbysmd.com**, a
 luxury wellness platform for Shannon Mary Dixon.
 
 I need you to act as the **brand, content, and somatic-experience partner**.

@@ -12,10 +12,10 @@ const CANONICAL_STRIPE_ACCOUNT = {
 
 const CANONICAL_PREVIEW_PRODUCT = "prod_VACTsFboJAEOF0"
 const CANONICAL_PREVIEW_PRICE = "price_1U9s49Adcj2oNOF4jcyMjyDB"
-const CANONICAL_PRODUCTION_URL = "https://www.howlbysmd.com"
-const CANONICAL_PREVIEW_URL = "https://preview.howlbysmd.com"
+const CANONICAL_PRODUCTION_URL = "https://www.hwlbysmd.com"
+const CANONICAL_PREVIEW_URL = "https://preview.hwlbysmd.com"
 const CANONICAL_CALCOM_PROFILE_URL = "https://cal.com/hwlbysmd"
-const CANONICAL_EMAIL_DOMAIN = "howlbysmd.com"
+const CANONICAL_EMAIL_DOMAIN = "hwlbysmd.com"
 const CANONICAL_SUPABASE_PROJECT_REF = {
   development: "lkxppynmdfzljuptauxf",
   preview: "lkxppynmdfzljuptauxf",

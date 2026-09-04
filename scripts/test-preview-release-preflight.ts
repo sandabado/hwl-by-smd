@@ -5,6 +5,7 @@ import {
   auditPreviewGitSnapshot,
   auditPreviewRepositoryFiles,
   PREVIEW_BRANCH,
+  PREVIEW_ORIGIN,
   type PreviewCheck,
   type PreviewRepositoryFiles,
 } from "./preflight-preview-release.ts"
@@ -19,7 +20,7 @@ function repositoryFixture(): PreviewRepositoryFiles {
     envExample: `
 HWL_DEPLOYMENT_TARGET=development
 HWL_LOCAL_BUILD=false
-NEXT_PUBLIC_SITE_URL=https://www.howlbysmd.com
+NEXT_PUBLIC_SITE_URL=https://www.hwlbysmd.com
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
@@ -34,7 +35,7 @@ LIFT_PDF_STORAGE_PATH=lift/lift-guide.pdf
 LIFT_VIDEO_STORAGE_PATH=lift/complete-lift-v1.mp4
 RESEND_API_KEY=
 CONTACT_TO_EMAIL=owner@example.com
-CONTACT_FROM_EMAIL=HWL <hello@howlbysmd.com>
+CONTACT_FROM_EMAIL=HWL <hello@hwlbysmd.com>
 INQUIRY_RATE_LIMIT_SECRET=
 INQUIRY_RATE_LIMIT_MAX=5
 CALCOM_PROFILE_URL=https://cal.com/hwlbysmd
@@ -78,6 +79,94 @@ test("reviewed Preview repository policy passes", () => {
     failures(auditPreviewRepositoryFiles(repositoryFixture())),
     []
   )
+})
+
+test("proposed custom Preview origin uses the new canonical domain", () => {
+  assert.equal(PREVIEW_ORIGIN, "https://preview.hwlbysmd.com")
+})
+
+test("new and retired Production host references fail Preview isolation", () => {
+  for (const hostname of [
+    "hwlbysmd.com",
+    "www.hwlbysmd.com",
+    "howlbysmd.com",
+    "www.howlbysmd.com",
+  ]) {
+    for (const value of [
+      hostname,
+      `https://${hostname}/checkout/success`,
+      `http://${hostname}`,
+      `//${hostname}`,
+      `https://operator@${hostname}/path`,
+      `//operator@${hostname}/path`,
+      `https://${hostname.toUpperCase()}:443/path`,
+      `https://${hostname}./path`,
+    ]) {
+      const fixture = repositoryFixture()
+      const parsed = JSON.parse(fixture.vercelJson) as Record<string, unknown>
+      parsed.redirects = [{ source: "/legacy", destination: value }]
+      fixture.vercelJson = JSON.stringify(parsed)
+
+      assert.ok(
+        failures(auditPreviewRepositoryFiles(fixture)).some(
+          (item) => item.name === "Vercel Production alias isolation"
+        ),
+        `Production hostname reference must be rejected: ${value}`
+      )
+    }
+  }
+})
+
+test("all top-level aliases remain outside Preview preparation authority", () => {
+  const fixture = repositoryFixture()
+  const parsed = JSON.parse(fixture.vercelJson) as Record<string, unknown>
+  parsed.alias = ["preview.example.com"]
+  fixture.vercelJson = JSON.stringify(parsed)
+
+  assert.ok(
+    failures(auditPreviewRepositoryFiles(fixture)).some(
+      (item) => item.name === "Vercel Production alias isolation"
+    )
+  )
+})
+
+test("non-Production references are not mistaken for Production hostnames", () => {
+  for (const destination of [
+    PREVIEW_ORIGIN,
+    "https://preview.howlbysmd.com",
+    "https://hwl-fixture-checkpoint.vercel.app",
+    "https://nothwlbysmd.com",
+    "https://hwlbysmd.com.example.org",
+  ]) {
+    const fixture = repositoryFixture()
+    const parsed = JSON.parse(fixture.vercelJson) as Record<string, unknown>
+    parsed.redirects = [{ source: "/preview", destination }]
+    fixture.vercelJson = JSON.stringify(parsed)
+
+    assert.deepEqual(failures(auditPreviewRepositoryFiles(fixture)), [])
+  }
+})
+
+test("informational email and prose header values are not Production aliases", () => {
+  const fixture = repositoryFixture()
+  const parsed = JSON.parse(fixture.vercelJson) as Record<string, unknown>
+  parsed.headers = [
+    {
+      source: "/(.*)",
+      headers: [
+        { key: "X-Support", value: "hello@hwlbysmd.com" },
+        { key: "X-Legacy-Support", value: "hello@howlbysmd.com" },
+        { key: "X-Support-Name", value: "HWL <hello@hwlbysmd.com>" },
+        {
+          key: "X-Support-Notice",
+          value: "Visit https://www.hwlbysmd.com for help.",
+        },
+      ],
+    },
+  ]
+  fixture.vercelJson = JSON.stringify(parsed)
+
+  assert.deepEqual(failures(auditPreviewRepositoryFiles(fixture)), [])
 })
 
 test("Production deployment command in CI fails", () => {

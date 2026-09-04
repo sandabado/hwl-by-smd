@@ -49,11 +49,11 @@ Phase 2 adds the first production commerce and member layer to HWL by SMD.
 1. Create the Supabase project and apply
    `supabase/migrations/001_whole_body_os.sql`.
 2. In Supabase Auth, set the Site URL to
-   `https://www.howlbysmd.com` and add these exact redirect URLs:
+   `https://www.hwlbysmd.com` and add these exact redirect URLs:
    - `http://localhost:3000/auth/callback`
    - `http://localhost:3001/auth/callback`
-   - `https://preview.howlbysmd.com/auth/callback`
-   - `https://www.howlbysmd.com/auth/callback`
+   - `https://preview.hwlbysmd.com/auth/callback`
+   - `https://www.hwlbysmd.com/auth/callback`
 3. Configure custom SMTP for Supabase Auth from the verified HWL sender domain.
    The default Supabase SMTP service is not a production delivery boundary and
    does not send to non-team addresses. Disable provider link tracking so it
@@ -74,7 +74,7 @@ Phase 2 adds the first production commerce and member layer to HWL by SMD.
    - $11.11 one-time — LIFT, guided video + downloadable PDF
    - Do not create a PDF-only launch Price or a membership Price yet.
 7. Register the Stripe webhook URL:
-   `https://www.howlbysmd.com/api/stripe/webhook`.
+   `https://www.hwlbysmd.com/api/stripe/webhook`.
 8. Subscribe the webhook to:
    - `checkout.session.completed`
    - `checkout.session.expired`

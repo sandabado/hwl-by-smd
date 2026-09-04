@@ -181,7 +181,7 @@ export default async function AdminSettingsPage() {
                 <p className="text-[10px] font-semibold tracking-[0.18em] text-[#9d8464] uppercase">
                   Domain
                 </p>
-                <h2 className="mt-1 text-2xl">howlbysmd.com</h2>
+                <h2 className="mt-1 text-2xl">hwlbysmd.com</h2>
                 <p className="mt-1 text-xs text-[#7a827a]">
                   Public home for the HWL experience
                 </p>

@@ -73,8 +73,7 @@ async function notifyShannon(
 
   const response = await fetch("https://api.resend.com/emails", {
     body: JSON.stringify({
-      from:
-        process.env.CONTACT_FROM_EMAIL ?? "HWL by SMD <hello@howlbysmd.com>",
+      from: process.env.CONTACT_FROM_EMAIL ?? "HWL by SMD <hello@hwlbysmd.com>",
       html: `<div style="font-family:Arial,sans-serif;color:#3f4a42;line-height:1.65"><h1 style="font-family:Georgia,serif">A gentle check-in is needed.</h1><p>${alerts.length === 1 ? "One relationship was" : `${alerts.length} relationships were`} flagged for human support. Automated journey messages have been paused where applicable.</p><ul>${items}</ul></div>`,
       subject:
         alerts.length === 1

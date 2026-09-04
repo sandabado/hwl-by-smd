@@ -22,8 +22,7 @@ export async function sendTransactionalEmail({
 
   const response = await fetch("https://api.resend.com/emails", {
     body: JSON.stringify({
-      from:
-        process.env.CONTACT_FROM_EMAIL ?? "HWL by SMD <hello@howlbysmd.com>",
+      from: process.env.CONTACT_FROM_EMAIL ?? "HWL by SMD <hello@hwlbysmd.com>",
       html,
       subject: subjects[template],
       to,

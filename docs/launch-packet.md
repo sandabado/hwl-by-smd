@@ -2,6 +2,63 @@
 
 **Updated:** September 4, 2026
 
+**Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
+Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
+Vercel apex-to-www redirect, `https://preview.hwlbysmd.com` for the proposed
+custom Preview, and `hello@hwlbysmd.com` for the planned Resend sender. This
+supersedes the old-domain setup instructions and approval request below;
+historical `howlbysmd.com` observations are not new-domain verification.
+
+## September 4 Domain Change
+
+- Application canonical metadata, structured-data URLs, sitemap/robots,
+  social-image branding, admin domain label, email defaults, environment
+  template, and release-validator expectations now target `hwlbysmd.com`.
+  Local `NEXT_PUBLIC_SITE_URL` remains localhost and Shannon's receiving
+  `CONTACT_TO_EMAIL` is unchanged. The local sender setting changes only the
+  planned From address; it does not grant verified sending authority.
+- Live Vercel reads confirm `hwlbysmd.com` and `www.hwlbysmd.com` are verified
+  and assigned to `hwl-by-smd`. The existing apex-to-www HTTP 308 rule is kept.
+  At 10:38 AM PDT the authoritative Porkbun records were `@ A 216.198.79.1`
+  and `www CNAME e662837722e1e8d4.vercel-dns-017.com`; Vercel reported both
+  hosts correctly configured. Earlier recursive parking answers were stale.
+  No website DNS or redirect change was made by Codex.
+- `preview.hwlbysmd.com` is not assigned or configured yet. Preserve the
+  existing protected Stripe sandbox branch-alias endpoint until the new
+  Preview hostname, Auth callback allowlist, and signing destination are
+  coherently configured and tested. Do not silently rewrite existing orders'
+  site URLs or use an old-host result as new-host payment evidence.
+- Existing apex Porkbun mail-forwarding MX/SPF must be preserved. At 10:38 AM
+  PDT the new domain had no authoritative `send`, `resend._domainkey`, or
+  `_dmarc` records. Obtain fresh records for this exact domain from Resend;
+  never copy the old domain's DKIM value. Do not enable receiving or replace
+  the apex mail records as part of sending setup.
+- The new Resend domain `hwlbysmd.com` was added as
+  `74f41a20-cb2c-4902-a9bb-378ed2049143`; its status is Not Started. Exact
+  generated DNS records and next steps are in [Domain Setup](hwl-domain-setup.md).
+  The owner-created old domain `howlbysmd.com` remains Not Started and was
+  not deleted. The new domain still requires DNS approval, Resend verification,
+  and a properly scoped sending key before inquiry or Auth-email delivery
+  can pass.
+- These are source/configuration preparations, not a deployed candidate.
+  Production promotion, live Stripe configuration, custom Preview assignment,
+  email DNS changes, and credential creation retain their explicit owner gates.
+- Post-change validation passed: 23 launch-environment cases, 15 Preview-policy
+  tests, seven reported inquiry tests, 54 commerce tests, five reported booking
+  tests, lint, a Next.js 16.3.1 Webpack build, and standalone TypeScript after
+  the build. The generated sitemap's 23 URLs all use
+  `https://www.hwlbysmd.com`; generated robots references the new sitemap;
+  neither artifact contains the retired domain. This remains local artifact
+  evidence, not a new Vercel deployment or email-delivery claim.
+- The final checkpoint review re-ran the 23 launch-environment fixtures,
+  15 Preview-policy tests, and seven inquiry tests successfully. The actual
+  local environment still fails on `RESEND_API_KEY`; these fixture passes do
+  not clear the provider gate. A fresh Resend browser read now shows the team
+  name `HWLbySMD` under the same signed-in account, with the exact new domain
+  still Not Started. Required DNS records and restricted credential creation
+  await owner approval. The local development browser remains available at
+  `http://localhost:3000/`; no deployment or public-sales change is implied.
+
 **Launch decision:** **Not live yet.** The current working tree implements the
 single $11.11 LIFT offer, protected fulfillment, a persistent cart, a guarded
 Stripe Checkout path, durable scheduled reconciliation, private operations
@@ -16,10 +73,11 @@ a real request, manual confirmation, reschedule, and cancellation lifecycle has
 passed, while human inbox receipt, the current public Preview, and Production
 have not yet passed their required end-to-end launch tests.
 
-## September 4 Continuation — Current Evidence
+## September 4, 10:30 AM Continuation — Before the Domain Change
 
-This section supersedes the older mutable provider/configuration statements
-below. Historical August 31 tests remain evidence for that dated path only.
+This section records the pre-domain-change checkpoint. The domain-change
+section above takes precedence. Historical August 31 tests remain evidence
+for that dated path only.
 
 - **Application candidate:** `455edc3a5529535080587988d52f9f22360c0626`
   was clean before this packet refresh. Its five commits after the pushed
@@ -104,7 +162,7 @@ push `main`, or promote anything to Production.
 | Inquiry delivery                | PERSISTENCE VERIFIED / HUMAN DELIVERY BLOCKED | Migration 013 is ledger-applied and its private tables/RPC boundary is present in staging. One synthetic hosted submission is durably stored, but its latest notification state is `failed` / provider rejected. There are zero verified administrator profiles, so Shannon currently has neither a confirmed email alert nor verified human inbox access |
 | Supabase Auth email             | PROVIDER SETUP / E2E PENDING      | A fresh public settings read shows signup enabled and email confirmation required (`mailer_autoconfirm=false`). Custom SMTP, verified-domain sending, exact Preview/Production redirect allowlists, rate limits, disabled link tracking, and real non-team-email delivery have not been proven |
 | Scheduled recovery             | STAGING RUN VERIFIED / PREVIEW RUN PENDING | Migration 014 is ledger-applied and its private queue/attempt tables plus narrow service-role RPCs are present in staging. On August 31, an authenticated local worker run against hosted staging reported and claimed the two expired current-candidate sandbox orders, resolved both as terminal, and left both jobs complete with zero alerts, errors, or manual-review reasons. A distinct sensitive branch-scoped Preview `CRON_SECRET` exists; deployed Preview invocation, alert routing, and cadence acceptance remain pending |
-| Current launch Preview          | CONFIGURATION 21/22 / BUILD BLOCKED | Checkpoint commit `c74fe61` is pushed; later local documentation commits are not. Automatic Preview `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo` failed safely before compilation because the provider set was incomplete. The hosted webhook name is now present. Resend Free installation is completed but has no email resource; current Marketplace resource choices are paid-only. Direct Resend is signed in, with account/domain/key scope awaiting owner confirmation. Production has zero environment records; `main` is untouched |
+| Current launch Preview          | CONFIGURATION / NEW DOMAIN CUTOVER PENDING | Checkpoint commit `c74fe61` is pushed; the new-domain application edits are local only. Automatic Preview `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo` failed before compilation on incomplete provider configuration. The hosted webhook name is now present, but a valid Resend key is still missing. Direct Resend now contains `hwlbysmd.com` with DNS verification/key pending. Hosted origins, sender configuration, and Auth callbacks must be aligned to the new domain before deploying. Production has zero environment records; `main` is untouched |
 | Production / live money         | PENDING OWNER GATE                | Production publicly serves older commit `145112cd` and checkout truthfully returns 503; Stripe activation and coherent live Product/Price/webhook/Production variables remain incomplete                                    |
 
 Passing local compilation does not prove provider integration, a paid journey,
@@ -743,7 +801,7 @@ pointer activation still require separate verification.
 
 - `CONTACT_TO_EMAIL` is configured locally.
 - `CONTACT_FROM_EMAIL` is locally configured in the planned
-  `HWL by SMD <hello@howlbysmd.com>` shape. This is configuration evidence only;
+  `HWL by SMD <hello@hwlbysmd.com>` shape. This is configuration evidence only;
   it must not be treated as delivery authority until the domain is verified in
   Resend.
 - The present local Resend credential did not validate in the provider audit.
@@ -753,8 +811,11 @@ pointer activation still require separate verification.
   of the check. No paid plan was selected. A direct Resend Free account/key is
   the approved zero-cost path, but owner sign-in and a valid `RESEND_API_KEY`
   are still pending.
+- The September 4 new-domain update added `hwlbysmd.com` to the direct Resend
+  account. See [Domain Setup](hwl-domain-setup.md) for the exact new CNAME/DKIM
+  records; DNS verification and a scoped sending key are still pending.
 - No sender-domain delivery test has passed.
-- Public DNS currently returns no MX or TXT record at `send.howlbysmd.com`, no
+- The August 31 old-domain DNS check returned no MX or TXT at `send.howlbysmd.com`, no
   TXT at the common `resend._domainkey.howlbysmd.com` selector, no root MX/TXT,
   and no `links.howlbysmd.com` tracking CNAME. A DMARC record does exist at
   `_dmarc.howlbysmd.com` with `p=quarantine`. Resend must first generate the
@@ -762,7 +823,7 @@ pointer activation still require separate verification.
   must not be guessed. Official domain guidance:
   <https://resend.com/docs/dashboard/domains/introduction>.
 - The launch validator now rejects a `CONTACT_FROM_EMAIL` outside the
-  owner-controlled `howlbysmd.com` domain. This prevents an arbitrary sender
+  owner-selected `hwlbysmd.com` domain. This prevents an arbitrary sender
   from satisfying configuration shape; Resend-side domain verification and a
   real delivery test remain separate evidence.
 - Migration 013 is ledger-applied, and its private tables plus narrow RPCs are
@@ -829,7 +890,7 @@ dedicated persistent sandbox endpoint; the ephemeral localhost Stripe CLI
 authority was not copied into Preview.
 
 Production has zero environment-variable records, and
-`preview.howlbysmd.com` is not currently assigned to a deployment. The
+`preview.hwlbysmd.com` is not currently assigned to a deployment. The
 checkpoint branch alone was pushed; no custom-domain, DNS, `main`, or
 Production mutation occurred.
 
@@ -907,7 +968,7 @@ Before describing a Preview as the release candidate:
 7. Verify the existing dedicated bypass-qualified Stripe sandbox endpoint on
    the fresh Preview: unqualified protection, unsigned application rejection,
    signed delivery, and staging receipt.
-8. Treat `preview.howlbysmd.com` as a separate owner/DNS gate; the current
+8. Treat `preview.hwlbysmd.com` as a separate owner/DNS gate; the current
    stable branch alias remains the verified webhook target unless that hostname
    is explicitly approved and configured.
 9. Enable commerce only for the coherent test Preview and repeat
@@ -931,7 +992,7 @@ Production remains closed until all of the following are true:
 - One live, one-time USD $11.11 Product/Price exists with the same canonical
   LIFT metadata as the sandbox Product.
 - The live webhook points directly to
-  `https://www.howlbysmd.com/api/stripe/webhook` without a redirect and is
+  `https://www.hwlbysmd.com/api/stripe/webhook` without a redirect and is
   subscribed to `checkout.session.completed`, `checkout.session.expired`,
   `charge.refunded`, and `charge.dispute.created`.
 - Production has a coherent set of live Stripe, Production Supabase, protected
@@ -976,7 +1037,7 @@ outstanding:
    Auth/profile identity, approve the narrow privilege change separately, and
    prove real inbox access plus logged-out denial.
 4. **Supabase Auth delivery:** configure custom SMTP from the verified HWL
-   sender domain, set the canonical Site URL to `https://www.howlbysmd.com`,
+   sender domain, set the canonical Site URL to `https://www.hwlbysmd.com`,
    allow the exact Preview and Production callbacks, disable SMTP link
    tracking, review Auth rate limits, and verify signup confirmation plus
    password recovery with a non-team address.
@@ -996,7 +1057,7 @@ outstanding:
    and persistent sandbox webhook now exist while Deployment Protection remains
    enabled globally. After Resend allows a successful Preview, verify signed
    delivery and staging receipt. Creation and DNS configuration of custom
-   `preview.howlbysmd.com` remain a separate owner gate.
+   `preview.hwlbysmd.com` remain a separate owner gate.
 8. **Production database:** only one HWL Supabase project currently exists.
    Explicitly approve whether Production may use it or authorize creation and
    verification of a separate Production project; staging must not be silently

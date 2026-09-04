@@ -3,6 +3,7 @@ import "server-only"
 const CALCOM_API_VERSION = "2024-06-14"
 const CALCOM_EVENT_TYPES_ENDPOINT = "https://api.cal.com/v2/event-types"
 const CALCOM_USERNAME = "hwlbysmd"
+const CALCOM_USER_AGENT = "HWLbySMD/1.0 (+https://www.hwlbysmd.com)"
 const DEFAULT_CALCOM_PROFILE_URL = "https://cal.com/hwlbysmd"
 
 export type CalcomPublicEventType = Readonly<{
@@ -127,6 +128,7 @@ export async function getCalcomPublicEventTypes(): Promise<CalcomPublicEventType
       headers: {
         Accept: "application/json",
         "cal-api-version": CALCOM_API_VERSION,
+        "User-Agent": CALCOM_USER_AGENT,
       },
       next: {
         revalidate: 300,

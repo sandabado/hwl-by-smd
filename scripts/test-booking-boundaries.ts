@@ -6,8 +6,52 @@ import {
   findBookingService,
   isExactCalEventForBookingService,
 } from "../lib/booking-services.ts"
+import { getCalcomPublicEventTypes } from "../lib/calcom.ts"
 
 const services = bookingPillars.flatMap((pillar) => pillar.services)
+
+test("Cal.com discovery sends the complete stable request identity", async () => {
+  const originalFetch = globalThis.fetch
+  let requestUrl: string | null = null
+  let requestInit: RequestInit | undefined
+
+  globalThis.fetch = async (input, init) => {
+    requestUrl = input.toString()
+    requestInit = init
+
+    return new Response(JSON.stringify({ data: [], status: "success" }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
+    })
+  }
+
+  try {
+    assert.deepEqual(await getCalcomPublicEventTypes(), {
+      eventTypes: [],
+      status: "available",
+    })
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+
+  assert.equal(
+    requestUrl,
+    "https://api.cal.com/v2/event-types?username=hwlbysmd"
+  )
+  assert.deepEqual(
+    Object.fromEntries(new Headers(requestInit?.headers).entries()),
+    {
+      accept: "application/json",
+      "cal-api-version": "2024-06-14",
+      "user-agent": "HWLbySMD/1.0 (+https://www.hwlbysmd.com)",
+    }
+  )
+  assert.deepEqual(requestInit?.next, {
+    revalidate: 300,
+    tags: ["calcom-public-event-types"],
+  })
+  assert.ok(requestInit?.signal instanceof AbortSignal)
+})
 
 test("booking catalog keeps live Cal discovery fail closed", async (t) => {
   await t.test("all public services have one unique canonical slug", () => {

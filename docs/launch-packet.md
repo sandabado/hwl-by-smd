@@ -44,7 +44,7 @@ historical `howlbysmd.com` observations are not new-domain verification.
   Production promotion, live Stripe configuration, custom Preview assignment,
   email DNS changes, and credential creation retain their explicit owner gates.
 - Post-change validation passed: 23 launch-environment cases, 15 Preview-policy
-  tests, seven reported inquiry tests, 54 commerce tests, five reported booking
+  tests, seven reported inquiry tests, 54 commerce tests, six reported booking
   tests, lint, a Next.js 16.3.1 Webpack build, and standalone TypeScript after
   the build. The generated sitemap's 23 URLs all use
   `https://www.hwlbysmd.com`; generated robots references the new sitemap;
@@ -58,6 +58,20 @@ historical `howlbysmd.com` observations are not new-domain verification.
   still Not Started. Required DNS records and restricted credential creation
   await owner approval. The local development browser remains available at
   `http://localhost:3000/`; no deployment or public-sales change is implied.
+- A fresh September 4 Cal.com check found all ten exact public event types and
+  real 30-day availability, but also reproduced HTTP 403 for the application's
+  former server request shape. Cal accepted the same versioned JSON request
+  with a normal `User-Agent`. The current code now supplies the stable
+  `HWLbySMD/1.0 (+https://www.hwlbysmd.com)` request identity; a deterministic
+  header/cache/timeout regression test and the real repaired application
+  function both pass, with the latter returning all ten intended slugs. This
+  restores server discovery locally; the exact deployed Preview still needs
+  browser verification.
+- A same-time Stripe read confirms the canonical sandbox still has exactly one
+  active Complete LIFT Product and one active one-time USD 1111 Price, and its
+  persistent checkpoint webhook remains enabled for the four approved event
+  types. The two newest hardened-candidate Sessions remain expired/unpaid with
+  no PaymentIntent. Live-parent activation and live objects remain unverified.
 
 **Launch decision:** **Not live yet.** The current working tree implements the
 single $11.11 LIFT offer, protected fulfillment, a persistent cart, a guarded
@@ -155,7 +169,7 @@ push `main`, or promote anything to Production.
 | Boundary                        | Status                            | Authoritative evidence                                                                                                                                                                                                      |
 | ------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Implemented in the working tree | READY FOR INTEGRATION             | One $11.11 video + PDF offer; persistent cart and sheet; server-validated Checkout; target/account/mode-scoped webhook, authenticated recovery, and durable scheduled recovery; private reconciliation status; protected media routes; Cal.com discovery/embed with manual inquiry fallback; DB-first inquiry route |
-| Locally verified                | PASS                              | TypeScript, ESLint, SEO validation, 54 commerce tests, 18 launch-boundary tests, 7 inquiry-boundary tests, 5 booking-boundary tests, 1 accessibility-markup test, 10 Preview-policy tests, and a Next.js 16.3.1 Webpack production build all pass on September 4. The rendered desktop/mobile axe evidence is from August 31, not a fresh hosted sweep |
+| Locally verified                | PASS                              | TypeScript, ESLint, SEO validation, 54 commerce tests, 23 launch-boundary tests, 7 inquiry-boundary tests, 6 booking-boundary tests, 1 accessibility-markup test, 15 Preview-policy tests, and a Next.js 16.3.1 Webpack production build all pass on September 4. The rendered desktop/mobile axe evidence is from August 31, not a fresh hosted sweep |
 | Supabase staging                | SCHEMA + ASSETS VERIFIED / E2E PENDING | Project is healthy; the remote ledger contains migrations 001–014 and a current linked dry-run is a no-op. Hosted schema/RPC probes match the 012–014 boundaries. The private 46,514,399-byte video remains verified, and the corrected 6,036,808-byte PDF returned a signed HTTP 200 with byte-identical SHA-256 while anonymous access returned 400. Current-code purchase, inquiry, recovery, and administrator journeys still require hosted/public-Preview repeats |
 | Stripe sandbox                  | PROVIDER OBJECTS VERIFIED / CURRENT E2E PENDING | A fresh read-only API check resolves to canonical account `acct_1U9cEQAdcj2oNOF4`; its active test Product/Price are one-time USD 1111 and match the launch catalog. The account still reports `charges_enabled=false`, `payouts_enabled=false`, and `details_submitted=false`. An earlier path passed real sandbox Checkout and lifecycle tests, but the exact current candidate has not repeated that provider journey |
 | Cal.com                         | OPERATIONAL / INBOX RECEIPT PENDING | `HWLbySMD` / `hwlbysmd` publicly lists the ten exact website event types. A real Signature Facial request entered the organizer's unconfirmed queue with the required guest count and location, passed manual confirmation, moved from 10:00 to 11:00 AM Pacific, and was then canceled. A fresh organizer read removed it from Upcoming, retained it under Canceled, and a fresh public read restored the released 11:00 AM slot. Cal collected no payment. Cal reported sending lifecycle emails, but human inbox receipt is not independently verified. Wild Glow Express remains inquiry-only |
@@ -404,7 +418,7 @@ The current inquiry concurrency and notification-state proof is more specific:
 | `npm audit --omit=dev` and full `npm audit`                         | PASS — zero vulnerabilities across 141 production dependencies and 554 total dependencies at checkpoint `c74fe61`; GitHub's 19 alerts reproduce only against the older `origin/main` lockfile                                                                      |
 | `npm run test:launch-env`                                           | PASS — all 18 synthetic launch-boundary fixtures, including explicit rejection of legacy Supabase browser/server keys, missing/short `CRON_SECRET`, and reuse of the inquiry-rate-limit secret as cron authority, produced the expected exit and message without exposing fixture secrets |
 | `npm run test:inquiries`                                            | PASS — 7 provider-free boundary cases cover trusted Vercel addressing, spoof rejection, missing deployed identity, short/missing HMAC authority, keyed fingerprints and payload digests, 1–20 limit clamping/defaulting, and the explicit local-development fallback          |
-| `npm run test:booking`                                              | PASS — 5 booking-boundary cases cover 11 unique canonical slugs, Wild Glow Express as inquiry-only, exact slug/title/duration matching for the other 10 services, and published guest limits                                                                                |
+| `npm run test:booking`                                              | PASS — 6 booking-boundary cases cover the complete Cal request identity, 11 unique canonical slugs, Wild Glow Express as inquiry-only, exact slug/title/duration matching for the other 10 services, and published guest limits                                                |
 | `npm run test:accessibility`                                        | PASS — rendered markup proves the actual LIFT progressbar directly owns its accessible name and truthful 0–7 initial value semantics                                                                                                                                       |
 | `npm run test:preview-release`                                      | PASS — 10 offline Preview-policy cases cover repository policy, forbidden Production deploy commands, deployment-gate ordering, exact cron declaration, committed-template secrecy, clean checkpoint state, pre-push ahead state, post-push exact synchronization, dirty-tree rejection, and branch/upstream mismatch rejection |
 | Preview repository preflight before and after push                  | PASS — clean checkpoint candidate was four commits ahead and not behind before push; after the authorized checkpoint-only push, HEAD `c74fe61` exactly matched `origin/checkpoint/platform-overhaul-2026-08-20`                                                       |

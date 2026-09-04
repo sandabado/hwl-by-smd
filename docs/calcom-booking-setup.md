@@ -1,6 +1,6 @@
 # Cal.com booking launch setup
 
-Last verified: August 31, 2026
+Last verified: September 4, 2026
 
 ## Current provider state
 
@@ -113,6 +113,22 @@ error overlay. At a 390×844 viewport, the Signature Facial calendar retained a
 390-pixel client and scroll width, displayed enabled dates and six visible time
 buttons, and produced no error overlay or horizontal overflow.
 
+On September 4, the exact READY checkpoint Preview returned HTTP 200 for the
+Signature Facial, Private Yoga, Moon Oracle Reading, and Wild Glow Express
+booking routes. The three Cal-backed pages contained their exact public
+`https://cal.com/hwlbysmd/<slug>` handoff and live-calendar copy; Wild Glow
+Express contained inquiry-only copy and no Cal link. A fresh public provider
+read returned all ten exact intended slugs. A privacy-focused aggregate scan
+found no public conflict-calendar labels, attendee addresses, private notes, or
+note templates. Distinct live public dates and times were also confirmed for
+the Esthetician, Yoga, and Consultation schedule families.
+
+An August 31 direct/provider Signature Facial test entered the unconfirmed
+queue, was manually confirmed, rescheduled, canceled, and released its slot.
+No test appointment remains active. This proves the provider lifecycle at that
+time, but it does not replace the required exact-current-Preview submission or
+human notification evidence.
+
 The following customer-journey evidence is still required:
 
 - A selected conflict on each approved Apple calendar removes the opening.
@@ -128,6 +144,7 @@ The following customer-journey evidence is still required:
   the visitor to the stored inquiry path without losing the selected service.
 - Public event links reveal no private calendar names, notes, or address data.
 
-Complete and remove any test bookings after verification. Publication and the
-verified website handoff are not evidence that conflict handling, messaging,
-cancellation, rescheduling, or a completed booking has passed end to end.
+Complete and remove any test bookings after verification. Publication,
+deployed handoff, and historical provider lifecycle evidence are not proof that
+current conflict handling, messaging, or the exact Preview's complete booking
+journey has passed end to end.

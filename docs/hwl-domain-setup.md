@@ -1,7 +1,8 @@
 # hwlbysmd.com — Domain Setup
 
-Owner-selected domain, September 4, 2026. No paid plan, DNS edit, credential
-creation, or Production deployment was performed for this record.
+Owner-selected domain, September 4, 2026. This record now includes the approved
+Preview CNAME, verified Resend sending DNS, and the restricted Preview sending
+credential. No Production deployment or `main` push was performed.
 
 ## Website
 
@@ -11,40 +12,43 @@ redirect from `https://hwlbysmd.com` to `https://www.hwlbysmd.com`.
 At 10:38 AM PDT, Vercel confirmed both domains are verified and assigned to
 `whole-body-earth/hwl-by-smd`. Authoritative Porkbun DNS matched Vercel:
 
-| Type | Host | Value |
-| --- | --- | --- |
-| A | `@` | `216.198.79.1` |
+| Type  | Host  | Value                                 |
+| ----- | ----- | ------------------------------------- |
+| A     | `@`   | `216.198.79.1`                        |
 | CNAME | `www` | `e662837722e1e8d4.vercel-dns-017.com` |
 
 These website records already exist. Do not add duplicates or replace them.
 Correct DNS does not deploy the new application candidate.
 
-`preview.hwlbysmd.com` still needs an explicitly approved checkpoint-branch
-assignment. Read Vercel's exact target after assignment, then add only that
-record. Keep the existing branch-alias sandbox webhook until the hostname,
-environment, Auth callback, and webhook destination can be verified together.
+`preview.hwlbysmd.com` is now verified in Vercel and assigned only to
+`checkpoint/platform-overhaul-2026-08-20`. Authoritative and public DNS return
+`CNAME cname.vercel-dns.com`; Vercel reports `misconfigured:false`, and TLS
+validates for the hostname. It maps to READY deployment
+`dpl_9uzHczDpUXxWXwQcKUwsZakxDJCy` at exact commit
+`96809cf5cbc12f2b23387c1d68f166618e1baa0f`. Deployment Protection remains
+enabled; anonymous access redirects to Vercel SSO.
 
-## Resend sending — DNS pending
+## Resend sending — DNS verified, delivery test pending
 
-The new domain was added in the signed-in `jesse.gawlik` Resend team; a later
-September 4 browser read shows that team's name as **HWLbySMD** under the same
-signed-in account. The domain status remains **Not Started**. Domain ID:
+The new domain was added in the signed-in **HWLbySMD** Resend team. Its status
+is now **Verified**. Domain ID:
 `74f41a20-cb2c-4902-a9bb-378ed2049143`.
 
 - [Resend domain and verification](https://resend.com/domains/74f41a20-cb2c-4902-a9bb-378ed2049143)
 - [Porkbun domain DNS](https://porkbun.com/account/domainsSpeedy/hwlbysmd.com)
 
-The records below were copied from this exact new domain's Resend page on
-September 4. They differ from the old domain's Amazon SES records. Recheck
-the domain page before applying them. These are public DNS values, not API
-secrets. Domain creation alone does not authorize email sending.
+The records below were copied from this exact new domain's Resend page and now
+resolve publicly. They differ from the old domain's Amazon SES records. These
+are public DNS values, not API secrets. Domain verification is configuration
+authority only; a real accepted send and human mailbox receipt remain separate
+launch evidence.
 
-| Required | Type | Host in Porkbun | Content | TTL |
-| --- | --- | --- | --- | --- |
-| Yes | TXT | `resend._domainkey` | The complete DKIM value below | Auto/default |
-| Yes | CNAME | `rsend` | `rsend.forge.rmta.net` | Auto/default |
-| Yes | CNAME | `send` | `send.forge.rmta.net` | Auto/default |
-| Optional; owner policy choice | TXT | `_dmarc` | `v=DMARC1; p=none;` | Auto/default |
+| Required                      | Type  | Host in Porkbun     | Content                       | TTL          |
+| ----------------------------- | ----- | ------------------- | ----------------------------- | ------------ |
+| Yes                           | TXT   | `resend._domainkey` | The complete DKIM value below | Auto/default |
+| Yes                           | CNAME | `rsend`             | `rsend.forge.rmta.net`        | Auto/default |
+| Yes                           | CNAME | `send`              | `send.forge.rmta.net`         | Auto/default |
+| Optional; owner policy choice | TXT   | `_dmarc`            | `v=DMARC1; p=none;`           | Auto/default |
 
 DKIM TXT content (one continuous value):
 
@@ -58,18 +62,21 @@ replace stricter DMARC policy, or delete the old unverified Resend domain as
 part of this sending setup. If an exact hostname already has a record, inspect
 it before editing; do not overwrite a conflicting record blindly.
 
-After owner-approved DNS changes:
+Completed configuration and remaining proof:
 
-1. Verify the exact TXT/CNAME records through authoritative DNS.
-2. Click **Verify DNS Records** in this new domain's Resend page.
-3. Require Resend's verified/sending-ready state, not just submitted DNS.
-4. Create an approved sending-only key restricted to `hwlbysmd.com`. Store it
-   privately in local and sensitive checkpoint-branch Preview configuration.
+1. **Complete:** exact TXT/CNAME records verified through authoritative and
+   public DNS.
+2. **Complete:** Resend reports the exact new domain verified/sending-ready.
+3. **Complete:** an approved sending-only replacement key restricted to
+   `hwlbysmd.com` was created and stored as a sensitive checkpoint-branch
+   Preview variable.
    Never paste it into this document, chat, source, or an API URL.
-5. Use `HWL by SMD <hello@hwlbysmd.com>` as `CONTACT_FROM_EMAIL`; retain
+4. **Complete:** use `HWL by SMD <hello@hwlbysmd.com>` as
+   `CONTACT_FROM_EMAIL`; retain
    Shannon's existing `CONTACT_TO_EMAIL` destination.
-6. Verify a real inquiry's DB receipt, notification audit, and inbox arrival.
+5. **Pending:** verify a real inquiry's DB receipt, notification audit, stable
+   retry, and Shannon's inbox arrival.
    Supabase Auth SMTP and confirmation/recovery delivery are separate tests.
 
-No new key, mail verification, or delivery is claimed complete here. No
-Production promotion or `main` push is authorized by this document.
+No real inquiry delivery is claimed complete here. No Production promotion or
+`main` push is authorized by this document.

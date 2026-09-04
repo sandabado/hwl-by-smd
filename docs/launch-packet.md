@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** August 31, 2026
+**Updated:** September 4, 2026
 
 **Launch decision:** **Not live yet.** The current working tree implements the
 single $11.11 LIFT offer, protected fulfillment, a persistent cart, a guarded
@@ -16,10 +16,68 @@ a real request, manual confirmation, reschedule, and cancellation lifecycle has
 passed, while human inbox receipt, the current public Preview, and Production
 have not yet passed their required end-to-end launch tests.
 
+## September 4 Continuation — Current Evidence
+
+This section supersedes the older mutable provider/configuration statements
+below. Historical August 31 tests remain evidence for that dated path only.
+
+- **Application candidate:** `455edc3a5529535080587988d52f9f22360c0626`
+  was clean before this packet refresh. Its five commits after the pushed
+  `c74fe61` are documentation-only; no application change, `main` push, or
+  Production deployment occurred in this continuation.
+- **Fresh local verification:** commerce 54/54, inquiries 7/7, booking 5/5,
+  accessibility 1/1, launch-environment fixtures 18/18, and Preview-policy
+  10/10 reported cases passed. Lint, SEO (21 pages, 21 metadata records,
+  seven documents), Next.js 16.3.1 Webpack build (63 generated pages), and
+  post-build standalone TypeScript passed on September 4. `build:ci` omits
+  the deployment-environment gate; compilation does not prove deployability.
+- **Actual environment:** the full local launch validator still fails only
+  on invalid `RESEND_API_KEY`; captions remain an optional accessibility
+  follow-up. Sales remain closed and Stripe mode remains sandbox.
+- **Stripe and staging:** the current canonical sandbox still has exactly
+  one active Product and one active Price: the one-time USD 1111 Complete
+  LIFT Video + Guide. The two exact-candidate Sessions are expired/unpaid,
+  with no PaymentIntent. Staging contains two matching expired orders and
+  zero purchases, Stripe Event receipts, customer bindings, or memberships.
+  Both reconciliation jobs are complete/terminal with zero failures or
+  manual-review alerts. Older paid/refunded/disputed Stripe fixtures do not
+  prove this candidate. Sandbox account flags do not establish the separate
+  live account's activation state.
+- **Preview:** live Vercel reads still resolve the latest checkpoint attempt
+  to failed deployment `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo` / `c74fe61`.
+  Its logs show a pre-compilation environment failure for Resend and the
+  then-missing webhook secret. The webhook name now exists among 21 sensitive
+  branch-scoped variables; `RESEND_API_KEY` remains absent. Write-only name
+  inventory is not value-coherence proof. Production still has zero
+  environment-variable records and serves older commit `145112cd`.
+- **Resend:** Vercel's raw account API and unfiltered installation listing
+  confirm completed Free installation `icfg_JwUVu69AO52KNNTlwWItMAG6`,
+  zero selected projects, and zero resources. The installation is not an
+  email resource. Current resource discovery offers Pro and Scale only;
+  no paid plan was selected. The filtered CLI installation command returned
+  an empty list despite the authoritative unfiltered/API record, so it must
+  not be used alone to infer removal. Direct Resend is now signed in to the
+  `jesse.gawlik` team, whose Domains page shows no domains. Owner confirmation
+  of that account boundary and a domain-restricted sending key is pending;
+  no domain, credential, or DNS record was created in this continuation.
+- **Cal.com:** the ten intended public service links remain discoverable.
+  The recorded August 31 request/confirmation/reschedule/cancellation and
+  released-slot proof is retained. Human inbox receipt, deliberate conflict
+  blocking, and the remaining exact-Preview interaction tests are not proven.
+
+**Next executable gate:** confirm the direct Resend team/domain/key scope,
+provision the approved Free sending authority, then install its server-only
+key in local and checkpoint-branch Preview configuration. Run coherent
+environment preflight before a new Preview attempt; do not manufacture a key,
+skip the validator, or reopen public sales to obtain a green deployment.
+The subsequent exact-candidate sandbox purchase, signed webhook/entitlement,
+inquiry delivery, Auth email/admin access, and Production approval gates all
+remain required.
+
 **Release boundary:** Work is on
 `checkpoint/platform-overhaul-2026-08-20`. Commit `c74fe61` is the latest
-pushed checkpoint; the current local documentation candidate is one commit
-ahead and awaits the next authorized checkpoint-only push. `main` remains
+pushed checkpoint; later local documentation commits await the next
+authorized checkpoint-only push. `main` remains
 untouched.
 This pass rotated the sandbox-only Stripe test key, authorized the Stripe CLI
 directly to the canonical sandbox, applied the exact reviewed migrations
@@ -39,14 +97,14 @@ push `main`, or promote anything to Production.
 | Boundary                        | Status                            | Authoritative evidence                                                                                                                                                                                                      |
 | ------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Implemented in the working tree | READY FOR INTEGRATION             | One $11.11 video + PDF offer; persistent cart and sheet; server-validated Checkout; target/account/mode-scoped webhook, authenticated recovery, and durable scheduled recovery; private reconciliation status; protected media routes; Cal.com discovery/embed with manual inquiry fallback; DB-first inquiry route |
-| Locally verified                | PASS                              | TypeScript, ESLint, SEO validation, 54 commerce tests, 18 launch-boundary tests, 7 inquiry-boundary tests, 5 booking-boundary tests, 1 accessibility-markup test, 10 Preview-policy tests, and a Next.js 16.3.1 Webpack production build all pass on August 31; a rendered axe sweep also passes on the audited desktop/mobile local journeys |
+| Locally verified                | PASS                              | TypeScript, ESLint, SEO validation, 54 commerce tests, 18 launch-boundary tests, 7 inquiry-boundary tests, 5 booking-boundary tests, 1 accessibility-markup test, 10 Preview-policy tests, and a Next.js 16.3.1 Webpack production build all pass on September 4. The rendered desktop/mobile axe evidence is from August 31, not a fresh hosted sweep |
 | Supabase staging                | SCHEMA + ASSETS VERIFIED / E2E PENDING | Project is healthy; the remote ledger contains migrations 001–014 and a current linked dry-run is a no-op. Hosted schema/RPC probes match the 012–014 boundaries. The private 46,514,399-byte video remains verified, and the corrected 6,036,808-byte PDF returned a signed HTTP 200 with byte-identical SHA-256 while anonymous access returned 400. Current-code purchase, inquiry, recovery, and administrator journeys still require hosted/public-Preview repeats |
 | Stripe sandbox                  | PROVIDER OBJECTS VERIFIED / CURRENT E2E PENDING | A fresh read-only API check resolves to canonical account `acct_1U9cEQAdcj2oNOF4`; its active test Product/Price are one-time USD 1111 and match the launch catalog. The account still reports `charges_enabled=false`, `payouts_enabled=false`, and `details_submitted=false`. An earlier path passed real sandbox Checkout and lifecycle tests, but the exact current candidate has not repeated that provider journey |
 | Cal.com                         | OPERATIONAL / INBOX RECEIPT PENDING | `HWLbySMD` / `hwlbysmd` publicly lists the ten exact website event types. A real Signature Facial request entered the organizer's unconfirmed queue with the required guest count and location, passed manual confirmation, moved from 10:00 to 11:00 AM Pacific, and was then canceled. A fresh organizer read removed it from Upcoming, retained it under Canceled, and a fresh public read restored the released 11:00 AM slot. Cal collected no payment. Cal reported sending lifecycle emails, but human inbox receipt is not independently verified. Wild Glow Express remains inquiry-only |
 | Inquiry delivery                | PERSISTENCE VERIFIED / HUMAN DELIVERY BLOCKED | Migration 013 is ledger-applied and its private tables/RPC boundary is present in staging. One synthetic hosted submission is durably stored, but its latest notification state is `failed` / provider rejected. There are zero verified administrator profiles, so Shannon currently has neither a confirmed email alert nor verified human inbox access |
 | Supabase Auth email             | PROVIDER SETUP / E2E PENDING      | A fresh public settings read shows signup enabled and email confirmation required (`mailer_autoconfirm=false`). Custom SMTP, verified-domain sending, exact Preview/Production redirect allowlists, rate limits, disabled link tracking, and real non-team-email delivery have not been proven |
 | Scheduled recovery             | STAGING RUN VERIFIED / PREVIEW RUN PENDING | Migration 014 is ledger-applied and its private queue/attempt tables plus narrow service-role RPCs are present in staging. On August 31, an authenticated local worker run against hosted staging reported and claimed the two expired current-candidate sandbox orders, resolved both as terminal, and left both jobs complete with zero alerts, errors, or manual-review reasons. A distinct sensitive branch-scoped Preview `CRON_SECRET` exists; deployed Preview invocation, alert routing, and cadence acceptance remain pending |
-| Current launch Preview          | CONFIGURATION 21/22 / BUILD BLOCKED | Checkpoint commit `c74fe61` is pushed; the local documentation candidate is one commit ahead. Automatic Preview `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo` failed safely before compilation because the provider set was incomplete. A dedicated protected Stripe sandbox endpoint and branch-only hosted signing secret now complete the Stripe set. Resend Marketplace terms were accepted, but its provider rejected the requested Free resource because that plan is disabled; a direct Resend Free key is now the remaining configuration gate. Production has zero environment records; `main` is untouched |
+| Current launch Preview          | CONFIGURATION 21/22 / BUILD BLOCKED | Checkpoint commit `c74fe61` is pushed; later local documentation commits are not. Automatic Preview `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo` failed safely before compilation because the provider set was incomplete. The hosted webhook name is now present. Resend Free installation is completed but has no email resource; current Marketplace resource choices are paid-only. Direct Resend is signed in, with account/domain/key scope awaiting owner confirmation. Production has zero environment records; `main` is untouched |
 | Production / live money         | PENDING OWNER GATE                | Production publicly serves older commit `145112cd` and checkout truthfully returns 503; Stripe activation and coherent live Product/Price/webhook/Production variables remain incomplete                                    |
 
 Passing local compilation does not prove provider integration, a paid journey,
@@ -335,9 +393,9 @@ The current inquiry concurrency and notification-state proof is more specific:
 | Launch environment preflight                                        | PASS — explicit deployment target is mandatory; development/Preview closed and sandbox-open fixtures pass; target mismatches, partial/live Preview config, and shared cron/inquiry secrets fail; Production intentionally fails because no separate Production Supabase boundary has been created or owner-approved                         |
 | Current configured launch environment                               | BLOCKED — the full local validator's only configuration failure is the invalid `RESEND_API_KEY`; the captions path is optional and may remain unset until a verified VTT object exists. The canonical sandbox account/Product/Price remain valid, while live account activation remains incomplete                                                   |
 | First `c74fe61` automatic Preview build                             | EXPECTED FAIL-CLOSED — `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo` stopped at the launch validator because `RESEND_API_KEY` and the then-incomplete hosted Stripe set were absent; application compilation/deployment did not proceed                                                    |
-| Live Vercel Preview configuration inventory                         | BLOCKED 21/22 — twenty-one required names are sensitive and branch-scoped to `checkpoint/platform-overhaul-2026-08-20`. The persistent hosted Stripe signing secret now belongs to the dedicated sandbox endpoint; `RESEND_API_KEY` alone awaits owner acceptance of the Resend Marketplace terms. Production remains at zero environment records |
+| Live Vercel Preview configuration inventory                         | BLOCKED 21/22 — twenty-one required names are sensitive and branch-scoped to `checkpoint/platform-overhaul-2026-08-20`. The persistent hosted Stripe signing secret now belongs to the dedicated sandbox endpoint. Terms are accepted, but the installation has no email resource; a valid `RESEND_API_KEY` still needs provisioning. Production remains at zero environment records |
 | Current public Production safety probe                              | PASS — homepage HTTP 200; unauthenticated LIFT Checkout HTTP 503 with truthful not-ready copy; no charge attempted                                                                                                                                                       |
-| Cal.com booking → conflict block → confirmation → cancel/reschedule | NOT RUN                                                                                                                                                                                                                                                                  |
+| Cal.com booking → conflict block → confirmation → cancel/reschedule | PARTIAL — the August 31 public Signature Facial request, manual confirmation, reschedule, cancellation, and released-slot provider checks passed. Deliberate conflict blocking and human notification receipt remain unverified; this is not complete launch-Preview proof |
 
 The trusted client-address resolver assertion returned this exact value:
 
@@ -740,7 +798,7 @@ inquiry.
 
 Checkpoint `c74fe61` is pushed to
 `origin/checkpoint/platform-overhaul-2026-08-20`; the current local
-documentation candidate is one commit ahead. The first automatic Preview,
+documentation commits are not yet pushed. The first automatic Preview,
 `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo`, failed safely at the launch environment
 validator before application compilation. At that moment both
 `RESEND_API_KEY` and the persistent `STRIPE_WEBHOOK_SECRET` were absent, so the

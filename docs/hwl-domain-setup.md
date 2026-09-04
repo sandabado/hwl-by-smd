@@ -24,9 +24,13 @@ Correct DNS does not deploy the new application candidate.
 `checkpoint/platform-overhaul-2026-08-20`. Authoritative and public DNS return
 `CNAME cname.vercel-dns.com`; Vercel reports `misconfigured:false`, and TLS
 validates for the hostname. It maps to READY deployment
-`dpl_9uzHczDpUXxWXwQcKUwsZakxDJCy` at exact commit
-`96809cf5cbc12f2b23387c1d68f166618e1baa0f`. Deployment Protection remains
-enabled; anonymous access redirects to Vercel SSO.
+`dpl_9uzHczDpUXxWXwQcKUwsZakxDJCy` for the exact application-source commit
+`96809cf5cbc12f2b23387c1d68f166618e1baa0f`, and later READY deployment
+`dpl_3oXc5J2HSotSFymRrpdDNrAamk6P` for documentation-only checkpoint
+`e4ebaf0`. The branch-bound hostname follows later READY checkpoint builds, so
+its current deployment ID must be resolved externally after each push.
+Deployment Protection remains enabled; anonymous access redirects to Vercel
+SSO.
 
 ## Resend sending — DNS verified, delivery test pending
 

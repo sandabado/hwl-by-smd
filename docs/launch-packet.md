@@ -11,16 +11,22 @@ historical `howlbysmd.com` observations are not new-domain verification.
 
 ## September 4 Launch Continuation — Current Authority
 
-- **Checkpoint candidate:** branch `checkpoint/platform-overhaul-2026-08-20`
-  is clean and synchronized at exact commit
-  `96809cf5cbc12f2b23387c1d68f166618e1baa0f`. GitHub CI and
-  `npm run preflight:preview:post-push` passed for that pushed commit. `main`
-  remains untouched.
-- **Protected Preview:** `https://preview.hwlbysmd.com` is verified in Vercel,
-  assigned only to the checkpoint branch, and maps to READY deployment
-  `dpl_9uzHczDpUXxWXwQcKUwsZakxDJCy` at the exact commit above. Authoritative
-  and public DNS return `CNAME cname.vercel-dns.com`; Vercel reports the domain
-  correctly configured, and its certificate validates for the hostname.
+- **Checkpoint candidate:** application source is frozen at exact commit
+  `96809cf5cbc12f2b23387c1d68f166618e1baa0f` on
+  `checkpoint/platform-overhaul-2026-08-20`. Later commits through this packet
+  change launch documentation only. Documentation checkpoint `e4ebaf0` passed
+  GitHub CI and a READY Vercel build; every later documentation-only push still
+  requires an external branch-sync and deployment read. `main` remains
+  untouched.
+- **Protected Preview:** `https://preview.hwlbysmd.com` is verified in Vercel
+  and assigned only to the checkpoint branch. The application-code checkpoint
+  passed as READY deployment `dpl_9uzHczDpUXxWXwQcKUwsZakxDJCy`; documentation
+  checkpoint `e4ebaf0` passed as READY deployment
+  `dpl_3oXc5J2HSotSFymRrpdDNrAamk6P`. The branch-bound custom hostname advances
+  to each later READY checkpoint, so its current deployment ID must be read
+  from Vercel rather than inferred from this packet. Authoritative and public
+  DNS return `CNAME cname.vercel-dns.com`; Vercel reports the domain correctly
+  configured, and its certificate validates for the hostname.
   Anonymous requests redirect to Vercel SSO while authenticated Vercel access
   reaches the application with HTTP 200. Deployment Protection remains on.
 - **Preview configuration:** the branch-scoped configuration now has all 22
@@ -225,7 +231,7 @@ push `main`, or promote anything to Production.
 | Inquiry delivery                | PERSISTENCE VERIFIED / HUMAN DELIVERY BLOCKED | Migration 013 is ledger-applied and its private tables/RPC boundary is present in staging. One synthetic hosted submission is durably stored, but its latest notification state is `failed` / provider rejected. There are zero verified administrator profiles, so Shannon currently has neither a confirmed email alert nor verified human inbox access |
 | Supabase Auth email             | PROVIDER SETUP / E2E PENDING      | A fresh public settings read shows signup enabled and email confirmation required (`mailer_autoconfirm=false`). Custom SMTP, verified-domain sending, exact Preview/Production redirect allowlists, rate limits, disabled link tracking, and real non-team-email delivery have not been proven |
 | Scheduled recovery             | STAGING RUN VERIFIED / PREVIEW RUN PENDING | Migration 014 is ledger-applied and its private queue/attempt tables plus narrow service-role RPCs are present in staging. On August 31, an authenticated local worker run against hosted staging reported and claimed the two expired current-candidate sandbox orders, resolved both as terminal, and left both jobs complete with zero alerts, errors, or manual-review reasons. A distinct sensitive branch-scoped Preview `CRON_SECRET` exists; deployed Preview invocation, alert routing, and cadence acceptance remain pending |
-| Current launch Preview          | READY / PROTECTED / TRANSACTIONAL E2E PENDING | Exact commit `96809cf5cbc12f2b23387c1d68f166618e1baa0f` is pushed and deployed READY as `dpl_9uzHczDpUXxWXwQcKUwsZakxDJCy`. `preview.hwlbysmd.com` is DNS/TLS-verified, branch-bound, and protected by Vercel SSO. All 22 required branch-scoped variable names exist, the Preview preflight passes in sandbox-open mode, and safe runtime route probes pass. Signed payment, inquiry delivery, post-login visual, and exact-Preview booking lifecycles remain pending. Production stays closed; `main` is untouched |
+| Current launch Preview          | READY / PROTECTED / TRANSACTIONAL E2E PENDING | Application source `96809cf5cbc12f2b23387c1d68f166618e1baa0f` and later documentation-only checkpoint `e4ebaf0` both deployed READY; the branch-bound hostname follows each later READY documentation checkpoint and must be resolved externally. `preview.hwlbysmd.com` is DNS/TLS-verified and protected by Vercel SSO. All 22 required branch-scoped variable names exist, the Preview preflight passes in sandbox-open mode, and safe runtime route probes pass. Signed payment, inquiry delivery, post-login visual, and exact-Preview booking lifecycles remain pending. Production stays closed; `main` is untouched |
 | Production / live money         | PENDING OWNER GATE                | Production publicly serves older commit `145112cd` and checkout truthfully returns 503; Stripe activation and coherent live Product/Price/webhook/Production variables remain incomplete                                    |
 
 Passing local compilation does not prove provider integration, a paid journey,
@@ -944,14 +950,18 @@ inquiry.
 
 ### Current state
 
-- Exact pushed commit:
+- Exact application-source commit:
   `96809cf5cbc12f2b23387c1d68f166618e1baa0f` on
-  `checkpoint/platform-overhaul-2026-08-20`, clean and synchronized with
-  origin. GitHub CI and the post-push Preview preflight pass.
-- READY deployment: `dpl_9uzHczDpUXxWXwQcKUwsZakxDJCy`.
+  `checkpoint/platform-overhaul-2026-08-20`. Later commits through this packet
+  change documentation only. Application deployment
+  `dpl_9uzHczDpUXxWXwQcKUwsZakxDJCy` and documentation deployment
+  `dpl_3oXc5J2HSotSFymRrpdDNrAamk6P` both reached READY; `e4ebaf0` also passed
+  GitHub CI. Resolve the branch alias after any later docs push rather than
+  treating either deployment ID as permanently current.
 - `preview.hwlbysmd.com` is verified, correctly CNAME-configured, TLS-valid,
-  and maps to that exact deployment. Deployment Protection redirects anonymous
-  traffic to Vercel SSO; authenticated Vercel access reaches application HTTP 200.
+  and follows the latest READY checkpoint deployment. Deployment Protection
+  redirects anonymous traffic to Vercel SSO; authenticated Vercel access reaches
+  application HTTP 200.
 - All 22 required branch-scoped configuration names exist. Runtime probes show
   the single `$11.11` LIFT offer with `checkoutReady:true`, an anonymous
   same-origin checkout reaching the login boundary rather than readiness 503,

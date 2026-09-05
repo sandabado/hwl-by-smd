@@ -24,6 +24,9 @@ const legacySupabaseFixtureSecrets = {
     "eyJ_fixture_legacy_service_role_must_never_be_accepted",
 } as const
 
+const STAGING_SUPABASE_URL = "https://lkxppynmdfzljuptauxf.supabase.co"
+const PRODUCTION_SUPABASE_URL = "https://qwprhsrwiihfllmgallr.supabase.co"
+
 const developmentFixture: NodeJS.ProcessEnv = {
   CALCOM_PROFILE_URL: "https://cal.com/hwlbysmd",
   COMMERCE_SALES_READY: "false",
@@ -35,7 +38,7 @@ const developmentFixture: NodeJS.ProcessEnv = {
   LIFT_VIDEO_STORAGE_PATH: "lift/complete-lift-v1.mp4",
   NEXT_PUBLIC_SITE_URL: "http://localhost:3000",
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_fixture_public_value",
-  NEXT_PUBLIC_SUPABASE_URL: "https://lkxppynmdfzljuptauxf.supabase.co",
+  NEXT_PUBLIC_SUPABASE_URL: STAGING_SUPABASE_URL,
   NODE_ENV: "development",
   STRIPE_LIVEMODE: "false",
   ...sharedFixtureSecrets,
@@ -67,17 +70,23 @@ const previewStripeFixture: NodeJS.ProcessEnv = {
   ...stripeFixtureSecrets,
 }
 
-const productionStripeFixture: NodeJS.ProcessEnv = {
-  ...previewStripeFixture,
-  COMMERCE_SALES_READY: "true",
+const productionFixture: NodeJS.ProcessEnv = {
+  ...previewFixture,
   HWL_DEPLOYMENT_TARGET: "production",
   NEXT_PUBLIC_SITE_URL: "https://www.hwlbysmd.com",
+  NEXT_PUBLIC_SUPABASE_URL: PRODUCTION_SUPABASE_URL,
+  STRIPE_LIVEMODE: "true",
+  VERCEL_ENV: "production",
+}
+
+const productionStripeFixture: NodeJS.ProcessEnv = {
+  ...productionFixture,
+  COMMERCE_SALES_READY: "true",
   STRIPE_ACCOUNT_ID: "acct_1U9cEIPTLuM8Maxa",
   STRIPE_LIFT_GUIDE_PRICE_ID: "price_fixtureLivePrice",
   STRIPE_LIFT_PRODUCT_ID: "prod_fixtureLiveProduct",
-  STRIPE_LIVEMODE: "true",
   STRIPE_SECRET_KEY: "sk_live_fixture_private_value",
-  VERCEL_ENV: "production",
+  STRIPE_WEBHOOK_SECRET: "whsec_fixture_private_value",
 }
 
 const fixtures: Fixture[] = [
@@ -274,14 +283,35 @@ const fixtures: Fixture[] = [
     name: `noncanonical Production origin fails: ${siteUrl}`,
   })),
   {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: productionFixture,
+    expectedExit: 0,
+    expectedText:
+      "Launch environment preflight passed for production (closed sales).",
+    name: "canonical Production database passes with sales closed",
+  },
+  {
     args: ["--target=production", "--expect-sales=open"],
     env: productionStripeFixture,
-    expectedExit: 1,
+    expectedExit: 0,
     expectedText:
-      "the canonical Production Supabase project has not been owner-approved",
-    name: "new www Production origin passes domain guard but remains closed without approved database",
+      "Launch environment preflight passed for production (open sales).",
+    name: "canonical Production database and live Stripe fixture pass",
     unexpectedText: ["NEXT_PUBLIC_SITE_URL:", "CONTACT_FROM_EMAIL:"],
   },
+  ...[STAGING_SUPABASE_URL, "https://mismatched-project.supabase.co"].map(
+    (supabaseUrl): Fixture => ({
+      args: ["--target=production", "--expect-sales=closed"],
+      env: {
+        ...productionFixture,
+        NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
+      },
+      expectedExit: 1,
+      expectedText:
+        "NEXT_PUBLIC_SUPABASE_URL: does not match the canonical production Supabase project",
+      name: `noncanonical Production Supabase project fails: ${supabaseUrl}`,
+    })
+  ),
 ]
 
 const inheritedEnvironment = Object.fromEntries(

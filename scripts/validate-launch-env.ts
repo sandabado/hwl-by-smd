@@ -19,9 +19,9 @@ const CANONICAL_EMAIL_DOMAIN = "hwlbysmd.com"
 const CANONICAL_SUPABASE_PROJECT_REF = {
   development: "lkxppynmdfzljuptauxf",
   preview: "lkxppynmdfzljuptauxf",
-  // Production must not silently inherit the staging database. Replace this
-  // null only after the owner approves the exact Production project boundary.
-  production: null,
+  // Owner-approved dedicated Production project. Production must never
+  // silently inherit the staging database.
+  production: "qwprhsrwiihfllmgallr",
 } satisfies Record<Target, string | null>
 
 const PLACEHOLDERS = new Set([

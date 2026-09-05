@@ -12,16 +12,16 @@ historical `howlbysmd.com` observations are not new-domain verification.
 ## September 5 Launch Continuation — Current Authority
 
 - **Checkpoint baseline and candidate:** exact commit
-  `9912291ad5dc9dba98dec78bbf59409b4d1d4a28` is pushed on
+  `b7b9a593fac4cafcd078378ee5768f47de0e67cd` is pushed on
   `checkpoint/platform-overhaul-2026-08-20`; local HEAD and its tracked remote
-  match with zero divergence. GitHub CI run `33977575309` completed successfully
-  for that exact SHA, including the September 5 Auth UX and dependency-lock
-  repairs. `main` remains untouched at
+  match with zero divergence. GitHub CI run `33996903434` completed successfully
+  for that exact SHA, including the September 5 Auth UX, dependency-lock, and
+  real admin sign-out repairs. `main` remains untouched at
   `a6902607f42a3c66506758d4886fb4a2d61d99e2`.
 - **Protected Preview:** `https://preview.hwlbysmd.com` is verified in Vercel
   and assigned only to the checkpoint branch. A September 5 Vercel inspection
   resolves it to READY Preview deployment
-  `dpl_GWEuouuZBLZWKguy3HYY8bwgPRQN`, built from exact checkpoint `9912291`.
+  `dpl_7qRayERhfuRsjBcX6mDW8zRwM42B`, created for exact checkpoint `b7b9a59`.
   Authoritative public DNS returns `CNAME cname.vercel-dns.com`; Vercel reports
   the domain correctly configured, and its certificate validates for the
   hostname.
@@ -53,7 +53,12 @@ historical `howlbysmd.com` observations are not new-domain verification.
   paths; defaults successful callbacks to `/library`; and prevents
   `/update-password` from showing a password form without a verified Supabase
   session. The signed-out/expired path provides a clear fresh-link action. The
-  Auth suite passes 16/16, and the repaired login and expired-reset
+  Auth suite passes 25/25, including a same-origin, fail-closed admin logout
+  handler that terminates the real Supabase session while preserving the
+  isolated localhost demo flow. On exact Preview deployment
+  `dpl_7qRayERhfuRsjBcX6mDW8zRwM42B`, the temporary administrator used **Sign
+  out**, reached `/login?redirectTo=/admin`, and remained denied when `/admin`
+  was requested again. The repaired login and expired-reset
   states render locally. Production now has the exact canonical Site URL and
   sole Production callback allowlist entry recorded below. Hosted custom SMTP,
   link-tracking and rate-limit settings, a real non-team signup confirmation,
@@ -76,9 +81,14 @@ historical `howlbysmd.com` observations are not new-domain verification.
   live Product `prod_VCotDELRoHDnox`, one-time $11.11 USD Price
   `price_1UCPFjPTLuM8MaxaTY48RO9e`, and four-event webhook destination
   `we_1UCPJEPTLuM8MaxawK9UgEHh` now exist with the canonical metadata and exact
-  Production URL. The live API secret is not connected, the webhook signing
-  secret remains hidden and uninstalled, the Production environment is empty,
-  and no Production checkout or live transaction has been tested.
+  Production URL. A dedicated live API key and the exact webhook signing secret
+  are now stored in separate macOS Keychain records without being printed. A
+  read-only API call using that key returned exact account
+  `acct_1U9cEIPTLuM8Maxa` with charges, payouts, and submitted details all
+  enabled; temporary plaintext files were deleted and the Dashboard secret was
+  re-masked. Neither secret is installed in Vercel Production yet, the
+  Production environment remains empty, and no Production checkout or live
+  transaction has been tested.
 - **Cal.com:** the ten intended `hwlbysmd` event types remain published with
   manual confirmation and no Cal payments. Fresh public checks show distinct
   available Esthetician, Yoga, and Consultation schedules. An authorized
@@ -95,6 +105,12 @@ historical `howlbysmd.com` observations are not new-domain verification.
   healthy Auth defaults, and no copied staging user, transaction, inquiry, or
   admin state. Its Auth Site URL is exactly `https://www.hwlbysmd.com`, with
   exactly one allowed redirect at `https://www.hwlbysmd.com/auth/callback`.
+  Fresh, distinct Production-only inquiry-rate-limit and reconciliation-cron
+  authorities are stored in separate Keychain records. The intended permanent
+  Production administrators are exactly `shannon@hwlbysmd.com` and
+  `admin@ghosthand.studio`; neither address currently exists in Production Auth,
+  so no grant has been made. Each must accept an individual Auth invitation and
+  confirm its mailbox before its matching profile is elevated.
   Production signup/recovery and SMTP E2E, Vercel Production configuration,
   application E2E, and candidate promotion remain pending.
 
@@ -102,8 +118,9 @@ The remaining launch-critical evidence is Shannon's independent mailbox
 confirmation for inquiry delivery, a stable inquiry replay, direct inspection
 of Cal's destination-calendar object and human booking emails, hosted Auth SMTP
 plus non-team signup/recovery proof, the remaining commerce recovery/lifecycle
-operations, secure installation of the live Stripe API and webhook signing
-secrets, a closed-gate Production application smoke test, and the owner's
+operations, installation of the already secured live Stripe credentials into a
+complete fail-closed Vercel Production environment, the two confirmed permanent
+admin accounts, a closed-gate Production application smoke test, and the owner's
 explicit Production promotion approval. No Production checkout or live
 transaction has been tested.
 
@@ -114,8 +131,9 @@ transaction has been tested.
   build printed 62 route/page entries.
 - `npm run test:commerce`: **55/55 passed**, including the dedicated partial
   refund regression that retains active LIFT access without provider calls.
-- `npm run test:auth`: **16/16 passed** for stable, non-reflective login feedback
-  and hostile same-origin redirect cases.
+- `npm run test:auth`: **25/25 passed** for stable, non-reflective login
+  feedback, hostile redirect cases, same-origin admin logout enforcement,
+  Supabase session termination, demo isolation, and sanitized failure behavior.
 - `npm run test:preview-release`: **16/16 passed**, including the requirement
   that checkpoint CI retain Auth-boundary coverage.
 - Launch-environment fixtures pass 26/26; booking passes 6/6; inquiries pass
@@ -1374,10 +1392,12 @@ Production remains closed until all of the following are true:
   `https://www.hwlbysmd.com/api/stripe/webhook`, uses API version
   `2026-08-26.dahlia`, and subscribes only to `checkout.session.completed`,
   `checkout.session.expired`, `charge.refunded`, and
-  `charge.dispute.created`. Its signing secret is not yet installed, so no
-  Production delivery is claimed.
-- Production has a coherent set of live Stripe, Production Supabase, protected
-  storage, inquiry, and sender configuration.
+  `charge.dispute.created`. Its signing secret is secured in Keychain but is not
+  yet installed in Vercel Production, so no Production delivery is claimed.
+- Production does **not** yet have the coherent live Stripe, Production
+  Supabase, inquiry, and sender environment required by the launch validator.
+  The private storage boundary is verified independently; it does not make the
+  application environment complete.
 - The exact Preview candidate has passed all end-to-end tests.
 - Migration 014 is applied. Its deployed cron, durable retry/manual-review
   behavior, and private admin status view still need to pass in the exact
@@ -1409,22 +1429,27 @@ exact-Preview paid Checkout and fulfillment journey now passes. These approvals
 remain outstanding:
 
 1. **Stripe live credentials and release:** the canonical account, $11.11
-   Product/Price, metadata, and exact four-event webhook are active. Separately
-   approve secure connection of the live API secret and hidden webhook signing
-   secret to the coherent Production environment, then approve the minimal live
-   smoke transaction only after the closed-gate Production app passes. Active
-   provider objects are not transaction proof.
+   Product/Price, metadata, and exact four-event webhook are active. The owner
+   approved secure retrieval and Vercel Production installation of the live API
+   and webhook secrets while sales remain closed; both are now secured in
+   Keychain and installation awaits the complete sender configuration. The
+   minimal live smoke transaction and opening sales still require separate
+   approval after the closed-gate Production app passes. Active provider objects
+   are not transaction proof.
 2. **Inquiry retention:** choose and publish a specific retention period and
    purge cadence before live inquiry collection; no automatic-deletion claim
    will be made until that policy and implementation are verified.
-3. **Temporary administrator cleanup:** staging now has exactly one
+3. **Permanent administrator handoff and temporary cleanup:** the owner chose
+   exactly `shannon@hwlbysmd.com` and `admin@ghosthand.studio` as permanent
+   Production administrators. Neither account exists in Production Auth yet;
+   configure SMTP, send separate invitations, require confirmation, and elevate
+   only the exact matching UUID/profile pairs. Staging now has exactly one
    administrator: the owner-approved, confirmed `jesse@wholebody.earth`
    profile. Its real Preview inquiry-inbox access is verified, and an anonymous
    request was intercepted by Vercel SSO. Because the role is project-global
-   and has no TTL, designate the permanent administrator and manually demote
-   this temporary profile after testing, or explicitly retain it through launch
-   and schedule immediate post-launch demotion. Demotion does not affect its
-   LIFT entitlement.
+   and has no TTL, manually demote this temporary profile after remaining
+   Preview testing or explicitly retain it through launch and schedule immediate
+   post-launch demotion. Demotion does not affect its LIFT entitlement.
 4. **Supabase Auth delivery:** preserve the verified Production Site URL
    `https://www.hwlbysmd.com` and its sole callback
    `https://www.hwlbysmd.com/auth/callback`. Configure custom SMTP from the

@@ -881,6 +881,54 @@ test("an existing refunded entitlement cannot be resurrected", async () => {
   assert.equal(fakeDatabase.state.checkout_orders[0].status, "refunded")
 })
 
+test("partial-refund replay retains active LIFT access without provider calls", async () => {
+  const partialRefundCharge = paymentIntent(checkoutMetadata(), {
+    amount_refunded: 555,
+    refunded: false,
+  }).latest_charge
+  let providerRetrieveCount = 0
+  const fakeStripe = {
+    paymentIntents: {
+      retrieve: async () => {
+        providerRetrieveCount += 1
+        throw new Error(
+          "A partial refund must not enter terminal reconciliation."
+        )
+      },
+    },
+  }
+  const fakeDatabase = database({
+    checkout_orders: [
+      checkoutOrder({
+        fulfilled_at: "2026-08-29T12:00:00.000Z",
+        fulfillment_source: "webhook",
+        status: "paid",
+        stripe_payment_intent_id: paymentIntentId,
+      }),
+    ],
+    purchases: [purchase("active")],
+  })
+  const before = structuredClone(fakeDatabase.state)
+
+  for (let replay = 0; replay < 2; replay += 1) {
+    const result = await reconcileFullRefund(
+      fakeStripe as never,
+      fakeDatabase as never,
+      partialRefundCharge as never,
+      "preview",
+      identity.stripe_account_id,
+      false
+    )
+    assert.equal(result, "processed")
+  }
+
+  assert.equal(providerRetrieveCount, 0)
+  assert.deepEqual(fakeDatabase.state, before)
+  assert.equal(fakeDatabase.state.purchases.length, 1)
+  assert.equal(fakeDatabase.state.purchases[0].status, "active")
+  assert.equal(fakeDatabase.state.checkout_orders[0].status, "paid")
+})
+
 test("full-refund replay repairs an incomplete order and remains idempotent", async () => {
   const refundedCharge = paymentIntent(checkoutMetadata(), {
     amount_refunded: 1111,

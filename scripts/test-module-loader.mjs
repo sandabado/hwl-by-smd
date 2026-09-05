@@ -5,6 +5,14 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 const projectRoot = fileURLToPath(new URL("../", import.meta.url))
 
 export async function resolve(specifier, context, nextResolve) {
+  if (
+    specifier === "next/server" ||
+    specifier === "next/headers" ||
+    specifier === "next/navigation"
+  ) {
+    return nextResolve(`${specifier}.js`, context)
+  }
+
   if (specifier === "server-only") {
     return {
       shortCircuit: true,
@@ -15,7 +23,7 @@ export async function resolve(specifier, context, nextResolve) {
   if (specifier === "@/lib/supabase/server") {
     return {
       shortCircuit: true,
-      url: "data:text/javascript,export%20function%20createAdminClient()%7Breturn%20null%7D",
+      url: "data:text/javascript,export%20function%20createAdminClient()%7Breturn%20null%7D%3Bexport%20async%20function%20createClient()%7Breturn%20null%7D",
     }
   }
 

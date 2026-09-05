@@ -7,18 +7,16 @@ direct owner approval first.
 
 The owner changed the launch domain to `hwlbysmd.com` on September 4, 2026.
 Production canonicals use `https://www.hwlbysmd.com`, matching Vercel's existing
-apex-to-www redirect. The custom Preview below is a required target, not an
-already configured hostname. Keep the existing sandbox branch-alias webhook
-until the new Preview hostname, environment, Auth redirects, and webhook have
-been coherently configured and verified. Preserve existing mail-forwarding
-records when adding the new domain's exact Resend sending records.
+apex-to-www redirect. The custom Preview is now configured, TLS-valid, assigned
+only to the checkpoint branch, and protected by Vercel SSO. Preserve existing
+mail-forwarding records and the exact verified Resend sending records.
 
 ## Fixed Preview boundary
 
 | Boundary            | Required Preview value                    |
 | ------------------- | ----------------------------------------- |
 | Git branch          | `checkpoint/platform-overhaul-2026-08-20` |
-| Stable origin       | `https://preview.hwlbysmd.com`           |
+| Stable origin       | `https://preview.hwlbysmd.com`            |
 | Deployment target   | `preview`                                 |
 | Stripe mode         | Sandbox/test only                         |
 | Stripe account      | `acct_1U9cEQAdcj2oNOF4`                   |
@@ -26,6 +24,35 @@ records when adding the new domain's exact Resend sending records.
 | Stripe Price        | `price_1U9s49Adcj2oNOF4jcyMjyDB`          |
 | Supabase            | Staging project `lkxppynmdfzljuptauxf`    |
 | Production mutation | Forbidden during Preview preparation      |
+
+## September 5 checkpoint baseline and candidate
+
+- The last externally verified pushed commit before this candidate was
+  `8e841fc2db78bf42126c2ee365c0f65228076980`. It
+  passed GitHub CI and deployed READY as
+  `dpl_F2R2enfjMUgT9qwnbj2Yr67apihU`; local HEAD and its tracked checkpoint
+  branch matched at that boundary. `main` was not pushed.
+- The protected Preview has all 22 required branch-scoped configuration names
+  and previously passed its sandbox-open environment preflight. This inventory
+  does not prove secret values or provider behavior.
+- The full combined local gate passes: TypeScript, ESLint, SEO, the Next.js
+  16.3.1 Webpack build (62 printed route/page entries), 55/55 commerce, 23/23
+  launch-environment, 16/16 Auth, 7/7 inquiry, 6/6 booking, 1/1
+  accessibility-markup, 16/16 Preview-policy, and full/production npm audits
+  with zero vulnerabilities. This candidate includes the Auth and repaired
+  lockfile changes; exact-SHA GitHub CI and Vercel deployment evidence must be
+  resolved externally after each checkpoint push.
+- Before transactional testing, the owner must privately pass Vercel SSO and
+  sign in with an existing confirmed staging Supabase purchaser on the exact
+  `https://preview.hwlbysmd.com` host. Do not place credentials in chat.
+- Hosted Auth still needs custom SMTP, exact redirect allowlists, disabled link
+  tracking, rate-limit review, and non-team signup-confirmation/password-reset
+  proof. A real database-first inquiry plus Resend/human receipt, an exact-host
+  Cal.com booking plus FIREBIRDS/conflict/human-email proof, and the current
+  sandbox purchase/fulfillment lifecycle also remain pending.
+- The canonical live Stripe parent is only 10% through onboarding: Business
+  type is in progress and the remaining required sections are not started.
+  Sandbox state is not live-money readiness.
 
 The local preflight is deterministic and offline. It does not fetch Git refs,
 read Vercel configuration, inspect provider objects, or make network calls.
@@ -83,9 +110,9 @@ Production, and do not reuse local webhook, cron, or inquiry secrets.
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — modern staging publishable key
 - `SUPABASE_SERVICE_ROLE_KEY` — modern staging server secret
 
-The service secret must remain server-only. Migrations 012–014 must be
-owner-approved, applied in order, and fingerprint-verified before the Preview
-application uses their tables or RPCs.
+The service secret must remain server-only. Migrations 012–014 are
+owner-approved, ledger-applied in order, and fingerprint-verified; preserve
+that ledger and do not reapply or repair it to prepare a later Preview.
 
 Supabase Auth must separately use production-capable custom SMTP from the
 verified HWL sender domain. The project URL allowlist must include the exact
@@ -107,9 +134,9 @@ not by itself configure Supabase Auth email.
 - `STRIPE_WEBHOOK_SECRET` — secret issued for the persistent Preview endpoint,
   never the Stripe CLI listener secret
 
-Create a dedicated Vercel **Protection Bypass for Automation** secret only
-after approval, keep Deployment Protection enabled globally, and install the
-persistent sandbox endpoint with the secret in its query parameter:
+Preserve the approved dedicated Vercel **Protection Bypass for Automation**
+secret, keep Deployment Protection enabled globally, and keep the persistent
+sandbox endpoint configured with the secret in its query parameter:
 
 ```text
 https://preview.hwlbysmd.com/api/stripe/webhook?x-vercel-protection-bypass=<dedicated-secret>
@@ -132,8 +159,9 @@ Subscribe exactly:
 
 The exact bypass-qualified endpoint must be reachable by Stripe without a
 redirect or authentication challenge, while the same endpoint without the
-bypass must remain protected. Creating or rotating this bypass is a hosted
-security change and requires owner approval.
+bypass must remain protected. A signed delivery and database receipt remain
+unverified. Creating or rotating this bypass is a hosted security change and
+requires owner approval.
 
 ### Fulfillment and inquiries
 
@@ -148,8 +176,9 @@ security change and requires owner approval.
 - `CRON_SECRET` — a separate unique random value of at least 32 characters
 - `CALCOM_PROFILE_URL=https://cal.com/hwlbysmd`
 
-The corrected canonical PDF must be visually reviewed before upload. Neither
-the PDF nor video belongs in Git or the Vercel deployment bundle.
+The corrected canonical PDF has been visually reviewed and byte-verified with
+the video in private staging storage. Preserve those exact objects. Neither the
+PDF nor video belongs in Git or the Vercel deployment bundle.
 
 ## Vercel Preview facts and manual recovery test
 
@@ -166,6 +195,11 @@ untested until a separately authorized Production smoke test.
 
 ## Hosted Preview verification order
 
+The current checkpoint has established the ledger/assets, custom hostname,
+complete branch configuration, protected READY deployment, and open-sandbox
+environment shape represented by the setup phase below. Preserve and reverify
+them after any new checkpoint; signed/provider/human E2E remains pending.
+
 1. Obtain owner approval for migrations 012–014, the branch-scoped Preview
    variables, custom hostname, a dedicated Vercel automation-bypass secret,
    the persistent Stripe sandbox webhook, and Cal.com publication settings.
@@ -173,8 +207,8 @@ untested until a separately authorized Production smoke test.
 3. Upload and verify the corrected PDF alongside the already reviewed private
    video; verify anonymous denial.
 4. Prepare an immutable checkpoint commit on the named branch. Run the offline
-   pre-push repository preflight, full tests, production build, secret scan,
-   and `git diff --check`.
+   pre-push repository preflight, full tests including `npm run test:auth`,
+   production build, dependency audits, secret scan, and `git diff --check`.
 5. Push only the checkpoint branch after owner authorization. Never push or
    merge `main` as part of Preview preparation. Then run
    `npm run preflight:preview:post-push` and require exact synchronization
@@ -190,8 +224,9 @@ untested until a separately authorized Production smoke test.
    entitlement, video, PDF, duplicate delivery, refund, dispute, and manual
    scheduled-recovery checks.
 9. Publish the approved Cal.com pilot and verify the full date/time selector,
-   confirmation flow, conflict calendars, destination calendar, timezone,
-   mobile keyboard access, and fallback behavior.
+   confirmation flow, deliberate conflict suppression, the FIREBIRDS destination
+   write, timezone, organizer/attendee human email receipt, mobile keyboard
+   access, and fallback behavior.
 10. Submit a real Preview inquiry and verify database receipt first, Resend
     notification second, duplicate/idempotency behavior, and admin visibility.
 11. Restore `COMMERCE_SALES_READY=false` if any provider, entitlement, inquiry,
@@ -205,4 +240,6 @@ untested until a separately authorized Production smoke test.
 Preview success is not Production approval. Do not create live Stripe objects,
 install live credentials, assign Production aliases, promote a deployment, or
 enable real money until the owner separately approves the Production Supabase
-boundary, live provider configuration, and final Preview evidence.
+boundary, live provider configuration, and final Preview evidence. Stripe live
+onboarding is currently 10% complete and must be finished and verified before
+live Product, Price, or webhook setup.

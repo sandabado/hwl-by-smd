@@ -11,7 +11,18 @@ import { cn } from "@/lib/utils"
 
 type Mode = "signin" | "signup"
 
-export function LoginForm({ redirectTo }: { redirectTo: string }) {
+type LoginFeedback = {
+  message: string
+  title: string
+}
+
+export function LoginForm({
+  feedback,
+  redirectTo,
+}: {
+  feedback: LoginFeedback | null
+  redirectTo: string
+}) {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>("signin")
   const [error, setError] = useState("")
@@ -108,6 +119,18 @@ export function LoginForm({ redirectTo }: { redirectTo: string }) {
           </button>
         ))}
       </div>
+
+      {feedback && (
+        <div
+          className="mt-5 rounded-2xl border border-[#9c4b40]/25 bg-[#9c4b40]/8 p-4 text-sm leading-relaxed text-[var(--primary)]"
+          role="alert"
+        >
+          <p className="font-medium">{feedback.title}</p>
+          <p className="mt-1 text-[var(--muted-foreground)]">
+            {feedback.message}
+          </p>
+        </div>
+      )}
 
       {!supabase && (
         <p className="mt-5 rounded-2xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 p-4 text-sm leading-relaxed text-[var(--primary)]">

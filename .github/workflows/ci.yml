@@ -57,6 +57,9 @@ jobs:
       - name: Test accessibility markup boundaries
         run: npm run test:accessibility
 
+      - name: Test authentication feedback and redirect boundaries
+        run: npm run test:auth
+
       - name: Test commerce reconciliation policy
         run: npm run test:commerce
 

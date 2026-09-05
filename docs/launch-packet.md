@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** September 4, 2026
+**Updated:** September 5, 2026
 
 **Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
 Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
@@ -9,26 +9,30 @@ custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
 
-## September 4 Launch Continuation — Current Authority
+## September 5 Launch Continuation — Current Authority
 
-- **Checkpoint candidate:** application source is frozen at exact commit
-  `96809cf5cbc12f2b23387c1d68f166618e1baa0f` on
-  `checkpoint/platform-overhaul-2026-08-20`. Later commits through this packet
-  change launch documentation only. Documentation checkpoint `e4ebaf0` passed
-  GitHub CI and a READY Vercel build; every later documentation-only push still
-  requires an external branch-sync and deployment read. `main` remains
-  untouched.
+- **Checkpoint baseline and candidate:** the last externally verified pushed
+  checkpoint before this candidate was exact commit
+  `8e841fc2db78bf42126c2ee365c0f65228076980` on
+  `checkpoint/platform-overhaul-2026-08-20`; local HEAD and its tracked remote
+  matched at that checkpoint, and `main` remains untouched. Its dedicated
+  partial-refund regression brings the provider-free commerce suite to 55/55.
+  The current candidate also includes the September 5 Auth UX and
+  dependency-lock repairs described below. Resolve its exact branch SHA, CI,
+  and Preview deployment externally after any checkpoint push.
 - **Protected Preview:** `https://preview.hwlbysmd.com` is verified in Vercel
-  and assigned only to the checkpoint branch. The application-code checkpoint
-  passed as READY deployment `dpl_9uzHczDpUXxWXwQcKUwsZakxDJCy`; documentation
-  checkpoint `e4ebaf0` passed as READY deployment
-  `dpl_3oXc5J2HSotSFymRrpdDNrAamk6P`. The branch-bound custom hostname advances
-  to each later READY checkpoint, so its current deployment ID must be read
-  from Vercel rather than inferred from this packet. Authoritative and public
+  and assigned only to the checkpoint branch. Exact checkpoint `8e841fc` passed
+  GitHub CI and deployed READY as `dpl_F2R2enfjMUgT9qwnbj2Yr67apihU`. The
+  branch-bound custom hostname advances to each later READY checkpoint, so its
+  current deployment ID must still be read from Vercel after any later push.
+  Authoritative and public
   DNS return `CNAME cname.vercel-dns.com`; Vercel reports the domain correctly
   configured, and its certificate validates for the hostname.
   Anonymous requests redirect to Vercel SSO while authenticated Vercel access
-  reaches the application with HTTP 200. Deployment Protection remains on.
+  reaches the application with HTTP 200. Deployment Protection remains on. A
+  purchaser/member journey still requires private Vercel SSO sign-in followed
+  by an existing confirmed staging Supabase purchaser login on this exact host;
+  that post-login Preview E2E has not yet been performed.
 - **Preview configuration:** the branch-scoped configuration now has all 22
   required names, including the domain-restricted Resend credential and the
   dedicated Stripe sandbox webhook secret. The Preview launch preflight passed
@@ -45,24 +49,64 @@ historical `howlbysmd.com` observations are not new-domain verification.
   expected license/refund/help links. Meaningful DOM was present and no Next.js
   error overlay appeared. Local development intentionally retains closed-sales
   copy; the protected Preview owns the open sandbox configuration.
+- **Auth UX repair:** the candidate source normalizes failed callback links
+  to allowlisted, non-provider error copy; preserves only safe same-origin return
+  paths; defaults successful callbacks to `/library`; and prevents
+  `/update-password` from showing a password form without a verified Supabase
+  session. The signed-out/expired path provides a clear fresh-link action. The
+  Auth suite passes 16/16, and the repaired login and expired-reset
+  states render locally. Hosted custom SMTP, URL allowlists, link-tracking and
+  rate-limit settings, a real non-team signup confirmation, and password
+  recovery delivery remain unverified.
+- **Dependency audit:** the lockfile-only local remediation now reports zero npm
+  advisories in both the full tree (560 dependencies) and the production graph
+  (141 dependencies). The combined local gate and production build now pass;
+  local evidence is not hosted evidence until the exact candidate SHA passes
+  checkpoint CI and deploys with the Auth repair.
 - **Stripe:** canonical sandbox `acct_1U9cEQAdcj2oNOF4` still contains one
   active Complete LIFT Product, one one-time USD 1111 Price, and the enabled
   four-event checkpoint webhook. A fresh exact-candidate paid/refund/dispute
-  journey is still pending. The separate live HWLbySMD account is at Stripe's
-  private business-verification flow; no live Product, Price, webhook, or
-  Production sales flag may be configured until Stripe activation is verified
-  and the owner separately approves Production.
+  journey is still pending. The separate live HWLbySMD parent account
+  `acct_1U9cEIPTLuM8Maxa` shows 10% onboarding completion: Business type is in
+  progress and every other required section is not started. No live Product,
+  Price, webhook, or Production sales flag may be configured until private
+  activation is completed and verified and the owner separately approves
+  Production.
 - **Cal.com:** the ten intended `hwlbysmd` event types remain published with
   manual confirmation and no Cal payments. Fresh public checks show distinct
   available Esthetician, Yoga, and Consultation schedules. The exact Preview
-  booking submission and human notification receipt remain action-time tests.
+  booking submission, organizer/attendee human email receipts, FIREBIRDS write,
+  and a deliberate conflict-suppression check remain action-time tests.
 - **Production:** `www.hwlbysmd.com` still serves the older Production artifact
   and its LIFT checkout fails closed. No candidate promotion has occurred.
 
-The remaining launch-critical evidence is a fresh sandbox paid journey and
-protected fulfillment, a valid inquiry through Resend to Shannon, the final
-Cal.com booking/notification journey, Stripe live-account activation, and the
-owner's explicit Production approval.
+The remaining launch-critical evidence is a private sign-in to the exact
+protected Preview; a fresh sandbox paid journey and protected fulfillment; a
+valid database-first inquiry with Resend acceptance and Shannon's human inbox
+receipt; the final Cal.com booking/calendar/notification journey; hosted Auth
+SMTP plus non-team signup/recovery proof; Stripe live-account activation; and
+the owner's explicit Production approval.
+
+## September 5 Full Local Verification
+
+- TypeScript, ESLint, SEO (21 pages, 21 metadata records, seven long-form
+  documents), and the Next.js 16.3.1 Webpack production build all pass. The
+  build printed 62 route/page entries.
+- `npm run test:commerce`: **55/55 passed**, including the dedicated partial
+  refund regression that retains active LIFT access without provider calls.
+- `npm run test:auth`: **16/16 passed** for stable, non-reflective login feedback
+  and hostile same-origin redirect cases.
+- `npm run test:preview-release`: **16/16 passed**, including the requirement
+  that checkpoint CI retain Auth-boundary coverage.
+- Launch-environment fixtures pass 23/23; booking passes 6/6; inquiries pass
+  7/7; and the accessibility-markup test passes 1/1.
+- Full `npm audit` and `npm audit --omit=dev`: **zero vulnerabilities** against
+  the repaired lockfile (560 total dependencies; 141 production dependencies).
+
+This full local gate covers the current Auth/lockfile candidate. By itself it
+does not prove a clean checkpoint, exact-SHA CI/deployment, hosted Auth email, signed-in
+Preview behavior, a real payment, a real inquiry notification, a real Cal.com
+booking, or live-money readiness.
 
 ## September 4 Domain Change
 
@@ -224,15 +268,16 @@ push `main`, or promote anything to Production.
 | Boundary                        | Status                            | Authoritative evidence                                                                                                                                                                                                      |
 | ------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Implemented in the working tree | READY FOR INTEGRATION             | One $11.11 video + PDF offer; persistent cart and sheet; server-validated Checkout; target/account/mode-scoped webhook, authenticated recovery, and durable scheduled recovery; private reconciliation status; protected media routes; Cal.com discovery/embed with manual inquiry fallback; DB-first inquiry route |
-| Locally verified                | PASS                              | TypeScript, ESLint, SEO validation, 54 commerce tests, 23 launch-boundary tests, 7 inquiry-boundary tests, 6 booking-boundary tests, 1 accessibility-markup test, 15 Preview-policy tests, and a Next.js 16.3.1 Webpack production build all pass on September 4. The rendered desktop/mobile axe evidence is from August 31, not a fresh hosted sweep |
+| Locally verified                | FULL PASS / EXACT-SHA HOSTED PROOF REQUIRED | The combined September 5 tree passes TypeScript, ESLint, SEO, the Next.js 16.3.1 Webpack build (62 printed route/page entries), 55 commerce, 23 launch-boundary, 16 Auth, 7 inquiry-boundary, 6 booking-boundary, 1 accessibility-markup, and 16 Preview-policy tests, plus zero-vulnerability full/production npm audits. Resolve the exact candidate SHA, CI, and Preview deployment externally; this row is local evidence only |
 | Supabase staging                | SCHEMA + ASSETS VERIFIED / E2E PENDING | Project is healthy; the remote ledger contains migrations 001–014 and a current linked dry-run is a no-op. Hosted schema/RPC probes match the 012–014 boundaries. The private 46,514,399-byte video remains verified, and the corrected 6,036,808-byte PDF returned a signed HTTP 200 with byte-identical SHA-256 while anonymous access returned 400. Current-code purchase, inquiry, recovery, and administrator journeys still require hosted/public-Preview repeats |
 | Stripe sandbox                  | PROVIDER OBJECTS VERIFIED / CURRENT E2E PENDING | A fresh read-only API check resolves to canonical account `acct_1U9cEQAdcj2oNOF4`; its active test Product/Price are one-time USD 1111 and match the launch catalog. The account still reports `charges_enabled=false`, `payouts_enabled=false`, and `details_submitted=false`. An earlier path passed real sandbox Checkout and lifecycle tests, but the exact current candidate has not repeated that provider journey |
 | Cal.com                         | OPERATIONAL / INBOX RECEIPT PENDING | `HWLbySMD` / `hwlbysmd` publicly lists the ten exact website event types. A real Signature Facial request entered the organizer's unconfirmed queue with the required guest count and location, passed manual confirmation, moved from 10:00 to 11:00 AM Pacific, and was then canceled. A fresh organizer read removed it from Upcoming, retained it under Canceled, and a fresh public read restored the released 11:00 AM slot. Cal collected no payment. Cal reported sending lifecycle emails, but human inbox receipt is not independently verified. Wild Glow Express remains inquiry-only |
 | Inquiry delivery                | PERSISTENCE VERIFIED / HUMAN DELIVERY BLOCKED | Migration 013 is ledger-applied and its private tables/RPC boundary is present in staging. One synthetic hosted submission is durably stored, but its latest notification state is `failed` / provider rejected. There are zero verified administrator profiles, so Shannon currently has neither a confirmed email alert nor verified human inbox access |
 | Supabase Auth email             | PROVIDER SETUP / E2E PENDING      | A fresh public settings read shows signup enabled and email confirmation required (`mailer_autoconfirm=false`). Custom SMTP, verified-domain sending, exact Preview/Production redirect allowlists, rate limits, disabled link tracking, and real non-team-email delivery have not been proven |
+| Authentication UX              | LOCAL REPAIR VERIFIED / HOSTED E2E PENDING | Failed-link feedback is allowlisted and non-reflective, return paths are same-origin, and password update now requires a verified server session before the form renders. Auth tests pass 16/16 and signed-out states render locally. A real confirmation link, recovery link, and purchaser login still need exact-Preview verification |
 | Scheduled recovery             | STAGING RUN VERIFIED / PREVIEW RUN PENDING | Migration 014 is ledger-applied and its private queue/attempt tables plus narrow service-role RPCs are present in staging. On August 31, an authenticated local worker run against hosted staging reported and claimed the two expired current-candidate sandbox orders, resolved both as terminal, and left both jobs complete with zero alerts, errors, or manual-review reasons. A distinct sensitive branch-scoped Preview `CRON_SECRET` exists; deployed Preview invocation, alert routing, and cadence acceptance remain pending |
-| Current launch Preview          | READY / PROTECTED / TRANSACTIONAL E2E PENDING | Application source `96809cf5cbc12f2b23387c1d68f166618e1baa0f` and later documentation-only checkpoint `e4ebaf0` both deployed READY; the branch-bound hostname follows each later READY documentation checkpoint and must be resolved externally. `preview.hwlbysmd.com` is DNS/TLS-verified and protected by Vercel SSO. All 22 required branch-scoped variable names exist, the Preview preflight passes in sandbox-open mode, and safe runtime route probes pass. Signed payment, inquiry delivery, post-login visual, and exact-Preview booking lifecycles remain pending. Production stays closed; `main` is untouched |
-| Production / live money         | PENDING OWNER GATE                | Production publicly serves older commit `145112cd` and checkout truthfully returns 503; Stripe activation and coherent live Product/Price/webhook/Production variables remain incomplete                                    |
+| Launch Preview baseline         | READY / PROTECTED / TRANSACTIONAL E2E PENDING | The last externally verified checkpoint before this candidate, `8e841fc2db78bf42126c2ee365c0f65228076980`, passed GitHub CI and deployed READY as `dpl_F2R2enfjMUgT9qwnbj2Yr67apihU`; `preview.hwlbysmd.com` is DNS/TLS-verified and protected by Vercel SSO. All 22 required branch-scoped variable names existed, sandbox-open preflight passed, and safe runtime probes passed. Resolve the candidate deployment externally after any push; purchaser sign-in, signed payment, inquiry delivery, and exact-Preview booking remain pending. Production stays closed; `main` is untouched |
+| Production / live money         | PENDING OWNER GATE                | Production publicly serves older commit `145112cd` and checkout truthfully returns 503. The canonical live Stripe parent reports 10% onboarding: Business type in progress and the remaining required sections not started. Live Product/Price/webhook/Production variables remain incomplete |
 
 Passing local compilation does not prove provider integration, a paid journey,
 or Production readiness. Each boundary above must be verified independently.
@@ -259,6 +304,25 @@ or Production readiness. Each boundary above must be verified independently.
 These are source-level accessibility and interaction safeguards. A final
 keyboard, zoom, screen-reader, and mobile check is still required on the launch
 Preview; this packet does not claim third-party Stripe Checkout conformance.
+
+### Authentication feedback and password recovery
+
+- The callback exchanges a valid Supabase code and returns only to a sanitized
+  same-origin path, defaulting to `/library`.
+- Failed, expired, or denied links are reduced to an allowlisted code and static
+  supportive copy. Provider-controlled descriptions and arbitrary query values
+  are never reflected into the page.
+- `/update-password` verifies the Supabase user server-side before rendering the
+  password form. A missing or expired session receives a clear recovery action
+  instead of an unauthorized password form.
+- The client form rechecks the user before mutation, uses generic failure copy,
+  and sends a successful update to `/account`.
+
+The Auth suite passes 16/16 for error allowlisting and hostile redirect
+inputs, and the signed-out login/reset states render locally. This candidate
+repair is not proof of Supabase custom SMTP, callback allowlist
+configuration, non-team confirmation/recovery email delivery, or an
+authenticated purchaser journey on the protected Preview.
 
 ### Secure payment and fulfillment path
 
@@ -356,7 +420,7 @@ migration 014 then passed in disposable PostgreSQL 17.6 with a two-session
 `SKIP LOCKED` concurrency check. Current hosted PostgREST/OpenAPI probes now
 confirm the distinctive 012–014 tables, columns, and narrow RPCs, while direct
 reads of the rate-limit and reconciliation tables retain their intended 403
-boundary. `npm run test:commerce` independently passed 54 provider-free policy,
+boundary. `npm run test:commerce` independently passed 55 provider-free policy,
 verifier, and scheduled-worker cases. These results still do not constitute the
 current public-Preview Stripe, cron, administrator, or browser E2E, so sales
 remain closed.
@@ -379,7 +443,7 @@ remain closed.
 - The manual inquiry remains available for alternate times even after an event
   type is published.
 
-The five booking-boundary tests pass for unique canonical slugs, inquiry-only
+The six booking-boundary tests pass for unique canonical slugs, inquiry-only
 Wild Glow Express handling, exact Cal.com matching, and published guest limits.
 Provider setup is now complete for the ten exact-match services: three approved
 schedules, six conflict calendars with `BILLS` excluded, `FIREBIRDS` as the
@@ -399,9 +463,11 @@ The page returned HTTP 200 with no Next.js error overlay. At 390×844,
 `/book?service=signature-facial` rendered enabled dates and six visible time
 buttons; `innerWidth`, document client width, and document scroll width were all
 390, with no horizontal overflow or Next.js error overlay. Keyboard date and
-slot selection was not verified. Conflict blocking, a submitted pending
-request, confirmation, rescheduling, cancellation, and notification behavior
-remain required before booking is described as fully launch-verified.
+slot selection was not verified. The separate provider-level test request,
+confirmation, reschedule, cancellation, and released-slot lifecycle recorded
+below passed. Full launch proof still requires the same submission through the
+exact protected Preview, deliberate conflict suppression, the FIREBIRDS calendar
+write, keyboard/mobile interaction, and organizer/attendee human email receipts.
 
 ### Inquiry durability
 
@@ -461,7 +527,7 @@ The current inquiry concurrency and notification-state proof is more specific:
   applied and is no longer current delivery evidence; repeat the request
   against staging before claiming hosted persistence or notification.
 
-## Verification — August 29–31
+## Verification record — August 29–September 5
 
 <!-- prettier-ignore -->
 | Check                                                               | Result                                                                                                                                                                                                                                                                   |
@@ -469,15 +535,16 @@ The current inquiry concurrency and notification-state proof is more specific:
 | `npm run typecheck`                                                 | PASS                                                                                                                                                                                                                                                                     |
 | `npm run lint`                                                      | PASS                                                                                                                                                                                                                                                                     |
 | `npm run validate:seo`                                              | PASS — 21 pages, 21 metadata records, 7 long-form documents                                                                                                                                                                                                              |
-| `npm run build:ci`                                                  | PASS — SEO 21 pages / 21 metadata records / 7 long-form documents; Next.js 16.3.1 Webpack build; 63 static pages generated; build manifest includes `/api/cron/commerce-reconciliation`                                                                                   |
-| `npm audit --omit=dev` and full `npm audit`                         | PASS — zero vulnerabilities across 141 production dependencies and 554 total dependencies at checkpoint `c74fe61`; GitHub's 19 alerts reproduce only against the older `origin/main` lockfile                                                                      |
-| `npm run test:launch-env`                                           | PASS — all 18 synthetic launch-boundary fixtures, including explicit rejection of legacy Supabase browser/server keys, missing/short `CRON_SECRET`, and reuse of the inquiry-rate-limit secret as cron authority, produced the expected exit and message without exposing fixture secrets |
+| `npm run build:ci`                                                  | PASS — September 5 combined tree: SEO 21 pages / 21 metadata records / 7 long-form documents; Next.js 16.3.1 Webpack build printed 62 route/page entries and includes `/api/cron/commerce-reconciliation`                                                                |
+| `npm audit --omit=dev` and full `npm audit`                         | PASS — September 5 lockfile remediation reports zero vulnerabilities across 141 production dependencies and 560 total dependencies. Pair this local result with exact-SHA checkpoint CI and deployment evidence before relying on it as hosted proof                     |
+| `npm run test:launch-env`                                           | PASS — all 23 synthetic launch-boundary fixtures pass, including explicit rejection of legacy Supabase browser/server keys, missing/short `CRON_SECRET`, and reuse of the inquiry-rate-limit secret as cron authority, without exposing fixture secrets |
 | `npm run test:inquiries`                                            | PASS — 7 provider-free boundary cases cover trusted Vercel addressing, spoof rejection, missing deployed identity, short/missing HMAC authority, keyed fingerprints and payload digests, 1–20 limit clamping/defaulting, and the explicit local-development fallback          |
 | `npm run test:booking`                                              | PASS — 6 booking-boundary cases cover the complete Cal request identity, 11 unique canonical slugs, Wild Glow Express as inquiry-only, exact slug/title/duration matching for the other 10 services, and published guest limits                                                |
 | `npm run test:accessibility`                                        | PASS — rendered markup proves the actual LIFT progressbar directly owns its accessible name and truthful 0–7 initial value semantics                                                                                                                                       |
-| `npm run test:preview-release`                                      | PASS — 10 offline Preview-policy cases cover repository policy, forbidden Production deploy commands, deployment-gate ordering, exact cron declaration, committed-template secrecy, clean checkpoint state, pre-push ahead state, post-push exact synchronization, dirty-tree rejection, and branch/upstream mismatch rejection |
-| Preview repository preflight before and after push                  | PASS — clean checkpoint candidate was four commits ahead and not behind before push; after the authorized checkpoint-only push, HEAD `c74fe61` exactly matched `origin/checkpoint/platform-overhaul-2026-08-20`                                                       |
-| `npm run test:commerce`                                             | PASS — 54 provider-free cases: 10 request/limit/namespace policy cases, 22 shared-verifier/expiry/repair cases, and 22 cron/scheduled-worker cases covering exact identity, fail-closed write ordering, customer-bookkeeping isolation, terminal monitoring, leases, report validation, deadline release, sanitized failure categories/responses, and replay repair |
+| `npm run test:auth`                                                  | PASS — 16 cases cover stable non-reflective error feedback and safe same-origin redirect handling, including hostile absolute, protocol-relative, encoded slash/backslash/control-character, and malformed inputs |
+| `npm run test:preview-release`                                      | PASS — 16 offline Preview-policy cases cover repository policy, forbidden Production deploy commands, deployment-gate ordering, required Auth test coverage, exact cron declaration, committed-template secrecy, checkpoint synchronization, dirty-tree rejection, and branch/upstream mismatch rejection |
+| Preview repository preflight before and after push                  | PASS for the recorded baseline — local and tracked remote matched exact commit `8e841fc2db78bf42126c2ee365c0f65228076980`; every later authorized checkpoint-only push must repeat this exact-synchronization proof and be resolved externally |
+| `npm run test:commerce`                                             | PASS — 55 provider-free cases: 10 request/limit/namespace policy cases, 23 shared-verifier/expiry/repair cases including partial-refund retention, and 22 cron/scheduled-worker cases covering exact identity, fail-closed write ordering, customer-bookkeeping isolation, terminal monitoring, leases, report validation, deadline release, sanitized failure categories/responses, and replay repair |
 | Targeted Prettier and `git diff --check`                            | PASS                                                                                                                                                                                                                                                                     |
 | Changed/untracked launch-file secret-shape scan                     | PASS — no real Stripe, webhook, Supabase, Resend, or JWT secret-shaped values; every shape hit is an explicitly synthetic fixture in the launch/Preview test harness or the packet's redacted fixture note                                                                 |
 | Prior `/book` fallback with 0 public Cal.com events                 | PASS — inquiry fallback, service switching, no iframe, no console errors; historical fallback proof only, because ten exact event types are now public                                                                                                                     |
@@ -488,7 +555,7 @@ The current inquiry concurrency and notification-state proof is more specific:
 | Current inquiry-only Wild Glow booking at 390×844                   | PASS — `/book?service=wild-glow-express-facial` rendered guest minimum/default 4, inquiry-only explanation, timing choices, privacy notice, and no live calendar; document client/scroll width both 375; zero console errors                                                   |
 | Local desktop/mobile axe sweep                                      | PASS — 18 public, store, legal, auth, and member-entry journeys at 1440×1000 and 390×844 produced zero WCAG 2 A/AA, 2.1 A/AA, or 2.2 AA axe violations after the contrast/progress fixes; six additional checkout-result, protected-auth, and password journeys passed at 390×844; no audited page overflowed or logged a console error |
 | Local keyboard and reduced-motion checks                            | PASS — skip navigation moved focus to `main`; mobile navigation and the cart trapped focus, closed with Escape, and restored their triggers; keyboard service activation preserved focus; four representative routes reported zero active animations under reduced motion                                                                  |
-| Remaining accessibility/provider verification                      | **PARTIAL** — live Cal.com dates and times now render for all three schedule families and the Signature Facial mobile selector fits at 390 px, but the sweep does not prove keyboard or mobile pointer/touch Cal selection, a completed Cal request, conflict blocking, confirmation/cancel/reschedule notifications, authenticated paid-library content, the real inquiry-admin inbox, 200% zoom across every route, or a manual screen-reader journey |
+| Remaining accessibility/provider verification                      | **PARTIAL** — live Cal.com dates and times render for all three schedule families and a prior provider-level Signature Facial request/confirm/reschedule/cancel lifecycle passed. The exact protected Preview still lacks purchaser sign-in, keyboard/mobile Cal submission, deliberate conflict blocking, FIREBIRDS destination write, organizer/attendee human email receipts, authenticated paid-library content, the real inquiry-admin inbox, 200% zoom across every route, and a manual screen-reader journey |
 | Current local `/beauty/lift` browser verification                   | PASS — rendered LIFT hero, accessible navigation, cart trigger, public preview, seven movement links, and $11.11 video+PDF copy; meaningful DOM present; no Next.js error overlay or browser warning/error logs                                                                                                                           |
 | Local same-origin page probes                                       | PASS — `GET /`, `GET /book`, and `GET /beauty/lift` each returned HTTP 200                                                                                                                                                                                               |
 | Contact same-origin boundary                                        | PASS — missing Origin and foreign Origin returned HTTP 403; the correct localhost Origin reached the route and returned a truthful HTTP 503 in the pre-migration host test. Now that migration 013 is applied, hosted persistence requires a fresh repeat                                                                                |
@@ -629,13 +696,13 @@ artifacts:
 | `app/api/cron/commerce-reconciliation/route.ts` |         382 | `e7613f9f8f7ba533fa0c80f5656040bb267ec11ef3a885b9abbc6003a7b9bcb5` |
 | `app/api/checkout/reconcile/route.ts`           |       7,086 | `ddce6fe29199cc78714f37fef995087bc3c61b1054cfd2c9fb5d4332fa3ff1ce` |
 | `paid-checkout-reconciler.tsx`                  |       2,457 | `98ffb93dd1aa45f40117148ea2b93b6ad4f0d36d628fcb2b6f72f0ec7ffcb6cd` |
-| `scripts/test-stripe-fulfillment.ts`            |      28,422 | `41d06f3eab8381e3f58068619a47548fb06da3cbd7de21da70cddf27f1c48f93` |
+| `scripts/test-stripe-fulfillment.ts`            |      29,851 | `ec8c7f1a403dfdb1ec0b023e0cf4495780193d841b919f43b2615b2846f70459` |
 | `scripts/test-scheduled-reconciliation.ts`      |      23,141 | `ffc098354ade8da03431bf4566d2fe1dd56e1e422c6b19e9d751376e1f8b5d9f` |
 | `scripts/test-commerce-database.sql`            |      32,807 | `84e760b0103b63d80300906161594ff32e5c6841da392e7d9be7c5a0f772b821` |
 | `scripts/validate-launch-env.ts`                |      14,236 | `1a7cdc0c98a78352bc00b1a23dc1d0a4d83932bf2da52abf5774727dea03370e` |
 
-These hashes identify the source and test bytes that passed the 54
-provider-free commerce cases, 18 launch-environment cases, and rollback-only
+These hashes identify the source and test bytes that passed the 55
+provider-free commerce cases, 23 launch-environment cases, and rollback-only
 database assertions. They do not replace the pending current-code Stripe
 sandbox repeat.
 
@@ -744,11 +811,11 @@ bypass and exactly `checkout.session.completed`, `checkout.session.expired`,
 `charge.refunded`, and `charge.dispute.created`. Its fresh signing secret is a
 sensitive exact-branch Preview variable; the localhost CLI secret was not
 reused. Deployment Protection remains enabled and the unqualified endpoint
-returns 401. Because the last Ready deployment predates the new bypass, signed
-delivery still requires proof on the next successful Preview. No
-current-candidate purchase has been completed. Local `STRIPE_LIVEMODE=false`
-and `COMMERCE_SALES_READY=false` keep the payment boundary in test mode and keep
-sales closed.
+returns 401. The latest READY deployment includes the complete branch-scoped
+configuration, but no signed delivery/database-receipt or current-candidate
+purchase has been exercised on that exact deployment. Local
+`STRIPE_LIVEMODE=false` and `COMMERCE_SALES_READY=false` keep the local payment
+boundary in test mode and keep local sales closed.
 
 The exact replay, refund, dispute, evidence, and incident procedure is recorded
 in [`docs/commerce-operations.md`](commerce-operations.md). That runbook is an
@@ -794,11 +861,13 @@ approval.
 2. Preserve the now-applied 001–014 ledger and no-op dry-run evidence; repeat
    schema, privilege, queue, and lease behavior through the deployed application
    boundary without reapplying or repairing migration history.
-3. Install the verified modern Supabase server credential in encrypted,
-   branch-scoped Preview configuration and point Preview at the byte-verified
-   canonical private PDF/video objects; repeat the purchase/delivery/refund
-   journey on the public custom Preview hostname.
-4. Configure and verify the four persistent Preview webhook subscriptions.
+3. Preserve the verified modern Supabase server credential and canonical
+   private PDF/video paths in encrypted branch-scoped Preview configuration;
+   repeat the purchase/delivery/refund journey on the public custom Preview
+   hostname.
+4. Preserve the enabled persistent Preview webhook and its four exact
+   subscriptions; verify a signed delivery and target/account/mode database
+   receipt on the exact current deployment.
 5. Exercise the authenticated `paid_pending` reconciliation path on the public
    Preview, including exact auth/origin/order binding, one POST/refresh, the
    60-second cooldown and three-claim ceiling, no fabricated Event receipt, and
@@ -815,12 +884,11 @@ approval.
    Product/Price and webhook, and run the minimal real-money smoke test only
    after separate Production approval.
 
-The latest signed-in live-account check reached Stripe's first activation
-screen: United States is fixed and the owner must choose the legal business
-type before entering representative, tax, address, and bank details. No legal
-choice was guessed or submitted, charges/payouts are not activated, and no live
-LIFT Product/Price exists. Sandbox readiness must not be reported as live-money
-readiness.
+The latest signed-in live-account check shows 10% onboarding completion:
+Business type is in progress and every other required section is not started.
+No private value was copied into this packet, charges/payouts are not verified
+active, and no live LIFT Product/Price exists. Sandbox readiness must not be
+reported as live-money readiness.
 
 ## Cal.com Booking State
 
@@ -948,16 +1016,15 @@ inquiry.
 
 ## Preview Release Candidate — Ready and Protected
 
-### Current state
+### Recorded external baseline and current requirements
 
-- Exact application-source commit:
-  `96809cf5cbc12f2b23387c1d68f166618e1baa0f` on
-  `checkpoint/platform-overhaul-2026-08-20`. Later commits through this packet
-  change documentation only. Application deployment
-  `dpl_9uzHczDpUXxWXwQcKUwsZakxDJCy` and documentation deployment
-  `dpl_3oXc5J2HSotSFymRrpdDNrAamk6P` both reached READY; `e4ebaf0` also passed
-  GitHub CI. Resolve the branch alias after any later docs push rather than
-  treating either deployment ID as permanently current.
+- Last externally verified pushed checkpoint before this candidate:
+  `8e841fc2db78bf42126c2ee365c0f65228076980` on
+  `checkpoint/platform-overhaul-2026-08-20`. GitHub CI passed and Vercel
+  deployment `dpl_F2R2enfjMUgT9qwnbj2Yr67apihU` reached READY for that exact
+  SHA. Resolve the branch alias after any later push rather than treating this
+  deployment ID as permanently current. The candidate includes the September 5
+  Auth and lockfile repairs; resolve its exact SHA and deployment externally.
 - `preview.hwlbysmd.com` is verified, correctly CNAME-configured, TLS-valid,
   and follows the latest READY checkpoint deployment. Deployment Protection
   redirects anonymous traffic to Vercel SSO; authenticated Vercel access reaches
@@ -967,8 +1034,10 @@ inquiry.
   same-origin checkout reaching the login boundary rather than readiness 503,
   hostile origins rejected, non-launch membership closed, and unsigned webhook
   input rejected.
-- Remaining Preview work is post-login visual/keyboard/mobile verification and
-  the owner-confirmed Stripe, inquiry, and Cal.com transactional journeys.
+- Remaining Preview work starts with private Vercel SSO sign-in and an existing
+  confirmed staging Supabase purchaser login on the exact custom hostname, then
+  post-login visual/keyboard/mobile verification and the owner-confirmed Stripe,
+  inquiry, and Cal.com transactional journeys.
 
 ### Historical first-attempt evidence (superseded where noted)
 
@@ -1037,12 +1106,14 @@ npm run validate:launch-env -- --target=production --expect-sales=open
 
 The new `scripts/preflight-preview-release.ts` and
 `docs/preview-release-runbook.md` add a dry, offline checkpoint policy before
-any Preview action. Its 10/10 policy fixtures pass. The repository-only
-preflight passed on the clean committed candidate after a fresh fetch, proving
-the checkpoint branch was ahead and not behind its tracked upstream. The full
-environment preflight remains blocked until a valid Resend key completes all 22
-branch-scoped values; passing
-repository policy is not permission to push, deploy, assign a hostname, or
+any Preview action. Its current 16/16 policy fixtures pass and require Auth
+boundary tests to remain in CI. The repository-only preflight passed on the
+clean pushed `8e841fc` checkpoint, where local HEAD exactly matched its tracked
+upstream. All 22 branch-scoped Preview names now exist and the deployed
+sandbox-open environment preflight passed. Every candidate containing the Auth,
+lockfile, or documentation changes must repeat clean repository/full validation
+for its own reviewed checkpoint. Passing repository or
+configuration policy is not permission to push `main`, promote Production, or
 change a provider.
 
 This validator proves configuration shape only. Hosted staging schema and asset
@@ -1063,33 +1134,30 @@ site URL; and explicit false values for Stripe live mode and the first-deploy
 commerce gate. A public Cal.com embed needs only the profile URL, not a private
 API key.
 
-Before describing a Preview as the release candidate:
+For the next Preview checkpoint:
 
-1. Preserve the verified hosted 001–014 ledger, no-op dry-run, schema/RPC
-   boundaries, and byte-identical private PDF/video evidence.
-2. Install the valid staging Supabase credential and verified private asset
-   paths in coherent branch-scoped Preview configuration.
-3. Preserve the passing isolated Stripe and inquiry evidence; repeat both
-   against hosted staging through the deployed current candidate.
-4. Preserve the verified Cal.com publication and repeat the real website
-   date/slot, conflict, request, confirmation, cancellation, and rescheduling
-   journey.
-5. Push only the reviewed local candidate to the checkpoint branch, prove exact
-   upstream synchronization afterward, and do not push `main`.
-6. Complete owner sign-in to a direct Resend Free account, create a valid key,
-   install its exact-branch Preview value, and redeploy with
-   `COMMERCE_SALES_READY=false`. Do not select a paid Marketplace plan without
-   separate approval.
-7. Verify the existing dedicated bypass-qualified Stripe sandbox endpoint on
-   the fresh Preview: unqualified protection, unsigned application rejection,
-   signed delivery, and staging receipt.
-8. Treat `preview.hwlbysmd.com` as a separate owner/DNS gate; the current
-   stable branch alias remains the verified webhook target unless that hostname
-   is explicitly approved and configured.
-9. Enable commerce only for the coherent test Preview and repeat
-   cart, checkout, webhook, entitlement, refund, inquiry, booking, scheduled
-   recovery, admin queue visibility, keyboard, mobile, and console checks on
-   the actual Preview URL.
+1. Preserve the verified hosted 001–014 ledger, schema/RPC boundaries,
+   byte-identical private PDF/video evidence, exact custom hostname, 22-name
+   branch-scoped configuration, and dedicated protected webhook boundary.
+2. Commit and push only the reviewed checkpoint branch after authorization;
+   repeat the full local gate, exact upstream synchronization, CI, deployment,
+   and alias-to-SHA proof. Do not push `main`.
+3. Privately pass Vercel SSO and sign in with an existing confirmed staging
+   Supabase purchaser on `preview.hwlbysmd.com`; never share credentials in chat.
+4. Repeat the current-candidate cart, sandbox Checkout, signed webhook,
+   reconciliation, entitlement, video, PDF, duplicate, partial/full refund,
+   dispute, scheduled recovery, and private admin checks on that exact host.
+5. Submit one valid inquiry and prove database-first receipt, Resend acceptance,
+   stable retry/idempotency, Shannon's human receipt, admin visibility, and
+   logged-out denial.
+6. Complete a website-originated Cal.com booking and prove manual confirmation,
+   deliberate conflict suppression, the FIREBIRDS destination write,
+   cancellation/rescheduling, organizer/attendee human emails, keyboard/mobile
+   interaction, and fallback behavior.
+7. Configure and verify Supabase custom SMTP and the exact URL allowlist, then
+   prove signup confirmation and password recovery with a non-team address.
+8. Restore `COMMERCE_SALES_READY=false` if any provider, access, notification,
+   calendar, isolation, accessibility, or operational check fails.
 
 No direct push to `main` is authorized or required for this workflow.
 
@@ -1103,7 +1171,9 @@ Production remains closed until all of the following are true:
   no separate Production Supabase project currently exists.
 
 - Stripe verifies the canonical live `HWLbySMD` business and enables charges
-  and payouts.
+  and payouts. The September 5 authenticated dashboard shows only 10%
+  onboarding completion: Business type is in progress and every remaining
+  required section is not started.
 - One live, one-time USD $11.11 Product/Price exists with the same canonical
   LIFT metadata as the sandbox Product.
 - The live webhook points directly to
@@ -1141,9 +1211,11 @@ were previously approved and read-verified. The current hardened application
 journey still requires a fresh provider repeat. These approvals remain
 outstanding:
 
-1. **Stripe legal business type:** the owner must choose the truthful Stripe
-   category for HWLbySMD before live activation can continue; no legal status
-   will be inferred from website copy or local files.
+1. **Stripe live onboarding:** the private flow is 10% complete, with Business
+   type in progress and the remaining required sections not started. The owner
+   must privately complete the truthful business, representative, banking, tax,
+   and identity details; no legal status or private value will be inferred from
+   website copy or local files.
 2. **Inquiry retention:** choose and publish a specific retention period and
    purge cadence before live inquiry collection; no automatic-deletion claim
    will be made until that policy and implementation are verified.
@@ -1171,9 +1243,9 @@ outstanding:
 7. **Preview transactional proof:** the custom branch domain, dedicated webhook
    bypass, persistent sandbox webhook, verified Resend domain, and restricted
    sending credential now exist while Deployment Protection remains enabled.
-   Approve the action-time sandbox payment, valid inquiry, and Cal.com booking
-   submissions needed to prove signed delivery, staging receipt, fulfillment,
-   and human notifications.
+   Reconfirm at action time the sandbox payment, valid inquiry, and Cal.com
+   booking submissions needed to prove signed delivery, staging receipt,
+   fulfillment, destination-calendar behavior, and human notifications.
 8. **Production database:** only one HWL Supabase project currently exists.
    Explicitly approve whether Production may use it or authorize creation and
    verification of a separate Production project; staging must not be silently
@@ -1195,6 +1267,14 @@ commit history.
 - Human confirmation that the next valid Preview inquiry reaches Shannon's
   intended mailbox. The direct Resend domain and restricted Preview credential
   are now configured; do not paste or copy that secret into chat or source.
+- Private sign-in to Vercel SSO and an existing confirmed staging Supabase
+  purchaser account on `https://preview.hwlbysmd.com`. Do not place either
+  credential in chat; post-login purchaser E2E remains unverified until that
+  browser session exists on the exact hostname.
+- Private Supabase Auth review confirming custom SMTP, the canonical Site URL and
+  exact callback allowlist, disabled link tracking, and appropriate email rate
+  limits, followed by one non-team signup-confirmation and password-recovery
+  delivery test.
 - Distinct `INQUIRY_RATE_LIMIT_SECRET` and `CRON_SECRET` values are installed as
   sensitive checkpoint-branch Preview records. Production still needs its own
   independently generated values after separate approval; neither value may be
@@ -1234,17 +1314,22 @@ Keep `COMMERCE_SALES_READY=false` in Production. The protected checkpoint
 Preview is intentionally open only to Stripe sandbox testing. The product,
 cart, payment safety model,
 protected video, durable payment recovery, private operations visibility, and
-booking integration are substantially implemented. The refreshed sandbox
+booking integration are substantially implemented. The local Auth repair now
+fails invalid links safely and gates password updates on a verified session;
+its 16/16 boundary suite passes, but hosted SMTP and email-link E2E do not. The
+refreshed sandbox
 Stripe secret and canonical $11.11 Price/Product pass current read-only API
 verification. An earlier implementation path passed canonical Stripe sandbox
 purchase, fulfillment, refund, dispute, and replay proof; the exact hardened
 source must repeat it. The isolated DB-first inquiry journey passes. Hosted
 staging now has the verified 001–014 ledger, current schema/RPC boundaries, and
 byte-identical canonical private PDF/video assets. The remaining work is the
-public provider and release proof: coordinated retirement of the compromised
+public provider and release proof: private sign-in to the exact protected
+Preview, coordinated retirement of the compromised
 legacy Supabase key, deployed cron execution, valid inquiry delivery and human
 inbox receipt, verified administrator bootstrap, Cal.com website booking E2E,
 owner acceptance of the recovery cadence and alert routing, the dispute manual
 review/resolution runbook, the remaining post-login mobile/keyboard/provider
-journeys on the current protected Preview, live Stripe activation, and explicit
+journeys on the current protected Preview, completion of the currently 10%
+Stripe live onboarding, live provider activation, and explicit
 Production approval.

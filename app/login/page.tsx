@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 
 import { LoginForm } from "@/components/auth/login-form"
+import { loginAuthFeedback } from "@/lib/auth-feedback"
 import { safeInternalPath } from "@/lib/safe-path"
 
 export const metadata: Metadata = {
@@ -11,9 +12,20 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirectTo?: string }>
+  searchParams: Promise<{
+    error?: string | string[]
+    error_code?: string | string[]
+    redirectTo?: string | string[]
+  }>
 }) {
-  const { redirectTo } = await searchParams
+  const params = await searchParams
+  const firstValue = (value: string | string[] | undefined) =>
+    typeof value === "string" ? value : undefined
+  const feedback = loginAuthFeedback({
+    errorCode: firstValue(params.error_code),
+    legacyOrNormalizedError: firstValue(params.error),
+  })
+  const redirectTo = safeInternalPath(firstValue(params.redirectTo), "/library")
 
   return (
     <section className="member-atmosphere px-6 py-20 md:py-28">
@@ -32,7 +44,7 @@ export default async function LoginPage({
             and return to every practice you own.
           </p>
         </div>
-        <LoginForm redirectTo={safeInternalPath(redirectTo, "/library")} />
+        <LoginForm feedback={feedback} redirectTo={redirectTo} />
       </div>
     </section>
   )

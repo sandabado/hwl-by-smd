@@ -13,6 +13,7 @@ import {
 function repositoryFixture(): PreviewRepositoryFiles {
   return {
     ci: `
+      - run: npm run test:auth
       - run: npm run test:launch-env
       - run: npm run test:preview-release
       - run: npm run build:ci
@@ -53,6 +54,7 @@ MUX_PRIVATE_KEY=
           "node scripts/preflight-preview-release.ts --repository-only --require-upstream-sync",
         "preflight:preview:repository":
           "node scripts/preflight-preview-release.ts --repository-only",
+        "test:auth": "node --test scripts/test-auth-boundaries.ts",
         "test:launch-env": "node scripts/test-launch-env.ts",
         "test:preview-release":
           "node --test scripts/test-preview-release-preflight.ts",
@@ -194,6 +196,22 @@ test("Next build without the deployment gate fails", () => {
       .map((item) => item.name)
       .join("\n"),
     /Build gate ordering/
+  )
+})
+
+test("missing Auth boundary coverage fails Preview policy", () => {
+  const fixture = repositoryFixture()
+  const parsed = JSON.parse(fixture.packageJson) as {
+    scripts: Record<string, string>
+  }
+  delete parsed.scripts["test:auth"]
+  fixture.packageJson = JSON.stringify(parsed)
+  fixture.ci = fixture.ci.replace("- run: npm run test:auth", "")
+
+  const failuresForFixture = failures(auditPreviewRepositoryFiles(fixture))
+  assert.ok(failuresForFixture.some((item) => item.name === "Preview scripts"))
+  assert.ok(
+    failuresForFixture.some((item) => item.name === "CI Preview coverage")
   )
 })
 

@@ -238,6 +238,7 @@ export function auditPreviewRepositoryFiles(
       "preflight:preview",
       "preflight:preview:post-push",
       "preflight:preview:repository",
+      "test:auth",
       "test:launch-env",
       "test:preview-release",
     ]
@@ -285,6 +286,7 @@ export function auditPreviewRepositoryFiles(
   )
 
   const requiredCiCommands = [
+    "npm run test:auth",
     "npm run test:launch-env",
     "npm run test:preview-release",
     "npm run build:ci",
@@ -297,7 +299,7 @@ export function auditPreviewRepositoryFiles(
       ? check(
           "pass",
           "CI Preview coverage",
-          "CI exercises the environment fixtures, Preview repository policy, and provider-free build"
+          "CI exercises Auth boundaries, environment fixtures, Preview repository policy, and the provider-free build"
         )
       : check(
           "fail",

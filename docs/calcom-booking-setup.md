@@ -1,6 +1,6 @@
 # Cal.com booking launch setup
 
-Last verified: September 4, 2026
+Last verified: September 6, 2026
 
 ## Current provider state
 
@@ -123,11 +123,22 @@ found no public conflict-calendar labels, attendee addresses, private notes, or
 note templates. Distinct live public dates and times were also confirmed for
 the Esthetician, Yoga, and Consultation schedule families.
 
-An August 31 direct/provider Signature Facial test entered the unconfirmed
-queue, was manually confirmed, rescheduled, canceled, and released its slot.
-No test appointment remains active. This proves the provider lifecycle at that
-time, but it does not replace the required exact-current-Preview submission or
-human notification evidence.
+On September 6, the current public Production site completed a full Intuitive
+Tarot Reading lifecycle for the authorized test attendee at
+`admin@ghosthand.studio`. The noon request entered Cal's unconfirmed queue,
+was manually confirmed by the authenticated organizer, and generated a Cal
+Video meeting. Public availability then suppressed the appointment plus its
+configured buffers. The organizer rescheduled it to 1:00 PM with a stated test
+reason; Cal reported that the updated calendar invitation was emailed to
+everyone, and public availability moved the suppression with the booking. The
+organizer then canceled it with a stated completion reason. The organizer
+dashboard returned to zero upcoming bookings, Canceled history retained the
+test lifecycle, and all five Sunday slots from noon through 4:00 PM returned.
+No test appointment remains active and no Cal payment was collected.
+
+An August 31 direct/provider Signature Facial test separately entered the
+unconfirmed queue, was manually confirmed, rescheduled, canceled, and released
+its slot.
 
 The following customer-journey evidence is still required:
 
@@ -136,10 +147,9 @@ The following customer-journey evidence is still required:
 - The website's live embedded date/slot flow works by keyboard and by mobile
   pointer/touch, including actual date and time activation, with the correct
   local-timezone guidance.
-- A real request reaches Shannon's `FIREBIRDS` calendar, remains pending until
-  manually confirmed, and sends the expected guest and owner notifications.
-- Confirmation, cancellation, and rescheduling work; canceling releases the
-  slot.
+- Directly inspect the resulting `FIREBIRDS` calendar object and human owner
+  and attendee inboxes. Cal reported that calendar-invitation email was sent,
+  but receipt was not inspected in those mailboxes.
 - Cal.com failure, an unpublished slug, or a title/duration mismatch returns
   the visitor to the stored inquiry path without losing the selected service.
 - Public event links reveal no private calendar names, notes, or address data.

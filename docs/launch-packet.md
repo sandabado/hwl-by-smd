@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** September 5, 2026
+**Updated:** September 6, 2026
 
 **Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
 Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
@@ -1958,3 +1958,71 @@ Next ordered gates:
 5. Only after those operational gates, separately approve opening Production
    sales and complete one owner-driven $11.11 live purchase through webhook,
    entitlement, video/PDF delivery, and refund-state verification.
+
+## September 6 Cal.com Production Lifecycle Proof — Latest Authority
+
+This addendum supersedes earlier statements that the current Production
+booking lifecycle was untested. It does not prove human mailbox receipt, a
+direct FIREBIRDS calendar-object inspection, or any Cal-native payment flow.
+
+- The owner authorized a temporary public-site booking using
+  `admin@ghosthand.studio`. The Production `/book` experience submitted an
+  Intuitive Tarot Reading request for Sunday, September 27, 2026 from
+  12:00–1:00 PM Pacific with Cal Video, guest count `1`, a clearly non-client
+  virtual test location, and launch-verification notes.
+- The attendee confirmation page stated that the request still required host
+  approval. The authenticated organizer queue showed exactly one matching
+  Unconfirmed booking. Shannon's host-side **Confirm** action succeeded and
+  generated a Cal Video meeting.
+- A fresh public availability read then showed only 3:00 PM and 4:00 PM for
+  that date, proving that the confirmed noon booking and its configured
+  60-minute before/after buffers suppressed conflicting times.
+- The organizer rescheduled the confirmed appointment to 1:00–2:00 PM with a
+  stated launch-test reason. Cal's success page stated that an updated email
+  calendar invitation was sent to everyone, and a fresh public availability
+  read showed only 4:00 PM, proving the rescheduled appointment and buffers
+  were active.
+- The organizer canceled the temporary appointment with a stated completion
+  reason. Cal's final page reported **This event is canceled**; the organizer
+  dashboard showed no upcoming bookings and retained the test lifecycle in
+  Canceled history. A cache-busted public availability read restored all five
+  Sunday slots from 12:00 PM through 4:00 PM.
+- No Cal.com payment was configured or collected. The complete
+  request → manual confirmation → reschedule → cancellation → released-slot
+  lifecycle passes on the public Production booking surface. Human inspection
+  of the organizer and attendee inboxes, plus direct inspection of the
+  FIREBIRDS calendar object, remain separate evidence gaps.
+
+## September 6 Security and Migration Follow-up — Latest Authority
+
+- The owner-approved Preview automation-bypass rotation completed without
+  rollback. A replacement credential passed the protected route probe; only
+  the sandbox webhook URL was updated; the same idempotent Stripe test event
+  returned HTTP 200 before and after the old credential was revoked; the old
+  credential was then rejected while the replacement remained valid.
+  Production Stripe, domains, aliases, deployments, environment variables,
+  signing secrets, application code, and `main` were untouched.
+- The exact migration 015 candidate passed its 16 inquiry-policy tests and a
+  full transactional staging rehearsal ending in `ROLLBACK`; the test request
+  returned HTTP 201 and staging retained neither schema nor ledger effects.
+- Production still contains migrations 001–014 only. Both the repository CLI
+  and a fresh official CLI attempted the owner-approved Production connection,
+  but the `us-east-2` session-pooler connection timed out before authentication.
+  DNS-over-HTTPS produced the same result, the project reports no network bans,
+  and the direct database hostname is IPv6-only from a host without a usable
+  IPv6 route.
+- The Management API fallback was not used. That API generates its own remote
+  migration version rather than preserving local version `015`; using it would
+  require a separately approved local-file renumbering and ledger
+  reconciliation plan. Direct SQL and manual migration-ledger edits remain
+  excluded.
+- Fresh exact-working-tree safety suites pass: booking 14/14, commerce 55/55,
+  and inquiries 16/16. Production sales and website inquiry collection remain
+  fail-closed while their separate launch gates are completed.
+- The Production invitation to `shannon@hwlbysmd.com` is provider-delivered but
+  remains unaccepted. Delivery to `admin@ghosthand.studio` remains delayed.
+  During an authenticated diagnostic, that delayed message's one-time invite
+  URL was rendered by the provider. It was not opened, used, or persisted in
+  the repository; the invitation is now treated as compromised and must be
+  invalidated and reissued before acceptance. Administrator elevation remains
+  prohibited until each exact Auth user is independently confirmed.

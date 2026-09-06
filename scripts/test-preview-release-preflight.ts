@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
 import test from "node:test"
 
 import {
@@ -22,6 +23,7 @@ function repositoryFixture(): PreviewRepositoryFiles {
 HWL_DEPLOYMENT_TARGET=development
 HWL_LOCAL_BUILD=false
 NEXT_PUBLIC_SITE_URL=https://www.hwlbysmd.com
+NEXT_PUBLIC_INQUIRY_COLLECTION_READY=false
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
@@ -77,9 +79,27 @@ function failures(checks: PreviewCheck[]) {
   return checks.filter((item) => item.status === "fail")
 }
 
+function readRepositoryFile(relativePath: string) {
+  return readFileSync(new URL(`../${relativePath}`, import.meta.url), "utf8")
+}
+
 test("reviewed Preview repository policy passes", () => {
   assert.deepEqual(
     failures(auditPreviewRepositoryFiles(repositoryFixture())),
+    []
+  )
+})
+
+test("current repository files satisfy reviewed Preview policy", () => {
+  assert.deepEqual(
+    failures(
+      auditPreviewRepositoryFiles({
+        ci: readRepositoryFile(".github/workflows/ci.yml"),
+        envExample: readRepositoryFile(".env.example"),
+        packageJson: readRepositoryFile("package.json"),
+        vercelJson: readRepositoryFile("vercel.json"),
+      })
+    ),
     []
   )
 })
@@ -248,6 +268,52 @@ test("populated secret in the committed template fails", () => {
       .join("\n"),
     /Environment template secrecy/
   )
+})
+
+test("missing inquiry collection readiness fails the template contract", () => {
+  const fixture = repositoryFixture()
+  fixture.envExample = fixture.envExample.replace(
+    "NEXT_PUBLIC_INQUIRY_COLLECTION_READY=false\n",
+    ""
+  )
+
+  const failedChecks = failures(auditPreviewRepositoryFiles(fixture))
+  const templateContract = failedChecks.find(
+    (item) => item.name === "Environment template contract"
+  )
+  assert.match(
+    templateContract?.detail ?? "",
+    /NEXT_PUBLIC_INQUIRY_COLLECTION_READY/
+  )
+  assert.ok(
+    failedChecks.some((item) => item.name === "Template fail-closed defaults")
+  )
+})
+
+test("inquiry collection must default fail closed in the committed template", () => {
+  for (const unsafeValue of ["true", "TRUE", "FALSE", ""]) {
+    const fixture = repositoryFixture()
+    fixture.envExample = fixture.envExample.replace(
+      "NEXT_PUBLIC_INQUIRY_COLLECTION_READY=false",
+      `NEXT_PUBLIC_INQUIRY_COLLECTION_READY=${unsafeValue}`
+    )
+
+    const failedChecks = failures(auditPreviewRepositoryFiles(fixture))
+    assert.ok(
+      !failedChecks.some(
+        (item) => item.name === "Environment template contract"
+      ),
+      `present inquiry readiness key must satisfy the template contract: ${JSON.stringify(unsafeValue)}`
+    )
+    assert.ok(
+      failedChecks.some(
+        (item) =>
+          item.name === "Template fail-closed defaults" &&
+          item.detail.includes("NEXT_PUBLIC_INQUIRY_COLLECTION_READY")
+      ),
+      `unsafe inquiry readiness default must fail: ${JSON.stringify(unsafeValue)}`
+    )
+  }
 })
 
 test("clean synchronized checkpoint snapshot passes Git policy", () => {

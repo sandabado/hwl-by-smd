@@ -56,6 +56,7 @@ const REQUIRED_TEMPLATE_KEYS = [
   "INQUIRY_RATE_LIMIT_SECRET",
   "LIFT_PDF_STORAGE_PATH",
   "LIFT_VIDEO_STORAGE_PATH",
+  "NEXT_PUBLIC_INQUIRY_COLLECTION_READY",
   "NEXT_PUBLIC_SITE_URL",
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
   "NEXT_PUBLIC_SUPABASE_URL",
@@ -351,18 +352,19 @@ export function auditPreviewRepositoryFiles(
   const safeDefaults =
     template.get("HWL_LOCAL_BUILD") === "false" &&
     template.get("COMMERCE_SALES_READY") === "false" &&
+    template.get("NEXT_PUBLIC_INQUIRY_COLLECTION_READY") === "false" &&
     template.get("STRIPE_LIVEMODE") === "false"
   checks.push(
     safeDefaults
       ? check(
           "pass",
           "Template fail-closed defaults",
-          "local bypass, commerce sales, and Stripe live mode default to false"
+          "local bypass, commerce sales, inquiry collection, and Stripe live mode default to false"
         )
       : check(
           "fail",
           "Template fail-closed defaults",
-          "HWL_LOCAL_BUILD, COMMERCE_SALES_READY, and STRIPE_LIVEMODE must all default to false"
+          "HWL_LOCAL_BUILD, COMMERCE_SALES_READY, NEXT_PUBLIC_INQUIRY_COLLECTION_READY, and STRIPE_LIVEMODE must all default to false"
         )
   )
 

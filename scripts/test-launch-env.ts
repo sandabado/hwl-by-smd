@@ -386,6 +386,28 @@ const fixtures: Fixture[] = [
   },
   {
     args: ["--target=production", "--expect-sales=closed"],
+    env: {
+      ...productionFixture,
+      NEXT_PUBLIC_INQUIRY_COLLECTION_READY: "true",
+    },
+    expectedExit: 0,
+    expectedText:
+      "Inquiry collection: open (NEXT_PUBLIC_INQUIRY_COLLECTION_READY=true).",
+    name: "Production closed sales permit inquiry collection open",
+  },
+  {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: {
+      ...productionFixture,
+      NEXT_PUBLIC_INQUIRY_COLLECTION_READY: "TRUE",
+    },
+    expectedExit: 1,
+    expectedText:
+      "NEXT_PUBLIC_INQUIRY_COLLECTION_READY: must be exactly true or false",
+    name: "Production malformed inquiry collection readiness fails",
+  },
+  {
+    args: ["--target=production", "--expect-sales=closed"],
     env: productionClosedStripeFixture,
     expectedExit: 0,
     expectedText:
@@ -422,6 +444,17 @@ const fixtures: Fixture[] = [
       "Launch environment preflight passed for production (open sales).",
     name: "canonical Production database and live Stripe fixture pass",
     unexpectedText: ["NEXT_PUBLIC_SITE_URL:", "CONTACT_FROM_EMAIL:"],
+  },
+  {
+    args: ["--target=production", "--expect-sales=open"],
+    env: {
+      ...productionStripeFixture,
+      NEXT_PUBLIC_INQUIRY_COLLECTION_READY: "true",
+    },
+    expectedExit: 0,
+    expectedText:
+      "Inquiry collection: open (NEXT_PUBLIC_INQUIRY_COLLECTION_READY=true).",
+    name: "Production open sales permit inquiry collection open",
   },
   {
     args: ["--target=production", "--expect-sales=open"],

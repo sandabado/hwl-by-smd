@@ -2252,13 +2252,20 @@ payment flow.
   warning-level events. Its four 5xx entries were the two deliberately repeated
   checkout/contact HTTP 503 safety canaries; there were no unexpected 5xx
   responses.
-- Production and checkpoint-branch Preview each contain the same 23 required
-  pre-open environment-variable names. `COMMERCE_ALERT_TO_EMAIL` is absent from
-  both. Production-open validation will continue to reject the build until the
-  owner names one exact alert recipient and authorizes installation and a
-  provider-delivery test. Sales, website inquiry collection, Production
-  promotion, live payment, and administrator elevation remain closed and were
-  not performed in this verification.
+- At the time this isolated candidate built, Production and checkpoint-branch
+  Preview each contained the same 23 required pre-open environment-variable
+  names and lacked `COMMERCE_ALERT_TO_EMAIL`. On September 6 the owner approved
+  `admin@ghosthand.studio` as the exact commerce-recovery alert recipient,
+  consistent with that identity's operational-super-admin and migration-015
+  inquiry-retention-operator responsibilities. The value was added as
+  sensitive server-side configuration to Production and only the checkpoint
+  Preview branch; fresh name-only Vercel inventories show it as `Encrypted` in
+  both exact scopes without exposing the value. Shannon's separate
+  permanent-site-admin and Stripe public-contact roles do not replace that
+  routing decision. Existing immutable deployments do not receive later
+  environment changes, and no deployed runtime has consumed the new value.
+  Sales, website inquiry collection, Production promotion, live payment, and
+  administrator elevation remain closed.
 - A fresh authenticated Production Supabase read reconfirmed Site URL
   `https://www.hwlbysmd.com`, the sole redirect URL
   `https://www.hwlbysmd.com/auth/callback`, the token-hash Invite User template,
@@ -2266,21 +2273,44 @@ payment flow.
   two-email SQL count returned exactly one Auth row, one profile, and one
   UUID/email match for each approved administrator identity. Both remain
   pending invitations with zero confirmed users, zero prior sign-ins, and zero
-  exact administrator profiles; the total Production administrator count is
+  profiles with `is_admin=true`; the total Production administrator count is
   zero. The query returned no tokens, timestamps, passwords, sessions, raw
-  metadata, UUIDs, or unrelated identities.
+  metadata, UUIDs, or unrelated identities. The owner subsequently approved an
+  in-place Ghosthand reinvitation. The existing user's filtered Auth log records
+  one new `/invite` request completed with HTTP 200, and Resend records one new
+  `You've been invited` message to the same address at
+  `2026-09-06 23:26:34.393000+00`. That newest message has status
+  `delivery delayed`; a fresh DNS query returned no MX record for
+  `ghosthand.studio`, so human receipt is not yet proved and no additional
+  resend is authorized while the provider attempt remains active. No deletion
+  or elevation was performed. Authority is resolved:
+  `admin@ghosthand.studio` remains the operational super admin and the exact
+  migration-015 inquiry-retention operator, while `shannon@hwlbysmd.com` is the
+  permanent site administrator. The application itself has one administrator
+  tier, `public.profiles.is_admin`; “operational super admin” describes
+  governance and operating authority, not a second application privilege tier.
+  Neither profile may be elevated until that exact human accepts their own
+  invitation and the matching Auth identity is independently confirmed.
 - An aggregate-only Production inquiry query returned zero `inquiries`, zero
   `inquiry_submission_limits`, and zero `inquiry_retention_runs`. No inquiry
   content was selected and no row was written. The unsaved SQL audit tabs were
   discarded after the checks.
+- In the canonical live Stripe account, the public business/support email was
+  observed blank. The owner selected `shannon@hwlbysmd.com` as that public
+  Stripe contact, but an automated form fill was not completed. No provider
+  update is claimed; saving and rereading the value remains pending human/UI
+  completion. This public Stripe contact is separate from the commerce-alert
+  destination and the application's administrator tier.
 - Public Resend DNS remains present and the authenticated provider dashboard
   reports `hwlbysmd.com` verified. The restricted Production Auth SMTP key
   shows recent use, while the separate restricted Production App key still
   shows no activity. This proves SMTP provider use, not human receipt of both
   invitations or application inquiry/commerce-alert delivery. The compromised
-  Ghosthand invitation still requires an explicitly approved in-place reinvite
-  before acceptance; neither identity may be elevated before independent
-  confirmation.
+  former Ghosthand invitation/link must not be accepted. The newly issued
+  replacement invitation is the only acceptable link, but Resend currently
+  reports its delivery as delayed and `ghosthand.studio` currently has no MX
+  record. Neither identity may be elevated before the corresponding human
+  acceptance and independent Auth confirmation.
 - A fresh authenticated Cal.com recheck confirmed zero Upcoming and zero
   Unconfirmed bookings. Canceled history still retains the authorized
   `Ghosthand Admin Test` noon request and rescheduled 1:00 PM lifecycle. The

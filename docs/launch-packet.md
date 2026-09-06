@@ -2029,10 +2029,33 @@ payment flow.
 - Fresh exact-working-tree safety suites pass: booking 14/14, commerce 55/55,
   and inquiries 16/16. Production sales and website inquiry collection remain
   fail-closed while their separate launch gates are completed.
-- The Production invitation to `shannon@hwlbysmd.com` is provider-delivered but
-  remains unaccepted. Delivery to `admin@ghosthand.studio` remains delayed.
-  During an authenticated diagnostic, that delayed message's one-time invite
-  URL was rendered by the provider. It was not opened, used, or persisted in
-  the repository; the invitation is now treated as compromised and must be
-  invalidated and reissued before acceptance. Administrator elevation remains
-  prohibited until each exact Auth user is independently confirmed.
+- A fresh authenticated live Stripe read at `2026-09-06T19:41:15.548Z`
+  confirms the canonical `HWLbySMD` account
+  `acct_1U9cEIPTLuM8Maxa` has payments, payouts, card payments, and transfers
+  active with no disabled reason. Product `prod_VCotDELRoHDnox` and one-time
+  USD 1,111-cent Price `price_1UCPFjPTLuM8MaxaTY48RO9e` are active and carry
+  the exact `lift-complete-v2`, `video_and_pdf`, and `lift_guide` metadata. The
+  enabled webhook `we_1UCPJEPTLuM8MaxawK9UgEHh` targets exactly
+  `https://www.hwlbysmd.com/api/stripe/webhook` and subscribes only to the four
+  approved checkout/refund/dispute events. Complete live-mode listings contain
+  zero Checkout Sessions, PaymentIntents, charges, refunds, or disputes and
+  zero captured amount. This proves configuration readiness, not a live sale;
+  the application commerce gate remains closed.
+- An authenticated Production Supabase read confirms Pro-plan managed daily
+  physical database backups with PITR disabled and a rolling seven-day
+  customer-accessible recovery window. Completed restore points were visible
+  at `2026-09-05 18:34:35 UTC` and `2026-09-06 07:58:54 UTC`. Seven days is the
+  recovery boundary, not an exact provider-attested physical-erasure timestamp.
+  Database restores do not restore Supabase Storage object bodies, and any
+  restore or clone from before an inquiry purge must remain closed until the
+  retention purge is rerun and verified.
+- A fresh authenticated Production dashboard read shows exactly one Auth user
+  and one UUID-matched profile for each of `shannon@hwlbysmd.com` and
+  `admin@ghosthand.studio`. Both Auth records still show no confirmation and no
+  sign-in; both profiles remain `is_admin=false`. Shannon's invitation is
+  provider-delivered. Delivery of the Ghosthand invitation was delayed, and an
+  earlier authenticated diagnostic rendered that message's one-time invite URL.
+  It was not opened, used, or persisted in the repository; the Ghosthand
+  invitation is treated as compromised and must be invalidated and reissued
+  before acceptance. Administrator elevation remains prohibited until each
+  exact Auth user is independently confirmed.

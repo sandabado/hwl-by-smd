@@ -336,6 +336,30 @@ phone numbers, or provider receipts. Primary-table deletion does not imply that
 managed backups are immediately rewritten; document and honor the verified
 backup-expiry boundary when responding to a deletion request.
 
+## Managed backup recovery boundary
+
+Verified September 6, 2026 against the authenticated Production project
+`qwprhsrwiihfllmgallr`: the project is on Supabase Pro with managed daily
+physical database backups. Point-in-Time Recovery is not enabled. Supabase
+defines the customer-accessible managed recovery window as the last seven days
+of daily backups; without PITR, the recovery point can be nearly 24 hours old.
+
+The completed restore points visible during verification were
+`2026-09-05 18:34:35 UTC` and `2026-09-06 07:58:54 UTC`. Their calculated
+seven-day boundaries are approximately `2026-09-12 18:34:35 UTC` and
+`2026-09-13 07:58:54 UTC`. These are customer-accessible recovery boundaries,
+not provider-attested physical-erasure timestamps. Supabase does not expose an
+exact per-snapshot cryptographic-erasure time.
+
+Managed database backups cover Postgres data and database metadata, but not
+Supabase Storage object bodies. Physical backups are restorable in place or to
+a new project, are not directly downloadable as logical exports, and restore
+the database as a whole rather than a selected row. A restore or clone from a
+pre-deletion snapshot can reintroduce a previously deleted inquiry. Keep that
+environment closed to users and rerun the retention purge before intake or
+access resumes. The provider dashboard offers no selective removal of one
+person's row from an existing managed snapshot.
+
 ## Repeatable local boundary check
 
 Run `npm run test:inquiries` before each launch candidate. The suite verifies
@@ -369,10 +393,11 @@ items 1 and 2 below, but `NEXT_PUBLIC_INQUIRY_COLLECTION_READY` remains exactly
 3. The named operator's owner/postgres SQL access is verified separately from
    ordinary site-admin access, the authenticated append-only private operations
    log exists, and the monthly calendar reminder has an owner.
-4. The published privacy policy carries the approved language and effective
-   date.
-5. The managed-backup expiry boundary is verified with the provider and
-   recorded in the private operations log.
+4. **Passed:** the published privacy policy carries the approved language and
+   September 5, 2026 effective date.
+5. **Provider boundary passed; operations record pending:** the managed backup
+   recovery window is verified above. Record that boundary in the authenticated
+   private operations log once item 3 exists.
 6. A rollback-only monthly rehearsal is reviewed without exported inquiry
    content.
 

@@ -8,6 +8,7 @@ import {
   isExactCalEventForBookingService,
 } from "../lib/booking-services.ts"
 import { getBookingRequestPresentation } from "../lib/booking-request-presentation.ts"
+import { resolveCalcomBookingLinks } from "../lib/calcom-booking-links.ts"
 import { getCalcomPublicEventTypes } from "../lib/calcom.ts"
 
 const services = bookingPillars.flatMap((pillar) => pillar.services)
@@ -59,7 +60,87 @@ test("Cal.com discovery sends the complete stable request identity", async () =>
   assert.ok(requestInit?.signal instanceof AbortSignal)
 })
 
-test("booking catalog keeps live Cal discovery fail closed", async (t) => {
+test("Cal.com booking links preserve discovery authority and survive provider failures", async (t) => {
+  const signatureFacial = findBookingService("signature-facial")?.service
+  const moonOracle = findBookingService("moon-oracle-reading")?.service
+
+  assert.ok(signatureFacial?.calendarBooking.kind === "exact-event")
+  assert.ok(moonOracle?.calendarBooking.kind === "exact-event")
+  const signatureFacialDuration =
+    signatureFacial.calendarBooking.durationMinutes
+  const moonOracleDuration = moonOracle.calendarBooking.durationMinutes
+
+  await t.test("an available response still requires every exact match", () => {
+    assert.deepEqual(
+      resolveCalcomBookingLinks({
+        eventTypes: [
+          {
+            id: 1,
+            lengthInMinutes: signatureFacialDuration,
+            slug: signatureFacial.slug,
+            title: signatureFacial.title,
+            url: `https://cal.com/hwlbysmd/${signatureFacial.slug}`,
+          },
+          {
+            id: 2,
+            lengthInMinutes: moonOracleDuration,
+            slug: moonOracle.slug,
+            title: `${moonOracle.title} Session`,
+            url: `https://cal.com/hwlbysmd/${moonOracle.slug}`,
+          },
+        ],
+        status: "available",
+      }),
+      {
+        [signatureFacial.slug]: `https://cal.com/hwlbysmd/${signatureFacial.slug}`,
+      }
+    )
+  })
+
+  await t.test(
+    "an available empty response does not guess that events are published",
+    () => {
+      assert.deepEqual(
+        resolveCalcomBookingLinks({ eventTypes: [], status: "available" }),
+        {}
+      )
+    }
+  )
+
+  for (const reason of [
+    "http-error",
+    "invalid-response",
+    "request-error",
+  ] as const) {
+    await t.test(
+      `${reason} falls back only to catalogued exact-event links`,
+      () => {
+        const links = resolveCalcomBookingLinks({
+          eventTypes: [],
+          reason,
+          status: "unavailable",
+        })
+        const expectedServices = services.filter(
+          (service) => service.calendarBooking.kind === "exact-event"
+        )
+
+        assert.equal(Object.keys(links).length, expectedServices.length)
+        assert.equal(expectedServices.length, 10)
+
+        for (const service of expectedServices) {
+          assert.equal(
+            links[service.slug],
+            `https://cal.com/hwlbysmd/${service.slug}`
+          )
+        }
+
+        assert.equal(links["wild-glow-express-facial"], undefined)
+      }
+    )
+  }
+})
+
+test("booking catalog keeps available Cal discovery exact", async (t) => {
   await t.test("all public services have one unique canonical slug", () => {
     const slugs = services.map((service) => service.slug)
 

@@ -2065,3 +2065,52 @@ payment flow.
   invitation is treated as compromised and must be invalidated and reissued
   before acceptance. Administrator elevation remains prohibited until each
   exact Auth user is independently confirmed.
+
+## September 6 Runtime, Dependency, and Cal Resilience Refresh — Latest Authority
+
+- A fresh Production deployment read at approximately `2026-09-06T20:30Z`
+  confirms `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz` remains READY in `iad1` from
+  checkpoint commit `a0152df52570197601260dbe02ffac88aa7988c8`. Both public
+  aliases resolve to it, and the apex redirects to canonical `www`. Home,
+  LIFT, booking, login, contact, and store returned HTTP 200. Checkout and
+  inquiry collection remain intentionally closed, while anonymous video and
+  PDF access remain denied or redirected to sign-in.
+- The exact deployment lifetime log scan contained five non-fatal outbound
+  `fetch failed` events (`ETIMEDOUT`, `ECONNRESET`, or `UND_ERR_SOCKET`) on
+  otherwise successful page requests; one explicitly named `api.cal.com`.
+  No commerce-route runtime errors, fatal events, or unexpected 5xx responses
+  were present. The public calendar was available during the subsequent live
+  browser check, but transient Cal discovery failure could temporarily remove
+  a live calendar from a service page.
+- The checkpoint now contains a narrow Cal resilience repair: when the public
+  event-type discovery request succeeds, its exact slug, title, and duration
+  matches remain authoritative; only when discovery is unavailable do the ten
+  catalogued exact-event services use their known direct Cal.com URLs. An
+  available empty provider response remains empty, and inquiry-only Wild Glow
+  never receives a guessed calendar. Booking tests pass 20/20, TypeScript and
+  ESLint pass, the Production build passed, and a local browser check rendered
+  the Intuitive Tarot calendar with five September 27 appointment times and no
+  application errors. This repair is local until its checkpoint commit, CI,
+  Preview deployment, and browser verification are recorded below.
+- A fresh registry audit of clean, synced checkpoint `322bc18867158405a292c502fd7a14e7a74a6dc6`
+  reported zero advisories in both the full 560-record dependency tree and the
+  141-dependency Production graph. GitHub's default branch remains the older
+  `main` commit `a6902607f42a3c66506758d4886fb4a2d61d99e2` and currently has
+  24 open Dependabot alerts (11 high, 12 moderate, one low). Those alerts apply
+  to the stale default-branch lockfile, not this checkpoint or the deployed
+  candidate. Clearing the GitHub banner requires a separately authorized,
+  reviewed merge to `main`; this launch continuation does not push `main`.
+- Production returns HSTS, `nosniff`, SAMEORIGIN framing, strict-origin
+  referrer handling, and a restrictive camera/microphone/geolocation policy.
+  It does not yet send a Content Security Policy. That is a high-priority
+  defense-in-depth follow-up rather than a standalone launch blocker on the
+  present evidence. A generic enforced policy is not being added during
+  launch: it could break Next bootstrap and JSON-LD, Cal's script/iframe,
+  Supabase Auth and signed media, Mux, or OpenStreetMap. Introduce a
+  privacy-safe report-only policy in Preview, exercise every provider flow,
+  then narrow and enforce it separately.
+- A same-session Production Auth refresh still shows both intended permanent
+  accounts unconfirmed and never signed in. `admin@ghosthand.studio` therefore
+  still needs an owner-approved in-place reinvite that invalidates the exposed
+  former token; neither profile may receive `is_admin=true` until its exact
+  Auth record is independently confirmed.

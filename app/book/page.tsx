@@ -2,10 +2,7 @@ import Link from "next/link"
 
 import { BookingRequestFlow } from "@/components/booking/booking-request-flow"
 import { CtaBlock } from "@/components/shared/cta-block"
-import {
-  findBookingService,
-  isExactCalEventForBookingService,
-} from "@/lib/booking-services"
+import { resolveCalcomBookingLinks } from "@/lib/calcom-booking-links"
 import { getCalcomPublicEventTypes } from "@/lib/calcom"
 import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 import { createPageMetadata } from "@/lib/seo"
@@ -27,20 +24,7 @@ export default async function BookPage({
     getCalcomPublicEventTypes(),
   ])
   const inquiryCollectionReady = isInquiryCollectionReady()
-  const calLinksByServiceSlug: Record<string, string> = {}
-
-  if (calcomResult.status === "available") {
-    for (const eventType of calcomResult.eventTypes) {
-      const bookingService = findBookingService(eventType.slug)?.service
-
-      if (
-        bookingService &&
-        isExactCalEventForBookingService(bookingService, eventType)
-      ) {
-        calLinksByServiceSlug[bookingService.slug] = eventType.url
-      }
-    }
-  }
+  const calLinksByServiceSlug = resolveCalcomBookingLinks(calcomResult)
 
   const palmSpringsDateParts = new Intl.DateTimeFormat("en-US", {
     day: "2-digit",

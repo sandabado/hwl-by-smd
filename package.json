@@ -21,7 +21,7 @@
     "test:accessibility": "node --experimental-strip-types --test components/shared/lift-sequence-progress.a11y.test.ts",
     "test:auth": "node --experimental-strip-types --experimental-loader ./scripts/test-module-loader.mjs --test scripts/test-auth-boundaries.ts scripts/test-auth-callback.ts scripts/test-admin-auth.ts scripts/test-admin-logout.ts",
     "test:booking": "node --experimental-strip-types --experimental-loader ./scripts/test-module-loader.mjs --test scripts/test-booking-boundaries.ts",
-    "test:commerce": "node --experimental-strip-types --experimental-loader ./scripts/test-module-loader.mjs --test scripts/test-commerce-reconciliation.ts scripts/test-scheduled-reconciliation.ts scripts/test-stripe-fulfillment.ts",
+    "test:commerce": "node --experimental-strip-types --experimental-loader ./scripts/test-module-loader.mjs --test scripts/test-commerce-reconciliation.ts scripts/test-preview-commerce-alert-smoke.ts scripts/test-scheduled-reconciliation.ts scripts/test-stripe-fulfillment.ts",
     "test:inquiries": "node --experimental-strip-types --experimental-loader ./scripts/test-module-loader.mjs --test scripts/test-admin-inquiry-access.ts scripts/test-inquiry-boundaries.ts scripts/test-inquiry-retention.ts",
     "test:launch-env": "node --experimental-strip-types scripts/test-launch-env.ts",
     "test:preview-release": "node --experimental-strip-types --test scripts/test-preview-release-preflight.ts",

@@ -134,7 +134,9 @@ everyone, and public availability moved the suppression with the booking. The
 organizer then canceled it with a stated completion reason. The organizer
 dashboard returned to zero upcoming bookings, Canceled history retained the
 test lifecycle, and all five Sunday slots from noon through 4:00 PM returned.
-No test appointment remains active and no Cal payment was collected.
+The owner subsequently confirmed that the attendee calendar invitation arrived
+at `admin@ghosthand.studio`. No test appointment remains active and no Cal
+payment was collected.
 
 An August 31 direct/provider Signature Facial test separately entered the
 unconfirmed queue, was manually confirmed, rescheduled, canceled, and released
@@ -147,9 +149,10 @@ The following customer-journey evidence is still required:
 - The website's live embedded date/slot flow works by keyboard and by mobile
   pointer/touch, including actual date and time activation, with the correct
   local-timezone guidance.
-- Directly inspect the resulting `FIREBIRDS` calendar object and human owner
-  and attendee inboxes. Cal reported that calendar-invitation email was sent,
-  but receipt was not inspected in those mailboxes.
+- Directly inspect the resulting `FIREBIRDS` calendar object and the organizer
+  inbox. Attendee delivery is confirmed by the owner for
+  `admin@ghosthand.studio`; Shannon's organizer-mailbox receipt has not been
+  independently inspected.
 - Cal.com failure, an unpublished slug, or a title/duration mismatch returns
   the visitor to the stored inquiry path without losing the selected service.
 - Public event links reveal no private calendar names, notes, or address data.

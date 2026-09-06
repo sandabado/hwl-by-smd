@@ -1962,8 +1962,9 @@ Next ordered gates:
 ## September 6 Cal.com Production Lifecycle Proof — Latest Authority
 
 This addendum supersedes earlier statements that the current Production
-booking lifecycle was untested. It does not prove human mailbox receipt, a
-direct FIREBIRDS calendar-object inspection, or any Cal-native payment flow.
+booking lifecycle was untested. It does not prove Shannon's organizer-mailbox
+receipt, a direct FIREBIRDS calendar-object inspection, or any Cal-native
+payment flow.
 
 - The owner authorized a temporary public-site booking using
   `admin@ghosthand.studio`. The Production `/book` experience submitted an
@@ -1987,11 +1988,14 @@ direct FIREBIRDS calendar-object inspection, or any Cal-native payment flow.
   dashboard showed no upcoming bookings and retained the test lifecycle in
   Canceled history. A cache-busted public availability read restored all five
   Sunday slots from 12:00 PM through 4:00 PM.
+- The owner confirmed that the attendee calendar invitation arrived at
+  `admin@ghosthand.studio`. This closes the attendee human-mailbox gate; it
+  does not independently prove delivery to Shannon's organizer mailbox.
 - No Cal.com payment was configured or collected. The complete
   request → manual confirmation → reschedule → cancellation → released-slot
   lifecycle passes on the public Production booking surface. Human inspection
-  of the organizer and attendee inboxes, plus direct inspection of the
-  FIREBIRDS calendar object, remain separate evidence gaps.
+  of Shannon's organizer inbox and direct inspection of the FIREBIRDS calendar
+  object remain separate evidence gaps.
 
 ## September 6 Security and Migration Follow-up — Latest Authority
 

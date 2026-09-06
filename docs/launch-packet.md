@@ -1761,3 +1761,72 @@ the tested closed-sales candidate to `www.hwlbysmd.com`; re-smoke the canonical
 domain; send the two already approved invitations; have both humans choose
 their own passwords; and elevate only the exact confirmed UUID/profile pairs.
 Opening sales and a real $11.11 transaction remain separate later approvals.
+
+## September 5 Inquiry-Retention Safety Addendum — Latest Authority
+
+This addendum supersedes the preceding inquiry-retention and invitation-template
+status only. It does not authorize migration 015, a public alias change, an
+invitation, opening inquiry collection, opening sales, or a live charge.
+
+- The owner approved one inquiry policy: website inquiry content becomes
+  eligible for deletion 12 months after submission and is purged during a
+  monthly review operated by `admin@ghosthand.studio`; holds are limited to
+  active service, legal, safety, or dispute needs; pseudonymous rate-limit
+  fingerprints use a 30-day cutoff; the intake limit is five accepted
+  submissions per client identity per hour; and journal requests remain
+  private consent inquiries rather than mailing-list subscriptions.
+- Migration 015 is a reviewed local candidate but remains unapplied. It adds
+  constrained hold state, owner/postgres-only review and exact-set purge
+  functions, deterministic 30-day fingerprint cleanup, a database-enforced
+  five-request ceiling, and an append-only aggregate run ledger. Its
+  provider-free contract suite passes, while the rollback-only transactional
+  SQL suite remains unexecuted until an isolated database or separately
+  authorized staging application is available.
+- The public Privacy page now states the approved eligibility, monthly purge,
+  hold, fingerprint, journal-consent, and managed-backup boundaries with an
+  effective date of September 5, 2026. The operating runbook keeps inquiry
+  collection closed until migration proof, owner/postgres operator access, the
+  private append-only decision log, monthly reminder ownership, and provider
+  backup expiry are evidenced.
+- A separate build-time gate,
+  `NEXT_PUBLIC_INQUIRY_COLLECTION_READY`, now fails closed unless its value is
+  exact lowercase `true`. When closed, `/api/contact` returns HTTP 503 with
+  `received:false` and `Cache-Control:no-store` before reading the body or
+  constructing persistence/provider clients. Contact, retreat, journal, and
+  alternate-time booking forms render truthful paused states; live Cal.com
+  dates and times remain available.
+- Local browser evidence confirms Signature Facial still exposes enabled Cal
+  dates and six time buttons while alternate-time collection is absent.
+  Contact, retreat, and journal surfaces expose no inquiry controls. A local
+  same-origin POST returned the expected no-store 503 and the server recorded
+  no successful submission.
+- Local verification passes: inquiry tests 16/16, launch-environment fixtures
+  32/32, booking tests 6/6, accessibility test 1/1, full ESLint, TypeScript,
+  formatting, diff checks, SEO 21 pages / 21 metadata records / 7 long-form
+  documents, and the Next.js 16.3.1 Webpack Production build with all 62 routes.
+- A new `.vercelignore` prevents local secrets, all `private-content` paid
+  media, local QA captures, generated review files, and local build/tool state
+  from entering CLI deployment bundles. The final dry manifest contained 412
+  source files and zero private-content, local-QA, PEM, or key-like paths; only
+  the intentionally public `.env.example` remained.
+- Exactly one branch-scoped Preview record and one Production record now exist
+  for `NEXT_PUBLIC_INQUIRY_COLLECTION_READY`, both created as sensitive
+  records. Vercel CLI does not return sensitive values through `env run`, so
+  their exact build-time value must be proven by the next remote validator log;
+  no readiness claim relies on the CLI's redacted empty result.
+- The Supabase Invite User template is now saved and reload-verified with the
+  secure token-hash callback to `/auth/callback` and
+  `next=/update-password`. No invitation has been sent.
+- Before and after these changes, both `www.hwlbysmd.com` and `hwlbysmd.com`
+  still resolve to legacy READY Production deployment
+  `dpl_6uHzaSNDmqeU1Zmk6CZ5Jg6Yt8f5`. The public alias was not moved, sales
+  remain closed, no live Checkout Session or charge was created, and no
+  invitation or inquiry was sent.
+
+The next safe engineering step is a checkpoint-only commit, push, green CI,
+and a fresh isolated Production-targeted deployment built with both sales and
+inquiry collection closed. Because public readiness flags are fixed at build
+time, the earlier candidate `dpl_eML5nygjGV8cZ5w4aouU43yLHKn8` must not be
+promoted. Assigning a new candidate to the public alias requires a fresh exact
+owner approval after its deployment ID and closed-state smoke evidence are
+presented.

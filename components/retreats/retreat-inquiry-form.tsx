@@ -6,8 +6,10 @@ import {
   inquiryReceiptMessage,
   useInquirySubmission,
 } from "@/components/shared/use-inquiry-submission"
+import { InquiryCollectionPaused } from "@/components/shared/inquiry-collection-paused"
 import { InquiryPrivacyNotice } from "@/components/shared/inquiry-privacy-notice"
 import { Button } from "@/components/ui/button"
+import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 import { cn } from "@/lib/utils"
 
 type SubmissionStatus = "error" | "idle" | "sending" | "sent"
@@ -34,6 +36,16 @@ export function RetreatInquiryForm() {
   const [status, setStatus] = useState<SubmissionStatus>("idle")
   const [feedback, setFeedback] = useState("")
   const submitInquiry = useInquirySubmission()
+
+  if (!isInquiryCollectionReady()) {
+    return (
+      <InquiryCollectionPaused
+        className="rounded-[1.75rem] border-white/65 p-6 shadow-[0_24px_80px_rgba(61,47,37,0.11)] backdrop-blur-md sm:p-8"
+        description="Retreat inquiries will open after Shannon’s private inquiry operations are finalized. No gathering details are collected here while the form is paused."
+        title="Retreat inquiries are paused."
+      />
+    )
+  }
 
   function resetFeedback() {
     if (status === "error" || status === "sent") {

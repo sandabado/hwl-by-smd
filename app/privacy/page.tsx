@@ -57,13 +57,17 @@ const sections: LegalSection[] = [
     body: [
       "Members can choose whether guided Journeys may include booking invitations. A Journey can be paused or left without losing unrelated purchases.",
       "Required account, security, billing, and service messages may still be sent when necessary. Optional messages include a clear way to change frequency or opt out.",
+      "Submitting the journal form records a request for Shannon to review. It does not automatically add the visitor to a mailing list or establish a subscription.",
     ],
   },
   {
     title: "Storage, security, and retention",
     body: [
       "Reasonable administrative and technical safeguards are used, including authenticated access, row-level database policies, signed media links, and restricted administrative permissions. No online system can guarantee absolute security.",
-      "Records are retained while needed to provide the service, comply with financial or legal obligations, resolve disputes, and preserve conversation history requested by members. Data that is no longer needed may be deleted or anonymized.",
+      "Website inquiry content becomes eligible for deletion 12 months after submission and is purged during monthly review. A record may be held beyond that period only while needed for an active service or a legal, safety, or dispute matter. When the reason ends, the hold is removed and the record returns to the next monthly review.",
+      "The inquiry abuse-control system stores a keyed fingerprint rather than a raw network address. Fingerprints older than 30 days are removed during the monthly retention process and may also be removed during later valid submissions.",
+      "Deletion from active systems does not immediately rewrite encrypted managed backups. A residual backup copy may remain inaccessible to ordinary operations until the provider's verified backup cycle expires.",
+      "Other account, purchase, booking, and service records are retained while needed to provide the service, meet financial or legal obligations, resolve disputes, or preserve conversation history requested by members. Data that is no longer needed may be deleted or anonymized.",
     ],
   },
   {
@@ -85,6 +89,7 @@ export default function Page() {
   return (
     <LegalPage
       eyebrow="Privacy"
+      effectiveDate="September 5, 2026"
       introduction="How your account, purchases, conversations, and care context are handled."
       sections={sections}
       title="Privacy with intention."

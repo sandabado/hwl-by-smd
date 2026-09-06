@@ -1,0 +1,21 @@
+# Local secrets. Keep the documented, non-secret example available to builds.
+/.env*
+!/.env.example
+
+# Paid source assets are uploaded directly to private Supabase Storage. They
+# must never enter a Vercel deployment bundle.
+/private-content/
+
+# Local QA output and generated review artifacts.
+/tmp/
+/hwl-store-license-mobile.png
+/hwl-store-license-mobile-expanded.png
+/.playwright-mcp/
+/coverage/
+
+# Local build and tool state.
+/.next/
+/node_modules/
+/.vercel/
+*.tsbuildinfo
+.DS_Store

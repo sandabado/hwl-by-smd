@@ -3,11 +3,13 @@
 import { useState, type FormEvent } from "react"
 
 import { BreathingButton } from "@/components/shared/breathing-button"
+import { InquiryCollectionPaused } from "@/components/shared/inquiry-collection-paused"
 import { InquiryPrivacyNotice } from "@/components/shared/inquiry-privacy-notice"
 import {
   inquiryReceiptMessage,
   useInquirySubmission,
 } from "@/components/shared/use-inquiry-submission"
+import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 
 type ContactField = {
   label: string
@@ -33,6 +35,15 @@ export function ContactForm({
   )
   const [feedback, setFeedback] = useState("")
   const submitInquiry = useInquirySubmission()
+
+  if (!isInquiryCollectionReady()) {
+    return (
+      <InquiryCollectionPaused
+        description="Shannon’s private website inbox will open after its privacy operations are finalized. Published appointment times remain available now."
+        title="The online contact form is paused."
+      />
+    )
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

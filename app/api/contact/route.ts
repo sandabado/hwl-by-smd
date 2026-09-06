@@ -10,6 +10,7 @@ import {
   createInquiryPayloadDigest,
   prepareInquirySubmissionClaim,
 } from "@/lib/inquiries/rate-limit"
+import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 import { createAdminClient } from "@/lib/supabase/server"
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -130,6 +131,17 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { message: "Your note is too large." },
       { status: 413 }
+    )
+  }
+
+  if (!isInquiryCollectionReady()) {
+    return NextResponse.json(
+      {
+        message:
+          "Online inquiry collection is not open yet. Please return when inquiries are available.",
+        received: false,
+      },
+      { headers: { "Cache-Control": "no-store" }, status: 503 }
     )
   }
 

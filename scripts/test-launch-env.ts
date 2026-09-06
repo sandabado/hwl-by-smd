@@ -36,6 +36,7 @@ const developmentFixture: NodeJS.ProcessEnv = {
   INQUIRY_RATE_LIMIT_MAX: "5",
   LIFT_PDF_STORAGE_PATH: "lift/lift-guide.pdf",
   LIFT_VIDEO_STORAGE_PATH: "lift/complete-lift-v1.mp4",
+  NEXT_PUBLIC_INQUIRY_COLLECTION_READY: "false",
   NEXT_PUBLIC_SITE_URL: "http://localhost:3000",
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_fixture_public_value",
   NEXT_PUBLIC_SUPABASE_URL: STAGING_SUPABASE_URL,
@@ -102,9 +103,51 @@ const fixtures: Fixture[] = [
     args: ["--target=preview", "--expect-sales=closed"],
     env: previewFixture,
     expectedExit: 0,
-    expectedText:
-      "Launch environment preflight passed for preview (closed sales).",
+    expectedText: "Inquiry collection: closed",
     name: "preview closed without Stripe provider values",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      NEXT_PUBLIC_INQUIRY_COLLECTION_READY: "true",
+    },
+    expectedExit: 0,
+    expectedText: "Inquiry collection: open",
+    name: "preview inquiry collection explicitly open",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      NEXT_PUBLIC_INQUIRY_COLLECTION_READY: "",
+    },
+    expectedExit: 1,
+    expectedText:
+      "NEXT_PUBLIC_INQUIRY_COLLECTION_READY: must be exactly true or false",
+    name: "missing inquiry collection flag fails",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      NEXT_PUBLIC_INQUIRY_COLLECTION_READY: "TRUE",
+    },
+    expectedExit: 1,
+    expectedText:
+      "NEXT_PUBLIC_INQUIRY_COLLECTION_READY: must be exactly true or false",
+    name: "uppercase inquiry collection flag fails",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      NEXT_PUBLIC_INQUIRY_COLLECTION_READY: " true ",
+    },
+    expectedExit: 1,
+    expectedText:
+      "NEXT_PUBLIC_INQUIRY_COLLECTION_READY: must be exactly true or false",
+    name: "whitespace-padded inquiry collection flag fails",
   },
   {
     args: ["--target=preview", "--expect-sales=open"],
@@ -250,6 +293,20 @@ const fixtures: Fixture[] = [
   },
   {
     args: ["--target=preview", "--expect-sales=closed"],
+    env: { ...previewFixture, INQUIRY_RATE_LIMIT_MAX: "6" },
+    expectedExit: 1,
+    expectedText: "INQUIRY_RATE_LIMIT_MAX: must be exactly 5",
+    name: "unapproved inquiry submission limit fails",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: { ...previewFixture, INQUIRY_RATE_LIMIT_MAX: "" },
+    expectedExit: 1,
+    expectedText: "INQUIRY_RATE_LIMIT_MAX: must be exactly 5",
+    name: "missing inquiry submission limit fails",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
     env: {
       ...previewFixture,
       CONTACT_FROM_EMAIL: "HWL by SMD <hello@example.com>",
@@ -320,6 +377,7 @@ const inheritedEnvironment = Object.fromEntries(
       !key.startsWith("STRIPE_") &&
       !key.startsWith("SUPABASE_") &&
       !key.startsWith("NEXT_PUBLIC_SUPABASE_") &&
+      !key.startsWith("NEXT_PUBLIC_INQUIRY_") &&
       !key.startsWith("CONTACT_") &&
       !key.startsWith("RESEND_") &&
       !key.startsWith("INQUIRY_") &&

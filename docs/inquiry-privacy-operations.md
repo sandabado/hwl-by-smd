@@ -1,7 +1,9 @@
 # Inquiry privacy operations
 
-Status: owner-operated launch runbook. This document does not authorize a
-hosted migration, provider change, deployment, or deletion.
+Status: owner-approved policy and owner-operated launch runbook. Migration 015
+is a local review candidate until separately applied and verified. This
+document does not authorize a hosted migration, provider change, deployment,
+or deletion.
 
 ## Data boundary
 
@@ -52,15 +54,19 @@ compromised public route from becoming a bulk-erasure path.
   This reconciliation never returns it to `unattempted` and never sends another
   provider request.
 - HMAC-pseudonymized rate-limit rows older than 30 days are pruned during a
-  later valid submission. They contain no raw network address.
+  later valid submission and by the monthly retention run after migration 015.
+  They contain no raw network address.
 - Do not forward inquiry content into ordinary email or copy it into unrelated
   project tools.
 
 ## Current rate-limit contract
 
-- The default limit is five accepted submissions per HMAC-pseudonymized client
-  address in a one-hour window. `INQUIRY_RATE_LIMIT_MAX` may narrow or widen that
-  value only within the database-enforced range of 1 through 20.
+- The approved launch limit is five accepted submissions per
+  HMAC-pseudonymized client address in a one-hour window.
+  `INQUIRY_RATE_LIMIT_MAX` must be exactly `5` in a launch environment. The
+  legacy RPC keeps its 1-through-20 input validation for compatibility, while
+  migration 015 caps the database write and graceful rate-limited outcome at
+  five. Neither boundary permits a launch-time override without review.
 - Deployed Vercel traffic trusts only `x-vercel-forwarded-for`; generic
   forwarding headers are never accepted as the deployed caller identity.
 - A limited request receives HTTP `429` with `Retry-After: 3600`. The database
@@ -72,8 +78,8 @@ compromised public route from becoming a bulk-erasure path.
   launch validator rejects a shared value so compromise or rotation of one
   boundary does not silently become authority for the other.
 - Fingerprint rows older than 30 days are deleted during a later valid
-  submission. This fixed technical-record cleanup is separate from the still
-  undecided retention period for inquiry content.
+  submission and by every monthly retention run. This fixed technical-record
+  policy is separate from the 12-month inquiry-content policy.
 - Rotating `INQUIRY_RATE_LIMIT_SECRET` changes both future fingerprints and
   payload digests. Treat rotation as an incident or controlled maintenance
   action: record the time, environment, and reason, and expect existing client
@@ -190,74 +196,183 @@ This bootstrap is authorization guidance, not permission to create an account
 or change hosted data. The website service role and public application must
 never expose a self-promotion path.
 
-## Retention decision and dry-run protocol
+## Approved retention policy
 
-No retention period is encoded or implied by this runbook. Before accepting
-live inquiries, the owner must decide all of the following:
+The owner approved this policy on September 5, 2026:
 
-1. The retention period for each inquiry source, or one period that explicitly
-   covers booking, contact, retreat, and journal requests.
-2. Whether the clock starts at `created_at` or after an inquiry is closed. The
-   current schema records `created_at` but has no `closed_at`; a closure-based
-   clock therefore requires a separately reviewed schema change.
-3. Which legal, financial, safety, dispute, or active-service holds suspend
-   deletion. The current table has no hold flag, so any hold mechanism also
-   requires an explicit operating record or schema change.
-4. The purge cadence, named operator, review/approval path, and evidence kept
-   after deletion without retaining deleted PII.
-5. The exact public privacy-policy language and effective date.
-6. Whether the existing 30-day cleanup of pseudonymized rate-limit fingerprints
-   is accepted as the technical-record policy.
-7. Whether the default five submissions per client identity per hour is the
-   launch limit, or which explicit value from 1 through 20 should be configured
-   in each environment.
-8. Whether journal requests remain owner-reviewed consent requests or move to a
-   separately approved mailing-list and unsubscribe system.
+1. All website inquiry sources—booking request, contact page, journal request,
+   retreat partnership inquiry, and generic website inquiry—use one retention
+   period: 12 months from the row's `created_at` submission time.
+2. At an explicit UTC review time, a row is eligible when
+   `created_at <= review_time - interval '12 months'`.
+3. A hold may suspend routine deletion only for active service
+   (`active_service`), legal, safety, or dispute needs. Free-form hold reasons
+   are prohibited.
+4. `admin@ghosthand.studio` is the named monthly review and purge operator. The
+   operator uses an owner/postgres database session; neither the public site nor
+   its service-role credential receives hold or delete authority.
+5. HMAC-pseudonymized rate-limit rows use a separate 30-day clock and are
+   pruned by the monthly run as well as migration 013's opportunistic cleanup.
+6. The launch submission limit remains five accepted requests per client
+   identity per one-hour window.
+7. A journal submission is a consent inquiry for personal review. It is not a
+   mailing-list subscription, delivery record, or authority to send bulk mail.
 
-After those decisions are approved, begin with this owner/postgres **read-only
-candidate report**. The placeholder is deliberately invalid until an owner
-supplies an approved UTC cutoff:
+Migration 015 encodes the 12-month clock, constrained hold reasons, owner-only
+candidate/hold/purge functions, deterministic 30-day fingerprint cleanup, and
+an append-only aggregate run ledger. It intentionally creates no browser,
+service-role, application API, or scheduled deletion path.
+
+### Hold placement and release
+
+Before setting a hold, record the inquiry ID, approved reason, decision time,
+and decision owner in the authenticated, access-controlled, append-only
+owner-controlled privacy log. Do not copy the inquiry message or contact
+details into that log. In an owner/postgres SQL session, set one hold with:
+
+```sql
+select *
+from public.set_inquiry_retention_hold(
+  'REPLACE_WITH_EXACT_INQUIRY_UUID'::uuid,
+  'REPLACE_WITH_active_service_OR_legal_OR_safety_OR_dispute'
+);
+```
+
+Review every active hold during the monthly run. When its approved reason no
+longer applies, record the release decision in the privacy log and clear it:
+
+```sql
+select *
+from public.set_inquiry_retention_hold(
+  'REPLACE_WITH_EXACT_INQUIRY_UUID'::uuid,
+  null::text
+);
+```
+
+The table stores only the current hold and set time; the authenticated
+owner-controlled log is the audit history for placement and release. The purge
+function's `p_operator_email` is a required operator assertion, not proof of a
+human identity; retain authenticated database-session evidence for hold and
+purge actions in that log. Do not use a hold as an indefinite archive category.
+
+### Monthly candidate review
+
+Use one explicit UTC `review_time` for the report, rehearsal, and committed
+run. The placeholder below is deliberately invalid. Run this only through an
+owner/postgres session after migration 015 is ledger-applied:
 
 ```sql
 begin transaction read only;
 
-select
-  count(*) as candidate_count,
-  min(created_at) as oldest_created_at,
-  max(created_at) as newest_created_at
-from public.inquiries
-where created_at < timestamptz 'REPLACE_WITH_OWNER_APPROVED_CUTOFF_UTC';
+select *
+from public.get_inquiry_retention_candidates(
+  timestamptz 'REPLACE_WITH_REVIEW_TIME_UTC'
+);
 
-select id, created_at, source, status, notification_status
+select retention_hold_reason, count(*) as held_count
 from public.inquiries
-where created_at < timestamptz 'REPLACE_WITH_OWNER_APPROVED_CUTOFF_UTC'
-order by created_at, id;
+where created_at
+  <= timestamptz 'REPLACE_WITH_REVIEW_TIME_UTC' - interval '12 months'
+  and retention_hold_reason is not null
+group by retention_hold_reason
+order by retention_hold_reason;
+
+select count(*) as expired_fingerprint_count
+from public.inquiry_submission_limits
+where last_seen_at
+  < statement_timestamp() - interval '30 days';
 
 rollback;
 ```
 
-This report is not deletion authority. A later purge must be separately
-reviewed, start with the approved candidate IDs, exclude documented holds,
-return only deleted IDs as evidence, and be rehearsed with `ROLLBACK` before an
-owner authorizes `COMMIT`. Do not add a blanket scheduled delete while the
-retention decision remains open.
+Review the complete candidate list and every hold without exporting submitted
+content. Copy the complete, exact candidate UUID set into the purge call. The
+database rejects null, duplicate, missing, extra, newly held, or otherwise
+changed IDs; it never silently performs a partial purge.
+
+### Required rollback rehearsal and committed run
+
+First rehearse the exact reviewed set. An empty reviewed set is represented by
+`array[]::uuid[]` and still records the 30-day fingerprint cleanup during the
+eventual committed run.
+
+```sql
+begin;
+set local lock_timeout = '5s';
+
+select *
+from public.purge_inquiry_retention_candidates(
+  timestamptz 'REPLACE_WITH_SAME_REVIEW_TIME_UTC',
+  array[
+    'REPLACE_WITH_REVIEWED_INQUIRY_UUID'::uuid
+  ],
+  'admin@ghosthand.studio'
+);
+
+select operator_email, reviewed_at, cutoff_at, rate_limit_cutoff_at,
+  candidate_count, held_count, deleted_count, rate_limit_deleted_count,
+  executed_at
+from public.inquiry_retention_runs
+where reviewed_at = timestamptz 'REPLACE_WITH_SAME_REVIEW_TIME_UTC';
+
+rollback;
+```
+
+Require the returned IDs and counts to match the reviewed report exactly.
+After that rehearsal passes, repeat the same transaction with the same UTC
+review time and exact UUID array, inspect the result again, and use `COMMIT`
+instead of `ROLLBACK`. A set mismatch or count drift aborts before any deletion.
+The committed run ledger contains aggregate counts and operator assertion only;
+it retains no inquiry content or inquiry IDs.
+
+The inquiry cutoff always uses the explicit reviewed time. The technical
+fingerprint cutoff instead uses the database statement time at the start of the
+purge and records that exact cutoff in `rate_limit_cutoff_at`; an old review time
+therefore cannot extend the approved 30-day technical-record period.
+
+Record the run ID, UTC review time, aggregate counts, outcome, and operator in
+the private operations log. Never record deleted names, addresses, messages,
+phone numbers, or provider receipts. Primary-table deletion does not imply that
+managed backups are immediately rewritten; document and honor the verified
+backup-expiry boundary when responding to a deletion request.
 
 ## Repeatable local boundary check
 
 Run `npm run test:inquiries` before each launch candidate. The suite verifies
 that deployed traffic trusts only Vercel's protected client-address header,
 spoofable generic forwarding headers are rejected, missing deployment identity
-or a short HMAC secret fails closed, rate limits remain within 1–20 with a
-default of 5, fingerprints and payload evidence are secret-keyed, and local
-development uses only its explicit non-IP fallback. This suite is provider-free;
-it does not replace a hosted staging persistence test or a real Resend
-acceptance and mailbox-delivery check.
+or a short HMAC secret fails closed, the approved rate limit remains exactly
+five accepted submissions per hour, fingerprints and payload evidence are
+secret-keyed, and local
+development uses only its explicit non-IP fallback. It also checks the local
+migration contract, approved policy text, exact collection gate, owner-only
+retention authority, 12-month cutoff, constrained holds, and 30-day technical
+cleanup. This suite is provider-free; it does not replace executing
+`scripts/test-inquiry-retention-database.sql` after migration 015 in an isolated
+database, a hosted staging rehearsal, or a real Resend acceptance and
+mailbox-delivery check.
 
-## Owner decision still required
+## Deployment and opening gate
 
-Before live inquiry collection is approved, the owner must complete the
-retention decisions above, publish the resulting privacy language, and approve
-the purge cadence and operator. Until then, retention is a launch gate; the
-application must not claim that inquiries are automatically deleted, that
-read-only inbox statuses are operationally advanced, or that a journal request
-has been added to a managed mailing list.
+The policy decision does not apply migration 015 or authorize a purge.
+`NEXT_PUBLIC_INQUIRY_COLLECTION_READY` remains exactly `false` until all of the
+following are verified:
+
+1. Migration 015 is applied to the intended environment and its migration
+   ledger matches the reviewed file.
+2. `scripts/test-inquiry-retention-database.sql` passes in an isolated or
+   separately approved staging database and rolls back completely.
+3. The named operator's owner/postgres SQL access is verified separately from
+   ordinary site-admin access, the authenticated append-only private operations
+   log exists, and the monthly calendar reminder has an owner.
+4. The published privacy policy carries the approved language and effective
+   date.
+5. The managed-backup expiry boundary is verified with the provider and
+   recorded in the private operations log.
+6. A rollback-only monthly rehearsal is reviewed without exported inquiry
+   content.
+
+Only a rebuilt deployment with exact lowercase
+`NEXT_PUBLIC_INQUIRY_COLLECTION_READY=true` opens the website forms and API.
+The application must not claim that journal requests are subscriptions or that
+read-only inbox statuses are operationally advanced.

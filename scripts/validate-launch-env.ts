@@ -296,6 +296,13 @@ if (rateLimitSecret && rateLimitSecret.length < 32) {
   errors.push("INQUIRY_RATE_LIMIT_SECRET: must contain at least 32 characters")
 }
 
+const inquiryCollectionReady = process.env.NEXT_PUBLIC_INQUIRY_COLLECTION_READY
+if (inquiryCollectionReady !== "true" && inquiryCollectionReady !== "false") {
+  errors.push(
+    "NEXT_PUBLIC_INQUIRY_COLLECTION_READY: must be exactly true or false"
+  )
+}
+
 const cronSecret = requireValue("CRON_SECRET")
 if (cronSecret && cronSecret.length < 32) {
   errors.push("CRON_SECRET: must contain at least 32 characters")
@@ -316,13 +323,8 @@ requirePattern(
 )
 
 const rateLimitMaximum = read("INQUIRY_RATE_LIMIT_MAX")
-if (
-  rateLimitMaximum &&
-  (!/^\d+$/.test(rateLimitMaximum) ||
-    Number(rateLimitMaximum) < 1 ||
-    Number(rateLimitMaximum) > 20)
-) {
-  errors.push("INQUIRY_RATE_LIMIT_MAX: must be an integer from 1 through 20")
+if (rateLimitMaximum !== "5") {
+  errors.push("INQUIRY_RATE_LIMIT_MAX: must be exactly 5")
 }
 
 const calcomProfile =
@@ -468,6 +470,9 @@ if (errors.length) {
 
 console.log(
   `Launch environment preflight passed for ${target} (${salesExpectation} sales).`
+)
+console.log(
+  `Inquiry collection: ${inquiryCollectionReady === "true" ? "open" : "closed"} (NEXT_PUBLIC_INQUIRY_COLLECTION_READY=${inquiryCollectionReady}).`
 )
 for (const warning of warnings) console.warn(`- Warning: ${warning}`)
 console.log(

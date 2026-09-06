@@ -4,8 +4,7 @@ import { createHmac } from "node:crypto"
 
 import { resolveInquiryClientIdentity } from "@/lib/inquiries/client-address"
 
-const DEFAULT_MAXIMUM_SUBMISSIONS = 5
-const MAXIMUM_CONFIGURED_SUBMISSIONS = 20
+const APPROVED_MAXIMUM_SUBMISSIONS = 5
 const MINIMUM_SECRET_LENGTH = 32
 
 export type InquiryRateLimitResult =
@@ -22,16 +21,6 @@ export function createInquiryPayloadDigest(serializedPayload: string) {
   return createHmac("sha256", secret)
     .update(`hwl-inquiry-payload-v1\u0000${serializedPayload}`)
     .digest("hex")
-}
-
-function configuredMaximum() {
-  const configured = process.env.INQUIRY_RATE_LIMIT_MAX?.trim()
-  if (!configured) return DEFAULT_MAXIMUM_SUBMISSIONS
-
-  const parsed = Number(configured)
-
-  if (!Number.isInteger(parsed)) return DEFAULT_MAXIMUM_SUBMISSIONS
-  return Math.min(Math.max(parsed, 1), MAXIMUM_CONFIGURED_SUBMISSIONS)
 }
 
 /**
@@ -61,7 +50,7 @@ export function prepareInquirySubmissionClaim(
 
   return {
     fingerprint,
-    limit: configuredMaximum(),
+    limit: APPROVED_MAXIMUM_SUBMISSIONS,
     status: "ready",
   }
 }

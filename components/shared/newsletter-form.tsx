@@ -6,7 +6,9 @@ import {
   inquiryReceiptMessage,
   useInquirySubmission,
 } from "@/components/shared/use-inquiry-submission"
+import { InquiryCollectionPaused } from "@/components/shared/inquiry-collection-paused"
 import { Button } from "@/components/ui/button"
+import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 
 export function NewsletterForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
@@ -14,6 +16,16 @@ export function NewsletterForm() {
   )
   const [feedback, setFeedback] = useState("")
   const submitInquiry = useInquirySubmission()
+
+  if (!isInquiryCollectionReady()) {
+    return (
+      <InquiryCollectionPaused
+        className="mx-auto mt-8 max-w-xl"
+        description="Journal requests will open after Shannon’s private inquiry operations are finalized. No email address is collected here while requests are paused."
+        title="Journal requests are paused."
+      />
+    )
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -28,7 +40,8 @@ export function NewsletterForm() {
         {
           ...values,
           source: "journal-newsletter",
-          message: "Please add me to the HWL by SMD journal list.",
+          message:
+            "Please review my request to receive personal HWL by SMD journal updates.",
         },
         "Your request could not be sent."
       )
@@ -76,7 +89,7 @@ export function NewsletterForm() {
         className="min-h-11 rounded-full bg-[var(--primary)] px-6 text-white hover:bg-[var(--accent)]"
         disabled={status === "sending"}
       >
-        {status === "sending" ? "Joining…" : "Join the list"}
+        {status === "sending" ? "Sending…" : "Request journal updates"}
       </Button>
       <p className="text-xs leading-relaxed text-[var(--muted-foreground)] sm:basis-full">
         This sends a private request to Shannon. See the{" "}

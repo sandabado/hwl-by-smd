@@ -7,6 +7,12 @@ import {
   hasAuthorizedCronBearer,
   runScheduledCommerceReconciliation,
 } from "../lib/commerce/scheduled-reconciliation.ts"
+import {
+  commerceRecoveryAlertIdempotencyKey,
+  sendCommerceRecoveryAlert,
+  type CommerceRecoveryAlertInput,
+  type CommerceRecoveryAlertResult,
+} from "../lib/commerce/reconciliation-alert.ts"
 
 const ORDER_ID = "11111111-1111-4111-8111-111111111111"
 const CLAIM_TOKEN = "22222222-2222-4222-8222-222222222222"
@@ -19,6 +25,11 @@ const SESSION_ID = "cs_test_abcdefghijklmnop"
 const PAYMENT_INTENT_ID = "pi_test_abcdefghijklmnop"
 const EXPIRES_AT = "2026-08-30T00:00:00.000Z"
 const CRON_SECRET = "0123456789abcdef0123456789abcdef"
+const ALERT_CONFIGURATION = {
+  apiKey: "re_fixture_commerce_alert_key",
+  from: "HWL by SMD <hello@hwlbysmd.com>",
+  to: "commerce-operator@example.com",
+}
 const PRIVATE_FAILURE_DETAIL =
   "provider secret should stay hidden for customer@example.com"
 
@@ -125,6 +136,8 @@ function makeReportRow(overrides: Record<string, unknown> = {}) {
 }
 
 function makeHarness({
+  alertResult = { kind: "accepted" as const },
+  alertThrows = false,
   claims = [],
   finishResult = true,
   fulfillmentResult = {
@@ -133,12 +146,15 @@ function makeHarness({
   },
   now = () => 1_000,
   reports = [],
+  reportsByCall,
   rpcFailures = {},
   session = makeSession(),
   sessionError = false,
   stripeAccountError = false,
   stripeAccountMatches = true,
 }: {
+  alertResult?: CommerceRecoveryAlertResult
+  alertThrows?: boolean
   claims?: Array<Record<string, unknown>>
   finishResult?: boolean
   fulfillmentResult?:
@@ -150,18 +166,21 @@ function makeHarness({
     | { purchaseStatus: null; state: "ignored" }
   now?: () => number
   reports?: Array<Record<string, unknown>>
+  reportsByCall?: Array<Array<Record<string, unknown>>>
   rpcFailures?: Partial<Record<ReconciliationRpcName, ReconciliationRpcFailure>>
   session?: ReturnType<typeof makeSession>
   sessionError?: boolean
   stripeAccountError?: boolean
   stripeAccountMatches?: boolean
 } = {}) {
+  const alertCalls: CommerceRecoveryAlertInput[] = []
   const rpcCalls: Array<{ args: Record<string, unknown>; name: string }> = []
   const finishCalls: Array<Record<string, unknown>> = []
   const fulfillmentCalls: Array<Record<string, unknown>> = []
   const expirationCalls: Array<Record<string, unknown>> = []
   let sessionRetrieveCount = 0
   let stripeAccountCheckCount = 0
+  let reportCallCount = 0
 
   const admin = {
     async rpc(name: string, args: Record<string, unknown>) {
@@ -175,7 +194,9 @@ function makeHarness({
         }
       }
       if (name === "report_due_checkout_reconciliations") {
-        return { data: reports, error: null }
+        const data = reportsByCall?.[reportCallCount] ?? reports
+        reportCallCount += 1
+        return { data, error: null }
       }
       if (name === "claim_due_checkout_reconciliations") {
         return { data: claims, error: null }
@@ -222,9 +243,15 @@ function makeHarness({
     },
     now,
     randomUUID: () => RUN_ID,
+    async sendCommerceRecoveryAlert(input: CommerceRecoveryAlertInput) {
+      alertCalls.push(input)
+      if (alertThrows) throw new Error(PRIVATE_FAILURE_DETAIL)
+      return alertResult
+    },
   }
 
   return {
+    alertCalls,
     dependencies,
     expirationCalls,
     finishCalls,
@@ -253,6 +280,20 @@ async function captureConsoleErrors<T>(run: () => Promise<T>) {
   }
 }
 
+async function captureConsoleWarnings<T>(run: () => Promise<T>) {
+  const originalConsoleWarn = console.warn
+  const calls: unknown[][] = []
+  console.warn = (...args: unknown[]) => {
+    calls.push(args)
+  }
+
+  try {
+    return { calls, result: await run() }
+  } finally {
+    console.warn = originalConsoleWarn
+  }
+}
+
 function assertSanitizedFailureLog(
   calls: unknown[][],
   expected: { category: string; stage: string }
@@ -274,6 +315,318 @@ function assertSanitizedFailureLog(
     /provider secret|customer@example\.com|cs_test_|pi_test_|price_|prod_|acct_/
   )
 }
+
+function assertSanitizedAlertFailureLog(
+  calls: unknown[][],
+  category: string,
+  environment = "development"
+) {
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0]?.length, 1)
+  const serialized = calls[0]?.[0]
+  assert.equal(typeof serialized, "string")
+  if (typeof serialized !== "string") return
+
+  assert.deepEqual(JSON.parse(serialized), {
+    category,
+    environment,
+    event: "scheduled_commerce_reconciliation_alert_not_delivered",
+    level: "warn",
+  })
+  assert.doesNotMatch(
+    serialized,
+    /provider secret|customer@example\.com|cs_test_|pi_test_|price_|prod_|acct_/
+  )
+}
+
+function assertSanitizedStatusRefreshLog(
+  calls: unknown[][],
+  environment = "development"
+) {
+  assert.equal(calls.length, 1)
+  assert.equal(calls[0]?.length, 1)
+  const serialized = calls[0]?.[0]
+  assert.equal(typeof serialized, "string")
+  if (typeof serialized !== "string") return
+
+  assert.deepEqual(JSON.parse(serialized), {
+    category: "status_unavailable",
+    environment,
+    event: "scheduled_commerce_reconciliation_status_refresh_unavailable",
+    level: "warn",
+  })
+  assert.doesNotMatch(
+    serialized,
+    /provider secret|customer@example\.com|cs_test_|pi_test_|price_|prod_|acct_/
+  )
+}
+
+test("commerce recovery alert idempotency is deterministic by payload, UTC day, and environment", () => {
+  const morning = new Date("2026-09-06T00:00:01.000Z")
+  const evening = new Date("2026-09-06T23:59:59.000Z")
+  const nextDay = new Date("2026-09-07T00:00:00.000Z")
+  const payload = JSON.stringify({ from: "sender", text: "state one" })
+  const changedPayload = JSON.stringify({ from: "sender", text: "state two" })
+  const morningKey = commerceRecoveryAlertIdempotencyKey(
+    "production",
+    morning,
+    payload
+  )
+
+  assert.match(
+    morningKey,
+    /^hwl-commerce-recovery-production-2026-09-06-[a-f0-9]{24}$/
+  )
+  assert.equal(
+    commerceRecoveryAlertIdempotencyKey("production", evening, payload),
+    morningKey
+  )
+  assert.notEqual(
+    commerceRecoveryAlertIdempotencyKey("preview", morning, payload),
+    morningKey
+  )
+  assert.notEqual(
+    commerceRecoveryAlertIdempotencyKey("production", nextDay, payload),
+    morningKey
+  )
+  assert.notEqual(
+    commerceRecoveryAlertIdempotencyKey("production", morning, changedPayload),
+    morningKey
+  )
+  assert.doesNotMatch(morningKey, /sender|state/)
+})
+
+test("no recovery alert performs no provider request", async () => {
+  let fetchCount = 0
+  const result = await sendCommerceRecoveryAlert(
+    {
+      alertsPending: 0,
+      deploymentTarget: "production",
+      manualReview: 0,
+      occurredAt: new Date("2026-09-06T12:00:00.000Z"),
+    },
+    {
+      configuration: ALERT_CONFIGURATION,
+      fetchImpl: async () => {
+        fetchCount += 1
+        return new Response(null, { status: 202 })
+      },
+    }
+  )
+
+  assert.deepEqual(result, { kind: "not_required" })
+  assert.equal(fetchCount, 0)
+})
+
+test("commerce recovery email contains only aggregate state and the canonical protected link", async () => {
+  const requests: Array<{ init: RequestInit | undefined; input: unknown }> = []
+  const occurredAt = new Date("2026-09-06T12:00:00.000Z")
+  const result = await sendCommerceRecoveryAlert(
+    {
+      alertsPending: 3,
+      deploymentTarget: "production",
+      manualReview: 2,
+      occurredAt,
+    },
+    {
+      configuration: ALERT_CONFIGURATION,
+      fetchImpl: async (input, init) => {
+        requests.push({ init, input })
+        return new Response(null, { status: 202 })
+      },
+    }
+  )
+
+  assert.deepEqual(result, { kind: "accepted" })
+  assert.equal(requests.length, 1)
+  assert.equal(requests[0]?.input, "https://api.resend.com/emails")
+  const headers = new Headers(requests[0]?.init?.headers)
+  assert.equal(
+    headers.get("idempotency-key"),
+    commerceRecoveryAlertIdempotencyKey(
+      "production",
+      occurredAt,
+      String(requests[0]?.init?.body)
+    )
+  )
+  const payload = JSON.parse(String(requests[0]?.init?.body)) as {
+    from: string
+    subject: string
+    text: string
+    to: string[]
+  }
+  assert.deepEqual(payload.to, [ALERT_CONFIGURATION.to])
+  assert.equal(payload.from, ALERT_CONFIGURATION.from)
+  assert.match(payload.subject, /production commerce recovery needs attention/)
+  assert.match(payload.text, /Environment: production/)
+  assert.match(payload.text, /Recovery alerts pending now: 3/)
+  assert.match(
+    payload.text,
+    /Worker-classified manual-review outcomes this run: 2/
+  )
+  assert.match(payload.text, /Recovery status refresh: current\./)
+  assert.match(
+    payload.text,
+    /https:\/\/www\.hwlbysmd\.com\/login\?redirectTo=%2Fadmin%2Fstore/
+  )
+  assert.doesNotMatch(
+    `${payload.subject}\n${payload.text}`,
+    /customer@example|cs_(?:test|live)_|pi_|price_|prod_|acct_|evt_|ch_/
+  )
+})
+
+test("a full report batch is described as a lower bound", async () => {
+  const requests: RequestInit[] = []
+  const result = await sendCommerceRecoveryAlert(
+    {
+      alertsPending: 100,
+      deploymentTarget: "production",
+      manualReview: 0,
+      occurredAt: new Date("2026-09-06T12:00:00.000Z"),
+    },
+    {
+      configuration: ALERT_CONFIGURATION,
+      fetchImpl: async (_input, init) => {
+        requests.push(init ?? {})
+        return new Response(null, { status: 202 })
+      },
+    }
+  )
+
+  assert.deepEqual(result, { kind: "accepted" })
+  const payload = JSON.parse(String(requests[0]?.body)) as { text: string }
+  assert.match(payload.text, /Recovery alerts pending now: at least 100/)
+  assert.doesNotMatch(payload.text, /Recovery alerts pending now: 100(?:\n|$)/)
+})
+
+test("an uncertain recovery status sends a generic aggregate alert", async () => {
+  const requests: RequestInit[] = []
+  const result = await sendCommerceRecoveryAlert(
+    {
+      alertsPending: 0,
+      deploymentTarget: "production",
+      manualReview: 0,
+      occurredAt: new Date("2026-09-06T12:00:00.000Z"),
+      statusUncertain: true,
+    },
+    {
+      configuration: ALERT_CONFIGURATION,
+      fetchImpl: async (_input, init) => {
+        requests.push(init ?? {})
+        return new Response(null, { status: 202 })
+      },
+    }
+  )
+
+  assert.deepEqual(result, { kind: "accepted" })
+  const payload = JSON.parse(String(requests[0]?.body)) as { text: string }
+  assert.match(
+    payload.text,
+    /Recovery status refresh: unavailable; inspect the durable queue\./
+  )
+})
+
+test("missing commerce alert configuration performs no provider request", async () => {
+  let fetchCount = 0
+  for (const missing of ["apiKey", "from", "to"] as const) {
+    const result = await sendCommerceRecoveryAlert(
+      {
+        alertsPending: 1,
+        deploymentTarget: "production",
+        manualReview: 0,
+        occurredAt: new Date("2026-09-06T12:00:00.000Z"),
+      },
+      {
+        configuration: {
+          ...ALERT_CONFIGURATION,
+          [missing]: undefined,
+        },
+        fetchImpl: async () => {
+          fetchCount += 1
+          return new Response(null, { status: 202 })
+        },
+      }
+    )
+
+    assert.deepEqual(result, { kind: "not_configured" })
+  }
+  assert.equal(fetchCount, 0)
+})
+
+test("malformed or multi-recipient alert addresses perform no provider request", async () => {
+  let fetchCount = 0
+  for (const configuration of [
+    { ...ALERT_CONFIGURATION, to: "operator@example.com,broken" },
+    { ...ALERT_CONFIGURATION, to: "one@example.com;two@example.com" },
+    { ...ALERT_CONFIGURATION, to: "Operator <operator@example.com>" },
+    { ...ALERT_CONFIGURATION, to: "operator@example.com:bad" },
+    { ...ALERT_CONFIGURATION, from: "HWL <hello@hwlbysmd.com>,broken" },
+  ]) {
+    const result = await sendCommerceRecoveryAlert(
+      {
+        alertsPending: 1,
+        deploymentTarget: "production",
+        manualReview: 0,
+        occurredAt: new Date("2026-09-06T12:00:00.000Z"),
+      },
+      {
+        configuration,
+        fetchImpl: async () => {
+          fetchCount += 1
+          return new Response(null, { status: 202 })
+        },
+      }
+    )
+
+    assert.deepEqual(result, { kind: "not_configured" })
+  }
+  assert.equal(fetchCount, 0)
+})
+
+test("provider rejection is reduced to a sanitized alert result", async () => {
+  const result = await sendCommerceRecoveryAlert(
+    {
+      alertsPending: 1,
+      deploymentTarget: "preview",
+      manualReview: 0,
+      occurredAt: new Date("2026-09-06T12:00:00.000Z"),
+    },
+    {
+      configuration: ALERT_CONFIGURATION,
+      fetchImpl: async () =>
+        new Response(PRIVATE_FAILURE_DETAIL, { status: 403 }),
+    }
+  )
+
+  assert.deepEqual(result, { kind: "provider_rejected" })
+  assert.doesNotMatch(
+    JSON.stringify(result),
+    /provider secret|customer@example/
+  )
+})
+
+test("network ambiguity is reduced to a sanitized alert result", async () => {
+  const result = await sendCommerceRecoveryAlert(
+    {
+      alertsPending: 1,
+      deploymentTarget: "preview",
+      manualReview: 0,
+      occurredAt: new Date("2026-09-06T12:00:00.000Z"),
+    },
+    {
+      configuration: ALERT_CONFIGURATION,
+      fetchImpl: async () => {
+        throw new Error(PRIVATE_FAILURE_DETAIL)
+      },
+    }
+  )
+
+  assert.deepEqual(result, { kind: "network_outcome_unknown" })
+  assert.doesNotMatch(
+    JSON.stringify(result),
+    /provider secret|customer@example/
+  )
+})
 
 test("cron bearer comparison is exact and length-safe", () => {
   assert.equal(cronSecretsMatch("shared-secret", "shared-secret"), true)
@@ -423,11 +776,22 @@ test("claims use the exact namespace, fixed lease, and maximum batch size", asyn
       },
       name: "claim_due_checkout_reconciliations",
     },
+    {
+      args: {
+        p_batch_size: 100,
+        p_deployment_target: "development",
+        p_run_id: RUN_ID,
+        p_stripe_account_id: ACCOUNT_ID,
+        p_stripe_livemode: false,
+      },
+      name: "report_due_checkout_reconciliations",
+    },
   ])
   assert.equal(
     harness.rpcCalls.some(({ name }) => name.includes("stripe_events")),
     false
   )
+  assert.equal(harness.alertCalls.length, 0)
 })
 
 test("a completed checkout uses the shared verifier and exact claim identity", async () => {
@@ -508,10 +872,187 @@ test("report rows are validated and reduced to sanitized operational counts", as
   if (result.kind !== "completed") return
   assert.equal(result.summary.reported, 1)
   assert.equal(result.summary.alertsPending, 1)
+  assert.equal(harness.alertCalls.length, 1)
+  assert.deepEqual(
+    {
+      alertsPending: harness.alertCalls[0]?.alertsPending,
+      deploymentTarget: harness.alertCalls[0]?.deploymentTarget,
+      manualReview: harness.alertCalls[0]?.manualReview,
+    },
+    {
+      alertsPending: 1,
+      deploymentTarget: "development",
+      manualReview: 0,
+    }
+  )
   assert.doesNotMatch(
     JSON.stringify(result),
     /cs_test_|pi_test_|price_|prod_|acct_/
   )
+})
+
+test("a same-run manual-review transition triggers one aggregate alert", async () => {
+  const harness = makeHarness({
+    claims: [makeClaim({ deployment_target: "preview" })],
+  })
+  const result = await runScheduledCommerceReconciliation({
+    dependencies: harness.dependencies,
+  })
+
+  assert.equal(result.kind, "completed")
+  if (result.kind !== "completed") return
+  assert.equal(result.summary.manualReview, 1)
+  assert.equal(harness.alertCalls.length, 1)
+  assert.deepEqual(
+    {
+      alertsPending: harness.alertCalls[0]?.alertsPending,
+      deploymentTarget: harness.alertCalls[0]?.deploymentTarget,
+      manualReview: harness.alertCalls[0]?.manualReview,
+    },
+    {
+      alertsPending: 0,
+      deploymentTarget: "development",
+      manualReview: 1,
+    }
+  )
+  assert.equal(harness.sessionRetrieveCount, 0)
+})
+
+test("the post-repair report catches a same-run database-only manual-review transition", async () => {
+  const manualReviewReport = makeReportRow({
+    alert_pending: true,
+    job_state: "manual_review",
+    manual_review_reason: "retry_exhausted",
+    next_attempt_at: null,
+  })
+  const harness = makeHarness({
+    reportsByCall: [[], [manualReviewReport]],
+  })
+  const result = await runScheduledCommerceReconciliation({
+    dependencies: harness.dependencies,
+  })
+
+  assert.equal(result.kind, "completed")
+  if (result.kind !== "completed") return
+  assert.equal(result.summary.manualReview, 0)
+  assert.equal(result.summary.alertsPending, 1)
+  assert.equal(result.summary.reported, 0)
+  assert.equal(harness.alertCalls.length, 1)
+  assert.equal(harness.alertCalls[0]?.alertsPending, 1)
+  const reportCalls = harness.rpcCalls.filter(
+    ({ name }) => name === "report_due_checkout_reconciliations"
+  )
+  assert.deepEqual(
+    reportCalls.map(({ args }) => args.p_run_id),
+    [RUN_ID, RUN_ID]
+  )
+  assert.deepEqual(
+    harness.rpcCalls.map(({ name }) => name),
+    [
+      "report_due_checkout_reconciliations",
+      "claim_due_checkout_reconciliations",
+      "report_due_checkout_reconciliations",
+    ]
+  )
+})
+
+test("crossing the internal deadline surfaces uncertain database-created state", async () => {
+  const timestamps = [1_000, 1_000, 47_000, 47_000]
+  const harness = makeHarness({
+    now: () => timestamps.shift() ?? 47_000,
+  })
+  const result = await runScheduledCommerceReconciliation({
+    dependencies: harness.dependencies,
+  })
+
+  assert.equal(result.kind, "completed")
+  if (result.kind !== "completed") return
+  assert.equal(result.summary.deadlineReached, true)
+  assert.equal(result.summary.alertsPending, 0)
+  assert.equal(result.summary.manualReview, 0)
+  assert.equal(harness.alertCalls.length, 1)
+  assert.equal(harness.alertCalls[0]?.statusUncertain, true)
+  assert.deepEqual(
+    harness.rpcCalls.map(({ name }) => name),
+    [
+      "report_due_checkout_reconciliations",
+      "claim_due_checkout_reconciliations",
+    ]
+  )
+})
+
+test("a failed status refresh is distinct from alert delivery status", async () => {
+  const harness = makeHarness({
+    reportsByCall: [[], [makeReportRow({ user_id: "not-a-uuid" })]],
+  })
+  const { calls, result } = await captureConsoleWarnings(() =>
+    runScheduledCommerceReconciliation({ dependencies: harness.dependencies })
+  )
+
+  assert.equal(result.kind, "completed")
+  assert.equal(harness.alertCalls.length, 1)
+  assert.equal(harness.alertCalls[0]?.statusUncertain, true)
+  assertSanitizedStatusRefreshLog(calls)
+})
+
+test("missing alert configuration is logged safely without changing recovery authority", async () => {
+  const harness = makeHarness({
+    alertResult: { kind: "not_configured" },
+    reports: [makeReportRow({ alert_pending: true })],
+  })
+  const { calls, result } = await captureConsoleWarnings(() =>
+    runScheduledCommerceReconciliation({ dependencies: harness.dependencies })
+  )
+
+  assert.equal(result.kind, "completed")
+  if (result.kind !== "completed") return
+  assert.equal(result.summary.alertsPending, 1)
+  assert.equal(result.summary.reported, 1)
+  assertSanitizedAlertFailureLog(calls, "not_configured")
+})
+
+test("provider alert failure states cannot change the completed recovery result", async () => {
+  for (const kind of [
+    "provider_rejected",
+    "network_outcome_unknown",
+  ] as const) {
+    const harness = makeHarness({
+      alertResult: { kind },
+      reports: [makeReportRow({ alert_pending: true })],
+    })
+    const { calls, result } = await captureConsoleWarnings(() =>
+      runScheduledCommerceReconciliation({ dependencies: harness.dependencies })
+    )
+
+    assert.equal(result.kind, "completed")
+    if (result.kind !== "completed") continue
+    assert.equal(result.summary.alertsPending, 1)
+    assert.equal(result.summary.reported, 1)
+    assertSanitizedAlertFailureLog(calls, kind)
+  }
+})
+
+test("an unexpected notifier failure cannot change the completed recovery result", async () => {
+  const harness = makeHarness({
+    alertThrows: true,
+    reports: [makeReportRow({ alert_pending: true })],
+  })
+  const { calls, result } = await captureConsoleWarnings(() =>
+    runScheduledCommerceReconciliation({ dependencies: harness.dependencies })
+  )
+
+  assert.equal(result.kind, "completed")
+  if (result.kind !== "completed") return
+  assert.deepEqual(
+    {
+      alertsPending: result.summary.alertsPending,
+      claimed: result.summary.claimed,
+      manualReview: result.summary.manualReview,
+      reported: result.summary.reported,
+    },
+    { alertsPending: 1, claimed: 0, manualReview: 0, reported: 1 }
+  )
+  assertSanitizedAlertFailureLog(calls, "unexpected_error")
 })
 
 test("a malformed report fails closed with a sanitized report-RPC category", async () => {
@@ -580,6 +1121,60 @@ test("a thrown claim RPC error logs only its sanitized stage and category", asyn
       "claim_due_checkout_reconciliations",
     ]
   )
+})
+
+test("known durable alerts still notify when later claim work fails", async () => {
+  const harness = makeHarness({
+    reports: [makeReportRow({ alert_pending: true })],
+    rpcFailures: { claim_due_checkout_reconciliations: "throw" },
+  })
+  const { calls, result } = await captureConsoleErrors(() =>
+    runScheduledCommerceReconciliation({ dependencies: harness.dependencies })
+  )
+
+  assert.deepEqual(result, { kind: "unavailable" })
+  assertSanitizedFailureLog(calls, {
+    category: "rpc_error",
+    stage: "claim_rpc",
+  })
+  assert.equal(harness.alertCalls.length, 1)
+  assert.equal(harness.alertCalls[0]?.alertsPending, 1)
+  assert.equal(harness.alertCalls[0]?.manualReview, 0)
+  assert.equal(harness.alertCalls[0]?.statusUncertain, true)
+})
+
+test("recovery alert timeout is bounded by the outer function budget", async () => {
+  const timestamps = [1_000, 1_000, 55_500]
+  const harness = makeHarness({
+    now: () => timestamps.shift() ?? 55_500,
+    reports: [makeReportRow({ alert_pending: true })],
+  })
+  const result = await runScheduledCommerceReconciliation({
+    dependencies: harness.dependencies,
+    timeBudgetMs: 0,
+  })
+
+  assert.equal(result.kind, "completed")
+  assert.equal(harness.alertCalls.length, 1)
+  assert.equal(harness.alertCalls[0]?.timeoutMs, 4_500)
+})
+
+test("recovery alert skips provider work after the safe function budget", async () => {
+  const timestamps = [1_000, 61_000, 61_000]
+  const harness = makeHarness({
+    now: () => timestamps.shift() ?? 61_000,
+    reports: [makeReportRow({ alert_pending: true })],
+  })
+  const { calls, result } = await captureConsoleWarnings(() =>
+    runScheduledCommerceReconciliation({
+      dependencies: harness.dependencies,
+      timeBudgetMs: 0,
+    })
+  )
+
+  assert.equal(result.kind, "completed")
+  assert.equal(harness.alertCalls.length, 0)
+  assertSanitizedAlertFailureLog(calls, "time_budget_exhausted")
 })
 
 test("an open Session is rescheduled without calling fulfillment", async () => {

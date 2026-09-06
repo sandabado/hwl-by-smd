@@ -11,6 +11,10 @@ import {
 } from "@/lib/commerce/stripe-fulfillment"
 import { isCheckoutSessionId } from "@/lib/commerce/checkout-reconciliation-policy"
 import {
+  sendCommerceRecoveryAlert,
+  type CommerceRecoveryAlertResult,
+} from "@/lib/commerce/reconciliation-alert"
+import {
   COMMERCE_APPLICATION,
   getCheckoutCatalog,
   getCommerceDeploymentTarget,
@@ -26,8 +30,10 @@ import {
 import { createAdminClient } from "@/lib/supabase/server"
 
 export const SCHEDULED_RECONCILIATION_DEADLINE_MS = 45_000
+export const SCHEDULED_RECONCILIATION_MAX_DURATION_MS = 60_000
 export const SCHEDULED_RECONCILIATION_MAX_CLAIMS = 10
 const SCHEDULED_RECONCILIATION_LEASE_SECONDS = 120
+const SCHEDULED_RECONCILIATION_SHUTDOWN_RESERVE_MS = 1_000
 
 const CLAIM_RPC = "claim_due_checkout_reconciliations"
 const FINISH_RPC = "finish_checkout_reconciliation_claim"
@@ -132,6 +138,7 @@ type ScheduledReconciliationDependencies = {
   markCheckoutExpired: typeof markCheckoutExpired
   now: () => number
   randomUUID: () => string
+  sendCommerceRecoveryAlert: typeof sendCommerceRecoveryAlert
 }
 
 const DEFAULT_DEPENDENCIES: ScheduledReconciliationDependencies = {
@@ -146,6 +153,7 @@ const DEFAULT_DEPENDENCIES: ScheduledReconciliationDependencies = {
   markCheckoutExpired,
   now: Date.now,
   randomUUID,
+  sendCommerceRecoveryAlert,
 }
 
 function logScheduledReconciliationFailure(error: unknown) {
@@ -161,6 +169,106 @@ function logScheduledReconciliationFailure(error: unknown) {
       stage: failure?.stage ?? "worker",
     })
   )
+}
+
+type CommerceRecoveryAlertFailureCategory =
+  | Exclude<CommerceRecoveryAlertResult["kind"], "accepted" | "not_required">
+  | "time_budget_exhausted"
+  | "unexpected_error"
+
+function logCommerceRecoveryAlertFailure(
+  category: CommerceRecoveryAlertFailureCategory,
+  deploymentTarget: DeploymentTarget
+) {
+  console.warn(
+    JSON.stringify({
+      category,
+      environment: deploymentTarget,
+      event: "scheduled_commerce_reconciliation_alert_not_delivered",
+      level: "warn",
+    })
+  )
+}
+
+function logCommerceRecoveryStatusUnavailable(
+  deploymentTarget: DeploymentTarget
+) {
+  console.warn(
+    JSON.stringify({
+      category: "status_unavailable",
+      environment: deploymentTarget,
+      event: "scheduled_commerce_reconciliation_status_refresh_unavailable",
+      level: "warn",
+    })
+  )
+}
+
+async function notifyCommerceRecoverySafely(
+  summary: ScheduledReconciliationSummary,
+  deploymentTarget: DeploymentTarget,
+  occurredAt: Date,
+  sendAlert: typeof sendCommerceRecoveryAlert,
+  hardDeadlineAt: number,
+  now: () => number,
+  statusUncertain: boolean
+) {
+  if (summary.alertsPending + summary.manualReview === 0 && !statusUncertain) {
+    return
+  }
+
+  const timeoutMs = Math.floor(
+    hardDeadlineAt - now() - SCHEDULED_RECONCILIATION_SHUTDOWN_RESERVE_MS
+  )
+  if (timeoutMs <= 0) {
+    logCommerceRecoveryAlertFailure("time_budget_exhausted", deploymentTarget)
+    return
+  }
+
+  try {
+    const result = await sendAlert({
+      alertsPending: summary.alertsPending,
+      deploymentTarget,
+      manualReview: summary.manualReview,
+      occurredAt,
+      statusUncertain,
+      timeoutMs,
+    })
+
+    if (result.kind !== "accepted" && result.kind !== "not_required") {
+      logCommerceRecoveryAlertFailure(result.kind, deploymentTarget)
+    }
+  } catch {
+    // Alert delivery is intentionally secondary to the durable reconciliation
+    // result. An unexpected notifier failure must never alter recovery state.
+    logCommerceRecoveryAlertFailure("unexpected_error", deploymentTarget)
+  }
+}
+
+async function refreshAlertsPendingSafely(
+  supabase: AdminClient,
+  summary: ScheduledReconciliationSummary,
+  deploymentTarget: DeploymentTarget,
+  stripeAccountId: string,
+  stripeLivemode: boolean,
+  runId: string
+) {
+  try {
+    const report = await reportDueOrders(
+      supabase,
+      deploymentTarget,
+      stripeAccountId,
+      stripeLivemode,
+      runId
+    )
+    summary.alertsPending = report.alertsPending
+    return true
+  } catch {
+    // The initial report remains authoritative for the completed recovery run.
+    // A failed post-repair refresh can only reduce alert visibility, so surface
+    // a sanitized operational signal without rewriting the recovery result.
+    logCommerceRecoveryStatusUnavailable(deploymentTarget)
+    return false
+  }
 }
 
 export function cronSecretsMatch(value: string, expected: string) {
@@ -780,8 +888,10 @@ export async function runScheduledCommerceReconciliation({
   const requestedBudget = Number.isFinite(timeBudgetMs)
     ? timeBudgetMs
     : SCHEDULED_RECONCILIATION_DEADLINE_MS
+  const startedAt = dependencies.now()
+  const hardDeadlineAt = startedAt + SCHEDULED_RECONCILIATION_MAX_DURATION_MS
   const deadlineAt =
-    dependencies.now() +
+    startedAt +
     Math.max(0, Math.min(SCHEDULED_RECONCILIATION_DEADLINE_MS, requestedBudget))
   const deploymentTarget = dependencies.getCommerceDeploymentTarget()
   const stripeAccountId = dependencies.getExpectedStripeAccountId()
@@ -838,6 +948,8 @@ export async function runScheduledCommerceReconciliation({
     terminal: 0,
     verifiedActive: 0,
   }
+  let alertStatusUncertain = false
+  let reportEstablished = false
 
   try {
     const report = await reportDueOrders(
@@ -849,9 +961,19 @@ export async function runScheduledCommerceReconciliation({
     )
     summary.alertsPending = report.alertsPending
     summary.reported = report.reported
+    reportEstablished = true
 
     if (dependencies.now() >= deadlineAt) {
       summary.deadlineReached = true
+      await notifyCommerceRecoverySafely(
+        summary,
+        deploymentTarget,
+        new Date(startedAt),
+        dependencies.sendCommerceRecoveryAlert,
+        hardDeadlineAt,
+        dependencies.now,
+        alertStatusUncertain
+      )
       return { kind: "completed", summary }
     }
 
@@ -890,9 +1012,48 @@ export async function runScheduledCommerceReconciliation({
       })
     }
 
+    // A finish RPC can promote the eighth retry to manual review, while lease
+    // reclamation can do the same without returning a claim. Migration 014 makes
+    // the report-attempt insert idempotent by run ID but still returns the current
+    // candidate rows, so this refresh neither duplicates evidence nor suppresses
+    // same-run transitions.
+    if (dependencies.now() >= deadlineAt) {
+      summary.deadlineReached = true
+      alertStatusUncertain = true
+    } else {
+      alertStatusUncertain = !(await refreshAlertsPendingSafely(
+        supabase,
+        summary,
+        deploymentTarget,
+        stripeAccountId,
+        stripeLivemode,
+        runId
+      ))
+    }
+
+    await notifyCommerceRecoverySafely(
+      summary,
+      deploymentTarget,
+      new Date(startedAt),
+      dependencies.sendCommerceRecoveryAlert,
+      hardDeadlineAt,
+      dependencies.now,
+      alertStatusUncertain
+    )
+
     return { kind: "completed", summary }
   } catch (error) {
     logScheduledReconciliationFailure(error)
+    if (reportEstablished) alertStatusUncertain = true
+    await notifyCommerceRecoverySafely(
+      summary,
+      deploymentTarget,
+      new Date(startedAt),
+      dependencies.sendCommerceRecoveryAlert,
+      hardDeadlineAt,
+      dependencies.now,
+      alertStatusUncertain
+    )
     return { kind: "unavailable" }
   }
 }

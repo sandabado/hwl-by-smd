@@ -27,7 +27,6 @@ export type AdminInquiry = {
   preferred_date: string | null
   preferred_window: string | null
   service: string | null
-  service_slug: string | null
   services: string | null
   subject: string | null
   time_zone: string | null
@@ -39,10 +38,6 @@ export type AdminInquiry = {
     | "failed"
     | "not_configured"
     | "unattempted"
-  notification_error_code: string | null
-  notification_attempted_at: string | null
-  notification_accepted_at: string | null
-  notification_provider_id: string | null
   created_at: string
 }
 
@@ -65,36 +60,110 @@ type AdminInquiryInboxOptions = {
   pageSize?: number
 }
 
-/**
- * Returns a minimal inquiry DTO only after re-establishing real Supabase admin
- * authorization. The development-only demo session never receives live PII.
- */
-export async function getAdminInquiryInbox(
-  options: AdminInquiryInboxOptions = {}
-): Promise<AdminInquiryInbox> {
-  const access = await requireAdmin()
-  if (access.source !== "supabase") return { status: "local_preview" }
+type AdminInquiryReadOptions = {
+  firstRow: number
+  inquiryId: string | null
+  pageSize: number
+}
 
+type AdminInquiryReadResult =
+  | { status: "not_configured" }
+  | { status: "unavailable" }
+  | {
+      status: "ready"
+      count: number
+      rows: unknown[]
+    }
+
+export type AdminInquiryInboxDependencies = {
+  readInquiries: (
+    options: AdminInquiryReadOptions
+  ) => Promise<AdminInquiryReadResult>
+  requireAdmin: typeof requireAdmin
+}
+
+const INQUIRY_STATUSES = new Set<AdminInquiry["status"]>([
+  "received",
+  "in_review",
+  "responded",
+  "closed",
+  "spam",
+])
+const NOTIFICATION_STATUSES = new Set<AdminInquiry["notification_status"]>([
+  "accepted",
+  "attempting",
+  "audit_unknown",
+  "failed",
+  "not_configured",
+  "unattempted",
+])
+
+function optionalString(value: unknown) {
+  return typeof value === "string" ? value : null
+}
+
+function adminInquiryDto(value: unknown): AdminInquiry | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null
+
+  const row = value as Record<string, unknown>
+  if (
+    typeof row.id !== "string" ||
+    typeof row.source !== "string" ||
+    typeof row.name !== "string" ||
+    typeof row.email !== "string" ||
+    typeof row.message !== "string" ||
+    typeof row.created_at !== "string" ||
+    typeof row.status !== "string" ||
+    !INQUIRY_STATUSES.has(row.status as AdminInquiry["status"]) ||
+    typeof row.notification_status !== "string" ||
+    !NOTIFICATION_STATUSES.has(
+      row.notification_status as AdminInquiry["notification_status"]
+    )
+  ) {
+    return null
+  }
+
+  return {
+    id: row.id,
+    source: row.source,
+    name: row.name,
+    email: row.email,
+    message: row.message,
+    booking_preference: optionalString(row.booking_preference),
+    date_preference: optionalString(row.date_preference),
+    event_date: optionalString(row.event_date),
+    format: optionalString(row.format),
+    guest_count: optionalString(row.guest_count),
+    group_size: optionalString(row.group_size),
+    interests: optionalString(row.interests),
+    location: optionalString(row.location),
+    organization: optionalString(row.organization),
+    phone: optionalString(row.phone),
+    preferred_date: optionalString(row.preferred_date),
+    preferred_window: optionalString(row.preferred_window),
+    service: optionalString(row.service),
+    services: optionalString(row.services),
+    subject: optionalString(row.subject),
+    time_zone: optionalString(row.time_zone),
+    status: row.status as AdminInquiry["status"],
+    notification_status:
+      row.notification_status as AdminInquiry["notification_status"],
+    created_at: row.created_at,
+  }
+}
+
+async function readInquiries({
+  firstRow,
+  inquiryId,
+  pageSize,
+}: AdminInquiryReadOptions): Promise<AdminInquiryReadResult> {
   const admin = createAdminClient()
   if (!admin) return { status: "not_configured" }
 
-  const requestedInquiryId = options.inquiryId?.trim() ?? ""
-  const inquiryId = INQUIRY_ID_PATTERN.test(requestedInquiryId)
-    ? requestedInquiryId
-    : null
-  const page =
-    Number.isSafeInteger(options.page) && Number(options.page) > 0
-      ? Number(options.page)
-      : 1
-  const pageSize =
-    Number.isSafeInteger(options.pageSize) && Number(options.pageSize) > 0
-      ? Math.min(Number(options.pageSize), 100)
-      : ADMIN_INQUIRY_PAGE_SIZE
-  const firstRow = (page - 1) * pageSize
   const baseQuery = admin
     .from("inquiries")
     .select(
-      "id, source, name, email, message, booking_preference, date_preference, event_date, format, guest_count, group_size, interests, location, organization, phone, preferred_date, preferred_window, service, service_slug, services, subject, time_zone, status, notification_status, notification_error_code, notification_attempted_at, notification_accepted_at, notification_provider_id, created_at",
+      "id, source, name, email, message, booking_preference, date_preference, event_date, format, guest_count, group_size, interests, location, organization, phone, preferred_date, preferred_window, service, services, subject, time_zone, status, notification_status, created_at",
       { count: "exact" }
     )
 
@@ -112,11 +181,64 @@ export async function getAdminInquiryInbox(
   }
 
   return {
+    count: count ?? 0,
+    rows: data ?? [],
+    status: "ready",
+  }
+}
+
+const runtimeDependencies: AdminInquiryInboxDependencies = {
+  readInquiries,
+  requireAdmin,
+}
+
+/**
+ * Returns a minimal inquiry DTO only after re-establishing real Supabase admin
+ * authorization. The development-only demo session never receives live PII.
+ */
+export async function getAdminInquiryInbox(
+  options: AdminInquiryInboxOptions = {},
+  dependencies: AdminInquiryInboxDependencies = runtimeDependencies
+): Promise<AdminInquiryInbox> {
+  const access = await dependencies.requireAdmin()
+  if (access.source !== "supabase") return { status: "local_preview" }
+
+  const requestedInquiryId = options.inquiryId?.trim() ?? ""
+  const inquiryId = INQUIRY_ID_PATTERN.test(requestedInquiryId)
+    ? requestedInquiryId
+    : null
+  const page =
+    Number.isSafeInteger(options.page) && Number(options.page) > 0
+      ? Number(options.page)
+      : 1
+  const pageSize =
+    Number.isSafeInteger(options.pageSize) && Number(options.pageSize) > 0
+      ? Math.min(Number(options.pageSize), 100)
+      : ADMIN_INQUIRY_PAGE_SIZE
+  const firstRow = (page - 1) * pageSize
+  const result = await dependencies.readInquiries({
+    firstRow,
     inquiryId,
-    inquiries: (data ?? []) as AdminInquiry[],
+    pageSize,
+  })
+  if (result.status !== "ready") return result
+
+  const inquiries = result.rows.map(adminInquiryDto)
+  if (
+    !Number.isSafeInteger(result.count) ||
+    result.count < 0 ||
+    inquiries.some((inquiry) => inquiry === null)
+  ) {
+    console.error("[admin/inquiries] Inquiry inbox returned an invalid DTO.")
+    return { status: "unavailable" }
+  }
+
+  return {
+    inquiryId,
+    inquiries: inquiries as AdminInquiry[],
     page: inquiryId ? 1 : page,
     pageSize,
     status: "ready",
-    total: count ?? 0,
+    total: result.count,
   }
 }

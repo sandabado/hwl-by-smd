@@ -24,6 +24,8 @@ const CANONICAL_PRODUCTION_URL = "https://www.hwlbysmd.com"
 const CANONICAL_PREVIEW_URL = "https://preview.hwlbysmd.com"
 const CANONICAL_CALCOM_PROFILE_URL = "https://cal.com/hwlbysmd"
 const CANONICAL_EMAIL_DOMAIN = "hwlbysmd.com"
+const SINGLE_EMAIL_PATTERN =
+  /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$/
 const CANONICAL_SUPABASE_PROJECT_REF = {
   development: "lkxppynmdfzljuptauxf",
   preview: "lkxppynmdfzljuptauxf",
@@ -212,8 +214,8 @@ function requireEmail(key: string) {
   const value = requireValue(key)
   if (!value) return null
 
-  const address = value.match(/<([^<>]+)>$/)?.[1] ?? value
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
+  const address = value.match(/^[^<>]+<([^<>]+)>$/)?.[1]?.trim() ?? value
+  if (/[,;\r\n]/.test(value) || !SINGLE_EMAIL_PATTERN.test(address)) {
     errors.push(`${key}: must contain a valid email address`)
   }
   return value
@@ -223,7 +225,7 @@ function requireCanonicalSenderEmail(key: string) {
   const value = requireEmail(key)
   if (!value) return null
 
-  const address = value.match(/<([^<>]+)>$/)?.[1] ?? value
+  const address = value.match(/^[^<>]+<([^<>]+)>$/)?.[1]?.trim() ?? value
   const domain = address.split("@").at(-1)?.toLowerCase()
   if (domain !== CANONICAL_EMAIL_DOMAIN) {
     errors.push(
@@ -321,6 +323,12 @@ if (rateLimitSecret && cronSecret && rateLimitSecret === cronSecret) {
 
 requireEmail("CONTACT_TO_EMAIL")
 requireCanonicalSenderEmail("CONTACT_FROM_EMAIL")
+const commerceAlertDestination = read("COMMERCE_ALERT_TO_EMAIL")
+if (target === "production" && salesExpectation === "open") {
+  requireEmail("COMMERCE_ALERT_TO_EMAIL")
+} else if (commerceAlertDestination) {
+  requireEmail("COMMERCE_ALERT_TO_EMAIL")
+}
 // DB-first persistence remains the runtime receipt boundary. For the launch
 // candidate, however, Shannon explicitly chose Resend notifications, so the
 // release preflight requires the provider configuration as a policy gate.

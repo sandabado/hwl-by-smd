@@ -82,6 +82,7 @@ const productionFixture: NodeJS.ProcessEnv = {
 
 const productionStripeFixture: NodeJS.ProcessEnv = {
   ...productionFixture,
+  COMMERCE_ALERT_TO_EMAIL: "commerce-operator@example.com",
   COMMERCE_SALES_READY: "true",
   STRIPE_ACCOUNT_ID: "acct_1U9cEIPTLuM8Maxa",
   STRIPE_LIFT_GUIDE_PRICE_ID: "price_1UCPFjPTLuM8MaxaTY48RO9e",
@@ -161,6 +162,26 @@ const fixtures: Fixture[] = [
     expectedText:
       "Launch environment preflight passed for preview (open sales).",
     name: "preview sandbox open",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      COMMERCE_ALERT_TO_EMAIL: "not-an-email",
+    },
+    expectedExit: 1,
+    expectedText: "COMMERCE_ALERT_TO_EMAIL: must contain a valid email address",
+    name: "invalid optional commerce alert destination fails",
+  },
+  {
+    args: ["--target=production", "--expect-sales=open"],
+    env: {
+      ...productionStripeFixture,
+      COMMERCE_ALERT_TO_EMAIL: "operator@example.com,broken",
+    },
+    expectedExit: 1,
+    expectedText: "COMMERCE_ALERT_TO_EMAIL: must contain a valid email address",
+    name: "Production open sales reject a malformed recipient list",
   },
   {
     args: ["--target=preview", "--expect-sales=closed"],
@@ -402,6 +423,27 @@ const fixtures: Fixture[] = [
     name: "canonical Production database and live Stripe fixture pass",
     unexpectedText: ["NEXT_PUBLIC_SITE_URL:", "CONTACT_FROM_EMAIL:"],
   },
+  {
+    args: ["--target=production", "--expect-sales=open"],
+    env: { ...productionStripeFixture, COMMERCE_ALERT_TO_EMAIL: "" },
+    expectedExit: 1,
+    expectedText: "COMMERCE_ALERT_TO_EMAIL: missing or placeholder value",
+    name: "Production open sales require a commerce alert destination",
+  },
+  {
+    args: ["--target=production", "--expect-sales=open"],
+    env: { ...productionStripeFixture, CONTACT_FROM_EMAIL: "" },
+    expectedExit: 1,
+    expectedText: "CONTACT_FROM_EMAIL: missing or placeholder value",
+    name: "Production open sales require an alert sender",
+  },
+  {
+    args: ["--target=production", "--expect-sales=open"],
+    env: { ...productionStripeFixture, RESEND_API_KEY: "" },
+    expectedExit: 1,
+    expectedText: "RESEND_API_KEY: missing or placeholder value",
+    name: "Production open sales require the Resend sending key",
+  },
   ...[STAGING_SUPABASE_URL, "https://mismatched-project.supabase.co"].map(
     (supabaseUrl): Fixture => ({
       args: ["--target=production", "--expect-sales=closed"],
@@ -424,6 +466,7 @@ const inheritedEnvironment = Object.fromEntries(
       !key.startsWith("SUPABASE_") &&
       !key.startsWith("NEXT_PUBLIC_SUPABASE_") &&
       !key.startsWith("NEXT_PUBLIC_INQUIRY_") &&
+      !key.startsWith("COMMERCE_") &&
       !key.startsWith("CONTACT_") &&
       !key.startsWith("RESEND_") &&
       !key.startsWith("INQUIRY_") &&

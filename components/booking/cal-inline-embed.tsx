@@ -187,8 +187,8 @@ function CalEmbedInstance({
                 The live calendar could not load here.
               </p>
               <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                Send Shannon a booking request below, or open Cal.com in a new
-                tab to check the current availability.
+                Open Cal.com in a new tab to check the current availability. The
+                section below shows any other available booking path.
               </p>
             </div>
           </div>

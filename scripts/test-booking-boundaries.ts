@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
 import { test } from "node:test"
 
 import {
@@ -6,9 +7,14 @@ import {
   findBookingService,
   isExactCalEventForBookingService,
 } from "../lib/booking-services.ts"
+import { getBookingRequestPresentation } from "../lib/booking-request-presentation.ts"
 import { getCalcomPublicEventTypes } from "../lib/calcom.ts"
 
 const services = bookingPillars.flatMap((pillar) => pillar.services)
+
+function source(path: string) {
+  return readFileSync(new URL(`../${path}`, import.meta.url), "utf8")
+}
 
 test("Cal.com discovery sends the complete stable request identity", async () => {
   const originalFetch = globalThis.fetch
@@ -157,4 +163,119 @@ test("booking catalog keeps live Cal discovery fail closed", async (t) => {
       { maximum: 8, minimum: 1 }
     )
   })
+})
+
+test("booking request presentation stays actionable in both readiness states", async (t) => {
+  const recipientEmail = "shannonmarydixon@gmail.com"
+
+  const scenarios = [
+    {
+      calendarBookingKind: "inquiry-only" as const,
+      closed: {
+        actionHref:
+          "mailto:shannonmarydixon@gmail.com?subject=Booking%20request%3A%20Wild%20Glow%20Express%20Facial",
+        actionLabel: "Email Shannon about Wild Glow Express Facial",
+        announcement:
+          "Use the email link below to arrange this experience directly. The website request form is paused.",
+        calendarNote: "",
+        description:
+          "This experience needs a personal arrangement. The website request form is paused; email Shannon directly below so no details are collected on this page.",
+        kind: "direct-email" as const,
+        title: "Arrange this experience directly.",
+      },
+      hasLiveCalendar: false,
+      name: "inquiry-only service",
+      openAnnouncement: "Send Shannon a request for the next opening below.",
+      serviceTitle: "Wild Glow Express Facial",
+    },
+    {
+      calendarBookingKind: "exact-event" as const,
+      closed: {
+        actionHref:
+          "mailto:shannonmarydixon@gmail.com?subject=Booking%20request%3A%20Signature%20Facial",
+        actionLabel: "Email Shannon about another time",
+        announcement:
+          "Live dates and appointment times are available below. The website request form is paused; email Shannon directly for help with another time.",
+        calendarNote: "The website request form is paused.",
+        description:
+          "Live appointment times above remain available. The website request form is paused; email Shannon directly for help with another time.",
+        kind: "direct-email" as const,
+        title: "Need another time?",
+      },
+      hasLiveCalendar: true,
+      name: "exact Cal service with a live calendar",
+      openAnnouncement:
+        "Live dates and appointment times are available below. Send Shannon a request below if you need another time.",
+      serviceTitle: "Signature Facial",
+    },
+    {
+      calendarBookingKind: "exact-event" as const,
+      closed: {
+        actionHref:
+          "mailto:shannonmarydixon@gmail.com?subject=Booking%20request%3A%20Moon%20Oracle%20Reading",
+        actionLabel: "Email Shannon about Moon Oracle Reading",
+        announcement:
+          "The live calendar is not available for this experience right now. Use the email link below to book directly with Shannon.",
+        calendarNote: "",
+        description:
+          "The live calendar is not available for this experience right now. The website request form is paused; email Shannon directly below so no details are collected on this page.",
+        kind: "direct-email" as const,
+        title: "Email Shannon to book.",
+      },
+      hasLiveCalendar: false,
+      name: "exact Cal service while its calendar is unavailable",
+      openAnnouncement: "Send Shannon a request for the next opening below.",
+      serviceTitle: "Moon Oracle Reading",
+    },
+  ]
+
+  for (const scenario of scenarios) {
+    await t.test(`${scenario.name}: collection open`, () => {
+      assert.deepEqual(
+        getBookingRequestPresentation({
+          calendarBookingKind: scenario.calendarBookingKind,
+          hasLiveCalendar: scenario.hasLiveCalendar,
+          inquiryCollectionReady: true,
+          recipientEmail,
+          serviceTitle: scenario.serviceTitle,
+        }),
+        {
+          announcement: scenario.openAnnouncement,
+          kind: "online-form",
+        }
+      )
+    })
+
+    await t.test(`${scenario.name}: collection paused`, () => {
+      assert.deepEqual(
+        getBookingRequestPresentation({
+          calendarBookingKind: scenario.calendarBookingKind,
+          hasLiveCalendar: scenario.hasLiveCalendar,
+          inquiryCollectionReady: false,
+          recipientEmail,
+          serviceTitle: scenario.serviceTitle,
+        }),
+        scenario.closed
+      )
+    })
+  }
+})
+
+test("closed-mode presentation remains connected to the rendered email action", () => {
+  const bookingPage = source("app/book/page.tsx")
+  const bookingFlow = source("components/booking/booking-request-flow.tsx")
+  const calEmbed = source("components/booking/cal-inline-embed.tsx")
+  const pausedPanel = source("components/shared/inquiry-collection-paused.tsx")
+
+  assert.match(
+    bookingPage,
+    /custom arrangements include a direct way to email Shannon/
+  )
+  assert.match(
+    bookingFlow,
+    /actionHref=\{bookingRequestPresentation\.actionHref\}/
+  )
+  assert.match(pausedPanel, /href=\{actionHref\}/)
+  assert.doesNotMatch(calEmbed, /Send Shannon a booking request below/)
+  assert.match(calEmbed, /shows any other available booking path/)
 })

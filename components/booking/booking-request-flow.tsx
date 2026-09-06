@@ -23,6 +23,8 @@ import {
   findBookingService,
   type BookingPillarId,
 } from "@/lib/booking-services"
+import { getBookingRequestPresentation } from "@/lib/booking-request-presentation"
+import { SITE_CONFIG } from "@/lib/constants"
 import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 import { cn } from "@/lib/utils"
 
@@ -125,6 +127,15 @@ export function BookingRequestFlow({
     ? describeGuestRange(selectedService.guestRange)
     : ""
   const inquiryCollectionReady = isInquiryCollectionReady()
+  const bookingRequestPresentation = selectedService
+    ? getBookingRequestPresentation({
+        calendarBookingKind: selectedService.calendarBooking.kind,
+        hasLiveCalendar: Boolean(selectedCalLink),
+        inquiryCollectionReady,
+        recipientEmail: SITE_CONFIG.email,
+        serviceTitle: selectedService.title,
+      })
+    : null
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -334,7 +345,7 @@ export function BookingRequestFlow({
           >
             <p aria-atomic="true" aria-live="polite" className="sr-only">
               {selectedService
-                ? `${selectedService.title} selected. ${selectedService.duration}. ${selectedService.price}. ${selectedCalLink ? "Live dates and appointment times are available below." : inquiryCollectionReady ? "Send Shannon a request for the next opening below." : "Online inquiry requests are temporarily paused."}`
+                ? `${selectedService.title} selected. ${selectedService.duration}. ${selectedService.price}. ${bookingRequestPresentation?.announcement ?? ""}`
                 : `${pillarLabels[activePillar]} category selected. Choose a service to continue.`}
             </p>
 
@@ -397,19 +408,26 @@ export function BookingRequestFlow({
                               experience. Cal.com will guide you through
                               confirmation.
                             </p>
-                            {inquiryCollectionReady ? (
+                            {bookingRequestPresentation?.kind ===
+                            "online-form" ? (
                               <a
                                 className="mt-2 inline-flex text-xs font-medium text-[var(--accent)] underline underline-offset-4 focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
                                 href="#alternative-booking-request"
                               >
                                 Need a different time? Skip to the request form.
                               </a>
-                            ) : (
+                            ) : bookingRequestPresentation?.kind ===
+                              "direct-email" ? (
                               <p className="mt-2 text-xs font-medium text-[var(--accent)]">
-                                Alternative-time requests are temporarily
-                                paused.
+                                {bookingRequestPresentation.calendarNote}{" "}
+                                <a
+                                  className="underline underline-offset-4 focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
+                                  href={bookingRequestPresentation.actionHref}
+                                >
+                                  {bookingRequestPresentation.actionLabel}.
+                                </a>
                               </p>
-                            )}
+                            ) : null}
                           </div>
                         </div>
                       </div>
@@ -422,7 +440,7 @@ export function BookingRequestFlow({
                     </div>
                   ) : null}
 
-                  {inquiryCollectionReady ? (
+                  {bookingRequestPresentation?.kind === "online-form" ? (
                     <>
                       <div
                         className="mt-4 scroll-mt-24 rounded-2xl bg-[var(--primary)]/[0.055] p-4"
@@ -648,18 +666,16 @@ export function BookingRequestFlow({
                             : "Send preferred window"}
                       </Button>
                     </>
-                  ) : (
+                  ) : bookingRequestPresentation?.kind === "direct-email" ? (
                     <InquiryCollectionPaused
+                      actionHref={bookingRequestPresentation.actionHref}
+                      actionLabel={bookingRequestPresentation.actionLabel}
                       className="mt-4"
-                      description={
-                        selectedCalLink
-                          ? "Live appointment times above remain available. Alternative-time requests will open after Shannon’s private inquiry operations are finalized."
-                          : "This experience needs a personal request. Online inquiries will open after Shannon’s private inquiry operations are finalized; no details are collected here while the form is paused."
-                      }
+                      description={bookingRequestPresentation.description}
                       showBookingLink={false}
-                      title="Alternative requests are paused."
+                      title={bookingRequestPresentation.title}
                     />
-                  )}
+                  ) : null}
                 </>
               </>
             ) : (

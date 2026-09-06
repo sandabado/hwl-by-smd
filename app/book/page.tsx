@@ -7,6 +7,7 @@ import {
   isExactCalEventForBookingService,
 } from "@/lib/booking-services"
 import { getCalcomPublicEventTypes } from "@/lib/calcom"
+import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 import { createPageMetadata } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
@@ -25,6 +26,7 @@ export default async function BookPage({
     searchParams,
     getCalcomPublicEventTypes(),
   ])
+  const inquiryCollectionReady = isInquiryCollectionReady()
   const calLinksByServiceSlug: Record<string, string> = {}
 
   if (calcomResult.status === "available") {
@@ -69,8 +71,9 @@ export default async function BookPage({
               Book with Shannon
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--muted-foreground)] md:text-base">
-              Choose your experience. Live dates and times appear for services
-              ready to book; if you need another time, send Shannon a request.
+              {inquiryCollectionReady
+                ? "Choose your experience. Live dates and times appear for services ready to book; if you need another time, send Shannon a request."
+                : "Choose your experience. Live dates and times appear for services ready to book; custom arrangements include a direct way to email Shannon."}
             </p>
           </div>
           <p className="max-w-md text-xs leading-relaxed text-[var(--muted-foreground)] md:text-right md:text-sm">

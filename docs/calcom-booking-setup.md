@@ -138,6 +138,13 @@ The owner subsequently confirmed that the attendee calendar invitation arrived
 at `admin@ghosthand.studio`. No test appointment remains active and no Cal
 payment was collected.
 
+A fresh non-submitting Production keyboard check then activated September 27
+and the 12:00 PM slot with Enter inside the embedded calendar. Cal rendered the
+attendee form with its required name, email, location, guest-count, notes, Back,
+and Confirm controls. Back was also activated with Enter; all five Sunday slots
+remained available afterward. Confirm was never activated, so this check created
+no booking. Runtime output contained no errors and only two Cal-owned warnings.
+
 An August 31 direct/provider Signature Facial test separately entered the
 unconfirmed queue, was manually confirmed, rescheduled, canceled, and released
 its slot.
@@ -146,9 +153,9 @@ The following customer-journey evidence is still required:
 
 - A selected conflict on each approved Apple calendar removes the opening.
 - Overlapping bookings cannot both be confirmed.
-- The website's live embedded date/slot flow works by keyboard and by mobile
-  pointer/touch, including actual date and time activation, with the correct
-  local-timezone guidance.
+- The website's live embedded date/slot flow works by mobile pointer/touch,
+  including actual date and time activation, with the correct local-timezone
+  guidance. Desktop keyboard activation now passes as recorded above.
 - Directly inspect the resulting `FIREBIRDS` calendar object and the organizer
   inbox. Attendee delivery is confirmed by the owner for
   `admin@ghosthand.studio`; Shannon's organizer-mailbox receipt has not been

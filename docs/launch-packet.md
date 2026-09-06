@@ -1991,6 +1991,12 @@ payment flow.
 - The owner confirmed that the attendee calendar invitation arrived at
   `admin@ghosthand.studio`. This closes the attendee human-mailbox gate; it
   does not independently prove delivery to Shannon's organizer mailbox.
+- A subsequent non-submitting Production keyboard check activated September 27
+  and the 12:00 PM slot with Enter inside the embedded Cal frame. The complete
+  attendee-details form appeared, and Enter on Back restored all five available
+  times. Confirm was never activated, so no booking was created. Runtime output
+  contained no errors and only two Cal-owned warnings. Mobile pointer/touch
+  activation remains a separate evidence gap.
 - No Cal.com payment was configured or collected. The complete
   request → manual confirmation → reschedule → cancellation → released-slot
   lifecycle passes on the public Production booking surface. Human inspection

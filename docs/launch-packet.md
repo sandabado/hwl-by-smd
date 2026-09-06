@@ -2259,3 +2259,35 @@ payment flow.
   provider-delivery test. Sales, website inquiry collection, Production
   promotion, live payment, and administrator elevation remain closed and were
   not performed in this verification.
+- A fresh authenticated Production Supabase read reconfirmed Site URL
+  `https://www.hwlbysmd.com`, the sole redirect URL
+  `https://www.hwlbysmd.com/auth/callback`, the token-hash Invite User template,
+  and enabled custom SMTP through `smtp.resend.com` on port 465. A bounded
+  two-email SQL count returned exactly one Auth row, one profile, and one
+  UUID/email match for each approved administrator identity. Both remain
+  pending invitations with zero confirmed users, zero prior sign-ins, and zero
+  exact administrator profiles; the total Production administrator count is
+  zero. The query returned no tokens, timestamps, passwords, sessions, raw
+  metadata, UUIDs, or unrelated identities.
+- An aggregate-only Production inquiry query returned zero `inquiries`, zero
+  `inquiry_submission_limits`, and zero `inquiry_retention_runs`. No inquiry
+  content was selected and no row was written. The unsaved SQL audit tabs were
+  discarded after the checks.
+- Public Resend DNS remains present and the authenticated provider dashboard
+  reports `hwlbysmd.com` verified. The restricted Production Auth SMTP key
+  shows recent use, while the separate restricted Production App key still
+  shows no activity. This proves SMTP provider use, not human receipt of both
+  invitations or application inquiry/commerce-alert delivery. The compromised
+  Ghosthand invitation still requires an explicitly approved in-place reinvite
+  before acceptance; neither identity may be elevated before independent
+  confirmation.
+- A fresh authenticated Cal.com recheck confirmed zero Upcoming and zero
+  Unconfirmed bookings. Canceled history still retains the authorized
+  `Ghosthand Admin Test` noon request and rescheduled 1:00 PM lifecycle. The
+  current Production embed and direct public event page both exposed five
+  September 27 Sunday openings from noon through 4:00 PM Pacific for Intuitive
+  Tarot Reading. The noon slot opened the attendee form with manual
+  confirmation, Cal Video or attendee-address location, required attendee
+  email, guest-count and session-location fields, and no Cal payment. The check
+  backed out without activating Confirm; no new request was created and the
+  organizer queues remained empty.

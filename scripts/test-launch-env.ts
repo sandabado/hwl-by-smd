@@ -84,10 +84,15 @@ const productionStripeFixture: NodeJS.ProcessEnv = {
   ...productionFixture,
   COMMERCE_SALES_READY: "true",
   STRIPE_ACCOUNT_ID: "acct_1U9cEIPTLuM8Maxa",
-  STRIPE_LIFT_GUIDE_PRICE_ID: "price_fixtureLivePrice",
-  STRIPE_LIFT_PRODUCT_ID: "prod_fixtureLiveProduct",
+  STRIPE_LIFT_GUIDE_PRICE_ID: "price_1UCPFjPTLuM8MaxaTY48RO9e",
+  STRIPE_LIFT_PRODUCT_ID: "prod_VCotDELRoHDnox",
   STRIPE_SECRET_KEY: "sk_live_fixture_private_value",
   STRIPE_WEBHOOK_SECRET: "whsec_fixture_private_value",
+}
+
+const productionClosedStripeFixture: NodeJS.ProcessEnv = {
+  ...productionStripeFixture,
+  COMMERCE_SALES_READY: "false",
 }
 
 const fixtures: Fixture[] = [
@@ -256,8 +261,19 @@ const fixtures: Fixture[] = [
     },
     expectedExit: 1,
     expectedText:
-      "STRIPE_LIFT_GUIDE_PRICE_ID: does not match the verified canonical HWL sandbox Price",
+      "STRIPE_LIFT_GUIDE_PRICE_ID: does not match the verified canonical preview HWL Price",
     name: "wrong Preview Stripe price fails",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=open"],
+    env: {
+      ...previewStripeFixture,
+      STRIPE_LIFT_PRODUCT_ID: "prod_wrongPreviewProduct",
+    },
+    expectedExit: 1,
+    expectedText:
+      "STRIPE_LIFT_PRODUCT_ID: does not match the verified canonical preview HWL Product",
+    name: "wrong Preview Stripe product fails",
   },
   {
     args: ["--target=preview", "--expect-sales=closed"],
@@ -346,6 +362,36 @@ const fixtures: Fixture[] = [
     expectedText:
       "Launch environment preflight passed for production (closed sales).",
     name: "canonical Production database passes with sales closed",
+  },
+  {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: productionClosedStripeFixture,
+    expectedExit: 0,
+    expectedText:
+      "Launch environment preflight passed for production (closed sales).",
+    name: "canonical Production Stripe set passes with sales closed",
+  },
+  {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: {
+      ...productionClosedStripeFixture,
+      STRIPE_LIFT_PRODUCT_ID: "prod_wrongProductionProduct",
+    },
+    expectedExit: 1,
+    expectedText:
+      "STRIPE_LIFT_PRODUCT_ID: does not match the verified canonical production HWL Product",
+    name: "wrong Production Stripe product fails while sales are closed",
+  },
+  {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: {
+      ...productionClosedStripeFixture,
+      STRIPE_LIFT_GUIDE_PRICE_ID: "price_wrongProductionPrice",
+    },
+    expectedExit: 1,
+    expectedText:
+      "STRIPE_LIFT_GUIDE_PRICE_ID: does not match the verified canonical production HWL Price",
+    name: "wrong Production Stripe price fails while sales are closed",
   },
   {
     args: ["--target=production", "--expect-sales=open"],

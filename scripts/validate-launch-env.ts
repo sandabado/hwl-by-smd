@@ -10,8 +10,16 @@ const CANONICAL_STRIPE_ACCOUNT = {
   production: "acct_1U9cEIPTLuM8Maxa",
 } satisfies Record<Target, string>
 
-const CANONICAL_PREVIEW_PRODUCT = "prod_VACTsFboJAEOF0"
-const CANONICAL_PREVIEW_PRICE = "price_1U9s49Adcj2oNOF4jcyMjyDB"
+const CANONICAL_STRIPE_PRODUCT = {
+  development: "prod_VACTsFboJAEOF0",
+  preview: "prod_VACTsFboJAEOF0",
+  production: "prod_VCotDELRoHDnox",
+} satisfies Record<Target, string>
+const CANONICAL_STRIPE_PRICE = {
+  development: "price_1U9s49Adcj2oNOF4jcyMjyDB",
+  preview: "price_1U9s49Adcj2oNOF4jcyMjyDB",
+  production: "price_1UCPFjPTLuM8MaxaTY48RO9e",
+} satisfies Record<Target, string>
 const CANONICAL_PRODUCTION_URL = "https://www.hwlbysmd.com"
 const CANONICAL_PREVIEW_URL = "https://preview.hwlbysmd.com"
 const CANONICAL_CALCOM_PROFILE_URL = "https://cal.com/hwlbysmd"
@@ -428,22 +436,14 @@ if (mustValidateStripeProvider) {
     "must be a Stripe price_ identifier"
   )
 
-  if (
-    target !== "production" &&
-    productId &&
-    productId !== CANONICAL_PREVIEW_PRODUCT
-  ) {
+  if (productId && productId !== CANONICAL_STRIPE_PRODUCT[target]) {
     errors.push(
-      "STRIPE_LIFT_PRODUCT_ID: does not match the verified canonical HWL sandbox Product"
+      `STRIPE_LIFT_PRODUCT_ID: does not match the verified canonical ${target} HWL Product`
     )
   }
-  if (
-    target !== "production" &&
-    priceId &&
-    priceId !== CANONICAL_PREVIEW_PRICE
-  ) {
+  if (priceId && priceId !== CANONICAL_STRIPE_PRICE[target]) {
     errors.push(
-      "STRIPE_LIFT_GUIDE_PRICE_ID: does not match the verified canonical HWL sandbox Price"
+      `STRIPE_LIFT_GUIDE_PRICE_ID: does not match the verified canonical ${target} HWL Price`
     )
   }
 }

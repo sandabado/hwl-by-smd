@@ -1579,3 +1579,86 @@ dispute manual review/resolution runbook, the remaining post-login
 mobile/keyboard/provider journeys on the current protected Preview, secure live
 Stripe credential installation, closed-gate Production application E2E, and
 explicit Production approval.
+
+## September 5 Production Preparation — Latest Authority
+
+This section supersedes older point-in-time statements above that say Vercel
+Production is empty, live provider credentials are uninstalled, or Supabase
+custom SMTP is pending. It does not supersede the separate gates for moving the
+public domain, opening sales, or running a live-money transaction.
+
+The owner explicitly approved two restricted Resend Production keys, the
+Production Supabase SMTP save, a closed-sales Vercel Production configuration,
+and invitations for exactly `shannon@hwlbysmd.com` and
+`admin@ghosthand.studio`.
+
+Completed and verified:
+
+- Resend has two distinct sending-only keys, both restricted to the verified
+  `hwlbysmd.com` domain: `HWLbySMD Production App` and
+  `HWLbySMD Production Auth SMTP`. Their values are stored only in macOS
+  Keychain under separate accounts. The one-time local transfer files were
+  deleted and the browser automation session that held their values was reset.
+- Dedicated Supabase Production project `qwprhsrwiihfllmgallr` has custom SMTP
+  enabled and persisted with sender `HWL by SMD <hello@hwlbysmd.com>`, host
+  `smtp.resend.com`, port `465`, username `resend`, and a 60-second minimum
+  interval. The password field is intentionally unreadable after save. The
+  canonical Site URL and sole callback remain `https://www.hwlbysmd.com` and
+  `https://www.hwlbysmd.com/auth/callback`.
+- Vercel Production contains the exact 22-name launch contract as sensitive,
+  Production-only records. It uses the dedicated Production Supabase project,
+  canonical live Stripe account/Product/Price/webhook, canonical private LIFT
+  paths, Production Resend application key, independent inquiry and cron
+  secrets, and canonical Cal.com profile. `COMMERCE_SALES_READY=false` and
+  `STRIPE_LIVEMODE=true` remain deliberate and coherent.
+- The actual remotely injected Vercel Production environment passed the launch
+  preflight in closed-sales mode. SEO validated 21 pages, 21 metadata records,
+  and seven long-form documents; Next.js 16.3.1 compiled and generated all 62
+  routes.
+- Source commit `d4e8023` adds server-side `token_hash` verification for
+  allowlisted `type=invite` callbacks while preserving browser-initiated PKCE
+  code exchange. Invite success removes the token from the URL and requires an
+  authenticated session before `/update-password` renders its form. External
+  `next` destinations and unsupported token types fail closed. The Auth suite
+  passes 34/34, and booking 6/6, inquiries 7/7, commerce 55/55, launch-env 26
+  cases, TypeScript, ESLint, SEO, and a complete local Production build pass.
+- Isolated Production-target deployment
+  `dpl_eML5nygjGV8cZ5w4aouU43yLHKn8` is READY at
+  `https://hwl-by-ebzq8pkcz-whole-body-earth.vercel.app`. It was created with
+  custom-domain assignment skipped. Home, LIFT, booking, login, and anonymous
+  password routes return HTTP 200 with the new presentation; anonymous account
+  and library routes redirect to login; anonymous video and captions return
+  401; anonymous PDF delivery redirects to login; an invalid invite token
+  redirects to sanitized login feedback without retaining the token; unsigned
+  Stripe webhook traffic returns 400; and a same-origin valid LIFT checkout
+  request returns the intended closed-sales 503 before authentication or Stripe
+  Session creation. Error/fatal runtime log count was zero during this smoke
+  pass.
+- The public `www.hwlbysmd.com` alias still resolves to legacy deployment
+  `dpl_6uHzaSNDmqeU1Zmk6CZ5Jg6Yt8f5`. No custom domain moved, no Production
+  checkout Session or charge was created, sales were not opened, and `main`
+  was not pushed.
+
+The two approved invitation emails have not been sent yet. Supabase's current
+Invite User template still uses `{{ .ConfirmationURL }}`, which returns an
+implicit-flow fragment that is incompatible with the app's SSR PKCE client.
+Sending now could consume a one-time invitation without establishing the
+secure cookie needed to choose a password. Before sending:
+
+1. Save a Production Invite User template whose link targets
+   `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=invite&next=/update-password`.
+2. Obtain explicit owner approval to assign the already tested closed-sales
+   deployment to `www.hwlbysmd.com`; this is a public Production promotion but
+   does not open payments.
+3. Re-smoke the canonical domain with sales closed, then send the two exact
+   invitations.
+4. Each human accepts the link and chooses their own password. No operator
+   creates, stores, or shares an administrator password.
+5. Re-read each confirmed Auth UUID and its matching profile email, dry-run the
+   exact one-row elevation, then grant `is_admin=true` only to those two
+   owner-approved identities. Verify both admin sessions and real sign-out.
+
+Opening payments remains a later, separate approval. After the closed-domain
+Auth, inquiry, booking, and administrator tests pass, change
+`COMMERCE_SALES_READY=true` only under that approval and conduct the separately
+approved $11.11 live-money smoke transaction.

@@ -1638,6 +1638,10 @@ Completed and verified:
   `dpl_6uHzaSNDmqeU1Zmk6CZ5Jg6Yt8f5`. No custom domain moved, no Production
   checkout Session or charge was created, sales were not opened, and `main`
   was not pushed.
+- A fresh trusted read of the dedicated Production project returned zero Auth
+  users, zero profiles, and zero administrators. Neither approved permanent
+  administrator email exists yet, so no role elevation is possible before the
+  invitation and human-confirmation steps.
 
 The two approved invitation emails have not been sent yet. Supabase's current
 Invite User template still uses `{{ .ConfirmationURL }}`, which returns an

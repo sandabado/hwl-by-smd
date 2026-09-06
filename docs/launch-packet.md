@@ -2090,8 +2090,15 @@ payment flow.
   never receives a guessed calendar. Booking tests pass 20/20, TypeScript and
   ESLint pass, the Production build passed, and a local browser check rendered
   the Intuitive Tarot calendar with five September 27 appointment times and no
-  application errors. This repair is local until its checkpoint commit, CI,
-  Preview deployment, and browser verification are recorded below.
+  application errors. Checkpoint code commit
+  `183fafb7d94158b916e10046688c150aa2e373de` is pushed without touching
+  `main`; GitHub CI run `34058763334` passed every step, including the 20-case
+  booking suite and Production compile. Exact-SHA Preview deployment
+  `dpl_Byncu496TCeRSDPdrPz6hFVvgWRj` is READY and assigned to
+  `preview.hwlbysmd.com`. The protected Preview rendered the same live calendar,
+  direct Cal.com fallback, and five appointment times with no application
+  errors; only the two previously observed Cal-owned warnings remained. Its
+  post-check error-log scan returned no events.
 - A fresh registry audit of clean, synced checkpoint `322bc18867158405a292c502fd7a14e7a74a6dc6`
   reported zero advisories in both the full 560-record dependency tree and the
   141-dependency Production graph. GitHub's default branch remains the older

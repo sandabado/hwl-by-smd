@@ -1676,11 +1676,13 @@ change, Checkout Session, or charge was created.
 
 Checkpoint and deployment evidence:
 
-- Checkpoint HEAD `f114e74` is synchronized with
-  `origin/checkpoint/platform-overhaul-2026-08-20`. GitHub Actions run
-  `34000326727` completed successfully. Lint, TypeScript, SEO, launch and
-  Preview environment policy, inquiry, booking, accessibility, Auth, commerce,
-  dependency audit, and Production compile steps all passed.
+- Pre-addendum checkpoint `f114e74` was synchronized with
+  `origin/checkpoint/platform-overhaul-2026-08-20`, and its GitHub Actions run
+  `34000326727` completed successfully. Audit-only addendum commit `19f822f`
+  was then pushed to the same checkpoint branch; run `34000972709` also
+  completed successfully in 1 minute 22 seconds. Lint, TypeScript, SEO, launch
+  and Preview environment policy, inquiry, booking, accessibility, Auth,
+  commerce, dependency audit, and Production compile steps all passed.
 - The closed-sales isolated Production-target deployment remains
   `dpl_eML5nygjGV8cZ5w4aouU43yLHKn8`, READY in `iad1`, with zero error/fatal
   runtime logs in the audited window. It was built from runtime source commit

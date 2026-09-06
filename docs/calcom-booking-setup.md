@@ -152,6 +152,15 @@ and Confirm controls. Back was also activated with Enter; all five Sunday slots
 remained available afterward. Confirm was never activated, so this check created
 no booking. Runtime output contained no errors and only two Cal-owned warnings.
 
+A subsequent non-submitting Production mobile-viewport pointer check at
+390×844 opened the same website embed, advanced to October, selected October 11,
+and selected the noon appointment. The required attendee form rendered inside
+the embed. Activating Back returned to October 11 with all five noon-through-4:00
+PM slots available; the organizer dashboard still reported zero Upcoming and
+zero Unconfirmed bookings. This passes browser-level responsive pointer
+activation for month, date, time, and Back controls without creating a booking.
+Physical iOS or Android touch hardware remains a separate field check.
+
 An August 31 direct/provider Signature Facial test separately entered the
 unconfirmed queue, was manually confirmed, rescheduled, canceled, and released
 its slot.
@@ -160,9 +169,10 @@ The following customer-journey evidence is still required:
 
 - A selected conflict on each approved Apple calendar removes the opening.
 - Overlapping bookings cannot both be confirmed.
-- The website's live embedded date/slot flow works by mobile pointer/touch,
-  including actual date and time activation, with the correct local-timezone
-  guidance. Desktop keyboard activation now passes as recorded above.
+- Confirm the already passing responsive embed on at least one physical iOS or
+  Android touchscreen and recheck the visible local-timezone guidance there.
+  Desktop keyboard and 390×844 browser-level pointer activation now pass as
+  recorded above.
 - Directly inspect the resulting `FIREBIRDS` calendar object and the organizer
   inbox. Attendee delivery is confirmed by the owner for
   `admin@ghosthand.studio`; Shannon's organizer-mailbox receipt has not been

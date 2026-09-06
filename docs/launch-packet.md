@@ -2291,3 +2291,10 @@ payment flow.
   email, guest-count and session-location fields, and no Cal payment. The check
   backed out without activating Confirm; no new request was created and the
   organizer queues remained empty.
+- A follow-up 390×844 Production browser check exercised the embedded Cal.com
+  calendar with pointer activation: next-month navigation, October 11 date
+  selection, noon time selection, the required attendee form, and Back all
+  worked. October 11 retained all five noon-through-4:00 PM openings afterward,
+  and the organizer still showed zero Upcoming and zero Unconfirmed bookings.
+  This closes browser-level mobile pointer activation without claiming a
+  physical-device touch test.

@@ -438,12 +438,14 @@ Record:
 
 Do not store signing secrets, bearer tokens, raw card/payment details, full webhook payloads, or unnecessary customer PII in the evidence bundle.
 
-## Automated reconciliation: implemented locally, hosted rehearsal pending
+## Automated reconciliation: schema deployed, hosted worker rehearsal pending
 
-The current working tree implements the durable backstop, but migration 014 is
-not applied to hosted staging and the exact Preview/Production journey has not
-been rehearsed. This is therefore an implemented local control, not current
-hosted recovery evidence.
+The current working tree implements the durable backstop, and migration 014 is
+applied to both hosted staging and the dedicated Production database. The exact
+Preview paid-checkout and signed-webhook fulfillment journey passes, but the
+deployed scheduled worker, lease/retry lifecycle, and Production recovery path
+have not been rehearsed end to end. Treat this as deployed recovery machinery,
+not yet as current hosted recovery evidence.
 
 The endpoint is:
 

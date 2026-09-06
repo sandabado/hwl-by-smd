@@ -1,9 +1,9 @@
 # Inquiry privacy operations
 
-Status: owner-approved policy and owner-operated launch runbook. Migration 015
-is a local review candidate until separately applied and verified. This
-document does not authorize a hosted migration, provider change, deployment,
-or deletion.
+Status: owner-approved policy and owner-operated launch runbook. The exact
+reviewed migration 015 is applied and verified in Production as recorded in
+the deployment gate below. This document does not authorize any additional
+hosted migration, provider change, deployment, retention run, or deletion.
 
 ## Data boundary
 

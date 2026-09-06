@@ -138,6 +138,13 @@ The owner subsequently confirmed that the attendee calendar invitation arrived
 at `admin@ghosthand.studio`. No test appointment remains active and no Cal
 payment was collected.
 
+A later authenticated provider-side reinspection confirmed that Cal's
+**Canceled** bookings view still retains both the original noon request and the
+rescheduled 1:00 PM lifecycle entry for `Ghosthand Admin Test`, including the
+launch-verification note and generated Cal Video meeting links. This confirms
+provider-dashboard persistence; it does not independently prove Shannon's
+organizer-mailbox delivery or the FIREBIRDS calendar object.
+
 A fresh non-submitting Production keyboard check then activated September 27
 and the 12:00 PM slot with Enter inside the embedded calendar. Cal rendered the
 attendee form with its required name, email, location, guest-count, notes, Back,

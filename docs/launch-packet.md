@@ -9,7 +9,40 @@ custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
 
-## September 5 Launch Continuation — Current Authority
+## September 6 Checkpoint Preview Verification — Current Authority
+
+- **Exact code candidate:** commit
+  `9c4ee8726c76dce5c38a4d83c2890cb8c4c72530` is pushed on
+  `checkpoint/platform-overhaul-2026-08-20`. GitHub Actions run
+  `34061716861`, job `101563292656`, completed successfully for that exact
+  branch and SHA. The commit adds the fail-closed admin/inquiry boundary and
+  aggregate-only commerce-recovery alert path described in the latest section
+  below. `main` was not pushed or merged.
+- **Exact protected Preview:** Vercel deployment
+  `dpl_drJRbTBZbA4scmptFfE5QZU8nzxQ`
+  (`hwl-by-ikzta8xgr-whole-body-earth.vercel.app`) is READY Preview for exact
+  commit `9c4ee87`. `preview.hwlbysmd.com` resolves to that deployment. The
+  Production aliases `hwlbysmd.com` and `www.hwlbysmd.com` remain separately
+  assigned to `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz`; this verification did not
+  promote or alter Production.
+- **Rendered Preview checks:** authenticated Vercel access reached the exact
+  Preview application. The Intuitive Tarot page rendered the live September 27
+  selector with all five 12:00–4:00 PM times. `/login` rendered its email entry
+  surface, and a signed-out request for `/admin/inquiries` was denied and
+  redirected to `/login?redirectTo=/admin`. `/beauty/lift` exposed exactly the
+  single `$11.11` video-and-PDF offer; adding it opened the cart sheet with one
+  `$11.11` line item and the secure-checkout action. No Checkout session,
+  inquiry, booking, or provider notification was submitted in this pass.
+- **Runtime observation:** after those checks, the exact deployment had zero
+  warning logs, zero error logs, and zero 5xx responses in the queried recent
+  30-minute window. This is bounded runtime evidence, not proof of an untested
+  provider lifecycle.
+
+## September 5 Launch Continuation — Superseded Snapshot
+
+The following section records the earlier `b7b9a59` candidate and remains
+useful historical evidence. The September 6 authority sections supersede it for
+the current checkpoint and deployment identity.
 
 - **Checkpoint baseline and candidate:** exact commit
   `b7b9a593fac4cafcd078378ee5768f47de0e67cd` is pushed on
@@ -321,7 +354,7 @@ push `main`, or promote anything to Production.
 | Supabase Auth email             | PRODUCTION URLS VERIFIED / SMTP + E2E PENDING | A fresh public settings read shows signup enabled and email confirmation required (`mailer_autoconfirm=false`). Production Site URL is exactly `https://www.hwlbysmd.com` and its redirect allowlist contains exactly `https://www.hwlbysmd.com/auth/callback`. Custom SMTP, verified-domain sending, staging/Preview callback configuration, rate limits, disabled link tracking, and real non-team-email delivery have not been proven |
 | Authentication UX              | PURCHASER LOGIN VERIFIED / EMAIL E2E PENDING | Failed-link feedback is allowlisted and non-reflective, return paths are same-origin, and password update now requires a verified server session before the form renders. Auth tests pass 16/16 and signed-out states render locally. The confirmed purchaser login passed on the exact Preview; a real confirmation link and recovery link still need hosted verification |
 | Scheduled recovery             | STAGING RUN VERIFIED / PREVIEW RUN PENDING | Migration 014 is ledger-applied and its private queue/attempt tables plus narrow service-role RPCs are present in staging. On August 31, an authenticated local worker run against hosted staging reported and claimed the two expired current-candidate sandbox orders, resolved both as terminal, and left both jobs complete with zero alerts, errors, or manual-review reasons. A distinct sensitive branch-scoped Preview `CRON_SECRET` exists; deployed Preview invocation, alert routing, and cadence acceptance remain pending |
-| Launch Preview baseline         | READY / PROTECTED / PURCHASE + INQUIRY + BOOKING E2E PASS | Exact checkpoint `9912291ad5dc9dba98dec78bbf59409b4d1d4a28` passed GitHub CI run `33977575309` and is READY as `dpl_GWEuouuZBLZWKguy3HYY8bwgPRQN`; a fresh connector read re-resolved `preview.hwlbysmd.com` to that deployment. The September 5 purchaser sign-in/payment/fulfillment/private-media journey, inquiry persistence/Resend delivery/admin review, and website-originated Cal request/pending-slot suppression/rejection cleanup passed. Human mailbox inspection and the remaining provider/operations checks are pending. Production stays closed; `main` is untouched |
+| September 5 transaction-bearing Preview | DATED / PURCHASE + INQUIRY + BOOKING E2E PASS | Exact checkpoint `9912291ad5dc9dba98dec78bbf59409b4d1d4a28` passed GitHub CI run `33977575309` and was READY as `dpl_GWEuouuZBLZWKguy3HYY8bwgPRQN`; the custom Preview resolved to it during that test. The September 5 purchaser sign-in/payment/fulfillment/private-media journey, inquiry persistence/Resend delivery/admin review, and website-originated Cal request/pending-slot suppression/rejection cleanup passed. This is dated transactional evidence, not the current Preview deployment identity. Production stayed closed; `main` was untouched |
 | Production / live money         | ACCOUNT + LIVE OBJECTS ACTIVE / APPLICATION COMMERCE CLOSED | Production publicly serves older commit `145112cd` and checkout truthfully returns 503. The launch validator pins Production to `qwprhsrwiihfllmgallr` and rejects staging or arbitrary refs; 26/26 launch-boundary tests pass. The authenticated canonical Stripe account `acct_1U9cEIPTLuM8Maxa` shows no active tasks, Payments Active, and Payouts Active; only Cartes Bancaires is paused. Active canonical live Product `prod_VCotDELRoHDnox`, $11.11 Price `price_1UCPFjPTLuM8MaxaTY48RO9e`, and exact four-event Production webhook `we_1UCPJEPTLuM8MaxawK9UgEHh` exist. Vercel Production environment inventory remains empty; neither live API nor webhook signing secret is installed, and no Production checkout or live transaction has been tested |
 
 Passing local compilation does not prove provider integration, a paid journey,
@@ -593,22 +626,22 @@ The current inquiry concurrency and notification-state proof is more specific:
 | `npm run test:accessibility`                                        | PASS — rendered markup proves the actual LIFT progressbar directly owns its accessible name and truthful 0–7 initial value semantics                                                                                                                                       |
 | `npm run test:auth`                                                  | PASS — 16 cases cover stable non-reflective error feedback and safe same-origin redirect handling, including hostile absolute, protocol-relative, encoded slash/backslash/control-character, and malformed inputs |
 | `npm run test:preview-release`                                      | PASS — 16 offline Preview-policy cases cover repository policy, forbidden Production deploy commands, deployment-gate ordering, required Auth test coverage, exact cron declaration, committed-template secrecy, checkpoint synchronization, dirty-tree rejection, and branch/upstream mismatch rejection |
-| Preview repository preflight before and after push                  | PASS — local and tracked remote match exact commit `9912291ad5dc9dba98dec78bbf59409b4d1d4a28`; GitHub CI run `33977575309` passed and Vercel resolves the custom Preview to READY deployment `dpl_GWEuouuZBLZWKguy3HYY8bwgPRQN`. Every later authorized checkpoint-only push must repeat exact synchronization, CI, and deployment/alias proof |
+| September 5 Preview repository preflight before and after push      | PASS — local and tracked remote matched exact commit `9912291ad5dc9dba98dec78bbf59409b4d1d4a28`; GitHub CI run `33977575309` passed and Vercel resolved the custom Preview to READY deployment `dpl_GWEuouuZBLZWKguy3HYY8bwgPRQN`. This row is dated evidence; every later authorized checkpoint-only push must repeat exact synchronization, CI, and deployment/alias proof |
 | `npm run test:commerce`                                             | PASS — 55 provider-free cases: 10 request/limit/namespace policy cases, 23 shared-verifier/expiry/repair cases including partial-refund retention, and 22 cron/scheduled-worker cases covering exact identity, fail-closed write ordering, customer-bookkeeping isolation, terminal monitoring, leases, report validation, deadline release, sanitized failure categories/responses, and replay repair |
 | Targeted Prettier and `git diff --check`                            | PASS                                                                                                                                                                                                                                                                     |
 | Changed/untracked launch-file secret-shape scan                     | PASS — no real Stripe, webhook, Supabase, Resend, or JWT secret-shaped values; every shape hit is an explicitly synthetic fixture in the launch/Preview test harness or the packet's redacted fixture note                                                                 |
 | Prior `/book` fallback with 0 public Cal.com events                 | PASS — inquiry fallback, service switching, no iframe, no console errors; historical fallback proof only, because ten exact event types are now public                                                                                                                     |
-| Current website → Cal.com booking journey                           | CURRENT PREVIEW PASS / MAILBOX + DESTINATION OBJECT PENDING — `/book?service=signature-facial` retained the `$277 / guest` offer and submitted a September 9, 10:00–11:00 AM PDT request with required guest count `1`, a nonphysical Palm Springs launch-test location, and no payment. UID `3oRjqkAqvsqh8Sctf731br` appeared Unconfirmed with the submitted questions/notes; 10:00 AM, 11:00 AM, and 12:00 PM were suppressed while pending. The request was rejected after verification, no Upcoming booking remained, Canceled showed Rejected, and all 10:00 AM–3:00 PM slots returned after cache delay. FIREBIRDS destination configuration is verified, but the Apple Calendar event object and human emails were not directly inspected |
-| Current real Cal.com booking lifecycle                              | PASS — a public Signature Facial request for September 3 entered the authenticated organizer queue as unconfirmed with required guest count and attendee address; the organizer manually confirmed it, rescheduled it from 10:00 to 11:00 AM Pacific with a stated test reason, and canceled it with a stated completion reason. The final provider page says the event is canceled; no Cal payment was configured or collected. Cal stated that lifecycle email was sent, but human inbox receipt remains unverified |
-| Current live Cal.com selector at 390×844                            | PASS — `/book?service=signature-facial` rendered enabled dates and six visible time buttons; `innerWidth`, document client width, and document scroll width were all 390; no horizontal overflow or Next.js error overlay. Keyboard and mobile pointer/touch activation were not verified |
-| Current `/beauty/lift` + cart at 390×844                            | PASS — browser inner width 390; document client/scroll width both 375; no horizontal overflow; full-height cart showed one $11.11 LIFT Video + PDF item, included assets, truthful closed-sales checkout, and Stripe/license/refund/help links; zero console errors             |
-| Current inquiry-only Wild Glow booking at 390×844                   | PASS — `/book?service=wild-glow-express-facial` rendered guest minimum/default 4, inquiry-only explanation, timing choices, privacy notice, and no live calendar; document client/scroll width both 375; zero console errors                                                   |
+| September 5 website → Cal.com booking journey                       | PREVIEW PASS / MAILBOX + DESTINATION OBJECT PENDING — `/book?service=signature-facial` retained the `$277 / guest` offer and submitted a September 9, 10:00–11:00 AM PDT request with required guest count `1`, a nonphysical Palm Springs launch-test location, and no payment. UID `3oRjqkAqvsqh8Sctf731br` appeared Unconfirmed with the submitted questions/notes; 10:00 AM, 11:00 AM, and 12:00 PM were suppressed while pending. The request was rejected after verification, no Upcoming booking remained, Canceled showed Rejected, and all 10:00 AM–3:00 PM slots returned after cache delay. FIREBIRDS destination configuration is verified, but the Apple Calendar event object and human emails were not directly inspected |
+| August 31 real Cal.com booking lifecycle                            | PASS — a public Signature Facial request for September 3 entered the authenticated organizer queue as unconfirmed with required guest count and attendee address; the organizer manually confirmed it, rescheduled it from 10:00 to 11:00 AM Pacific with a stated test reason, and canceled it with a stated completion reason. The final provider page says the event is canceled; no Cal payment was configured or collected. Cal stated that lifecycle email was sent, but human inbox receipt remains unverified |
+| August 31 live Cal.com selector at 390×844                          | PASS — `/book?service=signature-facial` rendered enabled dates and six visible time buttons; `innerWidth`, document client width, and document scroll width were all 390; no horizontal overflow or Next.js error overlay. Keyboard and mobile pointer/touch activation were not verified |
+| August 31 `/beauty/lift` + cart at 390×844                          | PASS — browser inner width 390; document client/scroll width both 375; no horizontal overflow; full-height cart showed one $11.11 LIFT Video + PDF item, included assets, truthful closed-sales checkout, and Stripe/license/refund/help links; zero console errors             |
+| August 31 inquiry-only Wild Glow booking at 390×844                 | PASS — `/book?service=wild-glow-express-facial` rendered guest minimum/default 4, inquiry-only explanation, timing choices, privacy notice, and no live calendar; document client/scroll width both 375; zero console errors                                                   |
 | Local desktop/mobile axe sweep                                      | PASS — 18 public, store, legal, auth, and member-entry journeys at 1440×1000 and 390×844 produced zero WCAG 2 A/AA, 2.1 A/AA, or 2.2 AA axe violations after the contrast/progress fixes; six additional checkout-result, protected-auth, and password journeys passed at 390×844; no audited page overflowed or logged a console error |
 | Local keyboard and reduced-motion checks                            | PASS — skip navigation moved focus to `main`; mobile navigation and the cart trapped focus, closed with Escape, and restored their triggers; keyboard service activation preserved focus; four representative routes reported zero active animations under reduced motion                                                                  |
-| Remaining accessibility/provider verification                      | **PARTIAL** — live Cal.com dates/times render for all three schedule families; the exact Preview Signature Facial request, pending-slot suppression, and rejection cleanup pass; a prior provider-level confirm/reschedule/cancel lifecycle passes; and purchaser login, paid-library content, inquiry delivery, and temporary-admin inbox pass. Keyboard/mobile Cal submission, deliberate external-calendar conflict blocking, direct Apple Calendar object inspection, organizer/attendee human email receipts, 200% zoom across every route, and a manual screen-reader journey remain unverified |
-| Current local `/beauty/lift` browser verification                   | PASS — rendered LIFT hero, accessible navigation, cart trigger, public preview, seven movement links, and $11.11 video+PDF copy; meaningful DOM present; no Next.js error overlay or browser warning/error logs                                                                                                                           |
+| Remaining accessibility/provider verification at September 5       | **PARTIAL** — live Cal.com dates/times rendered for all three schedule families; the exact Preview Signature Facial request, pending-slot suppression, and rejection cleanup passed; a prior provider-level confirm/reschedule/cancel lifecycle passed; and purchaser login, paid-library content, inquiry delivery, and temporary-admin inbox passed. Keyboard/mobile Cal submission, deliberate external-calendar conflict blocking, direct Apple Calendar object inspection, organizer/attendee human email receipts, 200% zoom across every route, and a manual screen-reader journey remained unverified |
+| September 5 local `/beauty/lift` browser verification               | PASS — rendered LIFT hero, accessible navigation, cart trigger, public preview, seven movement links, and $11.11 video+PDF copy; meaningful DOM present; no Next.js error overlay or browser warning/error logs                                                                                                                           |
 | Local same-origin page probes                                       | PASS — `GET /`, `GET /book`, and `GET /beauty/lift` each returned HTTP 200                                                                                                                                                                                               |
-| Contact same-origin boundary                                        | CURRENT PREVIEW PASS — missing/foreign origins and malformed requests remain rejected. The authorized exact-Preview form submission returned provider-accepted UI, Vercel logged `POST /api/contact` HTTP 200, staging persisted the exact inquiry with accepted notification state and provider receipt, the private deep link rendered it, and Resend marked its message sent and delivered. Idempotent replay and human mailbox opening remain pending |
+| September 5 contact same-origin boundary                            | PREVIEW PASS — missing/foreign origins and malformed requests remained rejected. The authorized exact-Preview form submission returned provider-accepted UI, Vercel logged `POST /api/contact` HTTP 200, staging persisted the exact inquiry with accepted notification state and provider receipt, the private deep link rendered it, and Resend marked its message sent and delivered. Idempotent replay and human mailbox opening remained pending |
 | Checkout same-origin boundary                                       | PASS — missing Origin and foreign Origin returned HTTP 403; the correct localhost Origin reached the route and returned a truthful HTTP 503 because sales are closed; no Session or charge was attempted                                                                 |
 | Unsigned local Stripe webhook                                       | PASS — HTTP 400 before processing                                                                                                                                                                                                                                        |
 | Unauthenticated local reconciliation cron                           | PASS — after a fresh local `CRON_SECRET` was installed, a request without its bearer returned HTTP 401 before Stripe, Supabase, report, or lease work; route tests also assert `no-store`                                                                                   |
@@ -616,7 +649,7 @@ The current inquiry concurrency and notification-state proof is more specific:
 | Stripe webhook body cap                                             | PASS — raw bytes use the exact signature `Buffer`; payloads above 1,000,000 bytes fail closed                                                                                                                                                                            |
 | Financial-record foreign keys                                       | PASS — four profile relationships use `ON DELETE RESTRICT`; isolated Auth deletion raised a foreign-key violation and preserved the user and records                                                                                                                     |
 | Trusted client-address resolver                                     | PASS — local fallback, local proxy, trusted Vercel forwarding, spoof rejection, missing deployed identity, and IPv6 cases matched the exact expected outputs                                                                                                             |
-| Supabase linked migration inventory                                 | CURRENT APPLIED / NO-OP PASS — the hosted ledger contains 001–014, and a fresh linked `supabase db push --dry-run` reports the database is up to date with no migration, seed, or role work pending                                                                                                                                        |
+| September 5 Supabase linked migration inventory                     | APPLIED / NO-OP PASS — the hosted ledger contained 001–014, and a linked `supabase db push --dry-run` reported the database was up to date with no migration, seed, or role work pending                                                                                                                                                  |
 | Hosted 012–014 schema/RPC boundary                                  | PASS — exact namespace columns and 012 tables/RPC are present; the 013 inquiry table and four RPCs are present with direct rate-table access denied; the 014 private queue/attempt tables and four RPCs are present with direct table reads denied; sanitized status RPC returned HTTP 200 and zero rows                             |
 | Corrected canonical PDF in private staging storage                  | PASS — local and hosted `member-content/lift/lift-guide.pdf` are 6,036,808 bytes with SHA-256 `652c3c6eb6e87a44d47e5326e4e3a385d3704596a19020bc75ae318c6c117ad6`; signed GET returned HTTP 200 and byte-identical content; anonymous access returned HTTP 400                         |
 | Fresh isolated Supabase reset, migrations 001–014                   | PASS — migrations 001–014 applied in disposable PostgreSQL 17.6; rollback-only schema/state assertions passed; the disposable database/container was removed and hosted staging was untouched                                                                                                                                            |
@@ -625,21 +658,21 @@ The current inquiry concurrency and notification-state proof is more specific:
 | Targeted schema/RLS/function assertions                             | PASS — 14 migrations; browser commerce/inquiry/reconciliation access denied; service-role authority limited to the required server tables/RPCs; fixtures rolled back to zero                                                                                                                                                           |
 | Concurrent inquiry limiter                                          | PASS — 20 simultaneous claims produced exactly 5 accepts, 15 rejects, and a stored count of 5                                                                                                                                                                            |
 | Inquiry idempotency and notification state machine                  | PASS — same-ID record and notification races elected one creator/claimant; canonical mismatch consumed no claim; digest rotation preserved an identical retry; terminal accepted resisted downgrade; all five failure/pending categories and stale/completion CAS passed |
-| Stripe sandbox Checkout → signed webhook → entitlement              | CURRENT PREVIEW PASS — the Session completed/paid on September 5 for $11.11 USD (1,111 cents); its PaymentIntent succeeded and charge was captured. The signed webhook produced a paid/fulfilled checkout order with zero reconciliation attempts, one active $11.11 purchase, and a `checkout.session.completed` receipt. The authenticated Preview redirected to the full seven-movement course, `/account` showed the purchaser and active September 5 purchase, `/library` listed LIFT, and the cart was empty |
-| Entitled private media                                              | CURRENT PREVIEW PASS — `/api/video/lift` produced a private Supabase signed URL; the fresh asset request returned HTTP 206 with bytes `0-1023/46514399` as MP4. The canonical PDF returned HTTP 200 with 6,036,808 bytes and SHA-256 `652c3c6eb6e87a44d47e5326e4e3a385d3704596a19020bc75ae318c6c117ad6`; `/account` exposed the entitled `Download LIFT PDF` action |
-| Full refund → entitlement revocation                                | PRIOR PATH PASS / CURRENT REPEAT PENDING — full 1111-cent sandbox refund; purchase/order became `refunded`; library, video, and PDF access closed; success page reported revocation before the latest shared-verifier hardening                                                                                                                          |
-| Duplicate signed webhook replay                                     | PRIOR PATH PASS / CURRENT REPEAT PENDING — two replays returned HTTP 200 while event and purchase rows remained unique and terminal before the latest shared-verifier hardening                                                                                                                                                                          |
-| Dispute and event-order safety                                      | PRIOR PATH PASS / CURRENT REPEAT PENDING — Stripe's dispute test card produced a sandbox Dispute; completion observed the terminal Charge, recorded `disputed`, denied all assets, and the later direct dispute event remained terminal before the latest shared-verifier hardening                                                                      |
-| Authenticated reconciliation on public Preview                      | NOT RUN — route/auth/cookie/origin/client refresh and persistent webhook interaction still require the current custom Preview boundary; provider-free shared-helper and isolated DB transition coverage pass locally                                                        |
-| Current launch Preview browser journey                              | PARTIAL PASS — custom hostname DNS/TLS/exact deployment mapping, protected redirect, purchaser login, sandbox Checkout/fulfillment/private media, inquiry persistence/Resend delivery/admin review, and the exact-Preview Cal request/pending-slot suppression/rejection cleanup are verified. Keyboard/mobile post-login coverage, human mailboxes, direct destination-calendar object inspection, and remaining operations checks are pending |
-| Inquiry persistence → Resend notification                           | CURRENT PREVIEW PASS / HUMAN OPEN + REPLAY PENDING — inquiry `aeb5055b-9901-428d-96fa-1d8c4cc939ac` persisted at `2026-09-05T17:10:59Z` with `received`/`accepted`, no error, provider receipt, and attempted/accepted timestamps. The exact admin deep link showed Email accepted. Resend message `eaa31c57-…` from the verified HWL sender to Shannon's configured Gmail address is marked sent and delivered at September 5, 10:11 AM. Human mailbox opening and a same-ID replay were not verified |
+| Stripe sandbox Checkout → signed webhook → entitlement              | SEPTEMBER 5 PREVIEW PASS — the Session completed/paid on September 5 for $11.11 USD (1,111 cents); its PaymentIntent succeeded and charge was captured. The signed webhook produced a paid/fulfilled checkout order with zero reconciliation attempts, one active $11.11 purchase, and a `checkout.session.completed` receipt. The authenticated Preview redirected to the full seven-movement course, `/account` showed the purchaser and active September 5 purchase, `/library` listed LIFT, and the cart was empty |
+| Entitled private media                                              | SEPTEMBER 5 PREVIEW PASS — `/api/video/lift` produced a private Supabase signed URL; the fresh asset request returned HTTP 206 with bytes `0-1023/46514399` as MP4. The canonical PDF returned HTTP 200 with 6,036,808 bytes and SHA-256 `652c3c6eb6e87a44d47e5326e4e3a385d3704596a19020bc75ae318c6c117ad6`; `/account` exposed the entitled `Download LIFT PDF` action |
+| Full refund → entitlement revocation                                | PRIOR PATH PASS / SEPTEMBER 6 REPEAT PENDING — full 1111-cent sandbox refund; purchase/order became `refunded`; library, video, and PDF access closed; success page reported revocation before the latest shared-verifier hardening                                                                                                                  |
+| Duplicate signed webhook replay                                     | PRIOR PATH PASS / SEPTEMBER 6 REPEAT PENDING — two replays returned HTTP 200 while event and purchase rows remained unique and terminal before the latest shared-verifier hardening                                                                                                                                                                  |
+| Dispute and event-order safety                                      | PRIOR PATH PASS / SEPTEMBER 6 REPEAT PENDING — Stripe's dispute test card produced a sandbox Dispute; completion observed the terminal Charge, recorded `disputed`, denied all assets, and the later direct dispute event remained terminal before the latest shared-verifier hardening                                                              |
+| Authenticated reconciliation on public Preview                      | NOT RUN AT THIS SNAPSHOT — route/auth/cookie/origin/client refresh and persistent webhook interaction still required the custom Preview boundary; provider-free shared-helper and isolated DB transition coverage passed locally                                                    |
+| September 5 launch Preview browser journey                          | PARTIAL PASS — custom hostname DNS/TLS/exact deployment mapping, protected redirect, purchaser login, sandbox Checkout/fulfillment/private media, inquiry persistence/Resend delivery/admin review, and the exact-Preview Cal request/pending-slot suppression/rejection cleanup were verified. Keyboard/mobile post-login coverage, human mailboxes, direct destination-calendar object inspection, and remaining operations checks were pending |
+| Inquiry persistence → Resend notification                           | SEPTEMBER 5 PREVIEW PASS / HUMAN OPEN + REPLAY PENDING — inquiry `aeb5055b-9901-428d-96fa-1d8c4cc939ac` persisted at `2026-09-05T17:10:59Z` with `received`/`accepted`, no error, provider receipt, and attempted/accepted timestamps. The exact admin deep link showed Email accepted. Resend message `eaa31c57-…` from the verified HWL sender to Shannon's configured Gmail address was marked sent and delivered at September 5, 10:11 AM. Human mailbox opening and a same-ID replay were not verified |
 | Inquiry abuse, privacy, and admin boundaries                        | PASS — malformed/cross-origin/oversize payloads rejected; first five rate claims persisted and sixth returned 429; browser table reads denied; verified admin saw the record; anonymous admin denied                                                                     |
 | Launch environment preflight                                        | PASS — 26/26 cases; explicit deployment target is mandatory; development/Preview closed and sandbox-open fixtures pass; canonical Production closed/open fixtures pass only with `qwprhsrwiihfllmgallr`; staging and arbitrary Production database refs, target mismatches, partial/live Preview config, and shared cron/inquiry secrets fail |
-| Current configured launch environment                               | PREVIEW PURCHASE + INQUIRY + BOOKING E2E PASS / PRODUCTION CLOSED — the exact pushed checkpoint passes Preview post-push preflight with all 22 required branch-scoped names. Payment/fulfillment/private media, accepted Resend delivery/admin review, and the website-originated Cal request/cleanup are verified. The dedicated Production Supabase ref is pinned in code; its 001–014 ledger, clean data boundary, and canonical private assets are verified. The live Stripe account and canonical Product/Price/four-event webhook objects are active. Production environment inventory is empty, its live API and webhook signing secrets are not installed, and neither Production checkout nor a live transaction has been tested |
+| September 5 configured launch environment                           | PREVIEW PURCHASE + INQUIRY + BOOKING E2E PASS / PRODUCTION CLOSED — the exact pushed checkpoint passed Preview post-push preflight with all 22 then-required branch-scoped names. Payment/fulfillment/private media, accepted Resend delivery/admin review, and the website-originated Cal request/cleanup were verified. This is a dated configuration snapshot; later Production and Preview authority sections supersede its inventory statements |
 | First `c74fe61` automatic Preview build                             | EXPECTED FAIL-CLOSED — `dpl_3ZEfnCQJ9MxsYTS6zR98bEZvmiuo` stopped at the launch validator because `RESEND_API_KEY` and the then-incomplete hosted Stripe set were absent; application compilation/deployment did not proceed                                                    |
-| Live Vercel Preview configuration inventory                         | PASS 22/22 NAMES / STRIPE + RESEND E2E PASS — all required records are sensitive and branch-scoped to `checkpoint/platform-overhaul-2026-08-20`, including the dedicated sandbox webhook secret and domain-scoped Resend key. READY deployment `dpl_GWEuouuZBLZWKguy3HYY8bwgPRQN` passed the validator, signed Stripe fulfillment, and accepted Resend delivery; a fresh connector read re-resolved the custom hostname to it. Production remains at zero environment records |
-| Current public Production safety probe                              | PASS — homepage HTTP 200; unauthenticated LIFT Checkout HTTP 503 with truthful not-ready copy; no charge attempted                                                                                                                                                       |
-| Cal.com booking → availability suppression → rejection              | CURRENT PREVIEW PASS / DIRECT CALENDAR + MAILBOX PROOF PENDING — the exact Preview request appeared Unconfirmed, suppressed the appointment plus configured buffer slots, and was rejected/removed with the full day restored after cache delay. Calendar settings show FIREBIRDS destination and conflict checks for FIREBIRDS, WHOLEBODY, LIONWOLF, HWL, YOGA, and ACTOR with BILLS off. The actual Apple Calendar event object, deliberate external-calendar conflict injection, and organizer/attendee mailbox receipt were not directly inspected |
+| September 5 Vercel Preview configuration inventory                  | PASS 22/22 THEN-REQUIRED NAMES / STRIPE + RESEND E2E PASS — all required records were sensitive and branch-scoped to `checkpoint/platform-overhaul-2026-08-20`, including the dedicated sandbox webhook secret and domain-scoped Resend key. READY deployment `dpl_GWEuouuZBLZWKguy3HYY8bwgPRQN` passed the validator, signed Stripe fulfillment, and accepted Resend delivery; the custom hostname resolved to it during that test. Later authority sections supersede this inventory |
+| September 5 public Production safety probe                          | PASS — homepage HTTP 200; unauthenticated LIFT Checkout HTTP 503 with truthful not-ready copy; no charge attempted                                                                                                                                                       |
+| Cal.com booking → availability suppression → rejection              | SEPTEMBER 5 PREVIEW PASS / DIRECT CALENDAR + MAILBOX PROOF PENDING — the exact Preview request appeared Unconfirmed, suppressed the appointment plus configured buffer slots, and was rejected/removed with the full day restored after cache delay. Calendar settings showed FIREBIRDS destination and conflict checks for FIREBIRDS, WHOLEBODY, LIONWOLF, HWL, YOGA, and ACTOR with BILLS off. The actual Apple Calendar event object, deliberate external-calendar conflict injection, and organizer/attendee mailbox receipt were not directly inspected |
 
 The trusted client-address resolver assertion returned this exact value:
 
@@ -992,8 +1025,8 @@ operating boundary, not permission to perform a provider mutation.
 The following real sandbox proof was completed before the latest shared
 fulfillment-verifier hardening. It remains valuable integration evidence, but
 its refund, replay, and dispute exercises remain prior-path evidence. The
-current exact Preview's paid Checkout and fulfillment path has now repeated;
-its refund, replay, dispute, and recovery paths have not.
+September 5 transaction-bearing Preview's paid Checkout and fulfillment path
+repeated; its refund, replay, dispute, and recovery paths did not.
 
 - An authenticated website request created a real Stripe sandbox Checkout
   Session for exactly 1111 USD cents and returned only the Stripe-hosted HTTPS
@@ -1007,7 +1040,7 @@ its refund, replay, dispute, and recovery paths have not.
   response; the PDF was an explicitly noncanonical 1,508-byte functional
   fixture because the corrected owner asset was unavailable during that prior
   run. The canonical PDF is now byte-verified both in private staging storage
-  and through the current exact-Preview entitled delivery path above.
+  and through the September 5 exact-Preview entitled delivery path above.
 - A full 1111-cent sandbox refund produced `charge.refunded`, changed both
   order and purchase to `refunded`, closed every private content path, and made
   the success page report revoked access.
@@ -1034,15 +1067,18 @@ its refund, replay, dispute, and recovery paths have not.
    Repeat its refund and revocation path separately.
 4. Preserve the enabled persistent Preview webhook and its four exact
    subscriptions and the now-verified signed delivery plus
-   target/account/mode database receipt on the exact current deployment.
+   target/account/mode database receipt on the September 5 transaction-bearing
+   deployment.
 5. Exercise the authenticated `paid_pending` reconciliation path on the public
    Preview, including exact auth/origin/order binding, one POST/refresh, the
    60-second cooldown and three-claim ceiling, no fabricated Event receipt, and
    partial-order replay repair. Then exercise the migration-014 scheduled path:
    report, lease, missed-webhook repair, active monitoring, terminal revocation,
    retry exhaustion/manual review, stale-token rejection, and private admin
-   visibility. Configure the owner alert destination; `alert_pending` is a
-   durable signal but does not itself notify a person.
+   visibility. The checkpoint now contains an aggregate-only Resend alert path,
+   but its dedicated owner destination still must be selected, configured, and
+   provider-tested before Production sales open. `alert_pending` remains the
+   durable authority when notification is delayed or unavailable.
 6. Implement and verify the accepted dispute-resolution runbook. The current
    `charge.dispute.created` behavior suspends access in `disputed` status
    pending manual review; no automatic `charge.dispute.closed` path or audited
@@ -1112,7 +1148,7 @@ evidence.
 
 ## Inquiry and Resend State
 
-### Current state
+### September 5 state
 
 - Resend domain `hwlbysmd.com` is verified. Its DKIM TXT, `send` and `rsend`
   CNAMEs, and DMARC resolve publicly while the domain's pre-existing receiving
@@ -1120,7 +1156,7 @@ evidence.
 - The replacement Resend credential is sending-only, restricted to
   `hwlbysmd.com`, and installed as a sensitive variable only for the checkpoint
   branch Preview. The READY deployment passed the environment validator with
-  all 22 required names.
+  all 22 then-required names.
 - Safe exact-Preview probes reject missing/foreign origins, non-JSON input, and
   malformed payloads before persistence or notification. Inquiry helper tests
   pass 7/7.
@@ -1202,16 +1238,17 @@ The safe launch target is: save the inquiry first, return success after that
 save, and use Resend only to notify Shannon. A Resend outage must not lose the
 inquiry.
 
-## Preview Release Candidate — Ready and Protected
+## September 5 Preview Release Candidate — Dated Transaction Evidence
 
-### Current external baseline and requirements
+### Dated external baseline and requirements
 
 - Exact pushed checkpoint `9912291ad5dc9dba98dec78bbf59409b4d1d4a28` on
   `checkpoint/platform-overhaul-2026-08-20` passed GitHub CI run `33977575309`.
   Vercel deployment `dpl_GWEuouuZBLZWKguy3HYY8bwgPRQN` is READY for that exact
   SHA, and a fresh inspection resolves `preview.hwlbysmd.com` to it. Re-resolve
   the branch alias after any later push rather than treating this deployment ID
-  as permanently current.
+  as permanently current. The current September 6 deployment identity is
+  recorded at the top of this packet.
 - `preview.hwlbysmd.com` is verified, correctly CNAME-configured, TLS-valid,
   and follows the latest READY checkpoint deployment. Deployment Protection
   redirects anonymous traffic to Vercel SSO; authenticated Vercel access reaches
@@ -1221,8 +1258,9 @@ inquiry.
   same-origin checkout reaching the login boundary rather than readiness 503,
   hostile origins rejected, non-launch membership closed, and unsigned webhook
   input rejected.
-- Private Vercel SSO, the confirmed staging purchaser login, and the Stripe
-  purchase/fulfillment journey now pass on the exact custom hostname. The
+- At that checkpoint, private Vercel SSO, the confirmed staging purchaser
+  login, and the Stripe purchase/fulfillment journey passed on the exact custom
+  hostname. The
   inquiry persistence/Resend/admin journey and Cal request/slot-suppression/
   rejection cleanup also pass there. Remaining Preview work includes human
   mailbox confirmation, inquiry replay, direct Cal destination-object proof,
@@ -1268,7 +1306,7 @@ At that moment, Production had zero environment-variable records and
 alone was pushed; no custom-domain, DNS, `main`, or Production mutation
 occurred.
 
-### Current Preview policy and next checkpoint
+### Preview policy and the next checkpoint at that time
 
 Vercel sign-in protection still redirects unauthenticated requests on the
 branch Preview URL. Deployment Protection remains enabled globally. A
@@ -1298,14 +1336,15 @@ npm run validate:launch-env -- --target=production --expect-sales=open
 
 The new `scripts/preflight-preview-release.ts` and
 `docs/preview-release-runbook.md` add a dry, offline checkpoint policy before
-any Preview action. Its current 16/16 policy fixtures pass and require Auth
-boundary tests to remain in CI. The repository-only post-push preflight passed
-on clean exact checkpoint `9912291`, where local HEAD matched its tracked
-upstream. All 22 branch-scoped Preview names exist and the deployed sandbox-open
-environment preflight passed. Every later candidate must repeat clean
-repository/full validation for its own reviewed checkpoint. Passing repository or
-configuration policy is not permission to push `main`, promote Production, or
-change a provider.
+any Preview action. Its 16/16 policy fixtures pass and require Auth boundary
+tests to remain in CI. The last explicitly recorded clean repository-only
+post-push preflight in this dated section passed on exact checkpoint `9912291`,
+where local HEAD matched its tracked upstream. At that time all 22 then-required
+branch-scoped Preview names existed and the deployed sandbox-open environment
+preflight passed. Every later candidate must repeat clean repository/full
+validation for its own reviewed checkpoint. Passing repository or configuration
+policy is not permission to push `main`, promote Production, or change a
+provider.
 
 This validator proves configuration shape only. Hosted staging schema and asset
 existence are verified separately above; signed-webhook/paid entitlement,
@@ -1516,9 +1555,10 @@ commit history.
    byte/range-verified private canonical assets. Preserve its exact canonical
    Site URL and sole callback allowlist entry; complete custom SMTP and real
    signup/recovery E2E without copying staging data.
-3. Preserve the current hardened candidate's passing exact-Preview Stripe
-   sandbox purchase, signed webhook, entitlement, and canonical media proof.
-   Repeat the refund, dispute, and replay paths there; run the scheduled
+3. Preserve the September 5 transaction-bearing Preview's passing Stripe
+   sandbox purchase, signed webhook, entitlement, and canonical media proof as
+   dated evidence. Repeat purchase, refund, dispute, and replay on the current
+   candidate; run the scheduled
    report/repair/monitoring path and verify the private reconciliation-admin
    status view and manual-review alert routing.
 4. Repeat DB-first inquiry receipt on staging, then verify the configured Resend
@@ -1553,10 +1593,11 @@ fails invalid links safely and gates password updates on a verified session;
 its 16/16 boundary suite passes, but hosted SMTP and email-link E2E do not. The
 refreshed sandbox
 Stripe secret and canonical $11.11 Price/Product pass current read-only API
-verification. The exact hardened Preview now passes canonical Stripe sandbox
-purchase, signed-webhook fulfillment, active entitlement, and canonical private
-video/PDF delivery; refund, dispute, replay, and scheduled recovery still need
-current-Preview exercises. The isolated DB-first inquiry journey passes. Hosted
+  verification. The September 5 transaction-bearing Preview passed canonical
+  Stripe sandbox purchase, signed-webhook fulfillment, active entitlement, and
+  canonical private video/PDF delivery. The current Preview still needs purchase,
+  refund, dispute, replay, and scheduled-recovery exercises. The isolated DB-first
+  inquiry journey passes. Hosted
 staging now has the verified 001–014 ledger, current schema/RPC boundaries, and
 byte-identical canonical private PDF/video assets. Dedicated Production
 Supabase now has the same 001–014 migration boundary, a second no-op dry run,
@@ -1580,7 +1621,7 @@ mobile/keyboard/provider journeys on the current protected Preview, secure live
 Stripe credential installation, closed-gate Production application E2E, and
 explicit Production approval.
 
-## September 5 Production Preparation — Latest Authority
+## September 5 Production Preparation — Dated Evidence Record
 
 This section supersedes older point-in-time statements above that say Vercel
 Production is empty, live provider credentials are uninstalled, or Supabase
@@ -1667,7 +1708,7 @@ Auth, inquiry, booking, and administrator tests pass, change
 `COMMERCE_SALES_READY=true` only under that approval and conduct the separately
 approved $11.11 live-money smoke transaction.
 
-## September 5 Read-Only Operational Audit — Latest Authority
+## September 5 Read-Only Operational Audit — Dated Evidence Record
 
 This addendum supersedes older point-in-time statements about current Cal.com
 publication, Production inquiry infrastructure, and checkpoint CI. It records
@@ -1691,7 +1732,7 @@ Checkpoint and deployment evidence:
   `dpl_6uHzaSNDmqeU1Zmk6CZ5Jg6Yt8f5`, so no Production invitation or
   transactional E2E should be started there yet.
 
-Current Cal.com evidence:
+Cal.com evidence at that snapshot:
 
 - The public `hwlbysmd` profile and event-types API expose exactly ten intended
   events, all public and exact-matched by the website: Reiki Aromatherapy
@@ -1727,7 +1768,7 @@ Current Cal.com evidence:
   direct Apple Calendar object creation, deliberate external conflict blocking,
   keyboard submission, and mobile touch submission remain outstanding.
 
-Current Production inquiry evidence:
+Production inquiry evidence at that snapshot:
 
 - The isolated candidate's contact endpoint has no successful Production POST
   history; the only observed request was a safe GET returning 405. Production
@@ -1762,7 +1803,7 @@ domain; send the two already approved invitations; have both humans choose
 their own passwords; and elevate only the exact confirmed UUID/profile pairs.
 Opening sales and a real $11.11 transaction remain separate later approvals.
 
-## September 5 Inquiry-Retention Safety Addendum — Latest Authority
+## September 5 Inquiry-Retention Safety Addendum — Dated Evidence Record
 
 This addendum supersedes the preceding inquiry-retention and invitation-template
 status only. It does not authorize migration 015, a public alias change, an
@@ -1831,7 +1872,7 @@ promoted. Assigning a new candidate to the public alias requires a fresh exact
 owner approval after its deployment ID and closed-state smoke evidence are
 presented.
 
-## September 6 Closed-Sales Production Cutover — Latest Authority
+## September 6 Closed-Sales Production Cutover — Production Evidence Record
 
 This addendum supersedes earlier statements about the public aliases, the
 current checkpoint commit, the isolated Production candidate, and exact Stripe
@@ -1959,7 +2000,7 @@ Next ordered gates:
    sales and complete one owner-driven $11.11 live purchase through webhook,
    entitlement, video/PDF delivery, and refund-state verification.
 
-## September 6 Cal.com Production Lifecycle Proof — Latest Authority
+## September 6 Cal.com Production Lifecycle Proof — Cal Evidence Record
 
 This addendum supersedes earlier statements that the current Production
 booking lifecycle was untested. It does not prove Shannon's organizer-mailbox
@@ -1988,6 +2029,12 @@ payment flow.
   dashboard showed no upcoming bookings and retained the test lifecycle in
   Canceled history. A cache-busted public availability read restored all five
   Sunday slots from 12:00 PM through 4:00 PM.
+- A later authenticated provider-side reinspection confirmed that Cal's
+  **Canceled** bookings view still retains both the original 12:00 PM request
+  and the rescheduled 1:00 PM lifecycle entry for `Ghosthand Admin Test`, with
+  the launch-verification note and generated Cal Video meeting links. This
+  closes the Cal-dashboard persistence check; it is not evidence of Shannon's
+  separate organizer-mailbox delivery or the FIREBIRDS calendar object.
 - The owner confirmed that the attendee calendar invitation arrived at
   `admin@ghosthand.studio`. This closes the attendee human-mailbox gate; it
   does not independently prove delivery to Shannon's organizer mailbox.
@@ -2003,7 +2050,7 @@ payment flow.
   of Shannon's organizer inbox and direct inspection of the FIREBIRDS calendar
   object remain separate evidence gaps.
 
-## September 6 Security and Migration Follow-up — Latest Authority
+## September 6 Security and Migration Follow-up — Dated Evidence Record
 
 - The owner-approved Preview automation-bypass rotation completed without
   rollback. A replacement credential passed the protected route probe; only
@@ -2066,7 +2113,7 @@ payment flow.
   before acceptance. Administrator elevation remains prohibited until each
   exact Auth user is independently confirmed.
 
-## September 6 Runtime, Dependency, and Cal Resilience Refresh — Latest Authority
+## September 6 Runtime, Dependency, and Cal Resilience Refresh — Superseded Candidate Record
 
 - A fresh Production deployment read at approximately `2026-09-06T20:30Z`
   confirms `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz` remains READY in `iad1` from
@@ -2121,3 +2168,45 @@ payment flow.
   still needs an owner-approved in-place reinvite that invalidates the exposed
   former token; neither profile may receive `is_admin=true` until its exact
   Auth record is independently confirmed.
+
+## September 6 Cal Provider Confirmation and Safety Candidate — Current Authority
+
+- A fresh Production browser read of
+  `/book?service=intuitive-tarot-reading` rendered the live September 27
+  calendar and all five 12:00–4:00 PM appointment choices. A fresh authenticated
+  Cal.com provider read then confirmed that **Canceled** history retains both
+  the original noon request and its rescheduled 1:00 PM lifecycle entry for
+  `Ghosthand Admin Test`, including the launch-verification note and generated
+  Cal Video links. Combined with the already-confirmed attendee invitation and
+  restored public slots, the public selector → manual confirmation → reschedule
+  → cancel → released-inventory test passes. No test booking remains active and
+  Cal collected no payment. Shannon's organizer-mailbox receipt, the direct
+  FIREBIRDS calendar object, and a real mobile tap-through remain separate
+  evidence gaps.
+- The local checkpoint candidate now tests the private inquiry boundary beside
+  the service-role read. A confirmed Supabase Auth user must own the exact
+  UUID-matched `is_admin=true` profile; signed-out, unconfirmed, non-admin,
+  mismatched, and demo identities cannot reach live inquiry data. The DAL
+  returns only the fields rendered by the inbox and rejects malformed rows.
+- The local checkpoint candidate also adds aggregate-only commerce recovery
+  alerts through the existing restricted Resend sender. The dedicated
+  `COMMERCE_ALERT_TO_EMAIL` never falls back to the public inquiry recipient;
+  strict single-recipient validation gates Production-open builds. Messages
+  contain only environment, aggregate counts, and the protected admin-store
+  link. Idempotency is scoped to the privacy-safe digest of the complete
+  canonical payload, UTC day, and environment so exact retries deduplicate
+  without colliding with changed same-day state or routing. Known
+  durable alerts still attempt notification when later reconciliation work
+  fails, and the network timeout is bounded by the 60-second function envelope.
+  Alert failure remains nonfatal because the database signal is authoritative.
+- Current local verification passes: booking 20/20, Auth 40/40, inquiries
+  21/21, commerce 74/74, launch-environment 41 cases, Preview policy 16/16,
+  TypeScript, ESLint, SEO, and the complete 62-route Next.js 16.3.1 Production
+  build. The Auth and alert changes are pushed at exact commit `9c4ee87`, passed
+  exact-SHA CI run `34061716861`, and are deployed READY on exact protected
+  Preview `dpl_drJRbTBZbA4scmptFfE5QZU8nzxQ`. The rendered signed-out Auth
+  boundary passes there, but the commerce-alert provider delivery and a
+  confirmed-admin inquiry read on this exact candidate remain untested.
+  Production sales and website inquiry collection remain closed. Before sales
+  open, the owner must name the commerce-alert recipient; missed-cron detection
+  and alert acknowledgement remain separate operational follow-ups.

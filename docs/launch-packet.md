@@ -1666,3 +1666,96 @@ Opening payments remains a later, separate approval. After the closed-domain
 Auth, inquiry, booking, and administrator tests pass, change
 `COMMERCE_SALES_READY=true` only under that approval and conduct the separately
 approved $11.11 live-money smoke transaction.
+
+## September 5 Read-Only Operational Audit — Latest Authority
+
+This addendum supersedes older point-in-time statements about current Cal.com
+publication, Production inquiry infrastructure, and checkpoint CI. It records
+read-only verification only: no booking, inquiry, email, invitation, alias
+change, Checkout Session, or charge was created.
+
+Checkpoint and deployment evidence:
+
+- Checkpoint HEAD `f114e74` is synchronized with
+  `origin/checkpoint/platform-overhaul-2026-08-20`. GitHub Actions run
+  `34000326727` completed successfully. Lint, TypeScript, SEO, launch and
+  Preview environment policy, inquiry, booking, accessibility, Auth, commerce,
+  dependency audit, and Production compile steps all passed.
+- The closed-sales isolated Production-target deployment remains
+  `dpl_eML5nygjGV8cZ5w4aouU43yLHKn8`, READY in `iad1`, with zero error/fatal
+  runtime logs in the audited window. It was built from runtime source commit
+  `d4e8023`; the two later checkpoint commits modify this launch packet only.
+- `www.hwlbysmd.com` has not been reassigned. It still serves legacy deployment
+  `dpl_6uHzaSNDmqeU1Zmk6CZ5Jg6Yt8f5`, so no Production invitation or
+  transactional E2E should be started there yet.
+
+Current Cal.com evidence:
+
+- The public `hwlbysmd` profile and event-types API expose exactly ten intended
+  events, all public and exact-matched by the website: Reiki Aromatherapy
+  Healing (45 minutes), Signature Facial (60), Beauty & Being Ritual (90),
+  Wild Glow Luxury Facial (120), Private Yoga + Sound (60), Private Sound
+  Healing (75), Private Yoga (90), Intuitive Tarot Reading (60), Moon Oracle
+  Reading (60), and Tarot + Reiki Experience (75).
+- Every event reports an always-confirm policy, blocks its requested slot while
+  unconfirmed, has seats disabled, and reports a zero Cal.com price. The event
+  copy truthfully says payment is arranged separately. Every event requires
+  attendee name, email, guest count, and session location. Tarot and Moon offer
+  Cal Video or attendee address; the other eight request attendee address.
+- All ten events retain 48-hour notice, 60-minute buffers before and after, and
+  a rolling 30-day window. Public slot queries in
+  `America/Los_Angeles` returned real availability for all three schedule
+  families. Representative current results were Signature Facial with 42 slots
+  across seven dates, Private Yoga with 12 slots across six dates, and Moon
+  Oracle Reading with 10 slots across two Sundays in the queried window.
+- Browser accessibility-tree inspection confirmed enabled date and time
+  controls, timezone presentation, duration, location mode, and the visible
+  `Requires confirmation` state. Intuitive Tarot exposed Sunday times from
+  noon through 4:00 PM; Private Yoga exposed Friday times at 9:00 AM, 10:30 AM,
+  and noon. No slot was selected or submitted.
+- `Wild Glow Express Facial` remains intentionally inquiry-only because the
+  catalog specifies 15–20 minutes per guest with a four-person minimum rather
+  than a truthful fixed reservation duration. The website exposes no guessed
+  Cal.com event for it.
+- Public evidence cannot independently prove private destination-calendar or
+  conflict-calendar settings. Earlier authenticated provider evidence records
+  `FIREBIRDS` as destination, the approved six conflict calendars, and the
+  completed request, suppression, rejection, confirmation, reschedule,
+  cancellation, and slot-release exercises. Current human mailbox delivery,
+  direct Apple Calendar object creation, deliberate external conflict blocking,
+  keyboard submission, and mobile touch submission remain outstanding.
+
+Current Production inquiry evidence:
+
+- The isolated candidate's contact endpoint has no successful Production POST
+  history; the only observed request was a safe GET returning 405. Production
+  `public.inquiries` contains zero rows. This audit intentionally sent no email
+  and introduced no personal data.
+- Production Supabase Auth health and settings return 200, email Auth is
+  enabled, and automatic email confirmation is disabled. Anonymous reads of
+  both inquiry tables are denied.
+- Applied migration 013 retains the intended least-privilege boundary: direct
+  service-role SELECT is limited to `public.inquiries`; the private rate-limit
+  table denies direct reads even to service role; and only the four narrow
+  record, claim, stale, and completion RPCs are executable by service role.
+  The local inquiry boundary suite passes 7/7.
+- `/api/contact` validates same-origin JSON, a 16 KB body ceiling, UUIDv4
+  submission identity, field lengths, and service prerequisites before durable
+  receipt. It persists first, then claims one notification attempt with a
+  deterministic idempotency key. Ambiguous provider outcomes remain
+  `audit_unknown` instead of being presented as delivered or automatically
+  duplicated.
+- A full Production inquiry pass still requires the canonical alias on this
+  candidate, at least one confirmed permanent administrator, an approved and
+  published retention/purge procedure, and one explicitly authorized test
+  submission. That single test must prove HTTP 200 with notification
+  `accepted`, exactly one matching database row, exactly one Resend acceptance,
+  one human mailbox receipt without submitted PII in the alert body, signed-in
+  access to the same record, and signed-out denial.
+
+No public-release boundary changed during this audit. The next ordered gate is
+still: save the token-hash invitation template; separately approve and assign
+the tested closed-sales candidate to `www.hwlbysmd.com`; re-smoke the canonical
+domain; send the two already approved invitations; have both humans choose
+their own passwords; and elevate only the exact confirmed UUID/profile pairs.
+Opening sales and a real $11.11 transaction remain separate later approvals.

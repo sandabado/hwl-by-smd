@@ -2005,17 +2005,23 @@ direct FIREBIRDS calendar-object inspection, or any Cal-native payment flow.
 - The exact migration 015 candidate passed its 16 inquiry-policy tests and a
   full transactional staging rehearsal ending in `ROLLBACK`; the test request
   returned HTTP 201 and staging retained neither schema nor ledger effects.
-- Production still contains migrations 001–014 only. Both the repository CLI
-  and a fresh official CLI attempted the owner-approved Production connection,
-  but the `us-east-2` session-pooler connection timed out before authentication.
-  DNS-over-HTTPS produced the same result, the project reports no network bans,
-  and the direct database hostname is IPv6-only from a host without a usable
-  IPv6 route.
-- The Management API fallback was not used. That API generates its own remote
-  migration version rather than preserving local version `015`; using it would
-  require a separately approved local-file renumbering and ledger
-  reconciliation plan. Direct SQL and manual migration-ledger edits remain
-  excluded.
+- Production now contains exact ledger versions 001–015. The ordinary
+  `us-east-2` session-pooler path timed out before authentication even with the
+  rotated password and DNS-over-HTTPS, but a credential-safe native dry run
+  through the reachable transaction-pooler endpoint listed only
+  `015_inquiry_retention.sql`. The already-approved exact migration then applied
+  successfully; a second native dry run returned `upToDate:true` with no
+  pending migrations, and the remote ledger lists matching local/remote
+  versions 001 through 015. Catalog-only verification confirms the two
+  retention columns, RLS-enabled aggregate run table, partial index, validated
+  constraints, triggers, SECURITY INVOKER functions, fixed function settings,
+  and the intended absence of PUBLIC/anon/authenticated/service-role authority.
+  Aggregate counts remain zero for inquiries, submission limits, and retention
+  runs, with no inquiry content read.
+- The database password was sourced ephemerally from its existing Keychain
+  item through `PGPASSWORD`; it never appeared in command arguments, stdout,
+  or a file. The Management API, direct SQL, and manual migration-ledger edits
+  were not used, so local version `015` remains the canonical remote version.
 - Fresh exact-working-tree safety suites pass: booking 14/14, commerce 55/55,
   and inquiries 16/16. Production sales and website inquiry collection remain
   fail-closed while their separate launch gates are completed.

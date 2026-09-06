@@ -354,14 +354,18 @@ mailbox-delivery check.
 
 ## Deployment and opening gate
 
-The policy decision does not apply migration 015 or authorize a purge.
-`NEXT_PUBLIC_INQUIRY_COLLECTION_READY` remains exactly `false` until all of the
-following are verified:
+The policy decision alone did not apply migration 015 and does not authorize a
+purge. On September 6, 2026, the exact reviewed migration was ledger-applied to
+the dedicated Production database as version `015`; a follow-up native dry run
+was up to date, the catalog/privilege assertions passed, and the Production
+inquiry, submission-limit, and retention-run counts remained zero. This closes
+items 1 and 2 below, but `NEXT_PUBLIC_INQUIRY_COLLECTION_READY` remains exactly
+`false` until every remaining operational condition is verified:
 
-1. Migration 015 is applied to the intended environment and its migration
-   ledger matches the reviewed file.
-2. `scripts/test-inquiry-retention-database.sql` passes in an isolated or
-   separately approved staging database and rolls back completely.
+1. **Passed:** migration 015 is applied to Production and its migration ledger
+   matches the reviewed local version.
+2. **Passed:** `scripts/test-inquiry-retention-database.sql` passed in the
+   approved staging transaction and rolled back completely.
 3. The named operator's owner/postgres SQL access is verified separately from
    ordinary site-admin access, the authenticated append-only private operations
    log exists, and the monthly calendar reminder has an owner.

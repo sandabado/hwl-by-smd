@@ -1830,3 +1830,131 @@ time, the earlier candidate `dpl_eML5nygjGV8cZ5w4aouU43yLHKn8` must not be
 promoted. Assigning a new candidate to the public alias requires a fresh exact
 owner approval after its deployment ID and closed-state smoke evidence are
 presented.
+
+## September 6 Closed-Sales Production Cutover — Latest Authority
+
+This addendum supersedes earlier statements about the public aliases, the
+current checkpoint commit, the isolated Production candidate, and exact Stripe
+Product/Price binding proof. It does not open sales or inquiry collection,
+authorize a live charge, apply migration 015, grant an administrator role, or
+claim end-to-end Production email delivery.
+
+Release source and validation:
+
+- Checkpoint commit `a0152df52570197601260dbe02ffac88aa7988c8` pins the
+  verified live Stripe Product `prod_VCotDELRoHDnox` and one-time $11.11 Price
+  `price_1UCPFjPTLuM8MaxaTY48RO9e` in the launch validator. Production builds
+  now reject any different encrypted Product or Price value even while sales
+  remain closed. Runtime checkout behavior was not changed.
+- The commit is synchronized only with
+  `origin/checkpoint/platform-overhaul-2026-08-20`; `main` was not pushed.
+  GitHub Actions run `34044940931` completed successfully for the exact commit.
+  Its lint, TypeScript, SEO, launch/Preview policy, inquiry, booking,
+  accessibility, Auth, commerce, dependency-audit, and Production compile
+  steps all passed.
+- Local verification also passed: launch environment 36/36, ESLint,
+  TypeScript, SEO for 21 pages / 21 metadata records / seven long-form
+  documents, and the Next.js 16.3.1 Webpack Production build with all 62
+  routes.
+
+Production deployment and public cutover:
+
+- Production-target deployment `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz` is READY
+  in `iad1`. It was built with `--skip-domain` from the exact checkpoint
+  commit before public assignment. Its remotely injected Production
+  environment passed the strengthened exact Stripe binding validator with
+  `COMMERCE_SALES_READY=false` and
+  `NEXT_PUBLIC_INQUIRY_COLLECTION_READY=false`.
+- Under fresh owner direction to show the new site live, only
+  `hwlbysmd.com` and `www.hwlbysmd.com` were reassigned from legacy deployment
+  `dpl_6uHzaSNDmqeU1Zmk6CZ5Jg6Yt8f5` to the new deployment. Both aliases were
+  then resolved independently back to `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz`.
+  The apex redirects to the canonical `https://www.hwlbysmd.com` origin.
+- Home, LIFT, booking, and login return HTTP 200 from both public hostnames.
+  The public homepage rendered the approved Shannon-led hero and navigation;
+  the LIFT page rendered one $11.11 Video + PDF offer and an accessible cart
+  sheet. Browser inspection reported zero application console errors on the
+  homepage and LIFT surface.
+- The public rollback gate passed: a valid same-origin LIFT checkout POST
+  returns the intended closed-sales HTTP 503; a same-origin contact POST
+  returns the intended closed-inquiry HTTP 503 with `received:false`; and
+  anonymous LIFT video access returns HTTP 401. No Checkout Session, charge,
+  inquiry row, or email was created. The deployment reported no error or fatal
+  runtime logs in the audited window, so no alias rollback was required.
+
+Booking evidence on the public site:
+
+- `/book` exposes all eleven catalog services truthfully: ten exact Cal.com
+  event types and the intentionally inquiry-only Wild Glow Express Facial.
+  Selecting Signature Facial loaded its embedded, keyboard-addressable
+  September calendar with enabled dates and six visible times from 10:00 AM
+  through 3:00 PM, plus a direct Cal.com fallback link and an email fallback
+  while website inquiries remain paused.
+- Current provider reads show exactly ten public `hwlbysmd` event types, all
+  requiring manual confirmation and using no Cal-native payments. Beauty,
+  Yoga/Sound, and Tarot schedule families expose the approved live
+  availability in `America/Los_Angeles`.
+- No fresh appointment was submitted during this cutover. Human notification,
+  destination/conflict-calendar behavior, confirmation, reschedule, and
+  cancellation remain current Production lifecycle evidence gaps.
+- The embedded Cal.com client emits four provider-side warnings, including a
+  deprecated styling-prop warning and Cal-owned preload/client warnings. It
+  emits no browser errors, and these warnings do not block date/time selection.
+
+Provider state after cutover:
+
+- Live Stripe account `acct_1U9cEIPTLuM8Maxa`, Product
+  `prod_VCotDELRoHDnox`, one-time $11.11 Price
+  `price_1UCPFjPTLuM8MaxaTY48RO9e`, and the four-event Production webhook are
+  active. The deployment build now proves its encrypted Product/Price bindings
+  exactly. No live payment has occurred, so live checkout, webhook,
+  entitlement, signed delivery, refund, or dispute behavior is not yet proven.
+- Supabase Production project `qwprhsrwiihfllmgallr` is healthy in
+  `us-east-2`. Schema effects for migrations 010–014 are live. The private
+  `member-content` bucket contains the canonical 6,036,808-byte PDF and
+  46,514,399-byte MP4; signed range reads return 206, direct anonymous reads
+  are denied, and the object sizes match the local canonical assets.
+- Migration 015 is not applied. Its retention columns, aggregate run table,
+  and owner-only retention RPCs are absent. Its existing-row maximum-count
+  precondition could not be inspected with the deliberately least-privilege
+  service credential; application will therefore rely on the migration's
+  atomic constraint check if separately authorized.
+- Neither `shannon@hwlbysmd.com` nor `admin@ghosthand.studio` exists in
+  Production Auth or profiles. The two previously approved invitations were
+  not sent because a current read of the Production Site URL and redirect
+  allowlist was unavailable. The secure token-hash Invite User template was
+  previously saved and verified, but a fresh Dashboard check is required
+  before consuming the one-time links.
+- Resend currently reports `hwlbysmd.com` Verified, two distinct restricted
+  Production sending keys, and zero Production key usage. Production inquiry
+  and Auth SMTP delivery therefore remain configured-but-unproven, not green.
+
+Security follow-up:
+
+- During the read-only Stripe sandbox audit, a stored Preview webhook URL
+  returned its Vercel automation-bypass query credential and an audit mapper
+  displayed that credential in model-visible output. No Stripe API key,
+  webhook signing secret, Production credential, payment data, or customer
+  data was exposed. The value is not reproduced here.
+- Treat that Preview bypass credential as compromised. Before relying on the
+  Preview webhook again, create a replacement automation-bypass secret, update
+  only the sandbox Preview Stripe endpoint, verify without returning the URL or
+  query string, and revoke the old bypass. Production aliases and the
+  Production webhook are unaffected.
+
+Next ordered gates:
+
+1. Sign in to the Production Supabase Dashboard and re-verify the canonical
+   Site URL and callback allowlist; then send the two already approved exact
+   invitations. Each human chooses their own password before any exact-UUID
+   administrator elevation.
+2. Separately approve and apply migration 015, verify its least-privilege
+   boundary, and establish the owner-operated monthly retention procedure
+   before opening website inquiry collection.
+3. Separately approve the Preview bypass rotation and sandbox webhook URL
+   update described above.
+4. Submit and cancel one authorized Cal.com test appointment to prove the
+   current human notification and calendar lifecycle.
+5. Only after those operational gates, separately approve opening Production
+   sales and complete one owner-driven $11.11 live purchase through webhook,
+   entitlement, video/PDF delivery, and refund-state verification.

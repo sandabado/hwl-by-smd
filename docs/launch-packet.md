@@ -2210,3 +2210,52 @@ payment flow.
   Production sales and website inquiry collection remain closed. Before sales
   open, the owner must name the commerce-alert recipient; missed-cron detection
   and alert acknowledgement remain separate operational follow-ups.
+
+## September 6 Isolated Closed-Sales Production Candidate — Current Deployment Evidence
+
+- Clean, upstream-synchronized checkpoint
+  `f90f723b8a440d1ee1443d9b7ebf7374af34bdd9` was uploaded through the Vercel
+  CLI as isolated Production-target deployment
+  `dpl_5kVoUdY95gDGhBTN2HLw7b45iorN` at
+  `hwl-by-lgumivcke-whole-body-earth.vercel.app`. Vercel reports target
+  `production` and state `READY`. Because this was a manual CLI upload, Vercel
+  exposes no Git SHA in the deployment metadata; exact-source provenance is
+  the clean local checkout and operator record rather than Vercel-attested Git
+  metadata.
+- The remote build reported no `.env.local`, passed the actual encrypted
+  Production environment contract in **closed sales** mode, reported website
+  inquiry collection closed, validated 21 pages / 21 metadata records / seven
+  long-form documents, compiled with Next.js 16.3.1, completed TypeScript, and
+  generated all 62 route/page entries. The only build warning is the already
+  recorded optional LIFT captions follow-up.
+- Public traffic was not moved. `hwlbysmd.com` and `www.hwlbysmd.com` remain
+  assigned to `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz`, while
+  `preview.hwlbysmd.com` remains assigned to exact tested Preview
+  `dpl_drJRbTBZbA4scmptFfE5QZU8nzxQ`. The isolated candidate has only the
+  project-default Vercel alias.
+- Authenticated `vercel curl` checks against the isolated candidate returned
+  HTTP 200 for `/`, `/beauty/lift`,
+  `/book?service=intuitive-tarot-reading`, and `/login`.
+- A valid same-origin `lift_guide` checkout request returned the intended
+  closed-sales HTTP 503 before authentication, database reservation, or Stripe
+  Session creation. A same-origin contact request returned the intended
+  closed-inquiry HTTP 503 with `received:false` before body parsing,
+  persistence, or Resend delivery.
+- Anonymous LIFT video and captions reads returned HTTP 401. Anonymous PDF
+  delivery returned HTTP 307 to `/login?redirectTo=/library` without following
+  the redirect. An unsigned Stripe webhook returned HTTP 400 with the expected
+  missing-signature response, proving the runtime commerce configuration is
+  present while reaching no provider or database transition. Unauthenticated
+  commerce and relationship-health cron requests each returned HTTP 401 before
+  either job ran.
+- The post-probe runtime scan found zero error-level events and zero
+  warning-level events. Its four 5xx entries were the two deliberately repeated
+  checkout/contact HTTP 503 safety canaries; there were no unexpected 5xx
+  responses.
+- Production and checkpoint-branch Preview each contain the same 23 required
+  pre-open environment-variable names. `COMMERCE_ALERT_TO_EMAIL` is absent from
+  both. Production-open validation will continue to reject the build until the
+  owner names one exact alert recipient and authorizes installation and a
+  provider-delivery test. Sales, website inquiry collection, Production
+  promotion, live payment, and administrator elevation remain closed and were
+  not performed in this verification.

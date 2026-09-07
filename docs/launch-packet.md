@@ -16,17 +16,13 @@ environment-inventory, administrator, and readiness statements in the dated
 records below. Those records remain as historical evidence only.
 
 - **Exact application code and Preview:** application commit
-  `880fda518b90d6767084a01a0e6832b960d28446` is clean, pushed only on
+  `d00a0b48a36a1aff7cd69bec0fb7ef60960666ae` is clean, pushed only on
   `checkpoint/platform-overhaul-2026-08-20`, and passed GitHub Actions run
-  `34148956025`. Its READY Preview is
-  `dpl_BDucxTqrGjSXenahgBGGLxn5wogK`
-  (`hwl-by-dv9b432j4-whole-body-earth.vercel.app`). Documentation-only
-  descendant `29c20405908f29fe040f83d72ce6734f39aaf205` passed GitHub Actions run
-  `34150903434` and deployed READY as `dpl_999r4iVKHnVU1R5FdaGsuNpaG61v`.
-  `https://preview.hwlbysmd.com` is the stable branch Preview entry and may move
-  to later documentation-only descendants without changing the audited runtime
-  application code. Any later runtime-code commit requires fresh verification.
-  `main` remains untouched.
+  `34152833811`. Its READY Preview is
+  `dpl_EeMzfsFeC3wsk7En5Z8cYYS26BzF`
+  (`hwl-by-9qynkdbl3-whole-body-earth.vercel.app`), and
+  `https://preview.hwlbysmd.com` resolves to this deployment. Any later
+  runtime-code commit requires fresh verification. `main` remains untouched.
 - **Public Production remains separate and closed:** `hwlbysmd.com` and
   `www.hwlbysmd.com` still resolve to older READY Production deployment
   `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz`, source `a0152df52570197601260dbe02ffac88aa7988c8`.
@@ -42,16 +38,22 @@ records below. Those records remain as historical evidence only.
   discovery for LIFT, and canonical LIFT Product structured data at
   `/beauty/lift`. Desktop and 390 x 844 mobile checks found no horizontal
   overflow or application console errors. The Preview cart contains one
-  `LIFT — Video + PDF` item at `$11.11` and enables sandbox checkout. No new
-  Checkout Session was created during this verification.
+  `LIFT — Video + PDF` item at `$11.11`, enables sandbox checkout, and presents
+  the Terms and personal-use license, Privacy Policy, Refund Policy, and help
+  link immediately beside the purchase control. The public `llms.txt` and
+  explicit `OAI-SearchBot` policy expose only approved canonical public pages.
+  The administrator API now requires a confirmed Supabase identity and a
+  UUID-matched `is_admin=true` profile. No new Checkout Session was created
+  during this verification.
 - **Verification:** the Next.js 16.3.1 Webpack Production build completed all
   62 route/page entries. TypeScript, ESLint, and SEO validation pass for 21
   pages, 21 metadata records, and seven long-form documents. Focused boundary
-  suites pass 225 cases: booking 22/22, accessibility 5/5, commerce 74/74,
-  Auth 40/40, inquiries 21/21, launch environment 44/44, and Preview release
+  suites pass 241 cases: booking 22/22, accessibility 6/6, commerce 74/74,
+  Auth 55/55, inquiries 21/21, launch environment 44/44, and Preview release
   19/19. Full and Production-only npm audits report zero vulnerabilities. The
-  exact Preview deployment had no recent Vercel error-level or HTTP 500 log
-  entries in the queried window.
+  exact Preview rendered the updated LIFT cart and returned the expected
+  `llms.txt` and `robots.txt`; its browser session emitted no warning or error
+  entries.
 - **Cal.com is public-booking operational:** the public API returns exactly the
   ten expected active event types, with no missing or unexpected service. All
   ten expose live openings in the current Preview, require manual confirmation,
@@ -76,10 +78,11 @@ records below. Those records remain as historical evidence only.
   notification accepted by Resend; public inquiry collection remains paused,
   and monitored-mailbox receipt is not proven. Both approved Auth identities
   exist, but `shannon@hwlbysmd.com` and `admin@ghosthand.studio` remain
-  email-unconfirmed, never signed in, and `is_admin=false`. The current schema
-  supports only equal administrator grants; a distinct Ghosthand super-admin
-  role requires an approved role-model change. Legacy Supabase JWT keys remain
-  enabled pending a verified modern-key cutover and explicit retirement.
+  email-unconfirmed, never signed in, and `is_admin=false`. Both will use the
+  existing equal technical administrator grant after individual confirmation;
+  Ghosthand's super-admin designation remains an operational governance role,
+  not a second authorization tier. Legacy Supabase JWT keys remain enabled
+  pending a verified modern-key cutover and explicit retirement.
 - **Stripe live objects are ready, but live application commerce is not yet
   proven:** canonical account `acct_1U9cEIPTLuM8Maxa` has Payments and Payouts
   active. Active Product `prod_VCotDELRoHDnox`, one-time `$11.11` Price

@@ -27,7 +27,7 @@ export function Footer() {
       ? { label: "Account", href: "/login" }
       : user
         ? { label: "Library", href: "/library" }
-        : { label: "Sign In", href: "/login" },
+        : { label: "Members", href: "/login" },
   ]
 
   if (pathname.startsWith("/admin")) return null

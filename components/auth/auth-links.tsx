@@ -37,7 +37,7 @@ export function AuthLinks({
             "flex min-h-11 w-full items-center justify-center rounded-full border border-[var(--accent)] px-4 py-2 text-[var(--primary)]"
         )}
       >
-        Sign In
+        Members
       </Link>
     )
   }

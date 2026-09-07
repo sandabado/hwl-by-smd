@@ -67,6 +67,7 @@ export function Header() {
         <MainNav />
 
         <div className="hidden items-center gap-3 lg:flex">
+          <CartTrigger />
           <Button
             asChild
             size="sm"
@@ -75,7 +76,6 @@ export function Header() {
             <Link href="/book">Book</Link>
           </Button>
           <AuthLinks />
-          <CartTrigger />
         </div>
 
         <div className="flex items-center gap-1 lg:hidden">

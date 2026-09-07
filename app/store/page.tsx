@@ -3,7 +3,6 @@ import Link from "next/link"
 import { ArrowRight, Check, PlayCircle, type LucideIcon } from "lucide-react"
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button"
-import { JsonLd } from "@/components/seo/json-ld"
 import { BreathingSection } from "@/components/shared/breathing-section"
 import { BreathingText } from "@/components/shared/breathing-text"
 import { FaqAccordion } from "@/components/shared/internal-page"
@@ -12,7 +11,7 @@ import { Reveal } from "@/components/shared/reveal"
 import { Button } from "@/components/ui/button"
 import { getAuthenticatedUser, getMemberAccess } from "@/lib/access"
 import { media } from "@/lib/media"
-import { createPageMetadata, createProductJsonLd } from "@/lib/seo"
+import { createPageMetadata } from "@/lib/seo"
 import { isProductCheckoutReady } from "@/lib/stripe"
 
 export const metadata = createPageMetadata({
@@ -113,26 +112,8 @@ export default async function StorePage() {
   const access = user ? await getMemberAccess(user.id) : null
   const liftSalesReady = isProductCheckoutReady("lift_guide")
   const faqs = getFaqs({ liftReady: liftSalesReady })
-  const productSchema: ReturnType<typeof createProductJsonLd>[] = []
-
-  if (liftSalesReady) {
-    productSchema.push(
-      createProductJsonLd({
-        id: "lift-video-pdf",
-        name: "LIFT — Video + PDF",
-        description:
-          "A guided in-browser facial massage video with a private printable guide.",
-        path: "/store",
-        price: "11.11",
-      })
-    )
-  }
   return (
     <>
-      {productSchema.length ? (
-        <JsonLd data={productSchema} id="store-products-schema" />
-      ) : null}
-
       <BreathingSection
         background="gradient"
         className="flex min-h-[64svh] items-center"

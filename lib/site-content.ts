@@ -1,5 +1,9 @@
 import "server-only"
 
+import {
+  HOMEPAGE_LIFT_FEATURE,
+  isCanonicalHomepageLiftFeatureDestination,
+} from "@/lib/homepage-feature"
 import { createAdminClient } from "@/lib/supabase/server"
 
 export const editorialStatuses = [
@@ -268,14 +272,14 @@ export const websiteEditorDefaults = {
   ],
   featuredSlots: [
     {
-      key: "lift-daily-ritual",
-      slot: "homepage.primary-feature",
+      key: HOMEPAGE_LIFT_FEATURE.key,
+      slot: HOMEPAGE_LIFT_FEATURE.slot,
       status: "draft",
       eyebrow: "LIFT · Guided facial massage",
       headline: "A five-minute facial ritual.",
       description: "Guided video + downloadable PDF · $11.11 one time.",
       ctaLabel: "Experience LIFT",
-      ctaHref: "/beauty/lift",
+      ctaHref: HOMEPAGE_LIFT_FEATURE.ctaHref,
       mediaKey: "lift-video-preview",
     },
   ],
@@ -361,9 +365,9 @@ export function parseHomepageFeatureFormData(formData: FormData):
   }
 
   const ctaHref = values.ctaHref
-  if (ctaHref && !isSafeInternalSitePath(ctaHref)) {
+  if (ctaHref && ctaHref !== HOMEPAGE_LIFT_FEATURE.ctaHref) {
     fieldErrors.ctaHref = [
-      "Use a safe internal route beginning with one slash, such as /beauty/lift.",
+      `The LIFT feature destination is locked to ${HOMEPAGE_LIFT_FEATURE.ctaHref}.`,
     ]
   }
 
@@ -446,6 +450,17 @@ export function validateWebsiteEditorWorkspace(
       })
     }
 
+    if (
+      feature.key === HOMEPAGE_LIFT_FEATURE.key &&
+      !isCanonicalHomepageLiftFeatureDestination(feature)
+    ) {
+      issues.push({
+        scope: feature.headline,
+        message: `The LIFT feature must lead to ${HOMEPAGE_LIFT_FEATURE.ctaHref}.`,
+        severity: "blocking",
+      })
+    }
+
     if (feature.mediaKey && !mediaByKey.has(feature.mediaKey)) {
       issues.push({
         scope: feature.headline,
@@ -517,12 +532,12 @@ export function validateWebsiteEditorWorkspace(
 
 export const homepageFeatureCodeDefault: PublishedHomepageFeature = {
   source: "code-default",
-  key: "lift-daily-ritual",
+  key: HOMEPAGE_LIFT_FEATURE.key,
   eyebrow: "LIFT · Guided facial massage",
   headline: "A five-minute facial ritual.",
   description: "Guided video + downloadable PDF · $11.11 one time.",
   ctaLabel: "Experience LIFT",
-  ctaHref: "/beauty/lift",
+  ctaHref: HOMEPAGE_LIFT_FEATURE.ctaHref,
   media: {
     kind: "video",
     src: "/video/lift/facial-lift-preview.mp4",
@@ -613,8 +628,8 @@ async function readHomepageFeatureRows() {
       .select(
         "feature_key, slot_key, status, eyebrow, headline, description, cta_label, cta_href, media_asset_id, starts_at, ends_at, published_at, content"
       )
-      .eq("feature_key", "lift-daily-ritual")
-      .eq("slot_key", "homepage.primary-feature")
+      .eq("feature_key", HOMEPAGE_LIFT_FEATURE.key)
+      .eq("slot_key", HOMEPAGE_LIFT_FEATURE.slot)
       .abortSignal(signal)
       .maybeSingle()
 
@@ -681,7 +696,7 @@ export async function getWebsiteEditorPreview(access: EditorAccess) {
   const { feature, media } = rows
   const draft = record(record(feature.content)?.draft)
   const editable = draft ?? feature
-  const ctaHref = textValue(editable.cta_href, "/beauty/lift")
+  const ctaHref = textValue(editable.cta_href, HOMEPAGE_LIFT_FEATURE.ctaHref)
   const rawStatus = draft ? "draft" : textValue(feature.status, "draft")
   const status = editorialStatuses.some((value) => value === rawStatus)
     ? (rawStatus as EditorialStatus)
@@ -723,7 +738,10 @@ export async function getWebsiteEditorPreview(access: EditorAccess) {
         headline: textValue(editable.headline),
         description: textValue(editable.description),
         ctaLabel: textValue(editable.cta_label),
-        ctaHref: isSafeInternalSitePath(ctaHref)
+        ctaHref: isCanonicalHomepageLiftFeatureDestination({
+          key: HOMEPAGE_LIFT_FEATURE.key,
+          ctaHref,
+        })
           ? ctaHref
           : websiteEditorDefaults.featuredSlots[0].ctaHref,
         mediaKey: mediaPreview.key,
@@ -759,6 +777,7 @@ export async function getPublishedHomepageFeature(): Promise<PublishedHomepageFe
   const startsAt = textValue(feature.starts_at)
   const endsAt = textValue(feature.ends_at)
   const rightsExpiresAt = textValue(media.rights_expires_at)
+  const featureKey = textValue(feature.feature_key)
   const ctaHref = textValue(feature.cta_href)
   const mediaSource = safeMediaSource(media)
   const mediaKind = media.media_kind === "image" ? "image" : "video"
@@ -793,14 +812,17 @@ export async function getPublishedHomepageFeature(): Promise<PublishedHomepageFe
     !feature.published_at ||
     scheduleInvalid ||
     mediaInvalid ||
-    !isSafeInternalSitePath(ctaHref)
+    !isCanonicalHomepageLiftFeatureDestination({
+      key: featureKey,
+      ctaHref,
+    })
   ) {
     return homepageFeatureCodeDefault
   }
 
   return {
     source: "database",
-    key: textValue(feature.feature_key, "lift-daily-ritual"),
+    key: featureKey,
     eyebrow: textValue(feature.eyebrow),
     headline: textValue(feature.headline),
     description: textValue(feature.description),

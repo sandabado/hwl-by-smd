@@ -5,6 +5,7 @@ import Link from "next/link"
 import { LiftPreviewFilm } from "@/components/home/lift-preview-film"
 import { NewsletterForm } from "@/components/shared/newsletter-form"
 import { Button } from "@/components/ui/button"
+import { getCanonicalHomepageLiftHref } from "@/lib/homepage-feature"
 import { media } from "@/lib/media"
 import type { PublishedHomepageFeature } from "@/lib/site-content"
 
@@ -207,10 +208,20 @@ export function HeroEntry({
                 <p className="mt-4 min-h-20 text-sm leading-7 text-[#5b625b]">
                   {world.description}
                 </p>
-                <EditorialLink
-                  href={world.href}
-                  label={`Explore ${world.title}`}
-                />
+                <div className="flex flex-wrap items-center gap-x-7">
+                  <EditorialLink
+                    href={world.href}
+                    label={`Explore ${world.title}`}
+                  />
+                  {world.id === "beauty" ? (
+                    <Link
+                      className="inline-flex min-h-11 items-center text-xs font-medium tracking-[0.14em] text-[#626a61] uppercase underline-offset-8 transition-colors hover:text-[#20251f] hover:underline"
+                      href="/beauty/lift"
+                    >
+                      Discover LIFT
+                    </Link>
+                  ) : null}
+                </div>
               </article>
             ))}
           </div>
@@ -219,25 +230,7 @@ export function HeroEntry({
 
       <section className="bg-[#20251f] px-6 py-24 text-[#f7f3ec] sm:py-28 lg:py-36">
         <div className="mx-auto grid max-w-7xl items-center gap-14 lg:grid-cols-[1.03fr_0.97fr] lg:gap-24">
-          <div className="relative aspect-[4/5] overflow-hidden bg-[#c8b198]">
-            <Image
-              alt={media.editorial.liftVideoPreview.alt}
-              className="object-cover"
-              fill
-              sizes="(max-width: 1023px) 92vw, 48vw"
-              src={media.editorial.liftVideoPreview.src}
-            />
-            <LiftPreviewFilm
-              poster={media.editorial.liftVideoPreview.src}
-              source={media.motion.liftPreview.src}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#20251f]/45 via-transparent to-transparent" />
-            <p className="absolute right-6 bottom-6 left-6 text-xs font-semibold tracking-[0.22em] text-white uppercase">
-              Seven movements · Five minutes
-            </p>
-          </div>
-
-          <div>
+          <div className="lg:order-2">
             <p className="text-xs font-semibold tracking-[0.28em] text-[#d8b98e] uppercase">
               HWL Beauty
             </p>
@@ -258,12 +251,30 @@ export function HeroEntry({
             <div className="mt-8">
               <Link
                 className="inline-flex min-h-12 items-center gap-3 rounded-full bg-[#f7f3ec] px-7 text-xs font-semibold tracking-[0.18em] text-[#20251f] uppercase transition hover:bg-[#d8b98e]"
-                href={featuredExperience.ctaHref}
+                href={getCanonicalHomepageLiftHref(featuredExperience)}
               >
                 Explore LIFT
                 <ArrowRight aria-hidden="true" className="size-4" />
               </Link>
             </div>
+          </div>
+
+          <div className="relative aspect-[4/5] overflow-hidden bg-[#c8b198] lg:order-1">
+            <Image
+              alt={media.editorial.liftVideoPreview.alt}
+              className="object-cover"
+              fill
+              sizes="(max-width: 1023px) 92vw, 48vw"
+              src={media.editorial.liftVideoPreview.src}
+            />
+            <LiftPreviewFilm
+              poster={media.editorial.liftVideoPreview.src}
+              source={media.motion.liftPreview.src}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#20251f]/45 via-transparent to-transparent" />
+            <p className="absolute right-6 bottom-6 left-6 text-xs font-semibold tracking-[0.22em] text-white uppercase">
+              Seven movements · Five minutes
+            </p>
           </div>
         </div>
       </section>

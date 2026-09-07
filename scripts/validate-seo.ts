@@ -1,6 +1,11 @@
 import { readdirSync, readFileSync, statSync } from "node:fs"
 import { join, relative, resolve } from "node:path"
 
+import {
+  getCanonicalHomepageLiftHref,
+  HOMEPAGE_LIFT_FEATURE,
+  isCanonicalHomepageLiftFeatureDestination,
+} from "../lib/homepage-feature.ts"
 import { LOCATION_PAGES } from "../lib/location-pages.ts"
 import { seoJournalArticleList } from "../lib/seo-journal-articles.ts"
 
@@ -146,6 +151,79 @@ function similarity(left: string, right: string) {
 }
 
 const errors: string[] = []
+
+const liftPageSource = readFileSync(
+  resolve(projectRoot, "app/lift/page.tsx"),
+  "utf8"
+)
+const storePageSource = readFileSync(
+  resolve(projectRoot, "app/store/page.tsx"),
+  "utf8"
+)
+const homepageSource = readFileSync(
+  resolve(projectRoot, "components/home/hero-entry.tsx"),
+  "utf8"
+)
+
+const liftProductRequirements = [
+  ["Product JSON-LD", /createProductJsonLd\(\{/],
+  ["canonical Product path", /path:\s*["']\/beauty\/lift["']/],
+  ["canonical Product id", /id:\s*["']lift-video-pdf["']/],
+  ["canonical Product price", /price:\s*["']11\.11["']/],
+  [
+    "canonical Product image",
+    /image:\s*["']\/images\/editorial\/lift-video-preview\.jpg["']/,
+  ],
+  [
+    "fail-closed Product availability",
+    /availability:\s*liftSalesReady\s*\?\s*["']https:\/\/schema\.org\/InStock["']\s*:\s*["']https:\/\/schema\.org\/OutOfStock["']/,
+  ],
+  ["rendered Product JSON-LD", /<JsonLd\s+data=\{liftProductSchema\}/],
+  [
+    "product-intent metadata title",
+    /title:\s*["']LIFT Facial Massage Video \+ PDF Guide \| HWL by SMD["']/,
+  ],
+  ["canonical product heading", />\s*LIFT: A Daily Facial Massage Ritual\s*</],
+] as const
+
+for (const [label, pattern] of liftProductRequirements) {
+  if (!pattern.test(liftPageSource)) {
+    errors.push(`/beauty/lift: missing ${label}`)
+  }
+}
+
+if (/createProductJsonLd|store-products-schema/.test(storePageSource)) {
+  errors.push(
+    "/store: must not declare LIFT Product schema; /beauty/lift is canonical"
+  )
+}
+
+if (!/href=["']\/beauty\/lift["']/.test(homepageSource)) {
+  errors.push("/: missing direct canonical LIFT link")
+}
+
+if (
+  !/href=\{getCanonicalHomepageLiftHref\(featuredExperience\)\}/.test(
+    homepageSource
+  )
+) {
+  errors.push("/: primary LIFT CTA must use the canonical destination guard")
+}
+
+if (
+  HOMEPAGE_LIFT_FEATURE.key !== "lift-daily-ritual" ||
+  HOMEPAGE_LIFT_FEATURE.ctaHref !== "/beauty/lift" ||
+  !isCanonicalHomepageLiftFeatureDestination({
+    key: "lift-daily-ritual",
+    ctaHref: "/beauty/lift",
+  }) ||
+  getCanonicalHomepageLiftHref({
+    key: "lift-daily-ritual",
+    ctaHref: "/store",
+  }) !== "/beauty/lift"
+) {
+  errors.push("/: canonical LIFT feature destination guard is invalid")
+}
 
 for (const [route, source] of seoPages) {
   const absoluteSource = resolve(projectRoot, source)

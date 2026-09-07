@@ -4,6 +4,7 @@ import { BookingRequestFlow } from "@/components/booking/booking-request-flow"
 import { CtaBlock } from "@/components/shared/cta-block"
 import { resolveCalcomBookingLinks } from "@/lib/calcom-booking-links"
 import { getCalcomPublicEventTypes } from "@/lib/calcom"
+import { normalizeBookingServiceSlug } from "@/lib/booking-services"
 import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 import { createPageMetadata } from "@/lib/seo"
 
@@ -17,7 +18,7 @@ export const metadata = createPageMetadata({
 export default async function BookPage({
   searchParams,
 }: {
-  searchParams: Promise<{ service?: string }>
+  searchParams: Promise<{ service?: string | string[] }>
 }) {
   const [params, calcomResult] = await Promise.all([
     searchParams,
@@ -25,6 +26,7 @@ export default async function BookPage({
   ])
   const inquiryCollectionReady = isInquiryCollectionReady()
   const calLinksByServiceSlug = resolveCalcomBookingLinks(calcomResult)
+  const initialServiceSlug = normalizeBookingServiceSlug(params.service)
 
   const palmSpringsDateParts = new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
@@ -75,7 +77,7 @@ export default async function BookPage({
 
       <BookingRequestFlow
         calLinksByServiceSlug={calLinksByServiceSlug}
-        initialServiceSlug={params.service}
+        initialServiceSlug={initialServiceSlug}
         minimumDate={minimumDate}
       />
 

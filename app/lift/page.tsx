@@ -4,6 +4,7 @@ import { Check, LockKeyhole, Play } from "lucide-react"
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button"
 import { LiftPreviewFilm } from "@/components/home/lift-preview-film"
+import { JsonLd } from "@/components/seo/json-ld"
 import { BreathingSection } from "@/components/shared/breathing-section"
 import { BreathingText } from "@/components/shared/breathing-text"
 import { FaqAccordion } from "@/components/shared/internal-page"
@@ -15,13 +16,13 @@ import { Card } from "@/components/ui/card"
 import { PublicPreviewPlayer } from "@/components/video/public-preview-player"
 import { getAuthenticatedUser, getMemberAccess } from "@/lib/access"
 import { media } from "@/lib/media"
-import { createPageMetadata } from "@/lib/seo"
+import { createPageMetadata, createProductJsonLd } from "@/lib/seo"
 import { isProductCheckoutReady } from "@/lib/stripe"
 
 export const metadata = createPageMetadata({
-  title: "LIFT — Daily Facial Massage Guide | HWL by SMD",
+  title: "LIFT Facial Massage Video + PDF Guide | HWL by SMD",
   description:
-    "Seven movements. Five minutes a day. A daily facial massage ritual by Shannon Mary Dixon.",
+    "Learn Shannon Mary Dixon’s seven-movement, five-minute facial massage ritual with the complete guided video and downloadable PDF for $11.11.",
   path: "/beauty/lift",
 })
 
@@ -204,9 +205,23 @@ export default async function LiftPage() {
   const user = await getAuthenticatedUser()
   const access = user ? await getMemberAccess(user.id) : null
   const liftSalesReady = isProductCheckoutReady("lift_guide")
+  const liftProductSchema = createProductJsonLd({
+    id: "lift-video-pdf",
+    name: "LIFT — Video + PDF",
+    description:
+      "Learn Shannon Mary Dixon’s seven-movement, five-minute facial massage ritual with the complete guided video and downloadable PDF.",
+    path: "/beauty/lift",
+    price: "11.11",
+    image: "/images/editorial/lift-video-preview.jpg",
+    availability: liftSalesReady
+      ? "https://schema.org/InStock"
+      : "https://schema.org/OutOfStock",
+  })
 
   return (
     <>
+      <JsonLd data={liftProductSchema} id="lift-product-schema" />
+
       <BreathingSection
         background="gradient"
         className="flex min-h-[84svh] items-center"
@@ -224,7 +239,7 @@ export default async function LiftPage() {
             className="mt-6 max-w-3xl font-medium text-[var(--primary)]"
             size="hero"
           >
-            A Daily Facial Ritual
+            LIFT: A Daily Facial Massage Ritual
           </BreathingText>
           <BreathingText
             as="p"

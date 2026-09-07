@@ -5,7 +5,9 @@ import { test } from "node:test"
 import {
   bookingPillars,
   findBookingService,
+  getInitialBookingStep,
   isExactCalEventForBookingService,
+  normalizeBookingServiceSlug,
 } from "../lib/booking-services.ts"
 import { getBookingRequestPresentation } from "../lib/booking-request-presentation.ts"
 import { resolveCalcomBookingLinks } from "../lib/calcom-booking-links.ts"
@@ -141,6 +143,19 @@ test("Cal.com booking links preserve discovery authority and survive provider fa
 })
 
 test("booking catalog keeps available Cal discovery exact", async (t) => {
+  await t.test("query values resolve to one truthful initial step", () => {
+    assert.equal(normalizeBookingServiceSlug(undefined), undefined)
+    assert.equal(normalizeBookingServiceSlug("  "), undefined)
+    assert.equal(
+      normalizeBookingServiceSlug(["signature-facial", "moon-oracle-reading"]),
+      "signature-facial"
+    )
+    assert.equal(getInitialBookingStep(undefined), "experience")
+    assert.equal(getInitialBookingStep("not-a-service"), "experience")
+    assert.equal(getInitialBookingStep("signature-facial"), "schedule")
+    assert.equal(getInitialBookingStep("wild-glow-express-facial"), "schedule")
+  })
+
   await t.test("all public services have one unique canonical slug", () => {
     const slugs = services.map((service) => service.slug)
 
@@ -359,4 +374,20 @@ test("closed-mode presentation remains connected to the rendered email action", 
   assert.match(pausedPanel, /href=\{actionHref\}/)
   assert.doesNotMatch(calEmbed, /Send Shannon a booking request below/)
   assert.match(calEmbed, /shows any other available booking path/)
+})
+
+test("stepped booking keeps navigation and calendar recovery inside the journey", () => {
+  const bookingFlow = source("components/booking/booking-request-flow.tsx")
+  const calEmbed = source("components/booking/cal-inline-embed.tsx")
+
+  assert.match(bookingFlow, /aria-label="Booking progress"/)
+  assert.match(bookingFlow, /aria-current=\{isCurrent \? "step" : undefined\}/)
+  assert.match(bookingFlow, /window\.history\.pushState/)
+  assert.match(bookingFlow, /window\.addEventListener\("popstate"/)
+  assert.match(bookingFlow, /class CalendarEmbedBoundary/)
+  assert.match(bookingFlow, /Open calendar in a new tab/)
+  assert.match(bookingFlow, /onInitialReady=\{settleCalendarPosition\}/)
+  assert.match(calEmbed, /onInitialReady\?\.\(\)/)
+  assert.doesNotMatch(calEmbed, /styles:\s*\{/)
+  assert.match(calEmbed, /cssVarsPerTheme:\s*\{/)
 })

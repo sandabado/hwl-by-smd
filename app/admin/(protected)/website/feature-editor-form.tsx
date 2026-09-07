@@ -196,8 +196,8 @@ export function FeatureEditorForm({
                 Homepage LIFT door
               </p>
               <p className="mt-1 text-[11px] leading-5 text-[#7b837b]">
-                Edit the invitation, product truth, and destination. The
-                component layout remains locked.
+                Edit the invitation and product truth. The LIFT destination and
+                component layout remain locked.
               </p>
             </div>
             <span className="inline-flex min-h-7 items-center rounded-full bg-[#ad8659]/13 px-2.5 text-[10px] font-semibold text-[#876440]">
@@ -289,6 +289,7 @@ export function FeatureEditorForm({
                 maxLength={limits.ctaHref}
                 name="ctaHref"
                 placeholder="/beauty/lift"
+                readOnly
                 required
                 spellCheck={false}
                 type="text"
@@ -297,7 +298,8 @@ export function FeatureEditorForm({
                 className="mt-1.5 block text-[11px] leading-5 text-[#858c85]"
                 id="feature-cta-href-hint"
               >
-                Must begin with one slash and stay on this site.
+                Canonical LIFT destination, locked for consistent navigation and
+                search indexing.
               </span>
               <FieldError
                 errors={fieldErrors?.ctaHref}

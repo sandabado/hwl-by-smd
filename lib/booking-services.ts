@@ -212,6 +212,19 @@ export function findBookingService(serviceSlug?: string) {
   return null
 }
 
+export function normalizeBookingServiceSlug(
+  service: string | string[] | undefined
+) {
+  const candidate = Array.isArray(service) ? service[0] : service
+  const normalized = candidate?.trim()
+
+  return normalized || undefined
+}
+
+export function getInitialBookingStep(serviceSlug?: string) {
+  return findBookingService(serviceSlug) ? "schedule" : "experience"
+}
+
 export function isExactCalEventForBookingService(
   service: BookingService,
   eventType: {

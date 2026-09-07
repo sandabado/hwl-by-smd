@@ -16,14 +16,37 @@ const CAL_UI_CONFIG = {
   theme: "light",
   layout: "week_view",
   hideEventTypeDetails: true,
-  styles: {
-    body: { background: "#faf7f2" },
-    eventTypeListItem: {
-      background: "#fffaf4",
-      color: "#2b2724",
+  cssVarsPerTheme: {
+    light: {
+      "cal-brand": "#765538",
+      "cal-brand-emphasis": "#5e432d",
+      "cal-brand-text": "#fffaf4",
+      "cal-bg": "#faf7f2",
+      "cal-bg-subtle": "#fffaf4",
+      "cal-bg-muted": "#f3eee7",
+      "cal-text": "#2b2724",
+      "cal-text-emphasis": "#2b2724",
+      "cal-text-subtle": "#6f675f",
+      "cal-text-muted": "#8b8178",
+      "cal-border": "#ded6cc",
+      "cal-border-emphasis": "#765538",
+      "cal-border-subtle": "#e7dfd5",
     },
-    availabilityDatePicker: { background: "#faf7f2" },
-    branding: { brandColor: "#765538" },
+    dark: {
+      "cal-brand": "#d8b98e",
+      "cal-brand-emphasis": "#ead0aa",
+      "cal-brand-text": "#20251f",
+      "cal-bg": "#20251f",
+      "cal-bg-subtle": "#293027",
+      "cal-bg-muted": "#333b31",
+      "cal-text": "#f7f3ec",
+      "cal-text-emphasis": "#ffffff",
+      "cal-text-subtle": "#d7d2c9",
+      "cal-text-muted": "#aaa69e",
+      "cal-border": "#4b5548",
+      "cal-border-emphasis": "#d8b98e",
+      "cal-border-subtle": "#3b4439",
+    },
   },
 } as const
 
@@ -34,6 +57,8 @@ export interface CalInlineEmbedProps {
   calLink: string
   serviceTitle: string
   className?: string
+  onInitialReady?: () => void
+  showExternalLink?: boolean
 }
 
 function normalizeCalLink(calLink: string) {
@@ -58,6 +83,8 @@ function CalEmbedInstance({
   calLink,
   serviceTitle,
   className,
+  onInitialReady,
+  showExternalLink = true,
 }: CalInlineEmbedProps) {
   const reactId = useId()
   const [status, setStatus] = useState<EmbedStatus>("loading")
@@ -84,6 +111,7 @@ function CalEmbedInstance({
 
   useEffect(() => {
     let active = true
+    let hasReportedReady = false
     let api: Awaited<ReturnType<typeof getCalApi>> | undefined
 
     const handleReady = () => {
@@ -95,6 +123,11 @@ function CalEmbedInstance({
       if (iframe instanceof HTMLIFrameElement) iframe.title = iframeTitle
 
       setStatus("ready")
+
+      if (!hasReportedReady) {
+        hasReportedReady = true
+        onInitialReady?.()
+      }
     }
     const handleFailure = () => {
       if (!active) return
@@ -125,7 +158,7 @@ function CalEmbedInstance({
       api?.("off", { action: "linkReady", callback: handleReady })
       api?.("off", { action: "linkFailed", callback: handleFailure })
     }
-  }, [iframeId, iframeTitle, namespace])
+  }, [iframeId, iframeTitle, namespace, onInitialReady])
 
   return (
     <section
@@ -203,18 +236,20 @@ function CalEmbedInstance({
         )}
       </div>
 
-      <div className="flex justify-end border-t border-[var(--border)] px-5 py-4 sm:px-7">
-        <a
-          aria-label={`Open ${serviceTitle} scheduling in Cal.com in a new tab`}
-          className="inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)] underline-offset-4 transition-colors hover:text-[var(--primary)] hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
-          href={externalUrl}
-          rel="noreferrer"
-          target="_blank"
-        >
-          Open in Cal.com
-          <ExternalLink aria-hidden="true" className="size-4" />
-        </a>
-      </div>
+      {showExternalLink ? (
+        <div className="flex justify-end border-t border-[var(--border)] px-5 py-4 sm:px-7">
+          <a
+            aria-label={`Open ${serviceTitle} scheduling in Cal.com in a new tab`}
+            className="inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)] underline-offset-4 transition-colors hover:text-[var(--primary)] hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
+            href={externalUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            Open in Cal.com
+            <ExternalLink aria-hidden="true" className="size-4" />
+          </a>
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -223,6 +258,8 @@ export function CalInlineEmbed({
   calLink,
   serviceTitle,
   className,
+  onInitialReady,
+  showExternalLink,
 }: CalInlineEmbedProps) {
   const normalizedCalLink = normalizeCalLink(calLink)
 
@@ -245,7 +282,9 @@ export function CalInlineEmbed({
       calLink={normalizedCalLink}
       className={className}
       key={normalizedCalLink}
+      onInitialReady={onInitialReady}
       serviceTitle={serviceTitle}
+      showExternalLink={showExternalLink}
     />
   )
 }

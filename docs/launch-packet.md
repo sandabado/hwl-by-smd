@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** September 6, 2026
+**Updated:** September 7, 2026
 
 **Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
 Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
@@ -8,6 +8,97 @@ Vercel apex-to-www redirect, `https://preview.hwlbysmd.com` for the protected
 custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
+
+## September 7 Current Candidate — Launch Authority
+
+This section is the current release truth. It supersedes conflicting deployment,
+environment-inventory, administrator, and readiness statements in the dated
+records below. Those records remain as historical evidence only.
+
+- **Exact code and Preview:** commit
+  `880fda518b90d6767084a01a0e6832b960d28446` is clean, pushed only on
+  `checkpoint/platform-overhaul-2026-08-20`, and passed GitHub Actions run
+  `34148956025`. `main` remains untouched. READY Preview deployment
+  `dpl_BDucxTqrGjSXenahgBGGLxn5wogK`
+  (`hwl-by-dv9b432j4-whole-body-earth.vercel.app`) is the exact build currently
+  assigned to `https://preview.hwlbysmd.com`.
+- **Public Production remains separate and closed:** `hwlbysmd.com` and
+  `www.hwlbysmd.com` still resolve to older READY Production deployment
+  `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz`, source `a0152df52570197601260dbe02ffac88aa7988c8`.
+  It has the older navigation, booking layout, and LIFT presentation. Its cart
+  truthfully reports that secure checkout is opening soon. The 24 required
+  encrypted Production environment-variable names are present, but name
+  inventory is not secret-value, account-boundary, or end-to-end proof. No
+  Production alias, environment value, provider object, or live-money state was
+  changed in this pass.
+- **Candidate experience:** the Preview has the enterprise navigation, the
+  full-width two-step booking journey, a dedicated calendar step, canonical
+  query/hash deep links and browser-Back behavior, stronger homepage and menu
+  discovery for LIFT, and canonical LIFT Product structured data at
+  `/beauty/lift`. Desktop and 390 x 844 mobile checks found no horizontal
+  overflow or application console errors. The Preview cart contains one
+  `LIFT — Video + PDF` item at `$11.11` and enables sandbox checkout. No new
+  Checkout Session was created during this verification.
+- **Verification:** the Next.js 16.3.1 Webpack Production build completed all
+  62 route/page entries. TypeScript, ESLint, and SEO validation pass for 21
+  pages, 21 metadata records, and seven long-form documents. Focused boundary
+  suites pass 225 cases: booking 22/22, accessibility 5/5, commerce 74/74,
+  Auth 40/40, inquiries 21/21, launch environment 44/44, and Preview release
+  19/19. Full and Production-only npm audits report zero vulnerabilities. The
+  exact Preview deployment had no recent Vercel error-level or HTTP 500 log
+  entries in the queried window.
+- **Cal.com is public-booking operational:** the public API returns exactly the
+  ten expected active event types, with no missing or unexpected service. All
+  ten expose live openings in the current Preview, require manual confirmation,
+  block pending slots, enforce 48 hours' notice and 60-minute before/after
+  buffers, collect required guest-count and location answers, and use no Cal
+  payment. Wild Glow Express intentionally remains inquiry-only. Slot selection
+  reaches the attendee form on desktop and mobile; Confirm was not activated,
+  so this pass created no booking. Private destination/conflict settings,
+  Apple-calendar conflict injection, simultaneous confirmation, Shannon's
+  organizer-mailbox receipt, and a fresh complete lifecycle on this exact
+  Preview remain human/provider checks.
+- **Supabase Production is healthy and isolated:** project
+  `qwprhsrwiihfllmgallr` is `ACTIVE_HEALTHY` in `us-east-2`, and migration
+  effects through 015 are observed. The private `member-content` bucket denies
+  anonymous object access. Fresh signed streams for the canonical PDF
+  (6,036,808 bytes, SHA-256
+  `652c3c6eb6e87a44d47e5326e4e3a385d3704596a19020bc75ae318c6c117ad6`)
+  and video (46,514,399 bytes, SHA-256
+  `d3d3c7a390a4b8c199ae0970533c0c14ab4327ba7d3e53d7662c895d4860bf23`)
+  match their canonical local files byte for byte. Production public Auth/media
+  routes deny anonymous users. One durable inquiry is `received`, with its
+  notification accepted by Resend; public inquiry collection remains paused,
+  and monitored-mailbox receipt is not proven. Both approved Auth identities
+  exist, but `shannon@hwlbysmd.com` and `admin@ghosthand.studio` remain
+  email-unconfirmed, never signed in, and `is_admin=false`. The current schema
+  supports only equal administrator grants; a distinct Ghosthand super-admin
+  role requires an approved role-model change. Legacy Supabase JWT keys remain
+  enabled pending a verified modern-key cutover and explicit retirement.
+- **Stripe live objects are ready, but live application commerce is not yet
+  proven:** canonical account `acct_1U9cEIPTLuM8Maxa` has Payments and Payouts
+  active. Active Product `prod_VCotDELRoHDnox`, one-time `$11.11` Price
+  `price_1UCPFjPTLuM8MaxaTY48RO9e`, and four-event Production webhook
+  `we_1UCPJEPTLuM8MaxawK9UgEHh` match the required LIFT metadata and canonical
+  endpoint. There are zero live webhook deliveries and zero live application
+  purchases, so payment-to-entitlement-to-private-media fulfillment is not yet
+  proven. Stripe Checkout still does not display the approved public support
+  contact, support URL, Terms/Privacy URLs, or refund-policy link. The sandbox
+  webhook also needs repair: completed events returned HTTP 200, expired events
+  returned HTTP 503, and its exposed Preview automation-bypass credential must
+  be rotated, rebound, verified, and revoked under a narrow approval.
+
+**Launch sequence from this checkpoint:** first complete Stripe's public
+support/legal presentation and repair the isolated sandbox webhook credential;
+then explicitly approve deploying this exact candidate as a Production build
+with sales and inquiries still closed. Verify the closed candidate against the
+Production Supabase ref, protected media, unsigned-webhook rejection, and the
+reconciliation cron. Only after those checks should the owner separately
+authorize one real `$11.11` purchase and live-sales enablement. Confirm the
+Stripe event, order, purchase, entitlement, video, and PDF chain before leaving
+sales open. Administrator invitation acceptance/elevation, monitored inquiry
+receipt, public inquiry opening, and legacy-key retirement remain separately
+controlled owner actions.
 
 ## September 6 Checkpoint Preview Verification — Current Authority
 

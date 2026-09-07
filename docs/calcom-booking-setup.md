@@ -11,9 +11,11 @@ lists all ten exact-match website services as active public event types.
 
 The `/book` page discovers public event types and exposes a live date/time
 selector only when Cal.com's slug, title, and fixed duration exactly match the
-website catalog. It keeps the manual inquiry path available for alternate times
-and fails closed to that path if Cal.com is unavailable or a provider record
-does not match. The website never fabricates availability.
+website catalog. If discovery itself is unavailable, the site preserves access
+to the ten known direct Cal.com event URLs; Cal.com remains the authority for
+whether those pages have inventory. If discovery succeeds but a required
+provider record is empty or does not exactly match, that service fails closed
+to its inquiry path. The website never fabricates availability.
 
 The public embed does not require a Cal.com API key. Do not create or expose an
 API key for the launch embed.

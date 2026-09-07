@@ -2350,3 +2350,43 @@ payment flow.
   and the organizer still showed zero Upcoming and zero Unconfirmed bookings.
   This closes browser-level mobile pointer activation without claiming a
   physical-device touch test.
+
+## September 6 Current-Checkpoint Closed-Sales Candidate Rebuild
+
+- Clean checkpoint `c226155814e2cf0012c702f4e796525cf81573b4` was uploaded
+  as isolated Production-target deployment
+  `dpl_9pXgahHvEuTjRjsem6joeLhTWHCN` at
+  `hwl-by-hgeiorkx2-whole-body-earth.vercel.app`. Vercel reports target
+  `production`, region `iad1`, and state `READY`. The deployment received only
+  the project-default Vercel alias; `hwlbysmd.com` and `www.hwlbysmd.com`
+  remained on the existing public deployment, and `preview.hwlbysmd.com`
+  remained on the exact tested Preview. No custom domain was reassigned.
+- The remote build consumed the current 24-name Production environment,
+  including encrypted `COMMERCE_ALERT_TO_EMAIL`, and found no local
+  `.env.local`. The actual remote launch validator passed in Production closed
+  mode with `COMMERCE_SALES_READY=false` and
+  `NEXT_PUBLIC_INQUIRY_COLLECTION_READY=false`. SEO validation covered 21
+  pages, 21 metadata records, and seven long-form documents; Next.js 16.3.1
+  compiled successfully, TypeScript passed, and all 62 route/page entries were
+  generated. The only build warning remains the optional LIFT captions storage
+  follow-up.
+- Authenticated deployment-protection smoke checks returned HTTP 200 for `/`,
+  `/beauty/lift`, `/book?service=intuitive-tarot-reading`, and `/login`. A valid
+  same-origin `lift_guide` checkout request returned the intentional closed-sales
+  HTTP 503 before authentication or Stripe access. A valid same-origin contact
+  request returned the intentional closed-inquiry HTTP 503 with
+  `received:false` before persistence or Resend access. Anonymous LIFT video
+  returned HTTP 401; anonymous PDF delivery returned HTTP 307 to the scoped
+  library login; an unsigned Stripe webhook returned HTTP 400; and both cron
+  endpoints returned HTTP 401 without their bearer.
+- The post-smoke deployment log read returned zero error-level and zero
+  warning-level events. Its complete 5xx result contained only the two expected
+  safety canaries: one `/api/checkout` HTTP 503 and one `/api/contact` HTTP 503.
+  No live Checkout Session, payment, booking, inquiry row, provider email,
+  entitlement, reconciliation run, or administrator change was created.
+- Stripe still does not display a saved public customer-support email in the
+  canonical live account. The owner reconfirmed
+  `shannon@hwlbysmd.com` as the canonical Stripe business and customer-support
+  email. The provider form remains a human-completion gate: save that exact
+  value and reread it before opening sales. Do not change Stripe login,
+  representative, payout ownership, or purchaser receipt addressing.

@@ -148,8 +148,12 @@ operator.
 Do not infer that the notification recipient, a local demo administrator, or any
 existing Auth identity is the intended production administrator.
 
-Use this sequence only after the owner names and approves the exact normalized
-administrator email:
+The owner-approved Production identities are `shannon@hwlbysmd.com` as the
+permanent administrator and `admin@ghosthand.studio` as the operational super
+admin and retention operator. The application still grants only one technical
+administrator tier, `profiles.is_admin`; the operational title does not create
+a second hidden privilege tier. Apply the following sequence independently to
+each exact normalized identity:
 
 1. The owner creates or signs into that exact account through the ordinary
    `/login?redirectTo=/admin/inquiries` Supabase flow and completes email

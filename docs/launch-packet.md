@@ -2467,3 +2467,77 @@ payment flow.
 - A fresh sanitized Auth read still finds exactly the two approved Production
   identities, both unconfirmed and never signed in. Their two matching profiles
   both remain `is_admin=false`, and the total administrator count remains zero.
+
+## September 6 Evening Launch Recheck
+
+- The checkpoint worktree remains clean and exactly synchronized with
+  `origin/checkpoint/platform-overhaul-2026-08-20` at
+  `c6e578518bb2d9272769dbf2f91f950083066c5b`. `main` and `origin/main` remain
+  unchanged at `a6902607f42a3c66506758d4886fb4a2d61d99e2`. GitHub CI run
+  `34071737636` passed for the exact checkpoint SHA. A fresh local pass also
+  completed ESLint, TypeScript, all 218 Auth/booking/commerce/inquiry/launch
+  boundary tests, the repository-only synchronized Preview preflight, SEO for
+  21 pages and 21 metadata records, and the Next.js 16.3.1 Webpack Production
+  build with all 62 route/page entries.
+- The complete 11-page canonical LIFT guide was rendered again from
+  `private-content/lift/lift-guide.pdf`. All pages are legible and free of
+  clipping or overlap defects. Page 6 contains the corrected Jawline Lift
+  support statement; page 9 contains distinct Lymphatic Sweep and Neck Release
+  instructions. Its current 6,036,808-byte SHA-256 remains
+  `652c3c6eb6e87a44d47e5326e4e3a385d3704596a19020bc75ae318c6c117ad6`,
+  matching the previously byte-verified private Production object. No PDF was
+  edited or re-exported.
+- A fresh public Cal.com API read returned exactly ten visible event types. All
+  titles, slugs, fixed reservation lengths, and three approved schedule IDs
+  still match the website catalog. Every event still uses 48 hours' notice,
+  60-minute before/after buffers, `always` confirmation that blocks unconfirmed
+  requests, zero Cal payment, required `guestCount` and `locationDetails`
+  questions, and the approved per-family daily caps. The current public
+  Production embed rendered the Intuitive Tarot attendee form with Cal Video
+  or attendee-address choice and its two required custom questions; Confirm was
+  not activated and no booking was created.
+- Public `hwlbysmd.com` and `www.hwlbysmd.com` still resolve to older READY
+  Production deployment `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz` at source
+  `a0152df52570197601260dbe02ffac88aa7988c8`. The current exact-checkpoint
+  Preview is READY at `dpl_4d2GYhrrXWc3dURugWtxCFbqBdnJ` and remains behind
+  Vercel sign-in protection. The intended closed-sales Production candidate
+  remains READY at `dpl_9pXgahHvEuTjRjsem6joeLhTWHCN`, source
+  `c226155814e2cf0012c702f4e796525cf81573b4`, with no HWL custom alias. The
+  public site and intended candidate both validate as live Stripe mode with
+  sales and inquiry collection closed. Their public pages return HTTP 200;
+  same-origin checkout and inquiry canaries return the intentional HTTP 503.
+- The canonical live Stripe account remains Active with Payments and Payouts
+  capabilities active. Its Complete LIFT Product and exact one-time USD $11.11
+  Price remain active with the required `lift_guide` / `video_and_pdf`
+  metadata. The clean Production webhook remains active at the canonical public
+  path for the four required events, but it has zero deliveries this week and
+  there are still zero live payments. Therefore no live checkout, webhook,
+  entitlement, or delivery success is claimed. Stripe still shows blank public
+  support email, support URL, Privacy URL, and Terms URL, with its refund/legal/
+  support display toggles off. The owner has selected
+  `shannon@hwlbysmd.com` as the Stripe business/customer-support email; it must
+  still be saved and reread in Stripe without altering the separate login,
+  representative, or payout identities.
+- The sandbox retains exactly three $11.11 test PaymentIntents: one intact
+  success, one disputed, and one fully refunded. Its current webhook health is
+  not green: three `checkout.session.completed` deliveries returned HTTP 200,
+  while six `checkout.session.expired` attempts returned HTTP 503. During this
+  read-only audit the stored Preview endpoint rendered its Vercel automation-
+  bypass query credential into restricted tool output. The value is not
+  repeated or present in the repository and must be treated as compromised.
+  Before another sandbox lifecycle rehearsal, rotate only that Preview
+  automation-bypass credential, update only the sandbox webhook destination and
+  any authorized automation client, prove signed HTTP 200 delivery, and revoke
+  the old credential. Live Stripe keys, the live webhook signing secret,
+  Production aliases, and Production environment are outside this incident.
+- Production Supabase still has the legacy JWT anon/service-role keys enabled.
+  A modern-secret aggregate read reconfirmed exactly one Auth user and one
+  profile for each approved identity. `shannon@hwlbysmd.com` remains the
+  permanent administrator and `admin@ghosthand.studio` the operational super
+  admin/retention operator; both are still unconfirmed, have never signed in,
+  and remain `is_admin=false`. The isolated Production inquiry proof remains
+  exactly one durable `received` row with notification `accepted` and no error.
+  Public inquiry collection remains closed. Legacy-key retirement, both human
+  invitation acceptances, exact-identity elevation, public inquiry opening, the
+  closed-candidate alias move, and the first owner-driven live $11.11 purchase
+  all remain explicit launch gates.

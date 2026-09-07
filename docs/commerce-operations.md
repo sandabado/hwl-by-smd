@@ -491,8 +491,9 @@ immediate fulfillment SLA: signed webhooks remain primary and the bounded
 authenticated page recovery remains the near-term customer-session fallback.
 Before Production commerce is enabled, the owner must either accept and
 document the daily recovery delay or upgrade to Pro and verify a 15-minute
-schedule. In both cases, alert routing needs a named human destination and a
-missed-cron check; `alert_pending` alone does not notify anyone.
+schedule. The approved Production alert destination is
+`admin@ghosthand.studio`; its actual delivery and the missed-cron check still
+need to be exercised. `alert_pending` alone does not notify anyone.
 
 Preview must validate sandbox checkout, webhook, authenticated fallback,
 scheduled report/repair/monitoring/terminal/manual-review flows, stale-token
@@ -523,7 +524,8 @@ retained with sanitized evidence.
 - [ ] Full refund revokes both media assets; partial-refund behavior is explicitly accepted or prohibited.
 - [ ] Dispute creation revokes both media assets and remains terminal.
 - [ ] Anonymous and wrong-user access remain denied throughout.
-- [ ] Alert routing and the evidence template have an owner.
+- [ ] A sanitized recovery alert reaches the approved operational super admin
+      at `admin@ghosthand.studio`, and the evidence template is retained.
 
 Preview readiness does not authorize live keys, live mode, Production data, or Production activation.
 

@@ -3,7 +3,7 @@ export const SITE_CONFIG = {
   tagline: "Beauty · Body · Being",
   description:
     "Beauty, movement and ritual practices, products and experiences by Shannon Mary Dixon, with a real-world home in Palm Springs and Joshua Tree.",
-  email: "shannon@hwlbysmd.com",
+  email: "shannonmarydixon@gmail.com",
   phone: "617.671.8636",
   instagramPersonal: "@shannmarydix",
   instagramBrand: "@hwl.bysmd",

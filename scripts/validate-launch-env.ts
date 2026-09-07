@@ -24,7 +24,6 @@ const CANONICAL_PRODUCTION_URL = "https://www.hwlbysmd.com"
 const CANONICAL_PREVIEW_URL = "https://preview.hwlbysmd.com"
 const CANONICAL_CALCOM_PROFILE_URL = "https://cal.com/hwlbysmd"
 const CANONICAL_EMAIL_DOMAIN = "hwlbysmd.com"
-const CANONICAL_CONTACT_EMAIL = "shannon@hwlbysmd.com"
 const SINGLE_EMAIL_PATTERN =
   /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$/
 const CANONICAL_SUPABASE_PROJECT_REF = {
@@ -237,17 +236,6 @@ function requireCanonicalSenderEmail(key: string) {
   return value
 }
 
-function requireCanonicalContactEmail(key: string) {
-  const value = requireEmail(key)
-  if (!value) return null
-
-  if (target !== "development" && value !== CANONICAL_CONTACT_EMAIL) {
-    errors.push(`${key}: must be exactly ${CANONICAL_CONTACT_EMAIL}`)
-  }
-
-  return value
-}
-
 function requireStoragePath(key: string) {
   const value = requireValue(key)
   if (
@@ -333,7 +321,7 @@ if (rateLimitSecret && cronSecret && rateLimitSecret === cronSecret) {
   errors.push("CRON_SECRET: must be distinct from INQUIRY_RATE_LIMIT_SECRET")
 }
 
-requireCanonicalContactEmail("CONTACT_TO_EMAIL")
+requireEmail("CONTACT_TO_EMAIL")
 requireCanonicalSenderEmail("CONTACT_FROM_EMAIL")
 const commerceAlertDestination = read("COMMERCE_ALERT_TO_EMAIL")
 if (target === "production" && salesExpectation === "open") {

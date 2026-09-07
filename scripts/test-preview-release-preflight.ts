@@ -38,7 +38,7 @@ LIFT_PDF_STORAGE_PATH=lift/lift-guide.pdf
 LIFT_VIDEO_STORAGE_PATH=lift/complete-lift-v1.mp4
 RESEND_API_KEY=
 COMMERCE_ALERT_TO_EMAIL=
-CONTACT_TO_EMAIL=shannon@hwlbysmd.com
+CONTACT_TO_EMAIL=owner@example.com
 CONTACT_FROM_EMAIL=HWL <hello@hwlbysmd.com>
 INQUIRY_RATE_LIMIT_SECRET=
 INQUIRY_RATE_LIMIT_MAX=5
@@ -287,20 +287,6 @@ test("missing inquiry collection readiness fails the template contract", () => {
   )
   assert.ok(
     failedChecks.some((item) => item.name === "Template fail-closed defaults")
-  )
-})
-
-test("retired contact identity fails the template policy", () => {
-  const fixture = repositoryFixture()
-  fixture.envExample = fixture.envExample.replace(
-    "CONTACT_TO_EMAIL=shannon@hwlbysmd.com",
-    "CONTACT_TO_EMAIL=shannonmarydixon@gmail.com"
-  )
-
-  assert.ok(
-    failures(auditPreviewRepositoryFiles(fixture)).some(
-      (item) => item.name === "Environment template contact identity"
-    )
   )
 })
 

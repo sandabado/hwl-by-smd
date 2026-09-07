@@ -1,5 +1,4 @@
 import { LegalPage, type LegalSection } from "@/components/shared/legal-page"
-import { SITE_CONFIG } from "@/lib/constants"
 import { createPageMetadata } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
@@ -13,7 +12,7 @@ const sections: LegalSection[] = [
   {
     title: "Digital products",
     body: [
-      `LIFT includes the guided video and downloadable PDF in one purchase. It may be refunded within 14 days of purchase. Contact ${SITE_CONFIG.email} with the email used for checkout.`,
+      "LIFT includes the guided video and downloadable PDF in one purchase. It may be refunded within 14 days of purchase. Contact shannonmarydixon@gmail.com with the email used for checkout.",
     ],
   },
   {

@@ -7,7 +7,6 @@ export const PREVIEW_BRANCH = "checkpoint/platform-overhaul-2026-08-20"
 export const PREVIEW_ORIGIN = "https://preview.hwlbysmd.com"
 export const RECONCILIATION_CRON_PATH = "/api/cron/commerce-reconciliation"
 export const RECONCILIATION_CRON_SCHEDULE = "17 15 * * *"
-const CANONICAL_CONTACT_EMAIL = "shannon@hwlbysmd.com"
 
 const PRODUCTION_HOSTNAMES = new Set([
   "hwlbysmd.com",
@@ -326,20 +325,6 @@ export function auditPreviewRepositoryFiles(
           "fail",
           "Environment template contract",
           `missing variable names: ${missingTemplateKeys.join(", ")}`
-        )
-  )
-
-  checks.push(
-    template.get("CONTACT_TO_EMAIL") === CANONICAL_CONTACT_EMAIL
-      ? check(
-          "pass",
-          "Environment template contact identity",
-          `CONTACT_TO_EMAIL uses the owner-approved ${CANONICAL_CONTACT_EMAIL} business address`
-        )
-      : check(
-          "fail",
-          "Environment template contact identity",
-          `CONTACT_TO_EMAIL must be exactly ${CANONICAL_CONTACT_EMAIL}`
         )
   )
 

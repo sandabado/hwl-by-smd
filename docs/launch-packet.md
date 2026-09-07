@@ -20,9 +20,13 @@ records below. Those records remain as historical evidence only.
   `checkpoint/platform-overhaul-2026-08-20`, and passed GitHub Actions run
   `34152833811`. Its READY Preview is
   `dpl_EeMzfsFeC3wsk7En5Z8cYYS26BzF`
-  (`hwl-by-9qynkdbl3-whole-body-earth.vercel.app`), and
-  `https://preview.hwlbysmd.com` resolves to this deployment. Any later
-  runtime-code commit requires fresh verification. `main` remains untouched.
+  (`hwl-by-9qynkdbl3-whole-body-earth.vercel.app`). Documentation-only
+  descendant `6aab6396cd62cc13139d9f86b026ef0ececeb4ab` passed GitHub Actions run
+  `34153186250` and deployed READY as `dpl_GYRcsXTCF7R5BHhXox27gSUuzxRt`.
+  `https://preview.hwlbysmd.com` is the stable branch Preview entry and may move
+  through later documentation-only descendants without changing the audited
+  runtime application code. Any later runtime-code commit requires fresh
+  verification. `main` remains untouched.
 - **Public Production remains separate and closed:** `hwlbysmd.com` and
   `www.hwlbysmd.com` still resolve to older READY Production deployment
   `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz`, source `a0152df52570197601260dbe02ffac88aa7988c8`.

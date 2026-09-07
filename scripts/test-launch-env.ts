@@ -31,7 +31,7 @@ const developmentFixture: NodeJS.ProcessEnv = {
   CALCOM_PROFILE_URL: "https://cal.com/hwlbysmd",
   COMMERCE_SALES_READY: "false",
   CONTACT_FROM_EMAIL: "HWL by SMD <hello@hwlbysmd.com>",
-  CONTACT_TO_EMAIL: "shannonmarydixon@gmail.com",
+  CONTACT_TO_EMAIL: "shannon@hwlbysmd.com",
   HWL_DEPLOYMENT_TARGET: "development",
   INQUIRY_RATE_LIMIT_MAX: "5",
   LIFT_PDF_STORAGE_PATH: "lift/lift-guide.pdf",
@@ -104,6 +104,17 @@ const fixtures: Fixture[] = [
     expectedText:
       "Launch environment preflight passed for development (closed sales).",
     name: "development closed",
+  },
+  {
+    args: ["--target=development", "--expect-sales=closed"],
+    env: {
+      ...developmentFixture,
+      CONTACT_TO_EMAIL: "developer@example.com",
+    },
+    expectedExit: 0,
+    expectedText:
+      "Launch environment preflight passed for development (closed sales).",
+    name: "development permits a valid local inquiry recipient",
   },
   {
     args: ["--target=preview", "--expect-sales=closed"],
@@ -352,6 +363,26 @@ const fixtures: Fixture[] = [
     expectedText:
       "CONTACT_FROM_EMAIL: must use the owner-controlled hwlbysmd.com sender domain",
     name: "unapproved sender domain fails",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      CONTACT_TO_EMAIL: "shannonmarydixon@gmail.com",
+    },
+    expectedExit: 1,
+    expectedText: "CONTACT_TO_EMAIL: must be exactly shannon@hwlbysmd.com",
+    name: "retired inquiry destination fails",
+  },
+  {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: {
+      ...productionFixture,
+      CONTACT_TO_EMAIL: "owner@example.com",
+    },
+    expectedExit: 1,
+    expectedText: "CONTACT_TO_EMAIL: must be exactly shannon@hwlbysmd.com",
+    name: "Production rejects a noncanonical inquiry destination",
   },
   {
     args: ["--target=preview", "--expect-sales=closed"],

@@ -2541,3 +2541,54 @@ payment flow.
   invitation acceptances, exact-identity elevation, public inquiry opening, the
   closed-candidate alias move, and the first owner-driven live $11.11 purchase
   all remain explicit launch gates.
+
+## September 6 Canonical Business Email Alignment
+
+- The owner identified `shannon@hwlbysmd.com` as Shannon's canonical HWLbySMD
+  business email in addition to her permanent site-administrator identity. The
+  public site had still exposed `shannonmarydixon@gmail.com` through its shared
+  site configuration and refund policy. The checkpoint candidate now uses the
+  canonical HWL address in the contact page, footer, legal pages, structured
+  business data, direct-email booking fallbacks, refund instructions, and the
+  committed inquiry-destination template. The local uncommitted environment was
+  aligned without logging its other values.
+- The launch validator now rejects any Preview or Production
+  `CONTACT_TO_EMAIL` other than exactly `shannon@hwlbysmd.com`; development
+  retains valid local-recipient flexibility. The repository Preview policy also
+  requires that exact non-secret template value. Regression coverage passed 21
+  booking checks, 47 launch-environment cases, and 20 Preview-policy checks.
+  ESLint, TypeScript, SEO validation for 21 pages and 21 metadata records, and
+  the Next.js 16.3.1 Webpack Production build with all 62 route/page entries
+  also passed. A local browser reread rendered the exact address in the contact
+  page, both mail links, footer, and LIFT refund instructions.
+- This repository alignment is not Stripe persistence evidence. A fresh
+  sanitized live-account read still found the public support email, support
+  URL, Privacy URL, and Terms URL blank, with the refund/legal/support Checkout
+  display controls off. The separate Stripe representative email was observed
+  unchanged and was not treated as the owner-selected customer-facing business
+  contact. A human must save the four approved public-details values and enable
+  the three display controls before the first live sale.
+- The same read reconfirmed the active live $11.11 one-time LIFT Price, active
+  Product, clean four-event Production webhook, zero live webhook deliveries,
+  and zero live payments. No live Checkout Session, charge, entitlement, or
+  fulfillment proof exists yet. The sandbox webhook remains enabled for the
+  four exact events, but its compromised Preview-bypass destination was not
+  inspected or replayed; rotation still requires the previously stated narrow
+  approval.
+- Public Vercel aliases still resolve to READY deployment
+  `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz` at source
+  `a0152df52570197601260dbe02ffac88aa7988c8`. The protected Preview remained
+  READY at `dpl_A1DBaVXCsbU648xpEwfNJiY5Rkys`, exact source
+  `50159f4a75f3e5e61ee6262d6d38e7e89d19ab65`, before this email-alignment
+  commit. Public checkout and inquiry canaries remained intentionally closed;
+  authenticated Preview checkout stopped at scoped login and created no order
+  or Session.
+- Cal.com still exposes exactly ten catalog-matching event types with live
+  time selection, required guest-count and location questions, manual
+  confirmation, 48-hour notice, one-hour buffers, approved per-family daily
+  caps, and no Cal payment. A fresh public interaction reached the attendee
+  form and backed out without submitting. Supabase Production remains current
+  through migration 015, but both legacy JWT keys are still enabled and both
+  approved administrator identities remain unconfirmed, never signed in, and
+  `is_admin=false`. No provider, alias, payment, booking, invitation, or
+  privilege mutation was made during these rereads.

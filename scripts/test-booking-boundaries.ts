@@ -10,8 +10,13 @@ import {
 import { getBookingRequestPresentation } from "../lib/booking-request-presentation.ts"
 import { resolveCalcomBookingLinks } from "../lib/calcom-booking-links.ts"
 import { getCalcomPublicEventTypes } from "../lib/calcom.ts"
+import { SITE_CONFIG } from "../lib/constants.ts"
 
 const services = bookingPillars.flatMap((pillar) => pillar.services)
+
+test("public business identity uses Shannon's canonical HWL email", () => {
+  assert.equal(SITE_CONFIG.email, "shannon@hwlbysmd.com")
+})
 
 function source(path: string) {
   return readFileSync(new URL(`../${path}`, import.meta.url), "utf8")
@@ -247,14 +252,14 @@ test("booking catalog keeps available Cal discovery exact", async (t) => {
 })
 
 test("booking request presentation stays actionable in both readiness states", async (t) => {
-  const recipientEmail = "shannonmarydixon@gmail.com"
+  const recipientEmail = "shannon@hwlbysmd.com"
 
   const scenarios = [
     {
       calendarBookingKind: "inquiry-only" as const,
       closed: {
         actionHref:
-          "mailto:shannonmarydixon@gmail.com?subject=Booking%20request%3A%20Wild%20Glow%20Express%20Facial",
+          "mailto:shannon@hwlbysmd.com?subject=Booking%20request%3A%20Wild%20Glow%20Express%20Facial",
         actionLabel: "Email Shannon about Wild Glow Express Facial",
         announcement:
           "Use the email link below to arrange this experience directly. The website request form is paused.",
@@ -273,7 +278,7 @@ test("booking request presentation stays actionable in both readiness states", a
       calendarBookingKind: "exact-event" as const,
       closed: {
         actionHref:
-          "mailto:shannonmarydixon@gmail.com?subject=Booking%20request%3A%20Signature%20Facial",
+          "mailto:shannon@hwlbysmd.com?subject=Booking%20request%3A%20Signature%20Facial",
         actionLabel: "Email Shannon about another time",
         announcement:
           "Live dates and appointment times are available below. The website request form is paused; email Shannon directly for help with another time.",
@@ -293,7 +298,7 @@ test("booking request presentation stays actionable in both readiness states", a
       calendarBookingKind: "exact-event" as const,
       closed: {
         actionHref:
-          "mailto:shannonmarydixon@gmail.com?subject=Booking%20request%3A%20Moon%20Oracle%20Reading",
+          "mailto:shannon@hwlbysmd.com?subject=Booking%20request%3A%20Moon%20Oracle%20Reading",
         actionLabel: "Email Shannon about Moon Oracle Reading",
         announcement:
           "The live calendar is not available for this experience right now. Use the email link below to book directly with Shannon.",

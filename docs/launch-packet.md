@@ -15,13 +15,18 @@ This section is the current release truth. It supersedes conflicting deployment,
 environment-inventory, administrator, and readiness statements in the dated
 records below. Those records remain as historical evidence only.
 
-- **Exact code and Preview:** commit
+- **Exact application code and Preview:** application commit
   `880fda518b90d6767084a01a0e6832b960d28446` is clean, pushed only on
   `checkpoint/platform-overhaul-2026-08-20`, and passed GitHub Actions run
-  `34148956025`. `main` remains untouched. READY Preview deployment
+  `34148956025`. Its READY Preview is
   `dpl_BDucxTqrGjSXenahgBGGLxn5wogK`
-  (`hwl-by-dv9b432j4-whole-body-earth.vercel.app`) is the exact build currently
-  assigned to `https://preview.hwlbysmd.com`.
+  (`hwl-by-dv9b432j4-whole-body-earth.vercel.app`). Documentation-only
+  descendant `29c20405908f29fe040f83d72ce6734f39aaf205` passed GitHub Actions run
+  `34150903434` and deployed READY as `dpl_999r4iVKHnVU1R5FdaGsuNpaG61v`.
+  `https://preview.hwlbysmd.com` is the stable branch Preview entry and may move
+  to later documentation-only descendants without changing the audited runtime
+  application code. Any later runtime-code commit requires fresh verification.
+  `main` remains untouched.
 - **Public Production remains separate and closed:** `hwlbysmd.com` and
   `www.hwlbysmd.com` still resolve to older READY Production deployment
   `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz`, source `a0152df52570197601260dbe02ffac88aa7988c8`.

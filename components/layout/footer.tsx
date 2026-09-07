@@ -5,7 +5,14 @@ import { usePathname } from "next/navigation"
 
 import { useAuth } from "@/components/auth/auth-provider"
 import { SITE_CONFIG } from "@/lib/constants"
-import { MAIN_NAV } from "@/lib/nav-config"
+import {
+  ACCOUNT_NAV_LABEL,
+  BOOKING_NAV_ITEM,
+  getActiveMainNavHref,
+  isCurrentPath,
+  MAIN_NAV,
+} from "@/lib/nav-config"
+import { cn } from "@/lib/utils"
 
 const legalLinks = [
   { label: "Privacy", href: "/privacy" },
@@ -21,13 +28,14 @@ const footerLinkClass =
 export function Footer() {
   const pathname = usePathname()
   const { loading, user } = useAuth()
+  const activeMainHref = getActiveMainNavHref(pathname)
   const actionLinks = [
-    { label: "Book", href: "/book" },
+    BOOKING_NAV_ITEM,
     loading
-      ? { label: "My Account", href: "/login" }
+      ? { label: ACCOUNT_NAV_LABEL, href: "/login" }
       : user
-        ? { label: "My Account", href: "/account" }
-        : { label: "My Account", href: "/login" },
+        ? { label: ACCOUNT_NAV_LABEL, href: "/account" }
+        : { label: ACCOUNT_NAV_LABEL, href: "/login" },
   ]
 
   if (pathname.startsWith("/admin")) return null
@@ -63,7 +71,14 @@ export function Footer() {
             <div className="mt-5 flex flex-col items-start gap-3">
               {MAIN_NAV.map((item) => (
                 <Link
-                  className={footerLinkClass}
+                  aria-current={
+                    activeMainHref === item.href ? "page" : undefined
+                  }
+                  className={cn(
+                    footerLinkClass,
+                    activeMainHref === item.href &&
+                      "text-[#f7f3ec] underline underline-offset-4"
+                  )}
                   href={item.href}
                   key={item.href}
                 >
@@ -80,7 +95,14 @@ export function Footer() {
             <div className="mt-5 flex flex-col items-start gap-3">
               {actionLinks.map((item) => (
                 <Link
-                  className={footerLinkClass}
+                  aria-current={
+                    isCurrentPath(pathname, item.href) ? "page" : undefined
+                  }
+                  className={cn(
+                    footerLinkClass,
+                    isCurrentPath(pathname, item.href) &&
+                      "text-[#f7f3ec] underline underline-offset-4"
+                  )}
                   href={item.href}
                   key={item.href}
                 >

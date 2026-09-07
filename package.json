@@ -18,7 +18,7 @@
     "preflight:preview": "node --env-file-if-exists=.env.preview.local --experimental-strip-types scripts/preflight-preview-release.ts",
     "preflight:preview:post-push": "node --experimental-strip-types scripts/preflight-preview-release.ts --repository-only --require-upstream-sync",
     "preflight:preview:repository": "node --experimental-strip-types scripts/preflight-preview-release.ts --repository-only",
-    "test:accessibility": "node --experimental-strip-types --test components/shared/lift-sequence-progress.a11y.test.ts",
+    "test:accessibility": "node --experimental-strip-types --test components/shared/lift-sequence-progress.a11y.test.ts components/layout/navigation.a11y.test.ts",
     "test:auth": "node --experimental-strip-types --experimental-loader ./scripts/test-module-loader.mjs --test scripts/test-auth-boundaries.ts scripts/test-auth-callback.ts scripts/test-admin-auth.ts scripts/test-admin-logout.ts",
     "test:booking": "node --experimental-strip-types --experimental-loader ./scripts/test-module-loader.mjs --test scripts/test-booking-boundaries.ts",
     "test:commerce": "node --experimental-strip-types --experimental-loader ./scripts/test-module-loader.mjs --test scripts/test-commerce-reconciliation.ts scripts/test-scheduled-reconciliation.ts scripts/test-stripe-fulfillment.ts",

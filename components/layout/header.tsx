@@ -9,6 +9,7 @@ import { CartTrigger } from "@/components/cart/cart-trigger"
 import { MainNav } from "@/components/layout/main-nav"
 import { MobileNav } from "@/components/layout/mobile-nav"
 import { Button } from "@/components/ui/button"
+import { BOOKING_NAV_ITEM, isCurrentPath } from "@/lib/nav-config"
 import { cn } from "@/lib/utils"
 
 export function Header() {
@@ -52,7 +53,7 @@ export function Header() {
         <Link
           href="/"
           aria-label="HWL by SMD home"
-          className="flex shrink-0 flex-col font-serif text-xl leading-none font-medium tracking-[0.12em] text-[var(--primary)] md:text-2xl"
+          className="flex min-h-11 shrink-0 flex-col justify-center font-serif text-xl leading-none font-medium tracking-[0.12em] text-[var(--primary)] md:text-2xl"
         >
           <span aria-hidden="true">HWL·SMD</span>
           <span className="sr-only">HWL by SMD</span>
@@ -67,14 +68,23 @@ export function Header() {
         <MainNav />
 
         <div className="hidden items-center gap-3 lg:flex">
-          <CartTrigger compact />
           <Button
             asChild
             size="sm"
-            className="h-auto rounded-full bg-[var(--accent)] px-5 py-2 text-sm text-[var(--background)] hover:bg-[var(--primary)]"
+            className="min-h-11 rounded-full bg-[var(--accent)] px-5 py-2 text-sm text-[var(--background)] hover:bg-[var(--primary)]"
           >
-            <Link href="/book">Book</Link>
+            <Link
+              aria-current={
+                isCurrentPath(pathname, BOOKING_NAV_ITEM.href)
+                  ? "page"
+                  : undefined
+              }
+              href={BOOKING_NAV_ITEM.href}
+            >
+              {BOOKING_NAV_ITEM.label}
+            </Link>
           </Button>
+          <CartTrigger compact />
           <AuthLinks />
         </div>
 

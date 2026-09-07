@@ -14,12 +14,18 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { MAIN_NAV } from "@/lib/nav-config"
+import {
+  BOOKING_NAV_ITEM,
+  getActiveMainNavHref,
+  isCurrentPath,
+  MAIN_NAV,
+} from "@/lib/nav-config"
 import { cn } from "@/lib/utils"
 
 export function MobileNav() {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const activeHref = getActiveMainNavHref(pathname)
   const closeMenu = () => setOpen(false)
 
   return (
@@ -30,6 +36,7 @@ export function MobileNav() {
           size="icon"
           className="size-11 text-[var(--foreground)] lg:hidden"
           aria-label="Open navigation menu"
+          title="Menu"
         >
           <Menu className="size-5" aria-hidden="true" />
         </Button>
@@ -55,8 +62,7 @@ export function MobileNav() {
               aria-label="Mobile main"
             >
               {MAIN_NAV.map((item) => {
-                const isActive =
-                  pathname === item.href || pathname.startsWith(`${item.href}/`)
+                const isActive = activeHref === item.href
 
                 return (
                   <Link
@@ -80,8 +86,16 @@ export function MobileNav() {
                 asChild
                 className="min-h-11 w-full rounded-full bg-[var(--accent)] px-5 py-2 text-sm text-[var(--background)] hover:bg-[var(--primary)]"
               >
-                <Link href="/book" onClick={closeMenu}>
-                  Book
+                <Link
+                  aria-current={
+                    isCurrentPath(pathname, BOOKING_NAV_ITEM.href)
+                      ? "page"
+                      : undefined
+                  }
+                  href={BOOKING_NAV_ITEM.href}
+                  onClick={closeMenu}
+                >
+                  {BOOKING_NAV_ITEM.label}
                 </Link>
               </Button>
               <AuthLinks mobile onNavigate={closeMenu} />

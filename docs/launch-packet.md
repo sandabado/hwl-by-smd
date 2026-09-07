@@ -2263,9 +2263,27 @@ payment flow.
   both exact scopes without exposing the value. Shannon's separate
   permanent-site-admin and Stripe public-contact roles do not replace that
   routing decision. Existing immutable deployments do not receive later
-  environment changes, and no deployed runtime has consumed the new value.
-  Sales, website inquiry collection, Production promotion, live payment, and
+  environment changes. The checkpoint Preview credential was aligned to the
+  local protected-test value and a fresh Preview rebuild consumed the updated
+  branch snapshot; no Production deployment consumed either change. Sales,
+  website inquiry collection, Production promotion, live payment, and
   administrator elevation remain closed.
+- Commit `9878c7b4361cb43fc75173c6ad929ebf09b00ea1` passed CI run
+  `34068152717` and built as READY Preview
+  `hwl-by-oieo38us1-whole-body-earth.vercel.app`. A Preview-only temporary
+  commerce-alert probe returned HTTP 401 without its exact bearer and performed
+  no provider call. After the branch-only credential refresh, the rebuilt
+  Preview `hwl-by-2wm3j1m0v-whole-body-earth.vercel.app` returned HTTP 200 with
+  only `{ "kind": "accepted" }` for the authorized aggregate alert. One exact
+  same-day retry returned the same sanitized result. The restricted
+  `HWLbySMD checkpoint Preview` Resend key recorded one new `/emails` POST with
+  HTTP 200 rather than two; its linked email shows the expected Preview subject,
+  `sent` status, one pending-alert count, zero manual-review count, the protected
+  `/admin/store` review path, and no customer, order, payment, or provider
+  identifier. This proves accepted, idempotent provider submission, not human
+  delivery: `ghosthand.studio` still has no MX record. The temporary route was
+  removed immediately after this evidence; a clean replacement Preview is
+  required before any release decision.
 - A fresh authenticated Production Supabase read reconfirmed Site URL
   `https://www.hwlbysmd.com`, the sole redirect URL
   `https://www.hwlbysmd.com/auth/callback`, the token-hash Invite User template,

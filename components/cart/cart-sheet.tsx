@@ -272,30 +272,45 @@ export function CartSheet() {
               </span>
             </div>
             <div
-              className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[11px] text-[#675b4d]"
+              className="mt-3 text-center text-[11px] leading-relaxed text-[#675b4d]"
               inert={checkoutPending ? true : undefined}
             >
-              <Link
-                className="underline underline-offset-4"
-                href="/terms"
-                onClick={closeCart}
-              >
-                Personal-use license
-              </Link>
-              <Link
-                className="underline underline-offset-4"
-                href="/refund-policy"
-                onClick={closeCart}
-              >
-                Refund policy
-              </Link>
-              <Link
-                className="underline underline-offset-4"
-                href="/contact"
-                onClick={closeCart}
-              >
-                Need help?
-              </Link>
+              <p>
+                By continuing, you agree to the{" "}
+                <Link
+                  className="underline underline-offset-4"
+                  href="/terms#digital-products-and-access"
+                  onClick={closeCart}
+                >
+                  Terms &amp; personal-use license
+                </Link>{" "}
+                and acknowledge the{" "}
+                <Link
+                  className="underline underline-offset-4"
+                  href="/privacy"
+                  onClick={closeCart}
+                >
+                  Privacy Policy
+                </Link>{" "}
+                and{" "}
+                <Link
+                  className="underline underline-offset-4"
+                  href="/refund-policy"
+                  onClick={closeCart}
+                >
+                  Refund Policy
+                </Link>
+                .
+              </p>
+              <p className="mt-2">
+                <Link
+                  className="underline underline-offset-4"
+                  href="/contact"
+                  onClick={closeCart}
+                >
+                  Questions before purchasing?
+                </Link>
+              </p>
             </div>
           </footer>
         ) : null}

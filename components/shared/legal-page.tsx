@@ -11,13 +11,13 @@ export type LegalSection = {
 }
 
 export function LegalPage({
-  effectiveDate = "August 20, 2026",
+  effectiveDate,
   eyebrow,
   introduction,
   sections,
   title,
 }: {
-  effectiveDate?: string
+  effectiveDate: string
   eyebrow: string
   introduction: string
   sections: LegalSection[]
@@ -60,7 +60,7 @@ export function LegalPage({
           <div className="mt-14 rounded-[2rem] border border-[var(--border)] bg-white/45 p-7">
             <h2 className="text-2xl text-[var(--primary)]">Questions</h2>
             <p className="mt-3 leading-relaxed text-[var(--muted-foreground)]">
-              For privacy or terms questions, email{" "}
+              For policy or purchase questions, email{" "}
               <a
                 className="text-[var(--accent)] underline underline-offset-4"
                 href={`mailto:${SITE_CONFIG.email}`}

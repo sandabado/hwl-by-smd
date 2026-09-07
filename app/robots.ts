@@ -23,7 +23,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       { userAgent: "*", allow: "/", disallow: privatePaths },
       {
-        userAgent: ["Google-Extended", "GPTBot", "CCBot"],
+        userAgent: ["OAI-SearchBot", "Google-Extended", "GPTBot", "CCBot"],
         allow: "/",
         disallow: privatePaths,
       },

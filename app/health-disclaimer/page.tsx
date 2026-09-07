@@ -39,6 +39,7 @@ const sections: LegalSection[] = [
 export default function HealthDisclaimerPage() {
   return (
     <LegalPage
+      effectiveDate="August 20, 2026"
       eyebrow="Health Disclaimer"
       introduction="Know the scope of each practice and choose support appropriate to your needs."
       sections={sections}

@@ -107,3 +107,14 @@ test("persistent header actions retain generous pointer targets", () => {
   assert.match(auth, /"size-11 p-0"/)
   assert.match(cart, /"w-11 px-0"/)
 })
+
+test("the final cart action presents the complete purchase policy set", () => {
+  const cartSheet = source("components/cart/cart-sheet.tsx")
+
+  assert.match(cartSheet, /By continuing, you agree to the/)
+  assert.match(cartSheet, /href="\/terms#digital-products-and-access"/)
+  assert.match(cartSheet, /Terms &amp; personal-use license/)
+  assert.match(cartSheet, /href="\/privacy"/)
+  assert.match(cartSheet, /href="\/refund-policy"/)
+  assert.match(cartSheet, /href="\/contact"/)
+})

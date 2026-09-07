@@ -164,6 +164,8 @@ const homepageSource = readFileSync(
   resolve(projectRoot, "components/home/hero-entry.tsx"),
   "utf8"
 )
+const robotsSource = readFileSync(resolve(projectRoot, "app/robots.ts"), "utf8")
+const llmsText = readFileSync(resolve(projectRoot, "public/llms.txt"), "utf8")
 
 const liftProductRequirements = [
   ["Product JSON-LD", /createProductJsonLd\(\{/],
@@ -200,6 +202,72 @@ if (/createProductJsonLd|store-products-schema/.test(storePageSource)) {
 
 if (!/href=["']\/beauty\/lift["']/.test(homepageSource)) {
   errors.push("/: missing direct canonical LIFT link")
+}
+
+if (!/["']OAI-SearchBot["']/.test(robotsSource)) {
+  errors.push("/robots.txt: missing explicit OAI-SearchBot policy")
+}
+
+if (!/^# HWL by SMD$/m.test(llmsText)) {
+  errors.push("/llms.txt: missing canonical title")
+}
+
+const llmsUrls = [...llmsText.matchAll(/\]\((https?:\/\/[^)]+)\)/g)].map(
+  (match) => match[1]
+)
+const allowedLlmsPaths = new Set([
+  "/about",
+  "/beauty",
+  "/beauty/lift",
+  "/contact",
+  "/health-disclaimer",
+  "/sitemap.xml",
+])
+const privateLlmsPrefixes = [
+  "/account",
+  "/admin",
+  "/api",
+  "/auth",
+  "/checkout",
+  "/course",
+  "/den",
+  "/lesson",
+  "/library",
+  "/login",
+  "/reset-password",
+  "/the-den",
+  "/update-password",
+]
+
+if (!llmsUrls.includes("https://www.hwlbysmd.com/beauty/lift")) {
+  errors.push("/llms.txt: missing canonical LIFT URL")
+}
+
+for (const value of llmsUrls) {
+  let url: URL
+  try {
+    url = new URL(value)
+  } catch {
+    errors.push(`/llms.txt: invalid URL ${value}`)
+    continue
+  }
+
+  if (url.origin !== "https://www.hwlbysmd.com") {
+    errors.push(`/llms.txt: noncanonical origin ${url.origin}`)
+  }
+  if (!allowedLlmsPaths.has(url.pathname)) {
+    errors.push(
+      `/llms.txt: URL is not in the approved public set ${url.pathname}`
+    )
+  }
+  if (
+    privateLlmsPrefixes.some(
+      (prefix) =>
+        url.pathname === prefix || url.pathname.startsWith(`${prefix}/`)
+    )
+  ) {
+    errors.push(`/llms.txt: private route exposed ${url.pathname}`)
+  }
 }
 
 if (
@@ -263,6 +331,7 @@ const publicFiles = new Set(
     ".pdf",
     ".png",
     ".svg",
+    ".txt",
     ".webp",
   ]).map((file) => `/${relative(resolve(projectRoot, "public"), file)}`)
 )

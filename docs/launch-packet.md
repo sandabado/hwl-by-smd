@@ -2390,3 +2390,58 @@ payment flow.
   email. The provider form remains a human-completion gate: save that exact
   value and reread it before opening sales. Do not change Stripe login,
   representative, payout ownership, or purchaser receipt addressing.
+
+## September 6 Isolated Production Inquiry Delivery Proof
+
+- A separate one-off Production-target deployment
+  `dpl_39p34r8PwjQD6Sq1hCtN9sUJ7886` was built from checkpoint
+  `e9d4a2b5263ecc50c709b742029aa1a3e83f0115` at
+  `hwl-by-p31dou91d-whole-body-earth.vercel.app`. Only that immutable deployment
+  received build-time and runtime
+  `NEXT_PUBLIC_INQUIRY_COLLECTION_READY=true` overrides. The global Production
+  environment remained closed, sales remained closed, and neither public HWL
+  custom domain moved. Both the deployment URL and the project-default Vercel
+  alias redirect anonymous visitors to Vercel SSO, so the open test surface is
+  not publicly reachable.
+- One clearly labeled launch-verification inquiry with submission receipt
+  `8d758562-2a7a-4910-9af6-3d0d86f39f76` returned HTTP 200 with
+  `received:true` and notification `accepted`. One exact replay returned the
+  same terminal receipt. A service-key read that selected only audit fields for
+  that receipt returned exactly one Production row: source `website-inquiry`,
+  status `received`, notification `accepted`, no error code, and a present
+  provider receipt. No contact details or message content were selected.
+- Resend recorded exactly one new `HWL by SMD · New private inquiry` message for
+  the two identical requests. It was sent from the restricted HWL sender to the
+  configured Shannon mailbox and reached provider status `delivered` at
+  September 6, 5:47 PM Pacific. The email contains only the private inquiry ID,
+  source, protected admin-inbox link, and the explicit omission notice; it does
+  not include submitted contact details or message content. This proves durable
+  Production persistence, provider acceptance and delivery, and replay
+  idempotency. Human opening and confirmed-admin rendering remain pending.
+- The one-off deployment reported zero error-level and zero warning-level
+  runtime events after the accepted request and replay. Public Production still
+  renders the paused inquiry experience and its API remains fail-closed until a
+  separately approved build is created with the public readiness flag enabled.
+
+## September 6 Production Legacy Supabase-Key Incident
+
+- During a masked API-key inventory intended to support the aggregate inquiry
+  audit, Supabase CLI unexpectedly emitted the dedicated Production project's
+  complete legacy `service_role` JWT without the documented reveal flag. The
+  value is not repeated, stored, committed, or used by this application and
+  must now be treated as compromised.
+- The current repository and launch validator require modern
+  `sb_publishable_…` and `sb_secret_…` credentials and explicitly reject legacy
+  JWT-shaped application keys. Both current remote Production builds passed
+  that validator. The repository contains no JWT-shaped key, the dedicated
+  Production project reports zero Edge Functions, and the app has no identified
+  mobile, desktop, worker, or third-party Supabase client. These checks support
+  legacy-key retirement but cannot prove the absence of an undocumented
+  external caller.
+- Supabase documents legacy-key deactivation as reversible. The next security
+  action requires explicit owner approval: deactivate the legacy anon and
+  `service_role` API keys for Production project `qwprhsrwiihfllmgallr`, then
+  immediately re-smoke Auth, inquiry persistence, private asset access, and the
+  closed-sales candidate. Re-enable only as an alias-free rollback if a verified
+  dependency fails. Do not rotate the Auth JWT signing key as part of this
+  narrower action.

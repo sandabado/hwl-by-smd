@@ -2428,8 +2428,8 @@ payment flow.
 - During a masked API-key inventory intended to support the aggregate inquiry
   audit, Supabase CLI unexpectedly emitted the dedicated Production project's
   complete legacy `service_role` JWT without the documented reveal flag. The
-  value is not repeated, stored, committed, or used by this application and
-  must now be treated as compromised.
+  value is not repeated, committed, or used by this application; it may remain
+  in restricted execution-audit output and must now be treated as compromised.
 - The current repository and launch validator require modern
   `sb_publishable_…` and `sb_secret_…` credentials and explicitly reject legacy
   JWT-shaped application keys. Both current remote Production builds passed
@@ -2445,3 +2445,25 @@ payment flow.
   closed-sales candidate. Re-enable only as an alias-free rollback if a verified
   dependency fails. Do not rotate the Auth JWT signing key as part of this
   narrower action.
+
+## September 6 Administrator-Mail Routing Recheck
+
+- Resend's authenticated Receiving inbox contains the delivered Supabase
+  invitation addressed to `shannon@hwlbysmd.com`. This proves the domain's
+  current AWS inbound SMTP MX can receive mail into the Resend workspace. The
+  private one-time invitation link was not opened, copied, or exposed; Shannon
+  must accept it herself and choose her own password before any administrator
+  elevation. Resend Receiving is a dashboard/API inbox, not a conventional
+  human mailbox or forwarding destination, so long-term support-email handling
+  still needs an explicit operating decision.
+- `ghosthand.studio` remains on Porkbun nameservers with no MX. Its root DNS
+  includes a Proton verification token, which is consistent with a previously
+  started custom-domain setup but does not prove current paid-account access.
+  The preferred permanent fix is to complete that Proton configuration if the
+  owner can access it; the fastest fallback is a Porkbun `admin` forwarding
+  rule to an explicitly named monitored inbox. Do not use Resend inbound as the
+  Ghosthand human mailbox, and do not issue another Supabase invitation until a
+  cross-provider test message reaches the selected destination.
+- A fresh sanitized Auth read still finds exactly the two approved Production
+  identities, both unconfirmed and never signed in. Their two matching profiles
+  both remain `is_admin=false`, and the total administrator count remains zero.

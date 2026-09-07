@@ -2282,8 +2282,12 @@ payment flow.
   `/admin/store` review path, and no customer, order, payment, or provider
   identifier. This proves accepted, idempotent provider submission, not human
   delivery: `ghosthand.studio` still has no MX record. The temporary route was
-  removed immediately after this evidence; a clean replacement Preview is
-  required before any release decision.
+  removed immediately after this evidence. Clean commit
+  `2b0300a7f0e42cae08770f70aa4712240bfd6f77` passed CI run `34069185243` and
+  built as READY Preview `hwl-by-aw07246k8-whole-body-earth.vercel.app`. Its
+  home, LIFT, selected-service booking, and login routes each returned HTTP 200;
+  the retired probe returned HTTP 404 on both that exact deployment and
+  `preview.hwlbysmd.com`.
 - A fresh authenticated Production Supabase read reconfirmed Site URL
   `https://www.hwlbysmd.com`, the sole redirect URL
   `https://www.hwlbysmd.com/auth/callback`, the token-hash Invite User template,

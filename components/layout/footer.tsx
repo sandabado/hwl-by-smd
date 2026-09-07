@@ -24,10 +24,10 @@ export function Footer() {
   const actionLinks = [
     { label: "Book", href: "/book" },
     loading
-      ? { label: "Account", href: "/login" }
+      ? { label: "My Account", href: "/login" }
       : user
-        ? { label: "Library", href: "/library" }
-        : { label: "Members", href: "/login" },
+        ? { label: "My Account", href: "/account" }
+        : { label: "My Account", href: "/login" },
   ]
 
   if (pathname.startsWith("/admin")) return null

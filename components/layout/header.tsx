@@ -67,7 +67,7 @@ export function Header() {
         <MainNav />
 
         <div className="hidden items-center gap-3 lg:flex">
-          <CartTrigger />
+          <CartTrigger compact />
           <Button
             asChild
             size="sm"

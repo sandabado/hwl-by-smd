@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { UserRound } from "lucide-react"
 
 import { useAuth } from "@/components/auth/auth-provider"
 import { cn } from "@/lib/utils"
@@ -20,38 +21,27 @@ export function AuthLinks({
         aria-hidden="true"
         className={cn(
           "block animate-pulse rounded-full bg-[var(--muted)]",
-          mobile ? "h-11 w-full" : "h-8 w-16"
+          mobile ? "h-11 w-full" : "size-11"
         )}
       />
     )
   }
 
-  if (!user) {
-    return (
-      <Link
-        href="/login"
-        onClick={onNavigate}
-        className={cn(
-          "text-sm text-[var(--muted-foreground)] transition-colors duration-200 hover:text-[var(--foreground)]",
-          mobile &&
-            "flex min-h-11 w-full items-center justify-center rounded-full border border-[var(--accent)] px-4 py-2 text-[var(--primary)]"
-        )}
-      >
-        Members
-      </Link>
-    )
-  }
-
   return (
     <Link
-      href="/library"
+      aria-label={mobile ? undefined : "My Account"}
+      href={user ? "/account" : "/login"}
       onClick={onNavigate}
       className={cn(
         "inline-flex min-h-8 items-center justify-center rounded-full border border-[var(--accent)] px-4 py-1.5 text-sm text-[var(--primary)] transition-colors duration-200 hover:bg-[var(--accent)] hover:text-[var(--background)]",
-        mobile && "min-h-11 w-full py-2"
+        mobile ? "min-h-11 w-full py-2" : "size-11 p-0"
       )}
     >
-      Library
+      {mobile ? (
+        "My Account"
+      ) : (
+        <UserRound className="size-4.5" aria-hidden="true" />
+      )}
     </Link>
   )
 }

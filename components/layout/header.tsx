@@ -5,11 +5,10 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { AuthLinks } from "@/components/auth/auth-links"
+import { BookingTrigger } from "@/components/booking/booking-trigger"
 import { CartTrigger } from "@/components/cart/cart-trigger"
 import { MainNav } from "@/components/layout/main-nav"
 import { MobileNav } from "@/components/layout/mobile-nav"
-import { Button } from "@/components/ui/button"
-import { BOOKING_NAV_ITEM, isCurrentPath } from "@/lib/nav-config"
 import { cn } from "@/lib/utils"
 
 export function Header() {
@@ -68,28 +67,14 @@ export function Header() {
         <MainNav />
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Button
-            asChild
-            size="sm"
-            className="min-h-11 rounded-full bg-[var(--accent)] px-5 py-2 text-sm text-[var(--background)] hover:bg-[var(--primary)]"
-          >
-            <Link
-              aria-current={
-                isCurrentPath(pathname, BOOKING_NAV_ITEM.href)
-                  ? "page"
-                  : undefined
-              }
-              href={BOOKING_NAV_ITEM.href}
-            >
-              {BOOKING_NAV_ITEM.label}
-            </Link>
-          </Button>
+          <BookingTrigger />
           <CartTrigger compact />
           <AuthLinks />
         </div>
 
         <div className="flex items-center gap-1 lg:hidden">
           <MobileNav />
+          <BookingTrigger compact />
           <CartTrigger compact />
         </div>
       </div>

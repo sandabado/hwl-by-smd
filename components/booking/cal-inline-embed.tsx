@@ -6,15 +6,17 @@ import { useEffect, useId, useMemo, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
+const CAL_BOOKER_LAYOUT = "month_view" as const
+
 const CAL_EMBED_CONFIG = {
-  layout: "week_view",
+  layout: CAL_BOOKER_LAYOUT,
   theme: "light",
   "ui.color-scheme": "light",
 } as const
 
 const CAL_UI_CONFIG = {
   theme: "light",
-  layout: "week_view",
+  layout: CAL_BOOKER_LAYOUT,
   hideEventTypeDetails: true,
   cssVarsPerTheme: {
     light: {
@@ -57,7 +59,6 @@ export interface CalInlineEmbedProps {
   calLink: string
   serviceTitle: string
   className?: string
-  onInitialReady?: () => void
   showExternalLink?: boolean
 }
 
@@ -83,7 +84,6 @@ function CalEmbedInstance({
   calLink,
   serviceTitle,
   className,
-  onInitialReady,
   showExternalLink = true,
 }: CalInlineEmbedProps) {
   const reactId = useId()
@@ -111,7 +111,6 @@ function CalEmbedInstance({
 
   useEffect(() => {
     let active = true
-    let hasReportedReady = false
     let api: Awaited<ReturnType<typeof getCalApi>> | undefined
 
     const handleReady = () => {
@@ -123,11 +122,6 @@ function CalEmbedInstance({
       if (iframe instanceof HTMLIFrameElement) iframe.title = iframeTitle
 
       setStatus("ready")
-
-      if (!hasReportedReady) {
-        hasReportedReady = true
-        onInitialReady?.()
-      }
     }
     const handleFailure = () => {
       if (!active) return
@@ -158,7 +152,7 @@ function CalEmbedInstance({
       api?.("off", { action: "linkReady", callback: handleReady })
       api?.("off", { action: "linkFailed", callback: handleFailure })
     }
-  }, [iframeId, iframeTitle, namespace, onInitialReady])
+  }, [iframeId, iframeTitle, namespace])
 
   return (
     <section
@@ -258,7 +252,6 @@ export function CalInlineEmbed({
   calLink,
   serviceTitle,
   className,
-  onInitialReady,
   showExternalLink,
 }: CalInlineEmbedProps) {
   const normalizedCalLink = normalizeCalLink(calLink)
@@ -282,7 +275,6 @@ export function CalInlineEmbed({
       calLink={normalizedCalLink}
       className={className}
       key={normalizedCalLink}
-      onInitialReady={onInitialReady}
       serviceTitle={serviceTitle}
       showExternalLink={showExternalLink}
     />

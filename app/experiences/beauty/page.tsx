@@ -3,14 +3,13 @@ import { ArrowRight, Check, Droplets, Sparkles } from "lucide-react"
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button"
 import { JsonLd } from "@/components/seo/json-ld"
+import { ServiceOfferingsSection } from "@/components/services/service-offerings-section"
 import { PageSection } from "@/components/shared/internal-page"
 import { ParallaxImage } from "@/components/shared/parallax-image"
 import { PullQuote } from "@/components/shared/pull-quote"
-import { SectionDivider } from "@/components/shared/section-divider"
 import { SectionHeading } from "@/components/shared/section-heading"
 import { ServiceAreaNote } from "@/components/shared/service-area-note"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import {
   Accordion,
   AccordionContent,
@@ -26,44 +25,6 @@ export const metadata = createPageMetadata({
     "Facial rituals, lymphatic care, and skin consultation with Shannon Mary Dixon in Palm Springs and the Coachella Valley.",
   path: "/beauty",
 })
-
-const offerings = [
-  {
-    title: "Wild Glow Express Facial",
-    bookingHref: "/book?service=wild-glow-express-facial#choose-time",
-    details: ["15–20 minutes", "$111 per guest", "Minimum 4 retreat guests"],
-    description:
-      "A refreshing facial restoring radiance in moments, with cleansing, hydration, sculpting massage, and finishing touches.",
-  },
-  {
-    title: "Reiki Aromatherapy Healing",
-    bookingHref: "/book?service=reiki-aromatherapy-healing#choose-time",
-    details: ["30–45 minutes", "$222 per guest", "In person"],
-    description:
-      "A restorative blend of aromatherapy and Reiki, held at an unhurried pace for grounding and renewal.",
-  },
-  {
-    title: "Signature Facial",
-    bookingHref: "/book?service=signature-facial#choose-time",
-    details: ["60 minutes", "$277 per guest", "In person"],
-    description:
-      "A customized facial restoring glow, hydration, and balance while creating a meaningful moment of pause.",
-  },
-  {
-    title: "Beauty & Being Ritual",
-    bookingHref: "/book?service=beauty-being-ritual#choose-time",
-    details: ["90 minutes", "$333 per guest", "In person"],
-    description:
-      "A luxury facial blending customized skincare, aromatherapy, therapeutic and lymphatic massage, Reiki, and intentional restoration.",
-  },
-  {
-    title: "Wild Glow Luxury Facial",
-    bookingHref: "/book?service=wild-glow-luxury-facial#choose-time",
-    details: ["120 minutes", "$444 per guest", "In person"],
-    description:
-      "A fully immersive experience with advanced skincare, extended massage, energy balancing, aromatherapy, and personalized ritual.",
-  },
-]
 
 const benefits = [
   {
@@ -169,7 +130,7 @@ export default function BeautyPage() {
         id="beauty-service-schema"
       />
 
-      <section className="relative isolate flex min-h-[82svh] items-center overflow-hidden bg-[linear-gradient(145deg,#faf7f2_0%,#f5ece8_46%,#edf2ef_100%)] px-6 py-24">
+      <section className="experience-hero relative isolate flex min-h-[82svh] items-center overflow-hidden bg-[linear-gradient(145deg,#faf7f2_0%,#f5ece8_46%,#edf2ef_100%)] px-6 py-24">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -top-24 -left-32 size-[34rem] rounded-full border border-white/70 opacity-80"
@@ -183,37 +144,33 @@ export default function BeautyPage() {
           className="pointer-events-none absolute right-[-12rem] bottom-[-14rem] size-[38rem] rounded-full bg-white/30 blur-3xl"
         />
 
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-14 md:grid-cols-[minmax(0,0.92fr)_minmax(340px,0.78fr)] md:gap-20">
+        <div className="experience-hero-grid relative z-10 mx-auto grid w-full max-w-7xl items-center gap-14 md:grid-cols-[minmax(0,0.92fr)_minmax(340px,0.78fr)] md:gap-20">
           <div className="max-w-3xl text-center md:text-left">
             <p className="hero-reveal hero-reveal--1 text-xs font-medium tracking-[0.32em] text-[var(--accent)] uppercase">
               Beauty
             </p>
-            <h1 className="hero-reveal hero-reveal--2 mt-6 text-5xl leading-[0.98] font-medium text-[var(--primary)] md:text-7xl lg:text-8xl">
+            <h1 className="experience-hero-heading hero-reveal hero-reveal--2 mt-6 text-5xl leading-[0.98] font-medium text-[var(--primary)] md:text-7xl lg:text-8xl">
               Skin as landscape. Touch as language.
             </h1>
-            <p className="hero-reveal hero-reveal--3 mx-auto mt-7 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)] md:mx-0 md:text-xl">
+            <p className="experience-hero-subtitle hero-reveal hero-reveal--3 mx-auto mt-7 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)] md:mx-0 md:text-xl">
               The face holds what the body carries.
             </p>
-            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
-              <Button
-                asChild
-                className="h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
-              >
-                <Link href="/beauty/lift">
-                  Learn LIFT <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
+            <div className="experience-hero-actions mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
+              <AddToCartButton
+                className="h-12 sm:w-auto"
+                label="Get LIFT · $11.11"
+              />
               <Button
                 asChild
                 className="h-12 rounded-full border-[var(--border)] bg-white/35 px-7 text-[var(--primary)] backdrop-blur-sm hover:bg-white/65"
                 variant="outline"
               >
-                <Link href="/book">Book a Session</Link>
+                <Link href="#offerings">Explore Beauty</Link>
               </Button>
             </div>
           </div>
 
-          <div className="hero-image-reveal relative mx-auto w-full max-w-md md:max-w-none">
+          <div className="experience-hero-image hero-image-reveal relative mx-auto w-full max-w-md md:max-w-none">
             <div
               aria-hidden="true"
               className="absolute -inset-5 rounded-[2.75rem] border border-white/70"
@@ -237,6 +194,8 @@ export default function BeautyPage() {
           </div>
         </div>
       </section>
+
+      <ServiceOfferingsSection pillarId="beauty" />
 
       <PageSection className="py-24 md:py-32" id="overview">
         <div className="mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[0.72fr_1fr] lg:gap-24">
@@ -270,52 +229,6 @@ export default function BeautyPage() {
           className="mt-20"
           quote="Your face is not a problem to solve. It's a landscape to tend."
         />
-      </PageSection>
-
-      <SectionDivider variant="wave" />
-
-      <PageSection
-        className="bg-[linear-gradient(180deg,rgba(255,255,255,0.36),rgba(245,236,232,0.48))] py-24 md:py-32"
-        id="offerings"
-      >
-        <SectionHeading
-          eyebrow="Facial rituals"
-          title="Choose the ritual that meets the moment."
-        />
-        <p className="mt-6 max-w-2xl text-base leading-[1.9] text-[var(--muted-foreground)]">
-          Retreat group rates are shown below. Individual one-to-one pricing is
-          available through booking.
-        </p>
-        <div className="mt-14 grid gap-6 md:grid-cols-2">
-          {offerings.map((offering, index) => (
-            <Card
-              className="group relative overflow-hidden rounded-[2rem] border-white/65 bg-white/55 p-7 shadow-[0_22px_65px_rgba(112,84,77,0.07)] backdrop-blur-sm transition duration-500 hover:border-[var(--accent)]/35 hover:shadow-[0_28px_75px_rgba(112,84,77,0.12)] motion-safe:hover:-translate-y-1 md:p-9"
-              key={offering.title}
-            >
-              <span className="text-xs tracking-[0.28em] text-[var(--accent)] uppercase">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <h2 className="mt-5 text-3xl leading-tight font-medium text-[var(--primary)] md:text-4xl">
-                {offering.title}
-              </h2>
-              <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs tracking-[0.12em] text-[var(--muted-foreground)] uppercase">
-                {offering.details.map((detail) => (
-                  <span key={detail}>{detail}</span>
-                ))}
-              </div>
-              <p className="mt-6 max-w-xl text-base leading-[1.9] text-[var(--muted-foreground)]">
-                {offering.description}
-              </p>
-              <Link
-                className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-[var(--accent)] underline-offset-4 hover:underline"
-                href={offering.bookingHref}
-              >
-                Book this ritual
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-            </Card>
-          ))}
-        </div>
       </PageSection>
 
       <section className="bg-[#f3e9dc] px-6 py-24 text-center md:py-32">
@@ -408,8 +321,8 @@ export default function BeautyPage() {
             asChild
             className="mt-8 h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
           >
-            <Link href="/book">
-              Book a Facial <ArrowRight aria-hidden="true" />
+            <Link href="#offerings">
+              Choose a Facial <ArrowRight aria-hidden="true" />
             </Link>
           </Button>
         </div>

@@ -78,6 +78,7 @@ test("global navigation keeps landmarks, current state, and named utility contro
   const mobileNav = source("components/layout/mobile-nav.tsx")
   const header = source("components/layout/header.tsx")
   const auth = source("components/auth/auth-links.tsx")
+  const booking = source("components/booking/booking-trigger.tsx")
   const cart = source("components/cart/cart-trigger.tsx")
   const layout = source("app/layout.tsx")
 
@@ -87,6 +88,9 @@ test("global navigation keeps landmarks, current state, and named utility contro
   assert.match(mobileNav, /aria-label="Open navigation menu"/)
   assert.match(header, /aria-label="HWL by SMD home"/)
   assert.match(auth, /aria-label=\{mobile \? undefined : ACCOUNT_NAV_LABEL\}/)
+  assert.match(booking, /aria-controls="site-booking-sheet"/)
+  assert.match(booking, /aria-expanded=\{isOpen\}/)
+  assert.match(booking, /aria-haspopup="dialog"/)
   assert.match(cart, /aria-controls="site-cart-sheet"/)
   assert.match(cart, /aria-expanded=\{isOpen\}/)
   assert.match(cart, /aria-haspopup="dialog"/)
@@ -97,14 +101,15 @@ test("global navigation keeps landmarks, current state, and named utility contro
 test("persistent header actions retain generous pointer targets", () => {
   const mainNav = source("components/layout/main-nav.tsx")
   const mobileNav = source("components/layout/mobile-nav.tsx")
-  const header = source("components/layout/header.tsx")
   const auth = source("components/auth/auth-links.tsx")
+  const booking = source("components/booking/booking-trigger.tsx")
   const cart = source("components/cart/cart-trigger.tsx")
 
   assert.match(mainNav, /min-h-11/)
   assert.match(mobileNav, /className="size-11/)
-  assert.match(header, /className="min-h-11 rounded-full/)
   assert.match(auth, /"size-11 p-0"/)
+  assert.match(booking, /"min-h-11 rounded-full"/)
+  assert.match(booking, /"w-11 border/)
   assert.match(cart, /"w-11 px-0"/)
 })
 

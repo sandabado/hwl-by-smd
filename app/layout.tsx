@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 
 import { AuthProvider } from "@/components/auth/auth-provider"
+import { BookingShelfProvider } from "@/components/booking/booking-shelf-provider"
+import { BookingShelf } from "@/components/booking/booking-shelf"
 import { CartProvider } from "@/components/cart/cart-provider"
 import { CartSheet } from "@/components/cart/cart-sheet"
 import { Footer } from "@/components/layout/footer"
@@ -63,17 +65,20 @@ export default function RootLayout({
         <JsonLd data={createWebsiteJsonLd()} id="site-schema" />
         <AuthProvider>
           <CartProvider checkoutReady={liftCheckoutReady}>
-            <div className="flex min-h-screen flex-col" data-app-shell="">
-              <SkipLink />
-              <SiteEffects />
-              <Header />
-              <SiteBreadcrumbs />
-              <main className="flex-1" id="main-content" tabIndex={-1}>
-                <PageTransition>{children}</PageTransition>
-              </main>
-              <MotionPreference />
-              <Footer />
-            </div>
+            <BookingShelfProvider>
+              <div className="flex min-h-screen flex-col" data-app-shell="">
+                <SkipLink />
+                <SiteEffects />
+                <Header />
+                <SiteBreadcrumbs />
+                <main className="flex-1" id="main-content" tabIndex={-1}>
+                  <PageTransition>{children}</PageTransition>
+                </main>
+                <MotionPreference />
+                <Footer />
+              </div>
+              <BookingShelf />
+            </BookingShelfProvider>
             <CartSheet />
           </CartProvider>
         </AuthProvider>

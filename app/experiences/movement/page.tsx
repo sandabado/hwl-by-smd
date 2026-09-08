@@ -1,11 +1,12 @@
 import Link from "next/link"
 import { ArrowRight, Check, Circle, Wind } from "lucide-react"
 
+import { SelectBookingButton } from "@/components/booking/select-booking-button"
 import { JsonLd } from "@/components/seo/json-ld"
+import { ServiceOfferingsSection } from "@/components/services/service-offerings-section"
 import { PageSection } from "@/components/shared/internal-page"
 import { ParallaxImage } from "@/components/shared/parallax-image"
 import { PullQuote } from "@/components/shared/pull-quote"
-import { SectionDivider } from "@/components/shared/section-divider"
 import { SectionHeading } from "@/components/shared/section-heading"
 import { ServiceAreaNote } from "@/components/shared/service-area-note"
 import { Button } from "@/components/ui/button"
@@ -15,8 +16,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { findBookingService } from "@/lib/booking-services"
 import { media } from "@/lib/media"
-import { cn } from "@/lib/utils"
 import { createPageMetadata, createServiceJsonLd } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
@@ -25,34 +26,6 @@ export const metadata = createPageMetadata({
     "Private yoga, restorative movement, and sound bath sessions in Palm Springs, Joshua Tree, and Yucca Valley.",
   path: "/yoga",
 })
-
-const practices = [
-  {
-    title: "Private Yoga",
-    bookingHref: "/book?service=private-yoga#choose-time",
-    detail: "75–90 minutes · $666 for 2–4 guests · +$66 per additional guest",
-    image: media.experiences.movementBoat,
-    description:
-      "A complete movement and integration experience with yoga, breathwork, meditation, and aromatherapy, shaped around the group that arrives.",
-  },
-  {
-    title: "Private Sound Healing",
-    bookingHref: "/book?service=private-sound-healing#choose-time",
-    detail:
-      "60–75 minutes · $444 for up to 8 guests · +$44 per additional guest",
-    image: media.experiences.movementEagle,
-    description:
-      "An immersive sound bath using crystal singing bowls, guided meditation, breathwork, and restorative frequencies.",
-  },
-  {
-    title: "Private Yoga + Sound",
-    bookingHref: "/book?service=private-yoga-and-sound#choose-time",
-    detail: "60 minutes · $555 for up to 4 guests · +$55 per additional guest",
-    image: media.experiences.movementStretch,
-    description:
-      "Yoga, movement, and sound healing woven together in one private group practice.",
-  },
-]
 
 const process = [
   {
@@ -144,6 +117,12 @@ const faqs = [
 ]
 
 export default function MovementPage() {
+  const privateYogaBooking = findBookingService("private-yoga")
+
+  if (!privateYogaBooking) {
+    throw new Error("Private Yoga is missing from the booking catalog.")
+  }
+
   return (
     <div className="overflow-hidden">
       <JsonLd
@@ -158,7 +137,7 @@ export default function MovementPage() {
         id="yoga-service-schema"
       />
 
-      <section className="relative isolate flex min-h-[82svh] items-center overflow-hidden bg-[linear-gradient(145deg,#f6f2e9_0%,#e9ece4_50%,#ddd9cf_100%)] px-6 py-24">
+      <section className="experience-hero relative isolate flex min-h-[82svh] items-center overflow-hidden bg-[linear-gradient(145deg,#f6f2e9_0%,#e9ece4_50%,#ddd9cf_100%)] px-6 py-24">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-y-0 left-[12%] hidden w-px bg-white/55 md:block"
@@ -172,24 +151,24 @@ export default function MovementPage() {
           className="pointer-events-none absolute -right-32 -bottom-36 size-[36rem] rounded-full border border-[#839078]/20"
         />
 
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-14 md:grid-cols-[minmax(0,0.88fr)_minmax(360px,0.82fr)] md:gap-20">
+        <div className="experience-hero-grid relative z-10 mx-auto grid w-full max-w-7xl items-center gap-14 md:grid-cols-[minmax(0,0.88fr)_minmax(360px,0.82fr)] md:gap-20">
           <div className="max-w-3xl text-center md:text-left">
             <p className="hero-reveal hero-reveal--1 text-xs font-medium tracking-[0.32em] text-[#68735f] uppercase">
               Yoga
             </p>
-            <h1 className="hero-reveal hero-reveal--2 mt-6 text-5xl leading-[0.98] font-medium text-[var(--primary)] md:text-7xl lg:text-8xl">
+            <h1 className="experience-hero-heading hero-reveal hero-reveal--2 mt-6 text-5xl leading-[0.98] font-medium text-[var(--primary)] md:text-7xl lg:text-8xl">
               The body trusts what the mind hasn&apos;t said yet.
             </h1>
-            <p className="hero-reveal hero-reveal--3 mx-auto mt-7 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)] md:mx-0 md:text-xl">
+            <p className="experience-hero-subtitle hero-reveal hero-reveal--3 mx-auto mt-7 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)] md:mx-0 md:text-xl">
               Movement as nervous system care.
             </p>
-            <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
+            <div className="experience-hero-actions mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
               <Button
                 asChild
                 className="h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[#68735f]"
               >
-                <Link href="/book">
-                  Book a Yoga Session <ArrowRight aria-hidden="true" />
+                <Link href="#offerings">
+                  Explore Body Sessions <ArrowRight aria-hidden="true" />
                 </Link>
               </Button>
               <Button
@@ -203,7 +182,7 @@ export default function MovementPage() {
           </div>
 
           {/* Static atmospheric fallback until Shannon's approved movement loop is available. */}
-          <div className="hero-image-reveal relative mx-auto w-full max-w-md md:max-w-none">
+          <div className="experience-hero-image hero-image-reveal relative mx-auto w-full max-w-md md:max-w-none">
             <div
               aria-hidden="true"
               className="absolute -inset-5 rounded-t-[12rem] rounded-b-[2rem] border border-white/70"
@@ -224,6 +203,8 @@ export default function MovementPage() {
           </div>
         </div>
       </section>
+
+      <ServiceOfferingsSection pillarId="movement" />
 
       <PageSection className="py-24 md:py-32" id="overview">
         <div className="mx-auto grid max-w-6xl items-start gap-16 lg:grid-cols-[0.72fr_1fr] lg:gap-24">
@@ -259,61 +240,6 @@ export default function MovementPage() {
           className="mt-20"
           quote="Movement doesn't ask you to be impressive. It asks you to be present."
         />
-      </PageSection>
-
-      <SectionDivider variant="line" />
-
-      <PageSection className="bg-white/35 py-24 md:py-32" id="practices">
-        <SectionHeading
-          eyebrow="Three ways to enter"
-          title="A practice shaped around the body that arrives."
-        />
-        <p className="mt-6 max-w-2xl text-base leading-[1.9] text-[var(--muted-foreground)]">
-          Each private session has a clear form and enough space to change with
-          your energy that day.
-        </p>
-        <div className="mt-16 space-y-20 md:space-y-28">
-          {practices.map((practice, index) => (
-            <article
-              className="grid items-center gap-10 lg:grid-cols-2 lg:gap-20"
-              key={practice.title}
-            >
-              <div className={cn(index % 2 === 1 && "lg:order-2")}>
-                <span className="text-xs tracking-[0.28em] text-[#68735f] uppercase">
-                  Practice {String(index + 1).padStart(2, "0")}
-                </span>
-                <h2 className="mt-5 text-4xl leading-tight font-medium text-[var(--primary)] md:text-5xl">
-                  {practice.title}
-                </h2>
-                <p className="mt-4 text-xs tracking-[0.16em] text-[var(--muted-foreground)] uppercase">
-                  {practice.detail}
-                </p>
-                <p className="mt-6 max-w-xl text-lg leading-[1.9] text-[var(--muted-foreground)]">
-                  {practice.description}
-                </p>
-                <Link
-                  className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)] underline-offset-4 hover:underline"
-                  href={practice.bookingHref}
-                >
-                  Ask about this practice
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-              </div>
-              <ParallaxImage
-                alt={practice.image.alt}
-                aspectRatio="5 / 4"
-                className={cn(
-                  "rounded-[2rem] shadow-[0_26px_75px_rgba(67,79,61,0.12)]",
-                  index % 2 === 1 && "lg:order-1"
-                )}
-                imageClassName="object-cover"
-                sizes="(max-width: 1023px) 100vw, 50vw"
-                speed={0.2}
-                src={practice.image.src}
-              />
-            </article>
-          ))}
-        </div>
       </PageSection>
 
       <PageSection className="py-24 md:py-32" id="for-you">
@@ -407,14 +333,12 @@ export default function MovementPage() {
               confirmed through booking. All sessions are in person in the
               desert.
             </p>
-            <Button
-              asChild
-              className="mt-8 h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[#68735f]"
-            >
-              <Link href="/book">
-                Book a Yoga Session <ArrowRight aria-hidden="true" />
-              </Link>
-            </Button>
+            <SelectBookingButton
+              className="mt-8 h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[#68735f] sm:w-auto"
+              label="Book a Yoga Session"
+              pillarId={privateYogaBooking.pillar.id}
+              service={privateYogaBooking.service}
+            />
           </div>
         </div>
       </PageSection>
@@ -454,14 +378,12 @@ export default function MovementPage() {
           <h2 className="mt-5 text-5xl leading-tight font-medium text-[var(--primary)] md:text-6xl">
             Come home to your body.
           </h2>
-          <Button
-            asChild
-            className="mt-9 h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[#68735f]"
-          >
-            <Link href="/book">
-              Book a Yoga Session <ArrowRight aria-hidden="true" />
-            </Link>
-          </Button>
+          <SelectBookingButton
+            className="mt-9 h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[#68735f] sm:w-auto"
+            label="Book a Yoga Session"
+            pillarId={privateYogaBooking.pillar.id}
+            service={privateYogaBooking.service}
+          />
         </div>
       </section>
       <ServiceAreaNote />

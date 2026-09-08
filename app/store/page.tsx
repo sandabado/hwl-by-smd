@@ -28,7 +28,7 @@ const collections = [
     title: "Beauty Products",
     description:
       "Professional and everyday beauty products selected by Shannon for thoughtful at-home care. The first collection is being gathered now.",
-    image: media.experiences.beauty,
+    image: media.editorial.beautyOfferings,
     href: "/contact",
     label: "Ask about beauty products",
   },
@@ -38,7 +38,7 @@ const collections = [
     title: "Magical Tools",
     description:
       "A home for the tarot, ritual, lunar, and sensory tools Shannon chooses to carry. The first collection is being gathered now.",
-    image: media.experiences.ritualMoon,
+    image: media.editorial.beingOfferings,
     href: "/contact",
     label: "Ask about magical tools",
   },
@@ -144,33 +144,46 @@ export default async function StorePage() {
             LIFT ritual. The first physical collections are being gathered now.
           </BreathingText>
           <div className="mt-10 flex flex-wrap gap-4">
-            <Button
-              asChild
-              className="min-h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
-            >
-              <Link href="#beauty-products">Explore the Store</Link>
-            </Button>
+            {access?.canAccessLift ? (
+              <Button
+                asChild
+                className="min-h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
+              >
+                <Link href="/course/lift-daily-facial-ritual">Access LIFT</Link>
+              </Button>
+            ) : (
+              <AddToCartButton
+                className="min-h-12 w-auto px-7"
+                label="Get LIFT · $11.11"
+              />
+            )}
             <Button
               asChild
               className="min-h-12 rounded-full border-[var(--border)] bg-white/30 px-7 text-[var(--primary)] hover:bg-white/70"
               variant="outline"
             >
-              <Link href="#digital-practice">Digital Practice</Link>
+              <Link href="/beauty/lift">See LIFT details</Link>
             </Button>
           </div>
         </Reveal>
 
         <Reveal className="relative min-h-96" delay={120}>
-          <div className="absolute inset-x-0 top-4 mx-auto h-64 w-64 rounded-full border border-[var(--accent)]/28 bg-[radial-gradient(circle_at_34%_28%,rgba(255,255,255,0.9),rgba(196,168,130,0.2)_55%,transparent_70%)]" />
-          <div className="absolute inset-x-0 bottom-14 h-px bg-[var(--primary)]/18 shadow-[0_22px_35px_rgba(90,74,63,0.18)]" />
-          <div className="absolute inset-x-8 bottom-16 flex items-end justify-center gap-4">
-            <span className="h-36 w-16 rounded-t-full rounded-b-md border border-[var(--primary)]/15 bg-[var(--primary)]/88" />
-            <span className="h-24 w-28 rounded-sm border border-[var(--primary)]/12 bg-[#d9c0a6]" />
-            <span className="h-44 w-20 rounded-t-[2.5rem] rounded-b-lg border border-[var(--primary)]/12 bg-white/62" />
+          <div className="absolute inset-0 overflow-hidden rounded-[2rem] border border-white/65 bg-[var(--muted)] shadow-[0_28px_80px_rgba(90,74,63,0.14)]">
+            <Image
+              alt={media.editorial.beautyOfferings.alt}
+              className="object-cover"
+              fill
+              sizes="(max-width: 1023px) 92vw, 38vw"
+              src={media.editorial.beautyOfferings.src}
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-t from-[var(--primary)]/42 via-transparent to-transparent"
+            />
+            <p className="absolute right-5 bottom-5 left-5 text-[10px] font-medium tracking-[0.24em] text-white uppercase">
+              Simple tools · Daily practice · Chosen with care
+            </p>
           </div>
-          <p className="absolute inset-x-0 bottom-0 text-center text-[10px] font-medium tracking-[0.24em] text-[var(--muted-foreground)] uppercase">
-            A small shelf of practice
-          </p>
         </Reveal>
       </BreathingSection>
 

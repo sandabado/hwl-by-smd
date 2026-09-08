@@ -5,6 +5,9 @@ import { test } from "node:test"
 import {
   bookingPillars,
   findBookingService,
+  getBookingHref,
+  getBookingPillar,
+  getBookingServiceAction,
   getInitialBookingStep,
   isExactCalEventForBookingService,
   normalizeBookingServiceSlug,
@@ -167,6 +170,49 @@ test("booking catalog keeps available Cal discovery exact", async (t) => {
   })
 
   await t.test(
+    "catalog helpers preserve pillar authority and truthful booking actions",
+    () => {
+      assert.equal(getBookingPillar("beauty"), bookingPillars[0])
+      assert.equal(getBookingPillar("movement"), bookingPillars[1])
+      assert.equal(getBookingPillar("ritual"), bookingPillars[2])
+
+      const exactServices = services.filter(
+        (service) => service.calendarBooking.kind === "exact-event"
+      )
+      const inquiryServices = services.filter(
+        (service) => service.calendarBooking.kind === "inquiry-only"
+      )
+
+      assert.equal(exactServices.length, 10)
+      assert.equal(inquiryServices.length, 1)
+
+      for (const service of services) {
+        const expectedHref = `/book?service=${service.slug}#choose-time`
+
+        assert.equal(getBookingHref(service.slug), expectedHref)
+        assert.equal(getBookingServiceAction(service).href, expectedHref)
+      }
+
+      for (const service of exactServices) {
+        assert.deepEqual(getBookingServiceAction(service), {
+          href: `/book?service=${service.slug}#choose-time`,
+          kind: "book",
+          label: "Choose a time",
+        })
+      }
+
+      const inquiryAction = getBookingServiceAction(inquiryServices[0])
+
+      assert.deepEqual(inquiryAction, {
+        href: "/book?service=wild-glow-express-facial#choose-time",
+        kind: "inquire",
+        label: "Request this group ritual",
+      })
+      assert.doesNotMatch(inquiryAction.label, /book|choose a time|schedule/i)
+    }
+  )
+
+  await t.test(
     "Wild Glow Express cannot activate from a guessed 20-minute event",
     () => {
       const express = findBookingService("wild-glow-express-facial")?.service
@@ -258,6 +304,14 @@ test("booking catalog keeps available Cal discovery exact", async (t) => {
       findBookingService("private-sound-healing")?.service.guestRange,
       { maximum: 8, minimum: 1 }
     )
+
+    for (const service of getBookingPillar("movement").services) {
+      assert.doesNotMatch(
+        service.duration,
+        /\+\$\d+/,
+        `${service.slug} must not advertise guests beyond its enforced maximum`
+      )
+    }
   })
 })
 
@@ -386,8 +440,34 @@ test("stepped booking keeps navigation and calendar recovery inside the journey"
   assert.match(bookingFlow, /window\.addEventListener\("popstate"/)
   assert.match(bookingFlow, /class CalendarEmbedBoundary/)
   assert.match(bookingFlow, /Open calendar in a new tab/)
-  assert.match(bookingFlow, /onInitialReady=\{settleCalendarPosition\}/)
-  assert.match(calEmbed, /onInitialReady\?\.\(\)/)
+  assert.doesNotMatch(bookingFlow, /settleCalendarPosition|onInitialReady/)
+  assert.doesNotMatch(calEmbed, /onInitialReady/)
   assert.doesNotMatch(calEmbed, /styles:\s*\{/)
   assert.match(calEmbed, /cssVarsPerTheme:\s*\{/)
+  assert.match(calEmbed, /CAL_BOOKER_LAYOUT = "month_view"/)
+  assert.doesNotMatch(calEmbed, /week_view/)
+})
+
+test("products and appointments share a review-shelf journey without sharing transaction authority", () => {
+  const rootLayout = source("app/layout.tsx")
+  const serviceShelf = source(
+    "components/services/service-offerings-section.tsx"
+  )
+  const bookingShelf = source("components/booking/booking-shelf.tsx")
+  const bookingTrigger = source("components/booking/select-booking-button.tsx")
+  const homepage = source("components/home/hero-entry.tsx")
+
+  assert.match(rootLayout, /<BookingShelfProvider>/)
+  assert.match(rootLayout, /<BookingShelf \/>/)
+  assert.match(serviceShelf, /<AddToCartButton/)
+  assert.match(serviceShelf, /<SelectBookingButton/)
+  assert.match(homepage, /<SelectBookingButton/)
+  assert.match(bookingTrigger, /aria-haspopup="dialog"/)
+  assert.match(bookingTrigger, /data-booking-trigger/)
+  assert.match(bookingTrigger, /href=\{action\.href\}/)
+  assert.match(bookingTrigger, /event\.preventDefault\(\)/)
+  assert.match(bookingShelf, /href=\{action\.href\}/)
+  assert.match(bookingShelf, /See available dates & times/)
+  assert.match(bookingShelf, /No payment is collected when you request a time/)
+  assert.doesNotMatch(bookingShelf, /CheckoutButton|productId|STRIPE/i)
 })

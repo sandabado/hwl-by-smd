@@ -73,6 +73,18 @@ export const media = {
     ritualMoon: shannon.botanicalPortrait,
   },
   editorial: {
+    beautyOfferings: {
+      src: "/images/editorial/hwl-beauty-offerings-v1.webp",
+      alt: "Facial oil, ceramic skincare jar, sculpting stone, and apricot flower in desert light",
+    },
+    bodyOfferings: {
+      src: "/images/editorial/hwl-body-offerings-v1.webp",
+      alt: "Yoga mat, linen bolster, sage cloth, and singing bowl in a sunlit desert studio",
+    },
+    beingOfferings: {
+      src: "/images/editorial/hwl-being-offerings-v1.webp",
+      alt: "Ritual cards, brass moon, candle, flower, and stone arranged in plum twilight",
+    },
     aboutSkatingConcept: {
       src: "/images/home/hwl-home-body-studio-lunge-v2.webp",
       alt: "Shannon reaching through a grounded studio movement practice",

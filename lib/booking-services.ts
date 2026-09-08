@@ -120,7 +120,7 @@ export const bookingPillars: readonly BookingPillar[] = [
         calendarBooking: { durationMinutes: 60, kind: "exact-event" },
         slug: "private-yoga-and-sound",
         title: "Private Yoga + Sound",
-        duration: "60 min · up to 4 guests · +$55 each",
+        duration: "60 min · up to 4 guests",
         price: "$555",
         format: "In person",
         guestRange: { maximum: 4, minimum: 1 },
@@ -132,7 +132,7 @@ export const bookingPillars: readonly BookingPillar[] = [
         calendarBooking: { durationMinutes: 75, kind: "exact-event" },
         slug: "private-sound-healing",
         title: "Private Sound Healing",
-        duration: "60–75 min · up to 8 guests · +$44 each",
+        duration: "60–75 min · up to 8 guests",
         price: "$444",
         format: "In person",
         guestRange: { maximum: 8, minimum: 1 },
@@ -144,7 +144,7 @@ export const bookingPillars: readonly BookingPillar[] = [
         calendarBooking: { durationMinutes: 90, kind: "exact-event" },
         slug: "private-yoga",
         title: "Private Yoga",
-        duration: "75–90 min · 2–4 guests · +$66 each",
+        duration: "75–90 min · 2–4 guests",
         price: "$666",
         format: "In person",
         guestRange: { maximum: 4, minimum: 2 },
@@ -200,6 +200,54 @@ export const bookingPillars: readonly BookingPillar[] = [
     ],
   },
 ] as const
+
+export type BookingHref = `/book?service=${string}#choose-time`
+
+export type BookingServiceAction =
+  | Readonly<{
+      href: BookingHref
+      kind: "book"
+      label: "Choose a time"
+    }>
+  | Readonly<{
+      href: BookingHref
+      kind: "inquire"
+      label: "Request this group ritual"
+    }>
+
+export function getBookingPillar(id: BookingPillarId): BookingPillar {
+  const pillar = bookingPillars.find((item) => item.id === id)
+
+  if (!pillar) {
+    throw new Error(`Unknown booking pillar: ${id}`)
+  }
+
+  return pillar
+}
+
+export function getBookingHref(slug: BookingService["slug"]): BookingHref {
+  return `/book?service=${slug}#choose-time`
+}
+
+export function getBookingServiceAction(
+  service: BookingService
+): BookingServiceAction {
+  const href = getBookingHref(service.slug)
+
+  if (service.calendarBooking.kind === "inquiry-only") {
+    return {
+      href,
+      kind: "inquire",
+      label: "Request this group ritual",
+    }
+  }
+
+  return {
+    href,
+    kind: "book",
+    label: "Choose a time",
+  }
+}
 
 export function findBookingService(serviceSlug?: string) {
   if (!serviceSlug) return null

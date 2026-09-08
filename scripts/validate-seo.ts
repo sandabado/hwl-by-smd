@@ -217,11 +217,16 @@ const llmsUrls = [...llmsText.matchAll(/\]\((https?:\/\/[^)]+)\)/g)].map(
 )
 const allowedLlmsPaths = new Set([
   "/about",
+  "/astrology",
   "/beauty",
   "/beauty/lift",
+  "/book",
   "/contact",
   "/health-disclaimer",
+  "/retreats",
   "/sitemap.xml",
+  "/store",
+  "/yoga",
 ])
 const privateLlmsPrefixes = [
   "/account",

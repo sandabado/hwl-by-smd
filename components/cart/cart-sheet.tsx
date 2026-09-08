@@ -49,7 +49,7 @@ export function CartSheet() {
       }}
     >
       <SheetContent
-        className="z-[70] h-[100dvh] w-full gap-0 border-l border-[#d8c9b8] bg-[#faf7f2] p-0 text-[#2b2724] shadow-[-24px_0_80px_rgba(29,24,20,0.2)] data-[side=right]:w-full motion-reduce:animate-none motion-reduce:transition-none sm:max-w-[28rem]"
+        className="hwl-transaction-sheet z-[70] h-[100dvh] w-full gap-0 border-l border-[#d8c9b8] bg-[#faf7f2] p-0 text-[#2b2724] shadow-[-24px_0_80px_rgba(29,24,20,0.2)] data-[side=right]:w-full motion-reduce:animate-none motion-reduce:transition-none sm:max-w-[28rem]"
         id="site-cart-sheet"
         onCloseAutoFocus={(event) => event.preventDefault()}
         onEscapeKeyDown={(event) => {
@@ -66,7 +66,7 @@ export function CartSheet() {
         showCloseButton={false}
         side="right"
       >
-        <header className="relative border-b border-[#dfd3c6] px-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-5">
+        <header className="relative shrink-0 border-b border-[#dfd3c6] px-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-5">
           <p className="text-[10px] font-semibold tracking-[0.24em] text-[#765538] uppercase">
             {hasLift ? "Added to your ritual" : "Your ritual shelf"}
           </p>
@@ -97,7 +97,7 @@ export function CartSheet() {
           </Button>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+        <div className="hwl-transaction-sheet__body min-h-0 flex-1 overflow-y-auto px-6 py-6">
           {hasLift ? (
             <div className="space-y-6">
               {checkoutCancelled ? (
@@ -198,7 +198,7 @@ export function CartSheet() {
 
         {hasLift ? (
           <footer
-            className="border-t border-[#d8c9b8] bg-[#f7f1e9] px-6 pt-5"
+            className="shrink-0 border-t border-[#d8c9b8] bg-[#f7f1e9] px-6 pt-5"
             style={{
               paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))",
             }}

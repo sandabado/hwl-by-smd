@@ -9,6 +9,17 @@ HWL by SMD is Shannon Mary Dixon's practice exploring beauty, body, and being. L
 - [LIFT: A Daily Facial Massage Ritual](https://www.hwlbysmd.com/beauty/lift): Canonical public product and learning page.
 - [Beauty](https://www.hwlbysmd.com/beauty): Shannon's public beauty practice and facial ritual overview.
 
+## Services and booking
+
+- [Book a Session](https://www.hwlbysmd.com/book): Canonical booking journey for Shannon's live availability and session requests.
+- [Body](https://www.hwlbysmd.com/yoga): Private yoga, movement, and sound experiences.
+- [Being](https://www.hwlbysmd.com/astrology): Tarot, Reiki, and reflective ritual experiences.
+- [Retreats](https://www.hwlbysmd.com/retreats): Private group and retreat experiences.
+
+## Store
+
+- [HWL Store](https://www.hwlbysmd.com/store): Public catalog. LIFT is the current purchasable digital practice; future collections are labeled before release.
+
 ## About and safety
 
 - [About Shannon Mary Dixon](https://www.hwlbysmd.com/about): Founder background and practice.

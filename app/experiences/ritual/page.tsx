@@ -1,12 +1,13 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, MoonStar, ScrollText, Sparkles } from "lucide-react"
 
+import { SelectBookingButton } from "@/components/booking/select-booking-button"
 import { JsonLd } from "@/components/seo/json-ld"
+import { ServiceOfferingsSection } from "@/components/services/service-offerings-section"
 import { PullQuote } from "@/components/shared/pull-quote"
-import { SectionDivider } from "@/components/shared/section-divider"
 import { ServiceAreaNote } from "@/components/shared/service-area-note"
 import { Button } from "@/components/ui/button"
+import { findBookingService } from "@/lib/booking-services"
 import { media } from "@/lib/media"
 import { createPageMetadata, createServiceJsonLd } from "@/lib/seo"
 
@@ -16,39 +17,6 @@ export const metadata = createPageMetadata({
     "Private astrology consultations, tarot readings, and ritual ceremony in Palm Springs and the Hi-Desert.",
   path: "/astrology",
 })
-
-const offerings = [
-  {
-    icon: ScrollText,
-    title: "Intuitive Tarot Reading",
-    bookingHref: "/book?service=intuitive-tarot-reading#choose-time",
-    summary:
-      "A personalized reading for life transitions, decision-making, and reconnecting with inner wisdom.",
-    detail:
-      "Explore current circumstances, opportunities, challenges, and aligned next steps through reflective card work.",
-    format: "45–60 minutes · $222 · Virtual or in person",
-  },
-  {
-    icon: MoonStar,
-    title: "Moon Oracle Reading",
-    bookingHref: "/book?service=moon-oracle-reading#choose-time",
-    summary:
-      "A personalized astrological and lunar reading for clarity, timing, and connection to the immediate season.",
-    detail:
-      "Explore the current cosmic landscape and how its themes show up in your life, without treating astrology as fate.",
-    format: "45–60 minutes · $222 · Virtual or in person",
-  },
-  {
-    icon: Sparkles,
-    title: "Tarot + Reiki Experience",
-    bookingHref: "/book?service=tarot-and-reiki#choose-time",
-    summary:
-      "Intuitive guidance followed by restorative Reiki support designed to balance, clarify, and renew.",
-    detail:
-      "Begin with reflective tarot guidance, then continue with restorative Reiki support in the same in-person session.",
-    format: "60–75 minutes · $444 · In person",
-  },
-] as const
 
 const seasons = [
   {
@@ -78,6 +46,14 @@ const seasons = [
 ] as const
 
 export default function AstrologyPage() {
+  const readingBooking = findBookingService("intuitive-tarot-reading")
+
+  if (!readingBooking) {
+    throw new Error(
+      "Intuitive Tarot Reading is missing from the booking catalog."
+    )
+  }
+
   return (
     <>
       <JsonLd
@@ -115,14 +91,12 @@ export default function AstrologyPage() {
           <p className="mt-7 max-w-2xl text-lg leading-[1.9] text-white/65 md:text-xl">
             Pattern-reading for the season you&apos;re in.
           </p>
-          <Button
-            asChild
-            className="mt-10 h-12 rounded-full bg-[#dcc5a5] px-7 text-[#211c22] hover:bg-white"
-          >
-            <Link href="/book?service=intuitive-tarot-reading#choose-time">
-              Book a Reading
-            </Link>
-          </Button>
+          <SelectBookingButton
+            className="mt-10 h-12 rounded-full bg-[#dcc5a5] px-7 text-[#211c22] hover:bg-white sm:w-auto"
+            label="Book a Reading"
+            pillarId={readingBooking.pillar.id}
+            service={readingBooking.service}
+          />
           <Button
             asChild
             className="mt-4 h-12 rounded-full border-white/35 bg-white/10 px-7 text-white hover:bg-white/20 hover:text-white sm:mt-10 sm:ml-3"
@@ -132,6 +106,8 @@ export default function AstrologyPage() {
           </Button>
         </div>
       </section>
+
+      <ServiceOfferingsSection pillarId="ritual" />
 
       <section
         className="relative overflow-hidden bg-[#f7f1e9] px-6 py-28 md:py-40"
@@ -157,71 +133,6 @@ export default function AstrologyPage() {
           className="mx-auto mt-24 max-w-5xl"
           quote="The cards don't tell you what to do. They show you what you already know."
         />
-      </section>
-
-      <SectionDivider variant="fade" />
-
-      <section
-        className="relative overflow-hidden bg-[#251f27] px-6 py-28 text-white md:py-40"
-        id="offerings"
-      >
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 [background-image:radial-gradient(circle_at_20%_18%,rgba(220,197,165,0.12),transparent_24%),radial-gradient(circle_at_82%_72%,rgba(118,83,110,0.2),transparent_30%)] opacity-30"
-        />
-        <div className="relative mx-auto max-w-5xl">
-          <p className="text-center text-xs tracking-[0.28em] text-[#dcc5a5] uppercase">
-            Offerings
-          </p>
-          <h2 className="mx-auto mt-5 max-w-2xl text-center text-5xl leading-tight text-white md:text-6xl">
-            Three ways to listen.
-          </h2>
-          <div className="mt-20 divide-y divide-white/10 border-y border-white/10">
-            {offerings.map(
-              ({ bookingHref, detail, format, icon: Icon, summary, title }) => (
-                <details className="group py-8 md:py-10" key={title}>
-                  <summary className="grid cursor-pointer list-none gap-6 md:grid-cols-[64px_0.55fr_1fr_auto] md:items-center">
-                    <span className="grid size-14 place-items-center rounded-full border border-white/12 text-[#dcc5a5]">
-                      <Icon className="size-5" aria-hidden="true" />
-                    </span>
-                    <h3 className="text-4xl text-white">{title}</h3>
-                    <p className="max-w-xl text-base leading-[1.9] text-white/58">
-                      {summary}
-                    </p>
-                    <span className="text-xs tracking-[0.18em] text-[#dcc5a5] uppercase group-open:hidden">
-                      Enter
-                    </span>
-                    <span className="hidden text-xs tracking-[0.18em] text-[#dcc5a5] uppercase group-open:block">
-                      Close
-                    </span>
-                  </summary>
-                  <div className="mt-8 grid gap-5 pl-0 md:ml-[calc(64px+1.5rem)] md:grid-cols-[1fr_auto] md:items-end">
-                    <p className="max-w-2xl text-base leading-[1.9] text-white/68">
-                      {detail}
-                    </p>
-                    <div className="md:text-right">
-                      <p className="text-xs tracking-wide text-white/70">
-                        {format}
-                      </p>
-                      <Link
-                        className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#dcc5a5] underline-offset-4 hover:underline"
-                        href={bookingHref}
-                      >
-                        Book this offering
-                        <ArrowRight className="size-4" aria-hidden="true" />
-                      </Link>
-                    </div>
-                  </div>
-                </details>
-              )
-            )}
-          </div>
-          <p className="mx-auto mt-12 max-w-2xl text-center text-xs leading-[1.8] text-white/72">
-            Readings are offered for reflection and self-inquiry. They are not
-            predictions, psychological counseling, medical care, or financial
-            advice. Take what resonates and leave what does not.
-          </p>
-        </div>
       </section>
 
       <section className="bg-[#f3e9dc] px-6 py-24 text-center md:py-32">
@@ -296,12 +207,12 @@ export default function AstrologyPage() {
           <h2 className="mt-6 text-5xl leading-tight text-white md:text-7xl">
             Begin the inner work.
           </h2>
-          <Link
-            className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#dcc5a5] px-7 py-3 text-sm font-medium text-[#211c22] transition hover:bg-white"
-            href="/book?service=intuitive-tarot-reading#choose-time"
-          >
-            Book a Reading <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
+          <SelectBookingButton
+            className="mt-10 bg-[#dcc5a5] text-[#211c22] hover:bg-white sm:w-auto"
+            label="Book a Reading"
+            pillarId={readingBooking.pillar.id}
+            service={readingBooking.service}
+          />
         </div>
       </section>
       <ServiceAreaNote />

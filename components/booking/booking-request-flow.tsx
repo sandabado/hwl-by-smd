@@ -2,7 +2,6 @@
 
 import {
   Component,
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -133,8 +132,8 @@ function guestRangeError({
 
 function BookingProgress({ step }: { step: BookingStep }) {
   const steps = [
-    { id: "experience", label: "Experience" },
-    { id: "schedule", label: "Schedule & confirm" },
+    { id: "experience", label: "Choose a session" },
+    { id: "schedule", label: "Date & time" },
   ] as const
 
   return (
@@ -537,15 +536,6 @@ export function BookingRequestFlow({
     return () => window.removeEventListener("popstate", syncStepFromHistory)
   }, [])
 
-  const settleCalendarPosition = useCallback(() => {
-    window.requestAnimationFrame(() => {
-      const flow = bookingFlowRef.current
-      if (!flow || flow.getBoundingClientRect().top >= 0) return
-
-      flow.scrollIntoView({ behavior: "auto", block: "start" })
-    })
-  }, [])
-
   function resetFeedback() {
     if (status !== "idle") setStatus("idle")
     if (feedback) setFeedback("")
@@ -688,18 +678,18 @@ export function BookingRequestFlow({
           <div className="mt-9">
             <div className="mx-auto max-w-2xl text-center">
               <p className="text-xs font-medium tracking-[0.26em] text-[var(--accent)] uppercase">
-                Step 1 of 2 · Experience
+                Step 1 of 2 · Session shelf
               </p>
               <h2
                 className="mt-2 text-3xl font-medium text-[var(--primary)] outline-none md:text-4xl"
                 ref={stepHeadingRef}
                 tabIndex={-1}
               >
-                Choose what meets you here.
+                Choose from Shannon&apos;s session shelf.
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)] md:text-base">
-                Begin with the experience. You&apos;ll choose a date and time on
-                the next, dedicated step.
+                Compare the price, timing, and format here. Your selected
+                session carries into a dedicated date-and-time step.
               </p>
             </div>
 
@@ -805,7 +795,7 @@ export function BookingRequestFlow({
                     </span>
                     <div className="min-w-0">
                       <p className="text-[10px] font-semibold tracking-[0.18em] text-[var(--accent)] uppercase">
-                        Your experience
+                        Your session
                       </p>
                       <h3
                         className="mt-1 font-serif text-2xl leading-tight text-[var(--primary)]"
@@ -825,8 +815,8 @@ export function BookingRequestFlow({
                     type="button"
                   >
                     {selectedCalLink
-                      ? "Continue to available times"
-                      : "Continue to booking options"}
+                      ? "See available dates & times"
+                      : "Continue to request details"}
                     <ArrowRight aria-hidden="true" className="size-4" />
                   </Button>
                 </div>
@@ -849,7 +839,7 @@ export function BookingRequestFlow({
           <div className="mt-9">
             <div className="mx-auto max-w-3xl text-center">
               <p className="text-xs font-medium tracking-[0.26em] text-[var(--accent)] uppercase">
-                Step 2 of 2 · Schedule & confirm
+                Step 2 of 2 · Date & time
               </p>
               <h2
                 className="mt-2 text-3xl font-medium text-[var(--primary)] outline-none md:text-4xl"
@@ -951,7 +941,6 @@ export function BookingRequestFlow({
                   <CalInlineEmbed
                     calLink={selectedCalLink}
                     className="mt-5"
-                    onInitialReady={settleCalendarPosition}
                     serviceTitle={selectedService.title}
                     showExternalLink={false}
                   />

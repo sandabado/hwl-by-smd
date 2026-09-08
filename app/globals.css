@@ -155,6 +155,47 @@ body {
   animation: hero-image-reveal 0.7s 180ms ease-out forwards;
 }
 
+@media (min-width: 768px) and (max-height: 800px) {
+  .experience-hero {
+    min-height: calc(100svh - 4.5rem);
+    padding-block: 2.75rem;
+  }
+
+  .experience-hero-grid {
+    gap: 3rem;
+  }
+
+  .experience-hero-heading {
+    margin-top: 1rem;
+    font-size: 3.75rem;
+  }
+
+  .experience-hero-subtitle {
+    margin-top: 1rem;
+    line-height: 1.65;
+  }
+
+  .experience-hero-actions {
+    margin-top: 1.5rem;
+  }
+
+  .experience-hero-image {
+    max-width: 21rem;
+  }
+}
+
+@media (max-height: 42rem) {
+  .hwl-transaction-sheet {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .hwl-transaction-sheet__body {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+}
+
 .home-hero-image {
   animation: ken-burns 20s ease-in-out infinite alternate;
   transform-origin: 50% 40%;

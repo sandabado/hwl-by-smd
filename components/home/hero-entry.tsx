@@ -2,10 +2,13 @@ import { ArrowRight, ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
+import { SelectBookingButton } from "@/components/booking/select-booking-button"
+import { AddToCartButton } from "@/components/cart/add-to-cart-button"
 import { LiftPreviewFilm } from "@/components/home/lift-preview-film"
 import { NewsletterForm } from "@/components/shared/newsletter-form"
 import { Button } from "@/components/ui/button"
 import { getCanonicalHomepageLiftHref } from "@/lib/homepage-feature"
+import { findBookingService } from "@/lib/booking-services"
 import { media } from "@/lib/media"
 import type { PublishedHomepageFeature } from "@/lib/site-content"
 
@@ -46,7 +49,8 @@ const sessionPathways = [
     title: "Facials",
     location: "Palm Springs",
     description: "Customized facial treatments and intentional touch.",
-    href: "/book?service=signature-facial",
+    detailsHref: "/beauty",
+    serviceSlug: "signature-facial",
     cta: "Book a facial",
     image: media.home.proofFacial,
   },
@@ -54,7 +58,8 @@ const sessionPathways = [
     title: "Private Yoga",
     location: "Palm Springs · Joshua Tree · Surrounding Desert",
     description: "Private movement for individuals, groups and celebrations.",
-    href: "/book?service=private-yoga",
+    detailsHref: "/yoga",
+    serviceSlug: "private-yoga",
     cta: "Book or inquire",
     image: media.home.proofPrivateYoga,
   },
@@ -62,7 +67,8 @@ const sessionPathways = [
     title: "Readings",
     location: "Virtual + select in-person sessions",
     description: "Private tarot and intuitive sessions with Shannon.",
-    href: "/book?service=intuitive-tarot-reading",
+    detailsHref: "/astrology",
+    serviceSlug: "intuitive-tarot-reading",
     cta: "Book a reading",
     image: media.home.proofReadings,
   },
@@ -248,12 +254,22 @@ export function HeroEntry({
               and make the skincare ritual you’re already doing more
               intentional.
             </p>
-            <div className="mt-8">
+            <div className="mt-6 flex flex-col items-start gap-2 sm:flex-row sm:items-baseline sm:gap-3">
+              <p className="font-serif text-4xl text-[#f7f3ec]">$11.11</p>
+              <p className="font-sans text-xs tracking-[0.16em] text-white/56 uppercase">
+                Complete video + PDF · One time
+              </p>
+            </div>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <AddToCartButton
+                className="min-h-12 bg-[#f7f3ec] px-7 text-[#20251f] hover:bg-[#d8b98e] sm:w-auto"
+                label="Add LIFT to cart · $11.11"
+              />
               <Link
-                className="inline-flex min-h-12 items-center gap-3 rounded-full bg-[#f7f3ec] px-7 text-xs font-semibold tracking-[0.18em] text-[#20251f] uppercase transition hover:bg-[#d8b98e]"
+                className="inline-flex min-h-12 items-center justify-center gap-3 rounded-full border border-white/24 px-7 text-xs font-semibold tracking-[0.18em] text-white uppercase transition hover:bg-white/10"
                 href={getCanonicalHomepageLiftHref(featuredExperience)}
               >
-                Explore LIFT
+                See LIFT details
                 <ArrowRight aria-hidden="true" className="size-4" />
               </Link>
             </div>
@@ -304,33 +320,44 @@ export function HeroEntry({
           </div>
 
           <div className="mt-14 grid gap-10 lg:grid-cols-3 lg:gap-6">
-            {sessionPathways.map((pathway) => (
-              <article key={pathway.title}>
-                <Link
-                  aria-label={pathway.cta}
-                  className="group relative block aspect-[4/3] overflow-hidden bg-[#ded7cc]"
-                  href={pathway.href}
-                >
-                  <Image
-                    alt={pathway.image.alt}
-                    className="object-cover transition duration-700 ease-out group-hover:scale-[1.025]"
-                    fill
-                    sizes="(max-width: 1023px) 92vw, 31vw"
-                    src={pathway.image.src}
+            {sessionPathways.map((pathway) => {
+              const booking = findBookingService(pathway.serviceSlug)
+
+              if (!booking) return null
+
+              return (
+                <article key={pathway.title}>
+                  <Link
+                    aria-label={`Explore ${pathway.title}`}
+                    className="group relative block aspect-[4/3] overflow-hidden bg-[#ded7cc]"
+                    href={pathway.detailsHref}
+                  >
+                    <Image
+                      alt={pathway.image.alt}
+                      className="object-cover transition duration-700 ease-out group-hover:scale-[1.025]"
+                      fill
+                      sizes="(max-width: 1023px) 92vw, 31vw"
+                      src={pathway.image.src}
+                    />
+                  </Link>
+                  <p className="mt-6 text-xs font-semibold tracking-[0.16em] text-[var(--accent)] uppercase">
+                    {pathway.location}
+                  </p>
+                  <h3 className="mt-3 text-3xl font-medium text-[var(--primary)]">
+                    {pathway.title}
+                  </h3>
+                  <p className="mt-3 min-h-14 text-sm leading-7 text-[var(--muted-foreground)]">
+                    {pathway.description}
+                  </p>
+                  <SelectBookingButton
+                    className="mt-5 bg-[var(--primary)] text-white hover:bg-[var(--accent)] sm:w-auto"
+                    label={pathway.cta}
+                    pillarId={booking.pillar.id}
+                    service={booking.service}
                   />
-                </Link>
-                <p className="mt-6 text-xs font-semibold tracking-[0.16em] text-[var(--accent)] uppercase">
-                  {pathway.location}
-                </p>
-                <h3 className="mt-3 text-3xl font-medium text-[var(--primary)]">
-                  {pathway.title}
-                </h3>
-                <p className="mt-3 min-h-14 text-sm leading-7 text-[var(--muted-foreground)]">
-                  {pathway.description}
-                </p>
-                <EditorialLink href={pathway.href} label={pathway.cta} />
-              </article>
-            ))}
+                </article>
+              )
+            })}
           </div>
         </div>
       </section>

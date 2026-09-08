@@ -7,7 +7,6 @@ import {
   useState,
   type ReactNode,
   type FormEvent,
-  type MouseEvent,
 } from "react"
 import {
   ArrowLeft,
@@ -35,6 +34,7 @@ import {
   type BookingService,
 } from "@/lib/booking-services"
 import { getBookingRequestPresentation } from "@/lib/booking-request-presentation"
+import type { CalcomBookingOption } from "@/lib/calcom-booking-links"
 import { SITE_CONFIG } from "@/lib/constants"
 import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 import { cn } from "@/lib/utils"
@@ -93,12 +93,6 @@ const pillarLabels: Record<BookingPillarId, string> = {
   ritual: "Tarot + Reiki",
 }
 
-const availabilityLabels: Record<BookingPillarId, string> = {
-  beauty: "Beauty availability",
-  movement: "Yoga + Sound availability",
-  ritual: "Tarot, Reiki + virtual availability",
-}
-
 const inputClassName =
   "min-h-11 w-full rounded-xl border border-[var(--border)] bg-white/82 px-4 text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
 
@@ -132,14 +126,14 @@ function guestRangeError({
 
 function BookingProgress({ step }: { step: BookingStep }) {
   const steps = [
-    { id: "experience", label: "Choose a session" },
-    { id: "schedule", label: "Date & time" },
+    { id: "experience", label: "Session" },
+    { id: "schedule", label: "Time & details" },
   ] as const
 
   return (
     <ol
       aria-label="Booking progress"
-      className="mx-auto grid w-full max-w-xl grid-cols-2 gap-2"
+      className="mx-auto grid w-full max-w-lg grid-cols-2 gap-2"
     >
       {steps.map((item, index) => {
         const isCurrent = item.id === step
@@ -149,7 +143,7 @@ function BookingProgress({ step }: { step: BookingStep }) {
           <li
             aria-current={isCurrent ? "step" : undefined}
             className={cn(
-              "flex min-h-14 items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition-colors sm:px-4",
+              "flex min-h-11 items-center gap-2.5 rounded-xl border px-3 py-2 text-left transition-colors sm:px-4",
               isCurrent
                 ? "border-[var(--accent)] bg-[var(--accent)]/[0.09] text-[var(--primary)]"
                 : "border-[var(--border)] bg-white/45 text-[var(--muted-foreground)]",
@@ -160,7 +154,7 @@ function BookingProgress({ step }: { step: BookingStep }) {
             <span
               aria-hidden="true"
               className={cn(
-                "grid size-7 shrink-0 place-items-center rounded-full border text-xs font-semibold",
+                "grid size-6 shrink-0 place-items-center rounded-full border text-[11px] font-semibold",
                 isCurrent
                   ? "border-[var(--accent)] bg-[var(--accent)] text-white"
                   : "border-[var(--border)] bg-white",
@@ -171,10 +165,10 @@ function BookingProgress({ step }: { step: BookingStep }) {
               {isComplete ? <Check className="size-3.5" /> : index + 1}
             </span>
             <span>
-              <span className="block text-[9px] font-semibold tracking-[0.16em] uppercase">
+              <span className="block text-[8px] font-semibold tracking-[0.14em] uppercase">
                 Step {index + 1}
               </span>
-              <span className="mt-0.5 block text-xs font-medium sm:text-sm">
+              <span className="block text-[11px] font-medium sm:text-xs">
                 {item.label}
               </span>
             </span>
@@ -228,14 +222,14 @@ function BookingInquiryForm({
               id="alternative-booking-request-title"
             >
               {isInquiryOnly
-                ? "Arrange this group facial with Shannon."
+                ? "Arrange this experience with Shannon."
                 : hasLiveCalendar
                   ? "Need another time?"
                   : "Request Shannon’s next opening."}
             </h3>
             <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)]">
               {isInquiryOnly
-                ? "Wild Glow Express is 15–20 minutes per guest and begins with four guests. Share your group timing so Shannon can reserve the full appointment without guessing; she’ll reply personally within 48 hours."
+                ? `${selectedService.title} needs a personal arrangement. Share your preferred timing and Shannon will reply personally within 48 hours.`
                 : hasLiveCalendar
                   ? "Share your timing below and Shannon will reply personally within 48 hours with an alternate option."
                   : "Share your timing below. Shannon will reply personally within 48 hours with an available option. Ten to fourteen days’ notice is preferred, but shorter windows may be possible."}
@@ -438,11 +432,11 @@ function BookingInquiryForm({
 }
 
 export function BookingRequestFlow({
-  calLinksByServiceSlug,
+  calBookingOptionsByServiceSlug,
   initialServiceSlug,
   minimumDate,
 }: {
-  calLinksByServiceSlug: Readonly<Record<string, string>>
+  calBookingOptionsByServiceSlug: Readonly<Record<string, CalcomBookingOption>>
   initialServiceSlug?: string
   minimumDate: string
 }) {
@@ -461,7 +455,7 @@ export function BookingRequestFlow({
   const [status, setStatus] = useState<SubmissionStatus>("idle")
   const [feedback, setFeedback] = useState("")
   const bookingFlowRef = useRef<HTMLElement>(null)
-  const selectionSummaryRef = useRef<HTMLDivElement>(null)
+  const scheduleStepRef = useRef<HTMLDivElement>(null)
   const stepHeadingRef = useRef<HTMLHeadingElement>(null)
   const shouldFocusStepRef = useRef(false)
   const submitInquiry = useInquirySubmission()
@@ -471,10 +465,11 @@ export function BookingRequestFlow({
     bookingPillars.find((pillar) => pillar.id === activePillar) ??
     bookingPillars[0]
   const activeServices = activePillarData.services
-  const selectedCalLink =
+  const selectedCalOption =
     selectedService?.calendarBooking.kind === "exact-event"
-      ? calLinksByServiceSlug[selectedService.slug]
+      ? calBookingOptionsByServiceSlug[selectedService.slug]
       : undefined
+  const selectedCalLink = selectedCalOption?.url
   const inquiryCollectionReady = isInquiryCollectionReady()
   const bookingRequestPresentation = selectedService
     ? getBookingRequestPresentation({
@@ -503,7 +498,9 @@ export function BookingRequestFlow({
 
     shouldFocusStepRef.current = false
     const frame = window.requestAnimationFrame(() => {
-      bookingFlowRef.current?.scrollIntoView({
+      const target =
+        step === "schedule" ? scheduleStepRef.current : bookingFlowRef.current
+      target?.scrollIntoView({
         behavior: "auto",
         block: "start",
       })
@@ -550,21 +547,9 @@ export function BookingRequestFlow({
     resetFeedback()
   }
 
-  function chooseService(serviceSlug: string, shouldScroll: boolean) {
+  function chooseService(serviceSlug: string) {
     setSelectedServiceSlug(serviceSlug)
     resetFeedback()
-
-    if (shouldScroll && window.matchMedia("(max-width: 1023px)").matches) {
-      window.requestAnimationFrame(() => {
-        selectionSummaryRef.current?.scrollIntoView({
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-            .matches
-            ? "auto"
-            : "smooth",
-          block: "start",
-        })
-      })
-    }
   }
 
   function transitionToStep(nextStep: BookingStep) {
@@ -667,7 +652,7 @@ export function BookingRequestFlow({
 
   return (
     <section
-      className="scroll-mt-24 border-y border-[var(--border)] bg-white/38 px-5 py-8 sm:px-6 md:py-11"
+      className="scroll-mt-24 border-y border-[var(--border)] bg-white/38 px-5 py-5 sm:px-6 md:py-6"
       id="choose-time"
       ref={bookingFlowRef}
     >
@@ -675,51 +660,50 @@ export function BookingRequestFlow({
         <BookingProgress step={step} />
 
         {step === "experience" || !selectedService ? (
-          <div className="mt-9">
-            <div className="mx-auto max-w-2xl text-center">
-              <p className="text-xs font-medium tracking-[0.26em] text-[var(--accent)] uppercase">
-                Step 1 of 2 · Session shelf
-              </p>
-              <h2
-                className="mt-2 text-3xl font-medium text-[var(--primary)] outline-none md:text-4xl"
-                ref={stepHeadingRef}
-                tabIndex={-1}
-              >
-                Choose from Shannon&apos;s session shelf.
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)] md:text-base">
-                Compare the price, timing, and format here. Your selected
-                session carries into a dedicated date-and-time step.
-              </p>
-            </div>
-
-            <div
-              aria-label="Service categories"
-              className="mx-auto mt-7 grid max-w-2xl grid-cols-3 gap-2"
-              role="group"
-            >
-              {bookingPillars.map((pillar) => (
-                <button
-                  aria-controls="booking-service-options"
-                  aria-pressed={activePillar === pillar.id}
-                  className={cn(
-                    "min-h-11 rounded-full border px-2.5 py-2 text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none sm:text-sm",
-                    activePillar === pillar.id
-                      ? "border-[var(--primary)] bg-[var(--primary)] text-white"
-                      : "border-[var(--border)] bg-white/58 text-[var(--primary)] hover:border-[var(--accent)]"
-                  )}
-                  key={pillar.id}
-                  onClick={() => choosePillar(pillar.id)}
-                  type="button"
+          <div className="mt-5">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-xl text-left">
+                <h2
+                  className="text-2xl font-medium text-[var(--primary)] outline-none sm:text-3xl md:text-4xl"
+                  ref={stepHeadingRef}
+                  tabIndex={-1}
                 >
-                  {pillarLabels[pillar.id]}
-                </button>
-              ))}
+                  Find the session that fits.
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                  Compare format, timing, and price. Then choose from
+                  Shannon&apos;s live openings.
+                </p>
+              </div>
+
+              <div
+                aria-label="Service categories"
+                className="grid w-full grid-cols-3 gap-2 lg:max-w-xl"
+                role="group"
+              >
+                {bookingPillars.map((pillar) => (
+                  <button
+                    aria-controls="booking-service-options"
+                    aria-pressed={activePillar === pillar.id}
+                    className={cn(
+                      "min-h-11 rounded-full border px-2.5 py-2 text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none sm:text-sm",
+                      activePillar === pillar.id
+                        ? "border-[var(--primary)] bg-[var(--primary)] text-white"
+                        : "border-[var(--border)] bg-white/58 text-[var(--primary)] hover:border-[var(--accent)]"
+                    )}
+                    key={pillar.id}
+                    onClick={() => choosePillar(pillar.id)}
+                    type="button"
+                  >
+                    {pillarLabels[pillar.id]}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div
               aria-label={`${pillarLabels[activePillar]} services`}
-              className="mt-5 grid gap-3 md:grid-cols-2"
+              className="mt-4 grid gap-3 md:grid-cols-2"
               id="booking-service-options"
               role="group"
             >
@@ -727,220 +711,130 @@ export function BookingRequestFlow({
                 const selected = service.slug === selectedServiceSlug
 
                 return (
-                  <button
-                    aria-controls="booking-selection-summary"
-                    aria-pressed={selected}
+                  <div
                     className={cn(
-                      "group min-h-36 rounded-[1.35rem] border p-5 text-left transition focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none",
+                      "group overflow-hidden rounded-[1.25rem] border text-left transition",
                       selected
                         ? "border-[var(--accent)] bg-white shadow-[0_16px_42px_rgba(90,74,63,0.09)] ring-2 ring-[var(--accent)]/12"
                         : "border-[var(--border)] bg-white/55 hover:border-[var(--accent)]/60 hover:bg-white/78"
                     )}
                     key={service.slug}
-                    onClick={(event: MouseEvent<HTMLButtonElement>) =>
-                      chooseService(service.slug, event.detail > 0)
-                    }
-                    type="button"
                   >
-                    <span className="flex items-start justify-between gap-4">
-                      <span className="min-w-0">
-                        <span className="block font-serif text-xl leading-tight text-[var(--primary)]">
-                          {service.title}
-                        </span>
-                        <span className="mt-1.5 block text-[10px] font-medium tracking-[0.1em] text-[var(--muted-foreground)] uppercase">
-                          {service.duration} · {service.format}
-                        </span>
-                      </span>
-                      <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-[var(--accent)]">
-                        {service.price}
-                        {selected ? (
-                          <span className="grid size-6 place-items-center rounded-full bg-[var(--accent)] text-white">
-                            <Check aria-hidden="true" className="size-3.5" />
+                    <button
+                      aria-controls={
+                        selected ? `continue-${service.slug}` : undefined
+                      }
+                      aria-pressed={selected}
+                      className="w-full p-4 text-left focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none focus-visible:ring-inset sm:p-5"
+                      onClick={() => chooseService(service.slug)}
+                      type="button"
+                    >
+                      <span className="flex items-start justify-between gap-4">
+                        <span className="min-w-0">
+                          <span className="block font-serif text-xl leading-tight text-[var(--primary)]">
+                            {service.title}
                           </span>
-                        ) : null}
+                          <span className="mt-1.5 block text-[10px] font-medium tracking-[0.1em] text-[var(--muted-foreground)] uppercase">
+                            {service.duration} · {service.format}
+                          </span>
+                        </span>
+                        <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-[var(--accent)]">
+                          {service.price}
+                          {selected ? (
+                            <span className="grid size-6 place-items-center rounded-full bg-[var(--accent)] text-white">
+                              <Check aria-hidden="true" className="size-3.5" />
+                            </span>
+                          ) : null}
+                        </span>
                       </span>
-                    </span>
-                    <span className="mt-4 block text-sm leading-6 text-[var(--muted-foreground)]">
-                      {service.description}
-                    </span>
-                  </button>
+                      <span className="mt-3 block text-sm leading-6 text-[var(--muted-foreground)]">
+                        {service.description}
+                      </span>
+                    </button>
+
+                    {selected ? (
+                      <div
+                        className="border-t border-[var(--accent)]/20 px-4 py-3 sm:px-5"
+                        id={`continue-${service.slug}`}
+                      >
+                        <Button
+                          className="min-h-11 w-full rounded-full bg-[var(--primary)] px-5 text-white hover:bg-[var(--accent)]"
+                          onClick={continueToSchedule}
+                          type="button"
+                        >
+                          {selectedCalLink
+                            ? "See available dates & times"
+                            : "Continue to request details"}
+                          <ArrowRight aria-hidden="true" className="size-4" />
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
                 )
               })}
             </div>
 
-            <div
-              aria-label={selectedService ? undefined : "Selected experience"}
-              aria-labelledby={
-                selectedService ? "booking-selection-title" : undefined
-              }
-              className="mt-6 scroll-mt-24"
-              id="booking-selection-summary"
-              ref={selectionSummaryRef}
-              role="region"
-            >
-              <p aria-atomic="true" aria-live="polite" className="sr-only">
-                {selectedService
-                  ? `${selectedService.title} selected. ${selectedService.duration}. ${selectedService.price}.`
-                  : `${pillarLabels[activePillar]} category selected. Choose an experience to continue.`}
-              </p>
-
-              {selectedService ? (
-                <div className="grid gap-5 rounded-[1.6rem] border border-[var(--accent)]/45 bg-white/82 p-5 shadow-[0_20px_60px_rgba(90,74,63,0.08)] md:grid-cols-[1fr_auto] md:items-center md:p-6">
-                  <div className="flex min-w-0 items-start gap-4">
-                    <span
-                      aria-hidden="true"
-                      className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-full bg-[var(--accent)] text-white"
-                    >
-                      <Check className="size-4" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-semibold tracking-[0.18em] text-[var(--accent)] uppercase">
-                        Your session
-                      </p>
-                      <h3
-                        className="mt-1 font-serif text-2xl leading-tight text-[var(--primary)]"
-                        id="booking-selection-title"
-                      >
-                        {selectedService.title}
-                      </h3>
-                      <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                        {selectedService.duration} · {selectedService.format} ·{" "}
-                        {selectedService.price}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    className="min-h-11 w-full rounded-full bg-[var(--primary)] px-6 text-white hover:bg-[var(--accent)] md:w-auto"
-                    onClick={continueToSchedule}
-                    type="button"
-                  >
-                    {selectedCalLink
-                      ? "See available dates & times"
-                      : "Continue to request details"}
-                    <ArrowRight aria-hidden="true" className="size-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid min-h-32 place-items-center rounded-[1.6rem] border border-dashed border-[var(--border)] bg-white/35 px-6 text-center">
-                  <div>
-                    <CalendarDays
-                      aria-hidden="true"
-                      className="mx-auto size-5 text-[var(--accent)]"
-                    />
-                    <p className="mt-3 text-sm text-[var(--muted-foreground)]">
-                      Choose one experience to continue.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
+            <p aria-atomic="true" aria-live="polite" className="sr-only">
+              {selectedService
+                ? `${selectedService.title} selected. ${selectedService.duration}. ${selectedService.price}. Continue from the selected card.`
+                : `${pillarLabels[activePillar]} category selected. Choose an experience to continue.`}
+            </p>
           </div>
         ) : (
-          <div className="mt-9">
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="text-xs font-medium tracking-[0.26em] text-[var(--accent)] uppercase">
-                Step 2 of 2 · Date & time
-              </p>
-              <h2
-                className="mt-2 text-3xl font-medium text-[var(--primary)] outline-none md:text-4xl"
-                ref={stepHeadingRef}
-                tabIndex={-1}
-              >
-                {selectedCalLink
-                  ? "Choose a day and time."
-                  : "Complete your booking request."}
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)] md:text-base">
-                {selectedCalLink
-                  ? "The calendar now has the room. Choose a live opening, then Cal.com will collect the details Shannon needs to confirm your appointment."
-                  : "This experience begins with a personal arrangement so Shannon can hold the right amount of time and care."}
-              </p>
-            </div>
-
-            <div className="mt-7 rounded-[1.6rem] border border-[var(--border)] bg-white/72 p-5 shadow-[0_18px_55px_rgba(90,74,63,0.06)] sm:p-6">
-              <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold tracking-[0.18em] text-[var(--accent)] uppercase">
-                    Selected experience
-                  </p>
-                  <h3 className="mt-1 font-serif text-2xl leading-tight text-[var(--primary)]">
-                    {selectedService.title}
-                  </h3>
-                  <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                    {selectedService.duration} · {selectedService.format} ·{" "}
-                    {selectedService.price}
-                  </p>
-                </div>
-                <div className="md:text-right">
-                  <Button
-                    className="min-h-11 rounded-full px-4 text-[var(--primary)]"
-                    onClick={returnToExperience}
-                    type="button"
-                    variant="outline"
-                  >
-                    <ArrowLeft aria-hidden="true" className="size-4" />
-                    Change experience
-                  </Button>
-                  <p className="mt-2 max-w-xs text-xs leading-5 text-[var(--muted-foreground)]">
-                    Changing the experience resets any calendar progress.
-                  </p>
-                </div>
+          <div className="mt-4 scroll-mt-24" ref={scheduleStepRef}>
+            <div className="flex flex-col justify-between gap-4 rounded-[1.35rem] border border-[var(--border)] bg-white/72 p-4 shadow-[0_14px_42px_rgba(90,74,63,0.055)] sm:flex-row sm:items-center sm:p-5">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold tracking-[0.18em] text-[var(--accent)] uppercase">
+                  Selected session
+                </p>
+                <h2
+                  className="mt-1 font-serif text-xl leading-tight text-[var(--primary)] outline-none sm:text-2xl"
+                  ref={stepHeadingRef}
+                  tabIndex={-1}
+                >
+                  {selectedService.title}
+                </h2>
+                <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                  {selectedService.duration} · {selectedService.format} ·{" "}
+                  {selectedService.price}
+                </p>
+                <p className="mt-2 text-xs leading-5 text-[var(--muted-foreground)]">
+                  {selectedCalLink
+                    ? "Choose a live time below. No payment is collected now; your request remains pending until Shannon confirms it."
+                    : "Share a preferred window so Shannon can arrange the right time and care."}
+                </p>
               </div>
-            </div>
-
-            {selectedCalLink ? (
-              <div className="mt-6">
-                <div className="flex flex-col justify-between gap-4 rounded-2xl bg-[var(--accent)]/[0.09] p-4 sm:flex-row sm:items-center sm:p-5">
-                  <div className="flex items-start gap-3">
-                    <CalendarDays
-                      aria-hidden="true"
-                      className="mt-0.5 size-4 shrink-0 text-[var(--accent)]"
-                    />
-                    <div>
-                      <p className="text-sm font-medium text-[var(--primary)]">
-                        {availabilityLabels[activePillar]}
-                      </p>
-                      <p className="mt-1 max-w-2xl text-xs leading-5 text-[var(--muted-foreground)]">
-                        Times are live and shown in your local timezone. Your
-                        appointment remains pending until Shannon confirms it.
-                      </p>
-                      {bookingRequestPresentation?.kind === "online-form" ? (
-                        <a
-                          className="mt-2 inline-flex text-xs font-medium text-[var(--accent)] underline underline-offset-4 focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
-                          href="#alternative-booking-request"
-                        >
-                          Need a different time? Send a private request.
-                        </a>
-                      ) : bookingRequestPresentation?.kind ===
-                        "direct-email" ? (
-                        <p className="mt-2 text-xs font-medium text-[var(--accent)]">
-                          {bookingRequestPresentation.calendarNote}{" "}
-                          <a
-                            className="underline underline-offset-4 focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
-                            href={bookingRequestPresentation.actionHref}
-                          >
-                            {bookingRequestPresentation.actionLabel}.
-                          </a>
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                <Button
+                  className="min-h-11 rounded-full px-4 text-[var(--primary)]"
+                  onClick={returnToExperience}
+                  type="button"
+                  variant="outline"
+                >
+                  <ArrowLeft aria-hidden="true" className="size-4" />
+                  Change
+                </Button>
+                {selectedCalLink ? (
                   <a
                     aria-label={`Open ${selectedService.title} scheduling in Cal.com in a new tab`}
-                    className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-[var(--accent)]/35 bg-white/55 px-4 text-sm font-medium text-[var(--accent)] transition hover:bg-white focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-3 text-xs font-medium text-[var(--accent)] underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
                     href={selectedCalLink}
                     rel="noreferrer"
                     target="_blank"
                   >
-                    Open calendar in a new tab
-                    <ExternalLink aria-hidden="true" className="size-4" />
+                    Open in Cal.com
+                    <ExternalLink aria-hidden="true" className="size-3.5" />
                   </a>
-                </div>
+                ) : null}
+              </div>
+            </div>
 
+            {selectedCalLink ? (
+              <div>
                 <CalendarEmbedBoundary key={selectedCalLink}>
                   <CalInlineEmbed
                     calLink={selectedCalLink}
-                    className="mt-5"
+                    className="mt-4"
                     serviceTitle={selectedService.title}
                     showExternalLink={false}
                   />

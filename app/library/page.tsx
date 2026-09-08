@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { CourseCard } from "@/components/member/course-card"
 import { MemberNavigation } from "@/components/member/member-navigation"
 import { requireAccess } from "@/lib/access"
+import { isCalcomBookingLedgerReady } from "@/lib/bookings/member-bookings"
 import { getPublishedCourses } from "@/lib/member-content"
 
 export const dynamic = "force-dynamic"
@@ -16,7 +17,11 @@ export default async function LibraryPage({
 }: {
   searchParams: Promise<{ category?: string }>
 }) {
-  const { access } = await requireAccess("any_purchase", "/library")
+  const bookingLedgerReady = isCalcomBookingLedgerReady()
+  const { access } = await requireAccess(
+    bookingLedgerReady ? "authenticated" : "any_purchase",
+    "/library"
+  )
   const { category } = await searchParams
   const courses = await getPublishedCourses()
   const visible = courses.filter(
@@ -38,7 +43,7 @@ export default async function LibraryPage({
               The Library
             </h1>
           </div>
-          <MemberNavigation />
+          <MemberNavigation showSessions={bookingLedgerReady} />
         </div>
 
         <div className="mt-10 flex flex-wrap gap-2">

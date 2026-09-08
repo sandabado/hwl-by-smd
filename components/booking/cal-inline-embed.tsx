@@ -1,8 +1,9 @@
 "use client"
 
 import Cal, { getCalApi } from "@calcom/embed-react"
-import { ExternalLink } from "lucide-react"
-import { useEffect, useId, useMemo, useState } from "react"
+import { ArrowRight, CircleCheck, ExternalLink } from "lucide-react"
+import Link from "next/link"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -88,6 +89,8 @@ function CalEmbedInstance({
 }: CalInlineEmbedProps) {
   const reactId = useId()
   const [status, setStatus] = useState<EmbedStatus>("loading")
+  const [bookingComplete, setBookingComplete] = useState(false)
+  const successRef = useRef<HTMLDivElement>(null)
   const namespace = useMemo(() => {
     const safeId = reactId.replace(/[^a-z0-9]/gi, "")
     const safeLink = calLink.replace(/[^a-z0-9]/gi, "-").slice(0, 48)
@@ -129,6 +132,14 @@ function CalEmbedInstance({
       window.clearTimeout(readyTimeout)
       setStatus("error")
     }
+    const handleBookingSuccess = () => {
+      if (!active) return
+
+      window.clearTimeout(readyTimeout)
+      setStatus("ready")
+      setBookingComplete(true)
+      window.requestAnimationFrame(() => successRef.current?.focus())
+    }
 
     const readyTimeout = window.setTimeout(
       handleFailure,
@@ -142,6 +153,10 @@ function CalEmbedInstance({
         api = calApi
         calApi("on", { action: "linkReady", callback: handleReady })
         calApi("on", { action: "linkFailed", callback: handleFailure })
+        calApi("on", {
+          action: "bookingSuccessfulV2",
+          callback: handleBookingSuccess,
+        })
         calApi("ui", CAL_UI_CONFIG)
       })
       .catch(handleFailure)
@@ -151,6 +166,10 @@ function CalEmbedInstance({
       window.clearTimeout(readyTimeout)
       api?.("off", { action: "linkReady", callback: handleReady })
       api?.("off", { action: "linkFailed", callback: handleFailure })
+      api?.("off", {
+        action: "bookingSuccessfulV2",
+        callback: handleBookingSuccess,
+      })
     }
   }, [iframeId, iframeTitle, namespace])
 
@@ -166,71 +185,105 @@ function CalEmbedInstance({
     >
       <div className="border-b border-[var(--border)] px-5 py-4 sm:px-7">
         <h4 className="font-serif text-xl text-[var(--primary)]" id={headingId}>
-          Available dates and times
+          {bookingComplete
+            ? "Your booking was received"
+            : "Available dates and times"}
         </h4>
         <p
           className="mt-1 text-sm leading-relaxed text-[var(--muted-foreground)]"
           id={descriptionId}
         >
-          Choose an available time for {serviceTitle}. Times remain visible in
-          your local timezone.
+          {bookingComplete
+            ? `Cal.com will email the current booking status for ${serviceTitle}. No payment is collected when you request a time.`
+            : `Choose an available time for ${serviceTitle}. Times remain visible in your local timezone.`}
         </p>
       </div>
 
-      <div
-        className={cn(
-          "relative",
-          status === "error"
-            ? "min-h-40"
-            : "min-h-[42rem] sm:min-h-[46rem] lg:min-h-[44rem]"
-        )}
-      >
-        {status === "loading" ? (
-          <div
-            aria-live="polite"
-            className="absolute inset-x-0 top-0 z-10 flex min-h-32 items-center justify-center bg-[#faf7f2]/92 px-6 text-center backdrop-blur-sm"
-            role="status"
-          >
-            <div>
-              <span
-                aria-hidden="true"
-                className="mx-auto block size-7 animate-pulse rounded-full border border-[var(--accent)] bg-[var(--accent)]/12 motion-reduce:animate-none"
-              />
-              <span className="mt-3 block text-sm text-[var(--muted-foreground)]">
-                Gathering Shannon&apos;s available times…
-              </span>
-            </div>
+      {bookingComplete ? (
+        <div
+          aria-live="polite"
+          className="grid min-h-72 place-items-center px-6 py-10 text-center outline-none"
+          ref={successRef}
+          role="status"
+          tabIndex={-1}
+        >
+          <div className="max-w-lg">
+            <span className="mx-auto grid size-14 place-items-center rounded-full bg-[#52694d]/10 text-[#52694d]">
+              <CircleCheck aria-hidden="true" className="size-7" />
+            </span>
+            <h5 className="mt-5 font-serif text-3xl text-[var(--primary)]">
+              Time made for you.
+            </h5>
+            <p className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]">
+              Shannon will confirm your request personally. No payment is
+              collected now; she will arrange payment after the appointment. Use
+              the same email if you sign in to The Den.
+            </p>
+            <Link
+              className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-6 text-sm font-medium text-white transition hover:bg-[var(--accent)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
+              href="/book"
+            >
+              Explore another session
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </Link>
           </div>
-        ) : null}
-
-        {status === "error" ? (
-          <div
-            aria-live="polite"
-            className="grid min-h-40 place-items-center px-6 text-center"
-            role="status"
-          >
-            <div className="max-w-md">
-              <p className="text-sm font-medium text-[var(--primary)]">
-                The live calendar could not load here.
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                Open Cal.com in a new tab to check the current availability. The
-                section below shows any other available booking path.
-              </p>
+        </div>
+      ) : (
+        <div
+          className={cn(
+            "relative",
+            status === "error"
+              ? "min-h-40"
+              : "min-h-[42rem] sm:min-h-[46rem] lg:min-h-[44rem]"
+          )}
+        >
+          {status === "loading" ? (
+            <div
+              aria-live="polite"
+              className="absolute inset-x-0 top-0 z-10 flex min-h-32 items-center justify-center bg-[#faf7f2]/92 px-6 text-center backdrop-blur-sm"
+              role="status"
+            >
+              <div>
+                <span
+                  aria-hidden="true"
+                  className="mx-auto block size-7 animate-pulse rounded-full border border-[var(--accent)] bg-[var(--accent)]/12 motion-reduce:animate-none"
+                />
+                <span className="mt-3 block text-sm text-[var(--muted-foreground)]">
+                  Gathering Shannon&apos;s available times…
+                </span>
+              </div>
             </div>
-          </div>
-        ) : (
-          <Cal
-            calLink={calLink}
-            className="min-h-[42rem] w-full sm:min-h-[46rem] lg:min-h-[44rem]"
-            config={embedConfig}
-            key={calLink}
-            namespace={namespace}
-          />
-        )}
-      </div>
+          ) : null}
 
-      {showExternalLink ? (
+          {status === "error" ? (
+            <div
+              aria-live="polite"
+              className="grid min-h-40 place-items-center px-6 text-center"
+              role="status"
+            >
+              <div className="max-w-md">
+                <p className="text-sm font-medium text-[var(--primary)]">
+                  The live calendar could not load here.
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                  Open Cal.com in a new tab to check the current availability.
+                  The section below shows any other available booking path.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <Cal
+              calLink={calLink}
+              className="min-h-[42rem] w-full sm:min-h-[46rem] lg:min-h-[44rem]"
+              config={embedConfig}
+              key={calLink}
+              namespace={namespace}
+            />
+          )}
+        </div>
+      )}
+
+      {showExternalLink && !bookingComplete ? (
         <div className="flex justify-end border-t border-[var(--border)] px-5 py-4 sm:px-7">
           <a
             aria-label={`Open ${serviceTitle} scheduling in Cal.com in a new tab`}

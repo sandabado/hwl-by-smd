@@ -44,7 +44,9 @@ export type PreviewGitAuditOptions = {
 }
 
 const REQUIRED_TEMPLATE_KEYS = [
+  "CALCOM_BOOKING_LEDGER_READY",
   "CALCOM_PROFILE_URL",
+  "CALCOM_WEBHOOK_SECRET",
   "COMMERCE_ALERT_TO_EMAIL",
   "COMMERCE_SALES_READY",
   "CONTACT_FROM_EMAIL",
@@ -71,6 +73,7 @@ const REQUIRED_TEMPLATE_KEYS = [
 ] as const
 
 const SENSITIVE_TEMPLATE_KEYS = [
+  "CALCOM_WEBHOOK_SECRET",
   "CRON_SECRET",
   "INQUIRY_RATE_LIMIT_SECRET",
   "MUX_ACCESS_TOKEN",
@@ -351,6 +354,7 @@ export function auditPreviewRepositoryFiles(
 
   const safeDefaults =
     template.get("HWL_LOCAL_BUILD") === "false" &&
+    template.get("CALCOM_BOOKING_LEDGER_READY") === "false" &&
     template.get("COMMERCE_SALES_READY") === "false" &&
     template.get("NEXT_PUBLIC_INQUIRY_COLLECTION_READY") === "false" &&
     template.get("STRIPE_LIVEMODE") === "false"
@@ -359,12 +363,12 @@ export function auditPreviewRepositoryFiles(
       ? check(
           "pass",
           "Template fail-closed defaults",
-          "local bypass, commerce sales, inquiry collection, and Stripe live mode default to false"
+          "local bypass, booking history, commerce sales, inquiry collection, and Stripe live mode default to false"
         )
       : check(
           "fail",
           "Template fail-closed defaults",
-          "HWL_LOCAL_BUILD, COMMERCE_SALES_READY, NEXT_PUBLIC_INQUIRY_COLLECTION_READY, and STRIPE_LIVEMODE must all default to false"
+          "HWL_LOCAL_BUILD, CALCOM_BOOKING_LEDGER_READY, COMMERCE_SALES_READY, NEXT_PUBLIC_INQUIRY_COLLECTION_READY, and STRIPE_LIVEMODE must all default to false"
         )
   )
 

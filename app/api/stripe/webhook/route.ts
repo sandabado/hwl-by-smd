@@ -171,8 +171,10 @@ export async function POST(request: Request) {
     if (processedEventError && processedEventError.code !== "23505") {
       throw processedEventError
     }
-  } catch (error) {
-    console.error("Stripe webhook processing failed", error)
+  } catch {
+    console.error("Stripe webhook processing failed", {
+      stage: "event_process",
+    })
     return new Response("Webhook processing failed.", { status: 500 })
   }
 

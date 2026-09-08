@@ -44,8 +44,8 @@ const sections: LegalSection[] = [
   {
     title: "Bookings and in-person experiences",
     body: [
-      "Session scope, location, timing, travel, group size, payment schedule, cancellation terms, and any venue requirements are confirmed during booking. A request is not confirmed until Shannon accepts it and any required payment is received.",
-      "Booked services require at least 24 hours' cancellation notice for a full refund. No-shows may be charged the full session rate. Retreat cancellation, travel, lodging, equipment, and host responsibilities are governed by the individual retreat agreement.",
+      "Session scope, location, timing, travel, group size, cancellation terms, and any venue requirements are confirmed during booking. A request is not confirmed until Shannon accepts it. No service payment is collected when you request an appointment; Shannon arranges payment after the completed appointment.",
+      "Please give at least 24 hours' notice when canceling a booked service. Late cancellations and no-shows may be charged the full session rate. Any separately agreed deposit and all retreat cancellation, travel, lodging, equipment, and host responsibilities are governed by the individual agreement.",
       "You agree to disclose relevant safety information and follow reasonable instructions. HWL by SMD may adapt or stop an experience when continued participation appears unsafe.",
     ],
   },
@@ -82,7 +82,7 @@ const sections: LegalSection[] = [
 export default function Page() {
   return (
     <LegalPage
-      effectiveDate="August 29, 2026"
+      effectiveDate="September 7, 2026"
       eyebrow="Terms"
       introduction="A clear foundation for digital rituals, conversations, and booked experiences."
       sections={sections}

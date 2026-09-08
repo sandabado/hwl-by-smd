@@ -2,7 +2,7 @@ import Link from "next/link"
 
 import { BookingRequestFlow } from "@/components/booking/booking-request-flow"
 import { CtaBlock } from "@/components/shared/cta-block"
-import { resolveCalcomBookingLinks } from "@/lib/calcom-booking-links"
+import { resolveCalcomBookingOptions } from "@/lib/calcom-booking-links"
 import { getCalcomPublicEventTypes } from "@/lib/calcom"
 import { normalizeBookingServiceSlug } from "@/lib/booking-services"
 import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
@@ -25,7 +25,8 @@ export default async function BookPage({
     getCalcomPublicEventTypes(),
   ])
   const inquiryCollectionReady = isInquiryCollectionReady()
-  const calLinksByServiceSlug = resolveCalcomBookingLinks(calcomResult)
+  const calBookingOptionsByServiceSlug =
+    resolveCalcomBookingOptions(calcomResult)
   const initialServiceSlug = normalizeBookingServiceSlug(params.service)
 
   const palmSpringsDateParts = new Intl.DateTimeFormat("en-US", {
@@ -43,30 +44,32 @@ export default async function BookPage({
 
   return (
     <>
-      <section className="relative -mt-16 overflow-hidden px-5 pt-24 pb-6 sm:px-6 md:-mt-20 md:pt-28 md:pb-7">
+      <section className="relative -mt-16 overflow-hidden border-b border-[var(--border)] px-5 pt-20 pb-3 sm:px-6 sm:pb-4 md:-mt-20 md:pt-24 md:pb-5">
         <div
           aria-hidden="true"
           className="absolute inset-0 bg-[radial-gradient(circle_at_18%_10%,rgba(157,187,148,0.18),transparent_34%),radial-gradient(circle_at_85%_75%,rgba(225,191,149,0.16),transparent_36%)]"
         />
-        <div className="relative mx-auto flex max-w-7xl flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div className="relative mx-auto max-w-7xl">
           <div>
-            <p className="text-xs font-medium tracking-[0.28em] text-[var(--accent)] uppercase">
+            <p className="hidden text-xs font-medium tracking-[0.28em] text-[var(--accent)] uppercase sm:block">
               Book
             </p>
-            <h1 className="mt-2 text-4xl leading-tight font-medium text-[var(--primary)] md:text-5xl">
+            <h1 className="text-2xl leading-tight font-medium text-[var(--primary)] sm:mt-1 sm:text-3xl md:text-4xl">
               Book with Shannon
             </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--muted-foreground)] md:text-base">
-              {inquiryCollectionReady
-                ? "Choose your experience. Live dates and times appear for services ready to book; if you need another time, send Shannon a request."
-                : "Choose your experience. Live dates and times appear for services ready to book; custom arrangements include a direct way to email Shannon."}
+            <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-[var(--muted-foreground)]">
+              <span className="sm:hidden">
+                Choose a session and see Shannon&apos;s live availability.
+              </span>
+              <span className="hidden sm:inline">
+                {inquiryCollectionReady
+                  ? "Choose a session, see Shannon’s live availability, and complete the details in one clear flow."
+                  : "Choose a session and see Shannon’s live availability. Custom arrangements include a direct way to email her."}
+              </span>
             </p>
           </div>
-          <p className="max-w-md text-xs leading-relaxed text-[var(--muted-foreground)] md:text-right md:text-sm">
-            Tarot and moon oracle readings may be virtual or in person.
-            In-person sessions are offered across Palm Springs, Palm Desert,
-            Joshua Tree, Yucca Valley, and surrounding desert communities.
-            Larger gatherings live under{" "}
+          <p className="mt-2 hidden text-xs leading-relaxed text-[var(--muted-foreground)] sm:block">
+            Virtual readings · In-person desert care · Larger gatherings under{" "}
             <Link className="underline underline-offset-4" href="/retreats">
               Retreats
             </Link>
@@ -76,7 +79,7 @@ export default async function BookPage({
       </section>
 
       <BookingRequestFlow
-        calLinksByServiceSlug={calLinksByServiceSlug}
+        calBookingOptionsByServiceSlug={calBookingOptionsByServiceSlug}
         initialServiceSlug={initialServiceSlug}
         minimumDate={minimumDate}
       />

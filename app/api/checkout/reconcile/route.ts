@@ -224,8 +224,10 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ state: result.state })
-  } catch (error) {
-    console.error("Authenticated checkout reconciliation failed", error)
+  } catch {
+    console.error("Authenticated checkout reconciliation failed", {
+      stage: "authenticated_reconcile",
+    })
     return NextResponse.json(
       {
         error:

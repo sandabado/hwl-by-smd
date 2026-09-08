@@ -231,20 +231,45 @@ export default function BeautyPage() {
         />
       </PageSection>
 
-      <section className="bg-[#f3e9dc] px-6 py-24 text-center md:py-32">
-        <figure className="mx-auto max-w-4xl">
-          <blockquote className="font-serif text-3xl leading-[1.35] text-[var(--primary)] italic md:text-5xl">
-            “What a wonderful experience! Went in to get a facial for my
-            upcoming wedding — I was feeling quite stressed but felt immediately
-            soothed once Shannon started working her magic. My skin is still
-            showing the happy effects of being fed and massaged with all these
-            fancy concoctions. And honestly, I would pay again just to have that
-            meditative experience!”
-          </blockquote>
-          <figcaption className="mt-8 text-xs tracking-[0.22em] text-[var(--accent)] uppercase">
-            Zara K. · Beauty + facial client
-          </figcaption>
-        </figure>
+      <section className="relative isolate overflow-hidden border-y border-[var(--border)] bg-[#f3e9dc] px-6 py-16 md:py-20">
+        <div
+          aria-hidden="true"
+          className="absolute -top-28 -right-20 size-80 rounded-full bg-white/35 blur-3xl"
+        />
+        <div className="relative mx-auto grid max-w-6xl gap-8 md:grid-cols-[0.32fr_0.68fr] md:items-start md:gap-14">
+          <div>
+            <p className="text-xs font-medium tracking-[0.28em] text-[var(--accent)] uppercase">
+              Kind words
+            </p>
+            <h2 className="mt-4 max-w-xs text-3xl leading-tight font-medium text-[var(--primary)] md:text-4xl">
+              Care that stays with you.
+            </h2>
+          </div>
+
+          <figure className="relative rounded-[2rem] border border-white/65 bg-white/42 p-7 shadow-[0_24px_70px_rgba(90,74,63,0.08)] backdrop-blur-sm sm:p-9 md:p-10">
+            <span
+              aria-hidden="true"
+              className="absolute top-4 left-6 font-serif text-6xl leading-none text-[var(--accent)]/22"
+            >
+              “
+            </span>
+            <blockquote className="relative pt-5 font-serif text-xl leading-[1.55] text-[var(--primary)] italic sm:text-2xl md:text-[1.75rem]">
+              What a wonderful experience! Went in to get a facial for my
+              upcoming wedding — I was feeling quite stressed but felt
+              immediately soothed once Shannon started working her magic. My
+              skin is still showing the happy effects of being fed and massaged
+              with all these fancy concoctions. And honestly, I would pay again
+              just to have that meditative experience!
+            </blockquote>
+            <figcaption className="mt-7 flex items-center gap-3 text-[11px] font-medium tracking-[0.2em] text-[var(--accent)] uppercase">
+              <span
+                aria-hidden="true"
+                className="h-px w-8 bg-[var(--accent)]/45"
+              />
+              Zara K. · Beauty + facial client
+            </figcaption>
+          </figure>
+        </div>
       </section>
 
       <PageSection className="py-24 md:py-32" id="benefits">
@@ -310,12 +335,13 @@ export default function BeautyPage() {
             Investment
           </p>
           <h2 className="mt-5 text-4xl font-medium text-[var(--primary)] md:text-5xl">
-            Begin with a conversation.
+            Book your facial ritual.
           </h2>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)]">
-            Retreat rates are priced per guest. Individual one-to-one sessions
-            are confirmed through booking, once the timing and experience are
-            clear.
+            Each facial ritual above can be booked as an individual appointment.
+            Choose one to see Shannon’s live dates and times. No payment is
+            collected with the request; Shannon confirms the appointment
+            personally.
           </p>
           <Button
             asChild

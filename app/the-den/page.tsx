@@ -14,18 +14,46 @@ import { CourseCard } from "@/components/member/course-card"
 import { MemberNavigation } from "@/components/member/member-navigation"
 import { Button } from "@/components/ui/button"
 import { requireAccess } from "@/lib/access"
+import {
+  findNextMemberBooking,
+  getMemberBookings,
+  isCalcomBookingLedgerReady,
+} from "@/lib/bookings/member-bookings"
 import { getPublishedCourses } from "@/lib/member-content"
 
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "The Den | HWL by SMD",
-  description: "Your private HWL ritual library.",
+  description: "Your private HWL sessions and ritual library.",
+}
+
+function readableSessionDate(value: string, timeZone: string) {
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone,
+    }).format(new Date(value))
+  } catch {
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "America/Los_Angeles",
+    }).format(new Date(value))
+  }
 }
 
 export default async function TheDenPage() {
-  const { access, user } = await requireAccess("any_purchase", "/the-den")
-  const courses = await getPublishedCourses()
+  const bookingLedgerReady = isCalcomBookingLedgerReady()
+  const { access, user } = await requireAccess(
+    bookingLedgerReady ? "authenticated" : "any_purchase",
+    "/the-den"
+  )
+  const [courses, bookings] = await Promise.all([
+    getPublishedCourses(),
+    getMemberBookings(user.id),
+  ])
   const visibleCourses = courses.filter(
     (course) =>
       access.isMember || (course.access_tier === "lift" && access.canAccessLift)
@@ -33,6 +61,7 @@ export default async function TheDenPage() {
   const firstName =
     String(user.user_metadata.full_name ?? "").split(" ")[0] || "love"
   const today = visibleCourses[0]
+  const nextSession = findNextMemberBooking(bookings)
   const renewalDate = access.membership?.current_period_end
     ? new Intl.DateTimeFormat("en-US", {
         day: "numeric",
@@ -57,7 +86,7 @@ export default async function TheDenPage() {
               Welcome back, {firstName}.
             </h1>
           </div>
-          <MemberNavigation />
+          <MemberNavigation showSessions={bookingLedgerReady} />
         </div>
 
         <p className="mt-5 text-xl tracking-wide text-[var(--muted-foreground)]">
@@ -109,17 +138,19 @@ export default async function TheDenPage() {
                 Your next session
               </p>
               <h2 className="mt-3 text-3xl text-[var(--primary)]">
-                Make space for yourself.
+                {nextSession?.serviceTitle ?? "Make space for yourself."}
               </h2>
               <p className="mt-3 text-sm leading-[1.8] text-[var(--muted-foreground)]">
-                Your private sessions and requests will rest here when one is
-                scheduled.
+                {nextSession
+                  ? `${readableSessionDate(nextSession.startAt, nextSession.timeZone)} · ${nextSession.bookingStatus === "confirmed" ? "Confirmed" : "Awaiting Shannon’s confirmation"}`
+                  : "Your private sessions and requests will rest here when one is scheduled."}
               </p>
               <Link
                 className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)]"
-                href="/book"
+                href={nextSession ? "/the-den/sessions" : "/book"}
               >
-                Book with Shannon <ArrowRight className="size-4" />
+                {nextSession ? "View session" : "Book with Shannon"}{" "}
+                <ArrowRight aria-hidden="true" className="size-4" />
               </Link>
             </article>
 
@@ -154,14 +185,22 @@ export default async function TheDenPage() {
               Access
             </p>
             <h2 className="mt-3 text-4xl text-[var(--primary)]">
-              {access.isMember ? "The Den is active." : "Your private access"}
+              {access.isMember
+                ? "The Den is active."
+                : bookings.length
+                  ? "Your session history is ready."
+                  : "Your private access"}
             </h2>
             <p className="mt-4 text-sm leading-[1.8] text-[var(--muted-foreground)]">
               {access.isMember
                 ? renewalDate
                   ? `Your current period continues through ${renewalDate}.`
                   : "Your private library is open."
-                : "Your purchased practices remain available in your library."}
+                : access.hasAnyPurchase
+                  ? "Your purchased practices remain available in your library."
+                  : bookings.length
+                    ? "Your confirmed and past session records stay together here in your account."
+                    : "Your account is ready for sessions and practices whenever you are."}
             </p>
             <Link
               className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-[var(--primary)] underline-offset-4 hover:underline"

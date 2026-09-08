@@ -28,6 +28,7 @@ const STAGING_SUPABASE_URL = "https://lkxppynmdfzljuptauxf.supabase.co"
 const PRODUCTION_SUPABASE_URL = "https://qwprhsrwiihfllmgallr.supabase.co"
 
 const developmentFixture: NodeJS.ProcessEnv = {
+  CALCOM_BOOKING_LEDGER_READY: "false",
   CALCOM_PROFILE_URL: "https://cal.com/hwlbysmd",
   COMMERCE_SALES_READY: "false",
   CONTACT_FROM_EMAIL: "HWL by SMD <hello@hwlbysmd.com>",
@@ -143,6 +144,28 @@ const fixtures: Fixture[] = [
     expectedText:
       "NEXT_PUBLIC_INQUIRY_COLLECTION_READY: must be exactly true or false",
     name: "uppercase inquiry collection flag fails",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      CALCOM_BOOKING_LEDGER_READY: "true",
+    },
+    expectedExit: 1,
+    expectedText:
+      "CALCOM_WEBHOOK_SECRET: required when the booking ledger is enabled",
+    name: "enabled booking ledger without a webhook secret fails",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      CALCOM_BOOKING_LEDGER_READY: "true",
+      CALCOM_WEBHOOK_SECRET: "fixture-calcom-webhook-secret-32-characters",
+    },
+    expectedExit: 0,
+    expectedText: "Booking history: enabled",
+    name: "enabled booking ledger requires its private webhook secret",
   },
   {
     args: ["--target=preview", "--expect-sales=closed"],

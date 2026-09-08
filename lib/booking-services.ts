@@ -22,6 +22,11 @@ export type BookingService = {
     minimum: number
   }
   image: { alt: string; src: string }
+  payment: {
+    basis: "flat" | "per_guest"
+    currency: "usd"
+    unitAmountMinor: number
+  }
   price: string
   slug: string
   title: string
@@ -45,31 +50,38 @@ export const bookingPillars: readonly BookingPillar[] = [
     image: media.shannon.beautyPortrait,
     services: [
       {
-        calendarBooking: {
-          kind: "inquiry-only",
-          reason: "group-duration-unconfirmed",
-        },
+        calendarBooking: { durationMinutes: 20, kind: "exact-event" },
         slug: "wild-glow-express-facial",
         title: "Wild Glow Express Facial",
-        duration: "15–20 min · minimum 4 guests",
-        price: "$111/guest",
+        duration: "20 min",
+        price: "$111",
         format: "In person",
-        guestRange: { minimum: 4 },
+        guestRange: { maximum: 1, minimum: 1 },
         description:
           "A focused facial ritual for fresh, luminous skin when time is brief.",
         image: media.shannon.beautyLift,
+        payment: {
+          basis: "flat",
+          currency: "usd",
+          unitAmountMinor: 11100,
+        },
       },
       {
         calendarBooking: { durationMinutes: 45, kind: "exact-event" },
         slug: "reiki-aromatherapy-healing",
         title: "Reiki Aromatherapy Healing",
         duration: "30–45 min",
-        price: "$222/guest",
+        price: "$222",
         format: "In person",
-        guestRange: { minimum: 1 },
+        guestRange: { maximum: 1, minimum: 1 },
         description:
           "A quiet blend of aromatherapy and Reiki held at an unhurried pace.",
         image: media.shannon.botanicalPortrait,
+        payment: {
+          basis: "flat",
+          currency: "usd",
+          unitAmountMinor: 22200,
+        },
       },
       {
         calendarBooking: { durationMinutes: 60, kind: "exact-event" },
@@ -82,6 +94,11 @@ export const bookingPillars: readonly BookingPillar[] = [
         description:
           "Personalized professional skin care with massage and room to soften.",
         image: media.shannon.beautyLift,
+        payment: {
+          basis: "per_guest",
+          currency: "usd",
+          unitAmountMinor: 27700,
+        },
       },
       {
         calendarBooking: { durationMinutes: 90, kind: "exact-event" },
@@ -94,6 +111,11 @@ export const bookingPillars: readonly BookingPillar[] = [
         description:
           "An extended facial and restorative ritual for skin, senses, and stillness.",
         image: media.shannon.beautyPortrait,
+        payment: {
+          basis: "per_guest",
+          currency: "usd",
+          unitAmountMinor: 33300,
+        },
       },
       {
         calendarBooking: { durationMinutes: 120, kind: "exact-event" },
@@ -106,6 +128,11 @@ export const bookingPillars: readonly BookingPillar[] = [
         description:
           "Shannon’s most spacious facial experience, shaped as a complete ceremony of care.",
         image: media.shannon.beautyLift,
+        payment: {
+          basis: "per_guest",
+          currency: "usd",
+          unitAmountMinor: 44400,
+        },
       },
     ],
   },
@@ -127,6 +154,11 @@ export const bookingPillars: readonly BookingPillar[] = [
         description:
           "Breath-led private movement followed by a restorative sound experience.",
         image: media.experiences.movementEagle,
+        payment: {
+          basis: "flat",
+          currency: "usd",
+          unitAmountMinor: 55500,
+        },
       },
       {
         calendarBooking: { durationMinutes: 75, kind: "exact-event" },
@@ -139,6 +171,11 @@ export const bookingPillars: readonly BookingPillar[] = [
         description:
           "A private sound practice designed for rest, reflection, and spacious attention.",
         image: media.brand.sanctuaryHero,
+        payment: {
+          basis: "flat",
+          currency: "usd",
+          unitAmountMinor: 44400,
+        },
       },
       {
         calendarBooking: { durationMinutes: 90, kind: "exact-event" },
@@ -151,6 +188,11 @@ export const bookingPillars: readonly BookingPillar[] = [
         description:
           "A private practice shaped around your body, breath, experience, and energy that day.",
         image: media.brand.standingStretch,
+        payment: {
+          basis: "flat",
+          currency: "usd",
+          unitAmountMinor: 66600,
+        },
       },
     ],
   },
@@ -172,6 +214,11 @@ export const bookingPillars: readonly BookingPillar[] = [
         description:
           "Reflective card work for transitions, choices, patterns, and the season you are in.",
         image: media.shannon.ritualSpace,
+        payment: {
+          basis: "flat",
+          currency: "usd",
+          unitAmountMinor: 22200,
+        },
       },
       {
         calendarBooking: { durationMinutes: 60, kind: "exact-event" },
@@ -184,6 +231,11 @@ export const bookingPillars: readonly BookingPillar[] = [
         description:
           "A lunar and astrological reading for reflection, timing, and present-season clarity.",
         image: media.experiences.ritualWolf,
+        payment: {
+          basis: "flat",
+          currency: "usd",
+          unitAmountMinor: 22200,
+        },
       },
       {
         calendarBooking: { durationMinutes: 75, kind: "exact-event" },
@@ -196,6 +248,11 @@ export const bookingPillars: readonly BookingPillar[] = [
         description:
           "Intuitive guidance followed by restorative Reiki support in person.",
         image: media.shannon.ritualSpace,
+        payment: {
+          basis: "flat",
+          currency: "usd",
+          unitAmountMinor: 44400,
+        },
       },
     ],
   },

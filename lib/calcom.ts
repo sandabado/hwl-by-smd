@@ -7,8 +7,11 @@ const CALCOM_USER_AGENT = "HWLbySMD/1.0 (+https://www.hwlbysmd.com)"
 const DEFAULT_CALCOM_PROFILE_URL = "https://cal.com/hwlbysmd"
 
 export type CalcomPublicEventType = Readonly<{
+  confirmationRequired: boolean
+  currency: string
   id: number
   lengthInMinutes: number
+  price: number
   slug: string
   title: string
   url: string
@@ -31,6 +34,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isPositiveInteger(value: unknown): value is number {
   return Number.isInteger(value) && typeof value === "number" && value > 0
+}
+
+function isNonNegativeInteger(value: unknown): value is number {
+  return Number.isInteger(value) && typeof value === "number" && value >= 0
 }
 
 function readNonEmptyString(value: unknown) {
@@ -86,12 +93,20 @@ function parsePublicEventType(value: unknown): CalcomPublicEventType | null {
 
   const slug = readNonEmptyString(value.slug)
   const title = readNonEmptyString(value.title)
+  const currency = readNonEmptyString(value.currency)?.toLowerCase()
+  const confirmationPolicy = value.confirmationPolicy
 
   if (
     !isPositiveInteger(value.id) ||
     !isPositiveInteger(value.lengthInMinutes) ||
+    !isNonNegativeInteger(value.price) ||
+    !currency ||
+    !/^[a-z]{3}$/.test(currency) ||
     !slug ||
-    !title
+    !title ||
+    !isRecord(confirmationPolicy) ||
+    typeof confirmationPolicy.type !== "string" ||
+    typeof confirmationPolicy.blockUnconfirmedBookingsInBooker !== "boolean"
   ) {
     return null
   }
@@ -100,8 +115,13 @@ function parsePublicEventType(value: unknown): CalcomPublicEventType | null {
   if (!url) return null
 
   return {
+    confirmationRequired:
+      confirmationPolicy.type === "always" &&
+      confirmationPolicy.blockUnconfirmedBookingsInBooker,
+    currency,
     id: value.id,
     lengthInMinutes: value.lengthInMinutes,
+    price: value.price,
     slug,
     title,
     url,

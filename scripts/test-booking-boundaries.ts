@@ -13,7 +13,10 @@ import {
   normalizeBookingServiceSlug,
 } from "../lib/booking-services.ts"
 import { getBookingRequestPresentation } from "../lib/booking-request-presentation.ts"
-import { resolveCalcomBookingLinks } from "../lib/calcom-booking-links.ts"
+import {
+  resolveCalcomBookingLinks,
+  resolveCalcomBookingOptions,
+} from "../lib/calcom-booking-links.ts"
 import { getCalcomPublicEventTypes } from "../lib/calcom.ts"
 
 const services = bookingPillars.flatMap((pillar) => pillar.services)
@@ -65,7 +68,108 @@ test("Cal.com discovery sends the complete stable request identity", async () =>
   assert.ok(requestInit?.signal instanceof AbortSignal)
 })
 
-test("Cal.com booking links preserve discovery authority and survive provider failures", async (t) => {
+test("Cal.com discovery treats price and currency as required authority", async (t) => {
+  const originalFetch = globalThis.fetch
+  const signatureFacial = findBookingService("signature-facial")?.service
+
+  assert.ok(signatureFacial?.calendarBooking.kind === "exact-event")
+
+  const fetchEventTypes = async (data: readonly unknown[]) => {
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify({ data, status: "success" }), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      })
+
+    return getCalcomPublicEventTypes()
+  }
+
+  const validEvent = {
+    confirmationPolicy: {
+      blockUnconfirmedBookingsInBooker: true,
+      type: "always",
+    },
+    currency: "USD",
+    id: 101,
+    lengthInMinutes: signatureFacial.calendarBooking.durationMinutes,
+    price: signatureFacial.payment.unitAmountMinor,
+    slug: signatureFacial.slug,
+    title: signatureFacial.title,
+  }
+
+  try {
+    await t.test(
+      "zero and exact paid prices parse without losing cents",
+      async () => {
+        assert.deepEqual(
+          await fetchEventTypes([
+            { ...validEvent, id: 102, price: 0 },
+            validEvent,
+          ]),
+          {
+            eventTypes: [
+              {
+                confirmationRequired: true,
+                currency: "usd",
+                id: 102,
+                lengthInMinutes: validEvent.lengthInMinutes,
+                price: 0,
+                slug: validEvent.slug,
+                title: validEvent.title,
+                url: `https://cal.com/hwlbysmd/${signatureFacial.slug}`,
+              },
+              {
+                confirmationRequired: true,
+                currency: "usd",
+                id: validEvent.id,
+                lengthInMinutes: validEvent.lengthInMinutes,
+                price: validEvent.price,
+                slug: validEvent.slug,
+                title: validEvent.title,
+                url: `https://cal.com/hwlbysmd/${signatureFacial.slug}`,
+              },
+            ],
+            status: "available",
+          }
+        )
+      }
+    )
+
+    for (const [name, override] of [
+      ["missing price", { price: undefined }],
+      ["string price", { price: "27700" }],
+      ["fractional price", { price: 27700.5 }],
+      ["negative price", { price: -1 }],
+      ["missing currency", { currency: undefined }],
+      ["malformed currency", { currency: "US dollars" }],
+      ["missing confirmation policy", { confirmationPolicy: undefined }],
+      [
+        "malformed confirmation policy",
+        {
+          confirmationPolicy: {
+            blockUnconfirmedBookingsInBooker: "yes",
+            type: "always",
+          },
+        },
+      ],
+    ] as const) {
+      await t.test(`${name} fails the complete provider response`, async () => {
+        assert.deepEqual(
+          await fetchEventTypes([{ ...validEvent, ...override }]),
+          {
+            eventTypes: [],
+            reason: "invalid-response",
+            status: "unavailable",
+          }
+        )
+      })
+    }
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test("Cal.com booking links preserve request-only discovery authority and fail closed", async (t) => {
   const signatureFacial = findBookingService("signature-facial")?.service
   const moonOracle = findBookingService("moon-oracle-reading")?.service
 
@@ -80,15 +184,21 @@ test("Cal.com booking links preserve discovery authority and survive provider fa
       resolveCalcomBookingLinks({
         eventTypes: [
           {
+            confirmationRequired: true,
+            currency: signatureFacial.payment.currency,
             id: 1,
             lengthInMinutes: signatureFacialDuration,
+            price: 0,
             slug: signatureFacial.slug,
             title: signatureFacial.title,
             url: `https://cal.com/hwlbysmd/${signatureFacial.slug}`,
           },
           {
+            confirmationRequired: true,
+            currency: moonOracle.payment.currency,
             id: 2,
             lengthInMinutes: moonOracleDuration,
+            price: 0,
             slug: moonOracle.slug,
             title: `${moonOracle.title} Session`,
             url: `https://cal.com/hwlbysmd/${moonOracle.slug}`,
@@ -101,6 +211,120 @@ test("Cal.com booking links preserve discovery authority and survive provider fa
       }
     )
   })
+
+  await t.test(
+    "request-only events must remain free in the booking calendar",
+    () => {
+      const freeEvent = {
+        confirmationRequired: true,
+        currency: signatureFacial.payment.currency,
+        id: 3,
+        lengthInMinutes: signatureFacialDuration,
+        price: 0,
+        slug: signatureFacial.slug,
+        title: signatureFacial.title,
+        url: `https://cal.com/hwlbysmd/${signatureFacial.slug}`,
+      }
+      const paidEvent = {
+        ...freeEvent,
+        id: 4,
+        price: signatureFacial.payment.unitAmountMinor,
+      }
+
+      assert.deepEqual(
+        resolveCalcomBookingOptions({
+          eventTypes: [freeEvent],
+          status: "available",
+        }),
+        {
+          [signatureFacial.slug]: {
+            currency: "usd",
+            paymentState: "not_required",
+            priceMinor: 0,
+            url: freeEvent.url,
+          },
+        }
+      )
+      assert.deepEqual(
+        resolveCalcomBookingOptions({
+          eventTypes: [paidEvent],
+          status: "available",
+        }),
+        {}
+      )
+    }
+  )
+
+  await t.test(
+    "an event that no longer requires Shannon's confirmation stays hidden",
+    () => {
+      const autoConfirmedEvent = {
+        confirmationRequired: false,
+        currency: signatureFacial.payment.currency,
+        id: 5,
+        lengthInMinutes: signatureFacialDuration,
+        price: 0,
+        slug: signatureFacial.slug,
+        title: signatureFacial.title,
+        url: `https://cal.com/hwlbysmd/${signatureFacial.slug}`,
+      }
+
+      assert.deepEqual(
+        resolveCalcomBookingOptions({
+          eventTypes: [autoConfirmedEvent],
+          status: "available",
+        }),
+        {}
+      )
+    }
+  )
+
+  await t.test("paid or wrong-currency variants cannot produce a link", () => {
+    const baseEvent = {
+      confirmationRequired: true,
+      currency: signatureFacial.payment.currency,
+      id: 5,
+      lengthInMinutes: signatureFacialDuration,
+      price: 0,
+      slug: signatureFacial.slug,
+      title: signatureFacial.title,
+      url: `https://cal.com/hwlbysmd/${signatureFacial.slug}`,
+    }
+
+    for (const eventType of [
+      { ...baseEvent, price: signatureFacial.payment.unitAmountMinor },
+      { ...baseEvent, currency: "eur" },
+    ]) {
+      assert.deepEqual(
+        resolveCalcomBookingOptions({
+          eventTypes: [eventType],
+          status: "available",
+        }),
+        {}
+      )
+    }
+  })
+
+  await t.test(
+    "provider outages never guess a request-only booking URL",
+    () => {
+      for (const reason of [
+        "http-error",
+        "invalid-response",
+        "request-error",
+      ] as const) {
+        assert.deepEqual(
+          resolveCalcomBookingOptions({
+            eventTypes: [],
+            reason,
+            status: "unavailable",
+          }),
+          {},
+          `${reason} must not expose an unverified fallback link`
+        )
+      }
+    }
+  )
 
   await t.test(
     "an available empty response does not guess that events are published",
@@ -117,31 +341,14 @@ test("Cal.com booking links preserve discovery authority and survive provider fa
     "invalid-response",
     "request-error",
   ] as const) {
-    await t.test(
-      `${reason} falls back only to catalogued exact-event links`,
-      () => {
-        const links = resolveCalcomBookingLinks({
-          eventTypes: [],
-          reason,
-          status: "unavailable",
-        })
-        const expectedServices = services.filter(
-          (service) => service.calendarBooking.kind === "exact-event"
-        )
-
-        assert.equal(Object.keys(links).length, expectedServices.length)
-        assert.equal(expectedServices.length, 10)
-
-        for (const service of expectedServices) {
-          assert.equal(
-            links[service.slug],
-            `https://cal.com/hwlbysmd/${service.slug}`
-          )
-        }
-
-        assert.equal(links["wild-glow-express-facial"], undefined)
-      }
-    )
+    await t.test(`${reason} never guesses direct booking links`, () => {
+      const links = resolveCalcomBookingLinks({
+        eventTypes: [],
+        reason,
+        status: "unavailable",
+      })
+      assert.deepEqual(links, {})
+    })
   }
 })
 
@@ -183,8 +390,8 @@ test("booking catalog keeps available Cal discovery exact", async (t) => {
         (service) => service.calendarBooking.kind === "inquiry-only"
       )
 
-      assert.equal(exactServices.length, 10)
-      assert.equal(inquiryServices.length, 1)
+      assert.equal(exactServices.length, 11)
+      assert.equal(inquiryServices.length, 0)
 
       for (const service of services) {
         const expectedHref = `/book?service=${service.slug}#choose-time`
@@ -200,36 +407,28 @@ test("booking catalog keeps available Cal discovery exact", async (t) => {
           label: "Choose a time",
         })
       }
-
-      const inquiryAction = getBookingServiceAction(inquiryServices[0])
-
-      assert.deepEqual(inquiryAction, {
-        href: "/book?service=wild-glow-express-facial#choose-time",
-        kind: "inquire",
-        label: "Request this group ritual",
-      })
-      assert.doesNotMatch(inquiryAction.label, /book|choose a time|schedule/i)
     }
   )
 
   await t.test(
-    "Wild Glow Express cannot activate from a guessed 20-minute event",
+    "Wild Glow Express is an individual exact 20-minute booking",
     () => {
       const express = findBookingService("wild-glow-express-facial")?.service
 
       assert.ok(express)
       assert.deepEqual(express.calendarBooking, {
-        kind: "inquiry-only",
-        reason: "group-duration-unconfirmed",
+        durationMinutes: 20,
+        kind: "exact-event",
       })
-      assert.deepEqual(express.guestRange, { minimum: 4 })
+      assert.deepEqual(express.guestRange, { maximum: 1, minimum: 1 })
+      assert.equal(express.price, "$111")
       assert.equal(
         isExactCalEventForBookingService(express, {
           lengthInMinutes: 20,
           slug: express.slug,
           title: express.title,
         }),
-        false
+        true
       )
     }
   )
@@ -241,7 +440,7 @@ test("booking catalog keeps available Cal discovery exact", async (t) => {
         (service) => service.calendarBooking.kind === "exact-event"
       )
 
-      assert.equal(eligible.length, 10)
+      assert.equal(eligible.length, 11)
       for (const service of eligible) {
         assert.equal(service.calendarBooking.kind, "exact-event")
         const exactEvent = {
@@ -419,7 +618,7 @@ test("closed-mode presentation remains connected to the rendered email action", 
 
   assert.match(
     bookingPage,
-    /custom arrangements include a direct way to email Shannon/
+    /Custom arrangements include a direct way to email her/
   )
   assert.match(
     bookingFlow,
@@ -439,7 +638,7 @@ test("stepped booking keeps navigation and calendar recovery inside the journey"
   assert.match(bookingFlow, /window\.history\.pushState/)
   assert.match(bookingFlow, /window\.addEventListener\("popstate"/)
   assert.match(bookingFlow, /class CalendarEmbedBoundary/)
-  assert.match(bookingFlow, /Open calendar in a new tab/)
+  assert.match(bookingFlow, /Open in Cal\.com/)
   assert.doesNotMatch(bookingFlow, /settleCalendarPosition|onInitialReady/)
   assert.doesNotMatch(calEmbed, /onInitialReady/)
   assert.doesNotMatch(calEmbed, /styles:\s*\{/)

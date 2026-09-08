@@ -612,8 +612,10 @@ export async function POST(request: Request) {
         }
         session = await createOrRecoverStripeSession(stripe, order)
       }
-    } catch (error) {
-      console.error("Stripe Checkout Session preparation failed", error)
+    } catch {
+      console.error("Stripe Checkout Session preparation failed", {
+        stage: "session_prepare",
+      })
       return NextResponse.json(
         {
           error:

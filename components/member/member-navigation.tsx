@@ -5,15 +5,26 @@ import { usePathname } from "next/navigation"
 
 import { cn } from "@/lib/utils"
 
-const items = [
+const primaryItems = [
   ["Today", "/the-den"],
   ["Library", "/library"],
   ["Book Shannon", "/book"],
   ["Account", "/account"],
 ]
 
-export function MemberNavigation() {
+export function MemberNavigation({
+  showSessions = false,
+}: {
+  showSessions?: boolean
+}) {
   const pathname = usePathname()
+  const items = showSessions
+    ? [
+        primaryItems[0],
+        ["Sessions", "/the-den/sessions"],
+        ...primaryItems.slice(1),
+      ]
+    : primaryItems
 
   return (
     <nav

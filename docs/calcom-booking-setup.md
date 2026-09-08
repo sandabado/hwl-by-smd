@@ -1,41 +1,43 @@
 # Cal.com booking launch setup
 
-Last verified: September 6, 2026
+Last revised: September 7, 2026
 
 ## Current provider state
 
 The canonical Cal.com account is `HWLbySMD` (`hwlbysmd`) in
-`America/Los_Angeles`. Its public profile at <https://cal.com/hwlbysmd> now
-lists all ten exact-match website services as active public event types.
-`Wild Glow Express Facial` remains inquiry-only and has no Cal.com event.
+`America/Los_Angeles`. A fresh Cal.com public API read returns all eleven
+expected active public event types. `Wild Glow Express Facial` is provider
+event `6981284`, with the exact title and `wild-glow-express-facial` slug, a
+20-minute duration, and a free `0 USD` Cal.com price. The website offer remains
+$111 for one person; it is not a group experience and has no minimum-four rule.
 
 The `/book` page discovers public event types and exposes a live date/time
 selector only when Cal.com's slug, title, and fixed duration exactly match the
-website catalog. If discovery itself is unavailable, the site preserves access
-to the ten known direct Cal.com event URLs; Cal.com remains the authority for
-whether those pages have inventory. If discovery succeeds but a required
-provider record is empty or does not exactly match, that service fails closed
-to its inquiry path. The website never fabricates availability.
+website catalog and the event is free in Cal.com. If discovery is unavailable,
+or if a provider record is missing or does not exactly match, that service
+fails closed to its alternate request path. The website never guesses a Cal.com
+URL or fabricates availability.
 
 The public embed does not require a Cal.com API key. Do not create or expose an
 API key for the launch embed.
 
-## Verified schedule families
+## Current schedule families
 
-| Cal.com schedule       | Provider ID | Weekly availability (Pacific)        | Assigned events                                                                              |
-| ---------------------- | ----------: | ------------------------------------ | -------------------------------------------------------------------------------------------- |
-| HWL Beauty             |   `2303131` | Wednesday–Thursday, 10:00 AM–4:00 PM | Reiki Aromatherapy Healing; Signature Facial; Beauty & Being Ritual; Wild Glow Luxury Facial |
-| HWL Yoga Sound         |   `2303132` | Friday–Saturday, 9:00 AM–2:00 PM     | Private Yoga + Sound; Private Sound Healing; Private Yoga                                    |
-| HWL Consultation Tarot |   `2303130` | Sunday, 12:00–5:00 PM                | Intuitive Tarot Reading; Moon Oracle Reading; Tarot + Reiki Experience                       |
+| Cal.com schedule       | Provider ID | Weekly availability (Pacific)        | Assigned events                                                                                                        |
+| ---------------------- | ----------: | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| HWL Beauty             |   `2303131` | Wednesday–Thursday, 10:00 AM–4:00 PM | Wild Glow Express Facial; Reiki Aromatherapy Healing; Signature Facial; Beauty & Being Ritual; Wild Glow Luxury Facial |
+| HWL Yoga Sound         |   `2303132` | Friday–Saturday, 9:00 AM–2:00 PM     | Private Yoga + Sound; Private Sound Healing; Private Yoga                                                              |
+| HWL Consultation Tarot |   `2303130` | Sunday, 12:00–5:00 PM                | Intuitive Tarot Reading; Moon Oracle Reading; Tarot + Reiki Experience                                                 |
 
 “Consultation” is a schedule-family label, not an additional service. Custom
 retreat formats, seasonal workshops, and host-dependent group experiences
 continue through the inquiry flow and are not Cal.com event candidates.
 
-## Verified event publication
+## Current event catalog
 
 | Exact public title         | Exact slug                   | Fixed reservation | Schedule               | Location mode                 | Per-event daily cap |
 | -------------------------- | ---------------------------- | ----------------: | ---------------------- | ----------------------------- | ------------------: |
+| Wild Glow Express Facial   | `wild-glow-express-facial`   |            20 min | HWL Beauty             | Attendee address              |                   2 |
 | Reiki Aromatherapy Healing | `reiki-aromatherapy-healing` |            45 min | HWL Beauty             | Attendee address              |                   2 |
 | Signature Facial           | `signature-facial`           |            60 min | HWL Beauty             | Attendee address              |                   2 |
 | Beauty & Being Ritual      | `beauty-being-ritual`        |            90 min | HWL Beauty             | Attendee address              |                   2 |
@@ -47,44 +49,60 @@ continue through the inquiry flow and are not Cal.com event candidates.
 | Moon Oracle Reading        | `moon-oracle-reading`        |            60 min | HWL Consultation Tarot | Cal Video or attendee address |                   3 |
 | Tarot + Reiki Experience   | `tarot-and-reiki`            |            75 min | HWL Consultation Tarot | Attendee address              |                   3 |
 
-All ten rows are active and public. The published durations use the upper end
-of every public duration range so Cal.com never under-reserves Shannon's time.
-Any later title, slug, or duration change must be made in both systems and
-reverified before the website exposes the changed event.
+All eleven rows now return through Cal.com's public API. Wild Glow Express is
+public and exact at event ID `6981284`, 20 minutes, and `0 USD`. Its provider UI
+shows the HWL Beauty schedule, 60-minute buffers before and after, two days'
+minimum notice, a two-bookings-per-day cap, and a rolling 30-day horizon. Its
+preview says **Requires confirmation**; paid booking and seats are off. The
+published durations use the upper end of a public duration range so Cal.com
+never under-reserves Shannon's time. Any later title, slug, duration, or Cal
+price change must be made in both systems and reverified before the website
+exposes the changed event.
 
-### Inquiry-only catalog row
+## Booking safeguards
 
-| Exact public title       | Catalog slug               | Public timing           | Current public price | Website guest limit   |
-| ------------------------ | -------------------------- | ----------------------- | -------------------- | --------------------- |
-| Wild Glow Express Facial | `wild-glow-express-facial` | 15–20 minutes per guest | $111 per guest       | Minimum 4; no max set |
-
-`Wild Glow Express Facial` cannot activate a live calendar in the current
-website. Its duration is per guest, so a truthful fixed reservation cannot be
-derived without a separately approved total duration and capacity rule.
-
-## Verified booking safeguards
+The original ten events were verified with the safeguards below. For Wild Glow
+Express, the September 7 provider review proves its schedule, limits, buffers,
+payment/seat state, and intake configuration; its preview displays **Requires
+confirmation**. The local website then completed the newly added event's full
+request, organizer-confirmation, cancellation, and slot-release lifecycle.
 
 - Destination calendar: `FIREBIRDS`.
 - Conflict checks: `FIREBIRDS`, `WHOLEBODY`, `LIONWOLF`, `ACTOR`, `YOGA`, and
   `HWL`; `BILLS` is excluded.
-- Every event requires Shannon's confirmation **Always**; an unconfirmed
-  request blocks its slot.
-- Every event has 48 hours' minimum notice, 60 minutes before and after, and a
-  rolling 30-calendar-day booking horizon.
-- Guest invitations are hidden. Each event uses the required number question
-  “How many people will participate, including you?” and the required long-text
-  question “Where will this session take place?”
+- Every published event must require Shannon's confirmation **Always**; an
+  unconfirmed request blocks its slot.
+- Every published event must have 48 hours' minimum notice, 60 minutes before
+  and after, and a rolling 30-calendar-day booking horizon.
+- Guest invitations are hidden. Group-capable events use the required number
+  question “How many people will participate, including you?” and the required
+  long-text question “Where will this session take place?” Wild Glow Express
+  and Reiki Aromatherapy are individual appointments: the provider guest-count
+  and duplicate custom-location questions are hidden, while Cal.com's built-in
+  attendee-address field remains required.
 - Intuitive Tarot Reading and Moon Oracle Reading alone offer the choice of Cal
   Video or an attendee-supplied address. All other events use an
   attendee-supplied address.
-- Cal.com paid booking and seats are disabled for every event. One booking is a
-  request for one party; Shannon confirms logistics and price separately.
+- Cal.com paid booking and seats must remain disabled for every event. One
+  booking is a request for one party; Shannon confirms it manually. No payment
+  is collected when the appointment is requested. Shannon arranges payment
+  after the completed appointment.
+
+Reiki Aromatherapy is also a flat individual service: the website price is
+$222 with a maximum of one attendee, and its provider description says `$222
+for one person`.
 
 The per-event daily caps are provider safety limits, not a proven aggregate cap
 across every event in a schedule family. Required guest-count answers are
 intake data, not Cal.com seat inventory or automatic group-price calculation.
 Manual confirmation remains the authority for guest-count eligibility,
 location, and final price.
+
+The post-session payment email is **not automated yet**. Until a separately
+reviewed completion action and Stripe invoice/payment-link workflow pass an
+end-to-end test, Shannon must create and send the post-appointment payment
+request manually. Cal.com confirmation does not create or send a Stripe payment
+link.
 
 ## Catalog boundaries retained on the website
 
@@ -94,17 +112,25 @@ location, and final price.
   state which guests are included in the $444 base price.
 - `Private Yoga` says “$666 for 2–4 guests” and also “+$66 per additional
   guest,” while the website form caps the booking at four.
-- The four non-express beauty services use per-guest prices without a published
-  maximum group size; the three ritual services also have no published maximum.
+- `Signature Facial`, `Beauty & Being Ritual`, and `Wild Glow Luxury Facial`
+  use per-guest prices without a published maximum group size; the three ritual
+  services also have no published maximum.
 
 These phrases remain display and intake copy. They are not automated capacity
-or payment rules, and Cal.com collects no service payment for this launch.
+or payment rules. Cal.com collects no service payment; appointment payment is
+handled after the completed session.
 
 ## Website handoff evidence and remaining end-to-end work
 
-Provider configuration and publication are complete. On August 31, a local
-network-enabled `/book` run discovered all ten public event types through the
-same server-side Cal.com request used by the application. The embedded selector
+The dated evidence below is retained as history. References before September 7
+to ten events, a minimum-four Wild Glow group, or an inquiry-only Wild Glow flow
+describe the former catalog and do not override the current eleven-service
+model above.
+
+For the original ten-service configuration, provider setup and publication
+were complete. On August 31, a local network-enabled `/book` run discovered all
+ten public event types through the same server-side Cal.com request used by the
+application. The embedded selector
 then rendered genuine openings for all three schedule families: Beauty on a
 Wednesday, Yoga + Sound on a Friday, and Consultation / Tarot on a Sunday. The
 Signature Facial loading state resolved to a live calendar with enabled
@@ -163,12 +189,30 @@ zero Unconfirmed bookings. This passes browser-level responsive pointer
 activation for month, date, time, and Back controls without creating a booking.
 Physical iOS or Android touch hardware remains a separate field check.
 
+On September 7, the current local candidate discovered the exact Wild Glow
+Express provider event and rendered Shannon's genuine September availability
+with 20-minute times beginning at 10:00 AM. An authorized request for September
+16 at 10:00 AM was submitted through the website for
+`admin@ghosthand.studio`. The Cal.com form asked only for name, email, the
+required attendee address, and optional notes; it showed no guest-count,
+duplicate-location, seat, or payment step. The website displayed its booking
+receipt, the request appeared in Cal.com's **Unconfirmed** queue, and Shannon's
+organizer account successfully confirmed it. The organizer then canceled the
+test with an explicit launch-verification reason. Cal.com returned to zero
+upcoming test bookings, and the released 10:00 and 10:20 AM openings reappeared
+on a fresh website load. No payment was collected. This proves the complete
+local application-to-provider lifecycle without leaving a test appointment
+active; the deployed candidate still requires a non-submitting smoke check.
+
 An August 31 direct/provider Signature Facial test separately entered the
 unconfirmed queue, was manually confirmed, rescheduled, canceled, and released
 its slot.
 
 The following customer-journey evidence is still required:
 
+- Verify that the deployed candidate resolves Wild Glow Express to the exact
+  provider event and renders its live embedded dates and times. Do not create a
+  second test request unless provider state has changed.
 - A selected conflict on each approved Apple calendar removes the opening.
 - Overlapping bookings cannot both be confirmed.
 - Confirm the already passing responsive embed on at least one physical iOS or

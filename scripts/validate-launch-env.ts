@@ -359,6 +359,32 @@ if (calcomProfile) {
   }
 }
 
+const bookingLedgerReady = process.env.CALCOM_BOOKING_LEDGER_READY
+if (bookingLedgerReady !== "true" && bookingLedgerReady !== "false") {
+  errors.push("CALCOM_BOOKING_LEDGER_READY: must be exactly true or false")
+}
+const calcomWebhookSecret = read("CALCOM_WEBHOOK_SECRET")
+if (bookingLedgerReady === "true" && !calcomWebhookSecret) {
+  errors.push(
+    "CALCOM_WEBHOOK_SECRET: required when the booking ledger is enabled"
+  )
+}
+if (calcomWebhookSecret && calcomWebhookSecret.length < 32) {
+  errors.push("CALCOM_WEBHOOK_SECRET: must contain at least 32 characters")
+}
+for (const [otherName, otherSecret] of [
+  ["CRON_SECRET", cronSecret],
+  ["INQUIRY_RATE_LIMIT_SECRET", rateLimitSecret],
+] as const) {
+  if (
+    calcomWebhookSecret &&
+    otherSecret &&
+    calcomWebhookSecret === otherSecret
+  ) {
+    errors.push(`CALCOM_WEBHOOK_SECRET: must be distinct from ${otherName}`)
+  }
+}
+
 if (target === "production" && siteUrl !== CANONICAL_PRODUCTION_URL) {
   errors.push(
     `NEXT_PUBLIC_SITE_URL: Production must use ${CANONICAL_PRODUCTION_URL}`
@@ -481,6 +507,9 @@ console.log(
 )
 console.log(
   `Inquiry collection: ${inquiryCollectionReady === "true" ? "open" : "closed"} (NEXT_PUBLIC_INQUIRY_COLLECTION_READY=${inquiryCollectionReady}).`
+)
+console.log(
+  `Booking history: ${bookingLedgerReady === "true" ? "enabled" : "disabled"} (CALCOM_BOOKING_LEDGER_READY=${bookingLedgerReady}).`
 )
 for (const warning of warnings) console.warn(`- Warning: ${warning}`)
 console.log(

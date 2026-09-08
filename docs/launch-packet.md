@@ -9,6 +9,48 @@ custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
 
+## September 7 Booking Model Correction — Current Authority
+
+This section supersedes every older **current-state** claim below that describes
+Wild Glow Express as a group, minimum-four, or inquiry-only service; describes
+only ten Cal.com event types; or expects appointment payment during booking.
+Dated test records remain intact as historical evidence of what was true when
+those checks ran.
+
+- **Wild Glow Express Facial:** the canonical offer is an individual
+  appointment for one attendee, 20 minutes, $111, with the exact slug
+  `wild-glow-express-facial`. Cal.com's public API now returns it as active
+  public event `6981284`, with the exact title and slug, a 20-minute duration,
+  and a free `0 USD` provider price. The same public read returns all eleven
+  expected events.
+- **Individual-service intake:** Wild Glow Express and Reiki Aromatherapy are
+  one-person appointments. The website presents Reiki at a flat $222 with a
+  maximum of one attendee, and its provider description says `$222 for one
+  person`. For both events, provider guest-count and duplicate custom-location
+  questions are hidden; Cal.com's built-in attendee-address field is required.
+- **Appointment authority:** every appointment is a free Cal.com booking
+  request. Shannon manually accepts or declines it. Cal.com seats and payments
+  remain disabled, and the website does not collect Stripe payment while a
+  client requests a date or time. Wild Glow Express uses the HWL Beauty
+  schedule, 60-minute before/after buffers, two days' notice, a cap of two per
+  day, and a rolling 30-day horizon. Its provider preview displays **Requires
+  confirmation**.
+- **Payment timing:** Shannon accepts payment after the appointment is
+  complete. The application does **not yet** automate the completion-to-Stripe
+  invoice/payment-link email. Until that workflow is implemented and verified
+  end to end, the truthful operating path is a manually issued post-session
+  Stripe invoice or payment link.
+- **Evidence still required:** the provider API and settings checks now pass.
+  The current local website resolved Wild Glow Express to the exact event,
+  rendered live 20-minute availability, submitted one authorized request,
+  surfaced it in Cal.com's unconfirmed queue, confirmed it through Shannon's
+  organizer account, canceled it with a test reason, and showed the released
+  slots again on a fresh load. No payment was collected and no test booking
+  remains active. The deployed candidate still needs a non-submitting smoke
+  check. Appointment completion and post-session payment automation remain a
+  separate future lifecycle; launch uses Shannon's manual Stripe invoice or
+  payment-link workflow after service.
+
 ## September 7 Unified Commerce + Booking UX — Current Preview Candidate
 
 - **Exact application code:** commit

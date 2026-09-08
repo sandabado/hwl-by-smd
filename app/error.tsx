@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button"
 
 export default function Error({
   error,
-  unstable_retry,
+  retry,
 }: {
   error: Error & { digest?: string }
-  unstable_retry: () => void
+  retry: () => void
 }) {
   return (
     <section
@@ -37,7 +37,7 @@ export default function Error({
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Button
             className="h-11 rounded-full px-7"
-            onClick={() => unstable_retry()}
+            onClick={() => retry()}
             type="button"
           >
             Try Again

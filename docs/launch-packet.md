@@ -2879,3 +2879,73 @@ payment flow.
   approved administrator identities remain unconfirmed, never signed in, and
   `is_admin=false`. No provider, alias, payment, booking, invitation, or
   privilege mutation was made during these rereads.
+
+## September 8 Overnight Launch Audit
+
+- The checkpoint branch now centralizes the runtime launch authority for the
+  exact public site, dedicated Production Supabase project, canonical live
+  Stripe account, one active LIFT Product, one active one-time $11.11 Price,
+  private LIFT PDF/video objects, Resend sender, recovery recipient, and
+  deployment target. Runtime checks reject placeholders, whitespace-padded
+  values, legacy Supabase JWT keys, noncanonical Stripe mode or identifiers,
+  unsafe or duplicate storage paths, and missing or reused operational
+  secrets. Closing `COMMERCE_SALES_READY` blocks only new Checkout Sessions;
+  signed webhook intake, reconciliation, refund/dispute handling, fulfillment,
+  and existing-order inspection remain available.
+- The final local authority snapshot passes all 116 commerce checks and all 54
+  launch-environment fixtures, plus TypeScript, ESLint, and `git diff --check`.
+  The complete accessibility (6/6), Auth (55/55), booking (85/85), inquiry
+  (21/21), Preview policy (19/19), and 21-page SEO suites also pass. The fresh
+  Next.js 16.3.1 Webpack Production build after the final authority edits also
+  passes, generating all 63 static entries. The offline dependency
+  audit reports zero cached vulnerabilities; a fresh registry-backed audit was
+  not authorized and is not claimed.
+- The current booking catalog contains eleven published Cal.com services with
+  live date/time selection, local-timezone display, required attendee location
+  and guest-count questions where applicable, manual Shannon confirmation,
+  and no Cal payment. Wild Glow Express Facial is an individual 20-minute,
+  $111 in-person booking, not a group or per-guest retreat service. The website
+  intentionally collects no payment while reserving an appointment.
+- Automatic post-appointment invoicing is not implemented. For this launch,
+  Shannon must manually create and send a Stripe Invoice or Payment Link after
+  completing a service. A future Cal.com-to-Stripe workflow must prove
+  idempotency, amount authority, cancellation handling, and email delivery
+  before it can replace this manual boundary.
+- Production Supabase is on modern publishable and secret keys. Direct Auth,
+  database, and private-storage canaries passed with the modern keys; the
+  retired legacy anon and `service_role` keys returned HTTP 401. The two
+  approved administrator identities still require human acceptance/sign-in
+  and exact-identity elevation: `admin@ghosthand.studio` as operational super
+  admin and `shannon@hwlbysmd.com` as permanent HWL administrator. Neither is
+  currently a proven active administrator.
+- The canonical live Stripe Product and one-time $11.11 Price are active and
+  the four-event Production webhook is configured, but there is still no live
+  Checkout charge or signed live webhook delivery. Public sales must remain
+  closed until one owner-driven purchase proves Checkout, webhook HTTP 200,
+  durable paid order, entitlement, private video range playback, PDF delivery,
+  wrong-user denial, and duplicate suppression. A full-refund/revocation test
+  requires separate authorization. Partial refunds retain access; full refunds
+  revoke access; disputed purchases remain suspended for manual review.
+- The tax treatment of the $11.11 digital product still requires an owner or
+  accountant decision; Checkout does not silently enable Stripe Tax. The
+  recovery recipient `admin@ghosthand.studio` has not passed human mailbox
+  receipt proof and previously had no MX, so it cannot yet be treated as a
+  reliable operations alert destination. Production reconciliation and an
+  external missed-cron monitor must also be proven; the owner must accept the
+  daily Hobby recovery cadence or approve a faster paid cadence.
+- Durable inquiry persistence plus Resend provider delivery was proven in an
+  isolated Production canary, but the public inquiry route remains fail-closed
+  and human mailbox receipt remains unproven. Vercel's current agent credential
+  exposes encrypted Production environment values only as redacted values, so
+  the deployed closed candidate—not local inspection—is the source of truth for
+  exact Production configuration.
+- Captions for the LIFT video remain a documented accessibility follow-up. They
+  do not weaken payment authorization or private-media access, but they should
+  be completed before calling the full member experience accessibility-complete.
+- Release sequence: commit and push only
+  `checkpoint/platform-overhaul-2026-08-20`, wait for exact-SHA CI, deploy and
+  verify a sales-closed candidate, then move only the exact tested closed
+  candidate to the canonical aliases. Public sales stay closed. A separate,
+  protected, alias-free open candidate and the owner-driven live-purchase
+  canary are required before activating canonical checkout. `main` is not part
+  of this release.

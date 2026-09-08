@@ -2,19 +2,24 @@ import "server-only"
 
 import Stripe from "stripe"
 
-import { isSupabaseAdminConfigured } from "@/lib/env"
+import {
+  getCanonicalStripeAccountId,
+  getCanonicalStripeLivemode,
+  getCanonicalStripePriceId,
+  getCanonicalStripeProductId,
+  getCommerceDeploymentTarget as resolveCommerceDeploymentTarget,
+  isCommerceRuntimeAuthorityConfigured,
+  type DeploymentTarget,
+} from "@/lib/commerce/launch-authority"
+
+export type { DeploymentTarget } from "@/lib/commerce/launch-authority"
 
 export type ProductId = "lift_guide" | "pdf_download" | "membership"
 
 export const COMMERCE_APPLICATION = "hwl-by-smd"
 export const LAUNCH_PRODUCT_ID = "lift_guide" as const
 
-const STRIPE_ACCOUNT_ID_PATTERN = /^acct_[a-zA-Z0-9]{8,}$/
-const STRIPE_PRODUCT_ID_PATTERN = /^prod_[a-zA-Z0-9]{8,}$/
 const STRIPE_REQUEST_TIMEOUT_MS = 10_000
-const DEPLOYMENT_TARGETS = ["development", "preview", "production"] as const
-
-export type DeploymentTarget = (typeof DEPLOYMENT_TARGETS)[number]
 
 const LIFT_METADATA = {
   catalog_version: "lift-complete-v2",
@@ -108,96 +113,21 @@ export function getStripe() {
     : null
 }
 
-function isDeploymentTarget(
-  value: string | undefined
-): value is DeploymentTarget {
-  return DEPLOYMENT_TARGETS.includes(value as DeploymentTarget)
-}
-
-function getDeploymentTargetBoundary(): DeploymentTarget | "local" | null {
-  const explicitTarget = process.env.HWL_DEPLOYMENT_TARGET?.trim()
-  const platformTarget = process.env.VERCEL_ENV?.trim()
-
-  if (explicitTarget && !isDeploymentTarget(explicitTarget)) return null
-  if (platformTarget && !isDeploymentTarget(platformTarget)) return null
-  if (explicitTarget && platformTarget && explicitTarget !== platformTarget) {
-    return null
-  }
-
-  const deployedRuntime =
-    process.env.NODE_ENV === "production" ||
-    process.env.VERCEL === "1" ||
-    Boolean(platformTarget)
-
-  // VERCEL_ENV is only a second, independent mismatch signal. A deployed
-  // runtime must never use it as a substitute for HWL's explicit boundary.
-  if (deployedRuntime && !isDeploymentTarget(explicitTarget)) {
-    return null
-  }
-
-  if (isDeploymentTarget(explicitTarget)) return explicitTarget
-
-  return "local"
-}
-
-function isTrustedProductionRuntime() {
-  return (
-    process.env.HWL_DEPLOYMENT_TARGET === "production" &&
-    process.env.VERCEL_ENV === "production" &&
-    process.env.VERCEL === "1" &&
-    process.env.NODE_ENV === "production"
-  )
-}
-
 export function getCommerceDeploymentTarget(): DeploymentTarget | null {
-  const deploymentTarget = getDeploymentTargetBoundary()
-  if (deploymentTarget === null || deploymentTarget === "local") return null
-  if (deploymentTarget === "production" && !isTrustedProductionRuntime()) {
-    return null
-  }
-
-  return deploymentTarget
+  return resolveCommerceDeploymentTarget(process.env)
 }
 
 export function getExpectedStripeLivemode() {
-  const configuredMode =
-    process.env.STRIPE_LIVEMODE === "true"
-      ? true
-      : process.env.STRIPE_LIVEMODE === "false"
-        ? false
-        : null
-  if (configuredMode === null) return null
-
-  // HWL_DEPLOYMENT_TARGET is explicit and branch-scoped. VERCEL_ENV remains an
-  // independent platform signal when exposed, and any mismatch fails closed.
-  const deploymentTarget = getDeploymentTargetBoundary()
-  if (deploymentTarget === null) return null
-  if (deploymentTarget === "production") {
-    return configuredMode && isTrustedProductionRuntime() ? true : null
-  }
-  if (deploymentTarget === "preview" || deploymentTarget === "development") {
-    return configuredMode ? null : false
-  }
-
-  // A non-deployed local runtime is always test-only. It is intentionally not
-  // a valid checkout namespace until HWL_DEPLOYMENT_TARGET names development.
-  return configuredMode ? null : false
+  return getCanonicalStripeLivemode(process.env)
 }
 
 export function getExpectedStripeAccountId() {
-  const accountId = process.env.STRIPE_ACCOUNT_ID
-  return accountId && STRIPE_ACCOUNT_ID_PATTERN.test(accountId)
-    ? accountId
-    : null
+  return getCanonicalStripeAccountId(process.env)
 }
 
 export function getProductId(productId: ProductId) {
   if (productId !== LAUNCH_PRODUCT_ID) return undefined
-
-  const stripeProductId = process.env.STRIPE_LIFT_PRODUCT_ID
-  return stripeProductId && STRIPE_PRODUCT_ID_PATTERN.test(stripeProductId)
-    ? stripeProductId
-    : undefined
+  return getCanonicalStripeProductId(process.env)
 }
 
 function getStripeKeyLivemode() {
@@ -228,6 +158,10 @@ export async function isExpectedStripeAccount(stripe: Stripe) {
 }
 
 export function getPriceId(productId: ProductId) {
+  if (productId === LAUNCH_PRODUCT_ID) {
+    return getCanonicalStripePriceId(process.env)
+  }
+
   const price = process.env[PRODUCTS[productId].envKey]
   if (price) return price
 
@@ -247,19 +181,7 @@ export function isProductCheckoutReady(productId: ProductId) {
   // create a new checkout session.
   if (productId !== "lift_guide") return false
 
-  const promisedMediaReady = Boolean(
-    process.env.LIFT_PDF_STORAGE_PATH && process.env.LIFT_VIDEO_STORAGE_PATH
-  )
-
-  return Boolean(
-    isCommerceSalesReady() &&
-    isSupabaseAdminConfigured() &&
-    isStripeModeConfigured() &&
-    process.env.STRIPE_WEBHOOK_SECRET &&
-    promisedMediaReady &&
-    getPriceId(productId) &&
-    getProductId(productId)
-  )
+  return isCommerceRuntimeAuthorityConfigured(process.env)
 }
 
 function hasExpectedLiftMetadata(metadata: Stripe.Metadata) {

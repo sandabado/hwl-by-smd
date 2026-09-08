@@ -1,38 +1,17 @@
-const TARGETS = ["development", "preview", "production"] as const
+import {
+  CANONICAL_COMMERCE_ALERT_TO_EMAIL,
+  CANONICAL_EMAIL_DOMAIN,
+  CANONICAL_LAUNCH_AUTHORITY,
+  DEPLOYMENT_TARGETS as TARGETS,
+  type DeploymentTarget as Target,
+} from "../lib/commerce/launch-authority.ts"
+
 const SALES_EXPECTATIONS = ["closed", "open"] as const
 
-type Target = (typeof TARGETS)[number]
 type SalesExpectation = (typeof SALES_EXPECTATIONS)[number]
-
-const CANONICAL_STRIPE_ACCOUNT = {
-  development: "acct_1U9cEQAdcj2oNOF4",
-  preview: "acct_1U9cEQAdcj2oNOF4",
-  production: "acct_1U9cEIPTLuM8Maxa",
-} satisfies Record<Target, string>
-
-const CANONICAL_STRIPE_PRODUCT = {
-  development: "prod_VACTsFboJAEOF0",
-  preview: "prod_VACTsFboJAEOF0",
-  production: "prod_VCotDELRoHDnox",
-} satisfies Record<Target, string>
-const CANONICAL_STRIPE_PRICE = {
-  development: "price_1U9s49Adcj2oNOF4jcyMjyDB",
-  preview: "price_1U9s49Adcj2oNOF4jcyMjyDB",
-  production: "price_1UCPFjPTLuM8MaxaTY48RO9e",
-} satisfies Record<Target, string>
-const CANONICAL_PRODUCTION_URL = "https://www.hwlbysmd.com"
-const CANONICAL_PREVIEW_URL = "https://preview.hwlbysmd.com"
 const CANONICAL_CALCOM_PROFILE_URL = "https://cal.com/hwlbysmd"
-const CANONICAL_EMAIL_DOMAIN = "hwlbysmd.com"
 const SINGLE_EMAIL_PATTERN =
   /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$/
-const CANONICAL_SUPABASE_PROJECT_REF = {
-  development: "lkxppynmdfzljuptauxf",
-  preview: "lkxppynmdfzljuptauxf",
-  // Owner-approved dedicated Production project. Production must never
-  // silently inherit the staging database.
-  production: "qwprhsrwiihfllmgallr",
-} satisfies Record<Target, string | null>
 
 const PLACEHOLDERS = new Set([
   "[SENSITIVE]",
@@ -66,6 +45,24 @@ function isSalesExpectation(
 const cliTarget = option("target")
 const explicitDeploymentTarget = process.env.HWL_DEPLOYMENT_TARGET?.trim()
 const platformDeploymentTarget = process.env.VERCEL_ENV?.trim()
+
+if (
+  process.env.HWL_DEPLOYMENT_TARGET &&
+  process.env.HWL_DEPLOYMENT_TARGET !== explicitDeploymentTarget
+) {
+  console.error(
+    "HWL_DEPLOYMENT_TARGET must not contain leading or trailing whitespace."
+  )
+  process.exit(1)
+}
+
+if (
+  process.env.VERCEL_ENV &&
+  process.env.VERCEL_ENV !== platformDeploymentTarget
+) {
+  console.error("VERCEL_ENV must not contain leading or trailing whitespace.")
+  process.exit(1)
+}
 const requestedTarget =
   cliTarget ?? explicitDeploymentTarget ?? platformDeploymentTarget
 const requestedSales =
@@ -153,10 +150,17 @@ const target = requestedTarget
 const salesExpectation = requestedSales
 const errors: string[] = []
 const warnings: string[] = []
+const whitespaceErrors = new Set<string>()
 
 function read(key: string) {
-  const value = process.env[key]?.trim()
+  const rawValue = process.env[key]
+  const value = rawValue?.trim()
   if (!value) return null
+
+  if (rawValue !== value && !whitespaceErrors.has(key)) {
+    whitespaceErrors.add(key)
+    errors.push(`${key}: must not contain leading or trailing whitespace`)
+  }
 
   const normalized = value.toLowerCase()
   if (PLACEHOLDERS.has(value) || PLACEHOLDERS.has(normalized)) return null
@@ -188,7 +192,7 @@ function requireUrl(key: string, options: { allowLocalHttp?: boolean } = {}) {
     const localHttp =
       options.allowLocalHttp === true &&
       url.protocol === "http:" &&
-      ["localhost", "127.0.0.1", "::1"].includes(url.hostname)
+      ["localhost", "127.0.0.1", "::1", "[::1]"].includes(url.hostname)
     if (
       (url.protocol !== "https:" && !localHttp) ||
       url.username ||
@@ -238,10 +242,13 @@ function requireCanonicalSenderEmail(key: string) {
 
 function requireStoragePath(key: string) {
   const value = requireValue(key)
+  const segments = value?.split("/") ?? []
   if (
     value &&
     (value.startsWith("/") ||
-      value.includes("..") ||
+      segments.some(
+        (segment) => !segment || segment === "." || segment === ".."
+      ) ||
       !/^[a-zA-Z0-9][a-zA-Z0-9._/-]*$/.test(value))
   ) {
     errors.push(`${key}: must be a safe bucket-relative object path`)
@@ -252,6 +259,23 @@ function requireStoragePath(key: string) {
 const siteUrl = requireUrl("NEXT_PUBLIC_SITE_URL", {
   allowLocalHttp: target === "development",
 })
+if (target === "development" && siteUrl) {
+  const localSiteUrl = new URL(siteUrl)
+  const localHost = ["localhost", "127.0.0.1", "::1", "[::1]"].includes(
+    localSiteUrl.hostname
+  )
+  if (
+    localSiteUrl.protocol !== "http:" ||
+    !localHost ||
+    localSiteUrl.pathname !== "/" ||
+    localSiteUrl.search ||
+    localSiteUrl.hash
+  ) {
+    errors.push(
+      "NEXT_PUBLIC_SITE_URL: development must use a root localhost HTTP origin"
+    )
+  }
+}
 const supabaseUrl = requireUrl("NEXT_PUBLIC_SUPABASE_URL")
 const publicSupabaseKey = requirePattern(
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
@@ -278,7 +302,8 @@ if (supabaseUrl) {
   const projectRef = new URL(supabaseUrl).hostname.match(
     /^([a-z0-9-]+)\.supabase\.co$/
   )?.[1]
-  const expectedProjectRef = CANONICAL_SUPABASE_PROJECT_REF[target]
+  const expectedProjectRef =
+    CANONICAL_LAUNCH_AUTHORITY[target].supabaseProjectRef
 
   if (!projectRef) {
     errors.push(
@@ -292,11 +317,24 @@ if (supabaseUrl) {
     errors.push(
       `NEXT_PUBLIC_SUPABASE_URL: does not match the canonical ${target} Supabase project`
     )
+  } else if (supabaseUrl !== CANONICAL_LAUNCH_AUTHORITY[target].supabaseUrl) {
+    errors.push(
+      `NEXT_PUBLIC_SUPABASE_URL: must use the exact canonical ${target} Supabase URL without a path, query, or fragment`
+    )
   }
 }
 
-requireStoragePath("LIFT_PDF_STORAGE_PATH")
-requireStoragePath("LIFT_VIDEO_STORAGE_PATH")
+const liftPdfStoragePath = requireStoragePath("LIFT_PDF_STORAGE_PATH")
+const liftVideoStoragePath = requireStoragePath("LIFT_VIDEO_STORAGE_PATH")
+if (
+  liftPdfStoragePath &&
+  liftVideoStoragePath &&
+  liftPdfStoragePath === liftVideoStoragePath
+) {
+  errors.push(
+    "LIFT_VIDEO_STORAGE_PATH: must differ from LIFT_PDF_STORAGE_PATH so the complete bundle contains both assets"
+  )
+}
 
 const captionsPath = read("LIFT_VIDEO_CAPTIONS_STORAGE_PATH")
 if (captionsPath) requireStoragePath("LIFT_VIDEO_CAPTIONS_STORAGE_PATH")
@@ -325,7 +363,18 @@ requireEmail("CONTACT_TO_EMAIL")
 requireCanonicalSenderEmail("CONTACT_FROM_EMAIL")
 const commerceAlertDestination = read("COMMERCE_ALERT_TO_EMAIL")
 if (target === "production" && salesExpectation === "open") {
-  requireEmail("COMMERCE_ALERT_TO_EMAIL")
+  const validatedCommerceAlertDestination = requireEmail(
+    "COMMERCE_ALERT_TO_EMAIL"
+  )
+  if (
+    validatedCommerceAlertDestination &&
+    validatedCommerceAlertDestination.toLowerCase() !==
+      CANONICAL_COMMERCE_ALERT_TO_EMAIL
+  ) {
+    errors.push(
+      `COMMERCE_ALERT_TO_EMAIL: must use the canonical ${CANONICAL_COMMERCE_ALERT_TO_EMAIL} operations recipient`
+    )
+  }
 } else if (commerceAlertDestination) {
   requireEmail("COMMERCE_ALERT_TO_EMAIL")
 }
@@ -385,14 +434,20 @@ for (const [otherName, otherSecret] of [
   }
 }
 
-if (target === "production" && siteUrl !== CANONICAL_PRODUCTION_URL) {
+if (
+  target === "production" &&
+  siteUrl !== CANONICAL_LAUNCH_AUTHORITY.production.siteUrl
+) {
   errors.push(
-    `NEXT_PUBLIC_SITE_URL: Production must use ${CANONICAL_PRODUCTION_URL}`
+    `NEXT_PUBLIC_SITE_URL: Production must use ${CANONICAL_LAUNCH_AUTHORITY.production.siteUrl}`
   )
 }
-if (target === "preview" && siteUrl !== CANONICAL_PREVIEW_URL) {
+if (
+  target === "preview" &&
+  siteUrl !== CANONICAL_LAUNCH_AUTHORITY.preview.siteUrl
+) {
   errors.push(
-    `NEXT_PUBLIC_SITE_URL: launch Preview must use ${CANONICAL_PREVIEW_URL} so Stripe can reach a stable non-Production webhook`
+    `NEXT_PUBLIC_SITE_URL: launch Preview must use ${CANONICAL_LAUNCH_AUTHORITY.preview.siteUrl} so Stripe can reach a stable non-Production webhook`
   )
 }
 
@@ -438,7 +493,10 @@ if (mustValidateStripeProvider) {
     /^acct_[a-zA-Z0-9]{8,}$/,
     "must be a Stripe acct_ identifier"
   )
-  if (stripeAccount && stripeAccount !== CANONICAL_STRIPE_ACCOUNT[target]) {
+  if (
+    stripeAccount &&
+    stripeAccount !== CANONICAL_LAUNCH_AUTHORITY[target].stripeAccountId
+  ) {
     errors.push(
       `STRIPE_ACCOUNT_ID: does not match the canonical ${target} HWL account`
     )
@@ -470,12 +528,15 @@ if (mustValidateStripeProvider) {
     "must be a Stripe price_ identifier"
   )
 
-  if (productId && productId !== CANONICAL_STRIPE_PRODUCT[target]) {
+  if (
+    productId &&
+    productId !== CANONICAL_LAUNCH_AUTHORITY[target].stripeProductId
+  ) {
     errors.push(
       `STRIPE_LIFT_PRODUCT_ID: does not match the verified canonical ${target} HWL Product`
     )
   }
-  if (priceId && priceId !== CANONICAL_STRIPE_PRICE[target]) {
+  if (priceId && priceId !== CANONICAL_LAUNCH_AUTHORITY[target].stripePriceId) {
     errors.push(
       `STRIPE_LIFT_GUIDE_PRICE_ID: does not match the verified canonical ${target} HWL Price`
     )

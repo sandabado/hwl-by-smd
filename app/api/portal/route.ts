@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { getAuthenticatedUser } from "@/lib/access"
-import { getSiteUrl } from "@/lib/env"
+import { getCanonicalSiteUrl } from "@/lib/commerce/launch-authority"
 import { createAdminClient } from "@/lib/supabase/server"
 import {
   getExpectedStripeAccountId,
@@ -27,13 +27,15 @@ export async function POST(request: Request) {
   const stripeAccountId = getExpectedStripeAccountId()
   const stripeLivemode = getExpectedStripeLivemode()
   const supabase = createAdminClient()
+  const siteUrl = getCanonicalSiteUrl(process.env)
   if (
     !stripe ||
     !deploymentTarget ||
     !stripeAccountId ||
     stripeLivemode === null ||
     !isStripeModeConfigured() ||
-    !supabase
+    !supabase ||
+    !siteUrl
   ) {
     return NextResponse.json(
       { error: "Billing is not configured yet." },
@@ -72,7 +74,7 @@ export async function POST(request: Request) {
 
   const session = await stripe.billingPortal.sessions.create({
     customer: stripeCustomer.stripe_customer_id,
-    return_url: `${getSiteUrl(request.url)}/account`,
+    return_url: `${siteUrl}/account`,
   })
 
   return NextResponse.json({ url: session.url })

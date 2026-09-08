@@ -1,3 +1,9 @@
+import {
+  getDeploymentTargetBoundary,
+  isCanonicalSupabaseAdminConfiguration,
+  isCanonicalSupabasePublicConfiguration,
+} from "@/lib/commerce/launch-authority"
+
 const present = (value: string | undefined) =>
   Boolean(value && !value.startsWith("your_"))
 
@@ -8,19 +14,17 @@ export const publicEnv = {
 }
 
 export function isSupabaseConfigured() {
-  return (
-    present(publicEnv.supabaseUrl) &&
-    present(publicEnv.supabaseKey) &&
-    publicEnv.supabaseKey?.startsWith("sb_publishable_") === true
-  )
+  const target = getDeploymentTargetBoundary(process.env)
+  return isCanonicalSupabasePublicConfiguration(process.env, {
+    allowUnscopedLocal: target === "local",
+  })
 }
 
 export function isSupabaseAdminConfigured() {
-  return (
-    isSupabaseConfigured() &&
-    present(process.env.SUPABASE_SERVICE_ROLE_KEY) &&
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.startsWith("sb_secret_") === true
-  )
+  const target = getDeploymentTargetBoundary(process.env)
+  return isCanonicalSupabaseAdminConfiguration(process.env, {
+    allowUnscopedLocal: target === "local",
+  })
 }
 
 export function isStripeConfigured() {

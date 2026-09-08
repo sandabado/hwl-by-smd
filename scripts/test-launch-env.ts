@@ -83,7 +83,7 @@ const productionFixture: NodeJS.ProcessEnv = {
 
 const productionStripeFixture: NodeJS.ProcessEnv = {
   ...productionFixture,
-  COMMERCE_ALERT_TO_EMAIL: "commerce-operator@example.com",
+  COMMERCE_ALERT_TO_EMAIL: "admin@ghosthand.studio",
   COMMERCE_SALES_READY: "true",
   STRIPE_ACCOUNT_ID: "acct_1U9cEIPTLuM8Maxa",
   STRIPE_LIFT_GUIDE_PRICE_ID: "price_1UCPFjPTLuM8MaxaTY48RO9e",
@@ -105,6 +105,28 @@ const fixtures: Fixture[] = [
     expectedText:
       "Launch environment preflight passed for development (closed sales).",
     name: "development closed",
+  },
+  {
+    args: ["--target=development", "--expect-sales=closed"],
+    env: {
+      ...developmentFixture,
+      NEXT_PUBLIC_SITE_URL: "https://development.example.com",
+    },
+    expectedExit: 1,
+    expectedText:
+      "NEXT_PUBLIC_SITE_URL: development must use a root localhost HTTP origin",
+    name: "development rejects remote HTTPS origins",
+  },
+  {
+    args: ["--target=development", "--expect-sales=closed"],
+    env: {
+      ...developmentFixture,
+      NEXT_PUBLIC_SITE_URL: "http://[::1]:3000",
+    },
+    expectedExit: 0,
+    expectedText:
+      "Launch environment preflight passed for development (closed sales).",
+    name: "development accepts IPv6 localhost",
   },
   {
     args: ["--target=preview", "--expect-sales=closed"],
@@ -488,6 +510,61 @@ const fixtures: Fixture[] = [
   },
   {
     args: ["--target=production", "--expect-sales=open"],
+    env: {
+      ...productionStripeFixture,
+      STRIPE_WEBHOOK_SECRET: "whsec_fixture_private_value ",
+    },
+    expectedExit: 1,
+    expectedText:
+      "STRIPE_WEBHOOK_SECRET: must not contain leading or trailing whitespace",
+    name: "Production open sales reject whitespace-padded provider secrets",
+  },
+  {
+    args: ["--target=production", "--expect-sales=open"],
+    env: {
+      ...productionStripeFixture,
+      LIFT_VIDEO_STORAGE_PATH: productionStripeFixture.LIFT_PDF_STORAGE_PATH,
+    },
+    expectedExit: 1,
+    expectedText:
+      "LIFT_VIDEO_STORAGE_PATH: must differ from LIFT_PDF_STORAGE_PATH",
+    name: "Production requires distinct LIFT video and guide objects",
+  },
+  {
+    args: ["--target=production", "--expect-sales=open"],
+    env: {
+      ...productionStripeFixture,
+      LIFT_PDF_STORAGE_PATH: "lift/./lift-guide.pdf",
+    },
+    expectedExit: 1,
+    expectedText:
+      "LIFT_PDF_STORAGE_PATH: must be a safe bucket-relative object path",
+    name: "Production rejects noncanonical storage path segments",
+  },
+  {
+    args: ["--target=production", "--expect-sales=open"],
+    env: {
+      ...productionStripeFixture,
+      HWL_DEPLOYMENT_TARGET: " production ",
+    },
+    expectedExit: 1,
+    expectedText:
+      "HWL_DEPLOYMENT_TARGET must not contain leading or trailing whitespace.",
+    name: "Production rejects a whitespace-padded deployment authority",
+  },
+  {
+    args: ["--target=production", "--expect-sales=open"],
+    env: {
+      ...productionStripeFixture,
+      COMMERCE_ALERT_TO_EMAIL: "commerce-operator@example.com",
+    },
+    expectedExit: 1,
+    expectedText:
+      "COMMERCE_ALERT_TO_EMAIL: must use the canonical admin@ghosthand.studio operations recipient",
+    name: "Production open sales require the canonical operations recipient",
+  },
+  {
+    args: ["--target=production", "--expect-sales=open"],
     env: { ...productionStripeFixture, CONTACT_FROM_EMAIL: "" },
     expectedExit: 1,
     expectedText: "CONTACT_FROM_EMAIL: missing or placeholder value",
@@ -513,6 +590,17 @@ const fixtures: Fixture[] = [
       name: `noncanonical Production Supabase project fails: ${supabaseUrl}`,
     })
   ),
+  {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: {
+      ...productionFixture,
+      NEXT_PUBLIC_SUPABASE_URL: `${PRODUCTION_SUPABASE_URL}/rest/v1`,
+    },
+    expectedExit: 1,
+    expectedText:
+      "NEXT_PUBLIC_SUPABASE_URL: must use the exact canonical production Supabase URL without a path, query, or fragment",
+    name: "canonical Production Supabase host rejects a path suffix",
+  },
 ]
 
 const inheritedEnvironment = Object.fromEntries(

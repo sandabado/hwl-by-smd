@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** September 7, 2026
+**Updated:** September 8, 2026
 
 **Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
 Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
@@ -8,6 +8,52 @@ Vercel apex-to-www redirect, `https://preview.hwlbysmd.com` for the protected
 custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
+
+## September 8 Supabase Production Key Cutover — Current Authority
+
+This section supersedes every older statement below that says the legacy
+Supabase `anon` or `service_role` keys remain enabled, that the canonical
+domains resolve to `dpl_8JB23GVxaAFdLLbLUpmA5z8ukJNJ`, or that Vercel
+Production has not been rebound to the modern Supabase keys.
+
+- **Modern keys deployed first:** Vercel Production was rebound directly from
+  the canonical Supabase Production project `qwprhsrwiihfllmgallr` to its
+  default `sb_publishable_...` browser key and `sb_secret_...` server key. No
+  credential value was printed or committed. A fresh closed-sales Production
+  build completed READY as `dpl_BhFbR5o1q6uEjAapy3axhGD7Zd69`
+  (`hwl-by-aat0clzct-whole-body-earth.vercel.app`) from documentation-only
+  checkpoint `c8adca829e82852a522c886fd2255ecca392ed89`; its audited runtime remains
+  application commit `c26164d1c91245a9c3194bc370081ad7937af129`.
+- **Replacement-key canaries before retirement:** the modern publishable key
+  returned HTTP 200 from the Production Auth settings endpoint. The modern
+  secret key returned HTTP 200 for a bounded database read and HTTP 200 for a
+  private `member-content` storage listing. The new Vercel candidate returned
+  HTTP 200 for `/` and `/login`, HTTP 307 for the protected `/library` and PDF
+  download paths, HTTP 401 for unauthenticated LIFT video, the intentional HTTP
+  503 for same-origin checkout while sales are closed, and HTTP 400 for an
+  unsigned Stripe webhook.
+- **Dependency check:** the Supabase organization has no published OAuth apps.
+  Its only authorized apps are three Codex grants. Supabase management access
+  remained operational after the cutover, and the application data-plane
+  checks use only the modern project keys.
+- **Legacy retirement:** Supabase exposes one reversible project-level control
+  for the legacy JWT-based pair, so `service_role` and `anon` could not be
+  disabled sequentially. They were disabled atomically under the owner's
+  approved rollback procedure. A direct post-cutover check proved both legacy
+  keys are rejected as API keys with HTTP 401, while all three modern-key
+  canaries remained HTTP 200. The dashboard now exposes the immediate
+  **Re-enable JWT-based API keys** rollback action; no rollback was required.
+- **Canonical promotion and postflight:** the verified candidate was promoted
+  to Production. Both `www.hwlbysmd.com` and `hwlbysmd.com` resolve exactly to
+  `dpl_BhFbR5o1q6uEjAapy3axhGD7Zd69`; the apex returns HTTP 308 to `www`, and
+  `www` returns HTTP 200. The protected-route, media, checkout, and webhook
+  postflight statuses match the pre-promotion results, and the cutover window
+  contains no Vercel error-level runtime logs. The prior deployment
+  `dpl_8JB23GVxaAFdLLbLUpmA5z8ukJNJ` remains the alias-only rollback target.
+- **Unchanged release boundaries:** `COMMERCE_SALES_READY=false`; no Checkout
+  Session, charge, webhook mutation, or live purchase was created during this
+  cutover. Public inquiries and Cal.com booking-history sync retain their
+  separately documented gates. `main` was not pushed or merged.
 
 ## September 7 Production Cutover — Current Authority
 

@@ -9,6 +9,63 @@ custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
 
+## September 7 Production Cutover — Current Authority
+
+This section supersedes every older current-deployment and current-readiness
+statement below. Historical observations remain available only as dated audit
+evidence.
+
+- **Live application:** runtime commit
+  `c26164d1c91245a9c3194bc370081ad7937af129` is pushed only to
+  `checkpoint/platform-overhaul-2026-08-20`; `main` was not pushed or merged.
+  GitHub Actions run `34186973081` passed lint, TypeScript, SEO, all repository
+  boundary suites, the Production dependency audit, and the provider-free
+  Production compile for that exact SHA.
+- **Exact Production deployment:** Vercel deployment
+  `dpl_8JB23GVxaAFdLLbLUpmA5z8ukJNJ`
+  (`hwl-by-mrgjmpa4v-whole-body-earth.vercel.app`) is READY. Its real
+  Production-environment build passed for canonical project
+  `qwprhsrwiihfllmgallr`, closed sales, closed inquiries, and disabled Cal.com
+  booking history. Migration 016 remains unapplied and
+  `CALCOM_BOOKING_LEDGER_READY=false`.
+- **Canonical-domain cutover:** both `www.hwlbysmd.com` and `hwlbysmd.com` are
+  assigned to that exact READY deployment. The apex returns HTTP 308 to `www`;
+  `www` returns HTTP 200 without the Preview-only `x-robots-tag: noindex`
+  header. The prior alias-only rollback target is
+  `dpl_6TUjj1aEiJgyD3oLTDocdfZmnKAz`
+  (`hwl-by-b02u4crd0-whole-body-earth.vercel.app`).
+- **Public audit:** every one of the 23 canonical sitemap routes returned HTTP
+  200 after cutover. The live LIFT page exposes canonical URL
+  `https://www.hwlbysmd.com/beauty/lift`, canonical Product JSON-LD ID
+  `#lift-video-pdf`, the single `$11.11` Video + PDF offer, and its complete
+  Terms, Privacy, and Refund Policy links. `robots.txt`, `sitemap.xml`, and
+  `llms.txt` all return HTTP 200. Post-audit deployment logs contain no warning-
+  or error-level entries.
+- **Booking proof:** the public website resolved the exact Wild Glow Express
+  Facial at 20 minutes and `$111`, and rendered its live Cal.com month/date/time
+  selector with request-only, no-payment, and manual-confirmation language.
+  Fresh non-submitting browser checks also rendered live calendars for Private
+  Yoga + Sound and Intuitive Tarot Reading. No appointment was created during
+  the Production smoke test.
+- **Stripe customer presentation:** canonical live account HWLbySMD now
+  persists `shannon@hwlbysmd.com` as its customer-support email, the HWL contact
+  URL, Terms URL, Privacy URL, and Refund Policy URL. Checkout is configured to
+  display Terms/Privacy, the 14-days-from-purchase free-refund policy, support
+  email, and support website; the phone is not selected for Checkout display.
+- **Payment safety and remaining gate:** live LIFT checkout remains visibly and
+  server-side closed. A same-origin Production canary returned the intentional
+  HTTP 503 before authentication or provider mutation. The previously emitted
+  legacy Production Supabase `service_role` JWT is still enabled and must be
+  retired under its separately approved narrow key-deactivation and rollback
+  procedure before `COMMERCE_SALES_READY=true`. Therefore no secure live-sale,
+  live webhook, entitlement, or private-media fulfillment claim is made in
+  this release.
+- **Other closed features:** public inquiry collection remains HTTP 503 with
+  the on-page direct-email fallback. The Cal.com booking-history webhook also
+  remains HTTP 503 and The Den session-history navigation remains hidden. These
+  gates do not prevent current Cal.com appointment requests or Shannon's
+  launch-time manual post-appointment Stripe invoice/payment-link workflow.
+
 ## September 7 Booking Model Correction — Current Authority
 
 This section supersedes every older **current-state** claim below that describes

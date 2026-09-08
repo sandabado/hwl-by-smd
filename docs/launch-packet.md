@@ -9,6 +9,56 @@ custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
 
+## September 7 Unified Commerce + Booking UX — Current Preview Candidate
+
+- **Exact application code:** commit
+  `cd52772b816a414c349ce63d258ebd80274f21a8` is clean, synchronized only on
+  `checkpoint/platform-overhaul-2026-08-20`, and passed GitHub Actions run
+  `34176103707`. `main` was not pushed or merged.
+- **Exact protected Preview:** Vercel deployment
+  `dpl_62BPVaKeLH1x61GHsddCpzgBKo34`
+  (`hwl-by-n91y6p9dt-whole-body-earth.vercel.app`) is READY Preview and its
+  build log names branch `checkpoint/platform-overhaul-2026-08-20` and commit
+  `cd52772`. `https://preview.hwlbysmd.com` is the protected branch entry and
+  may advance through documentation-only descendants without changing the
+  audited application code.
+- **One interaction grammar, separate authorities:** products now move from an
+  offer to a cart review sheet and then Stripe; sessions move from an offer to
+  a session review sheet and then a dedicated Cal.com date/time step. Booking
+  never enters the commerce cart, and the booking review explicitly states
+  that no payment is collected when requesting a time. Closing a selected
+  session preserves a header control for reopening it. Both header controls
+  remain keyboard named, dialog aware, and usable at mobile and short/zoomed
+  viewport heights.
+- **Service and commerce signal:** canonical service shelves now appear high on
+  Beauty, Body, and Being with price, duration, format, readiness, and one
+  full-width next action. LIFT appears early on the homepage, Beauty page, and
+  Store as the one available `$11.11` video-and-PDF product. The top navigation
+  and public `llms.txt` expose the canonical LIFT, booking, service, retreat,
+  and Store routes. Service CTAs retain canonical crawlable URLs and work as
+  progressive-enhancement links when client scripting is unavailable.
+- **Preview browser evidence:** the exact Preview rendered the shared Signature
+  Facial review with its `$277/guest`, 60-minute, in-person details, then
+  reached `/book?service=signature-facial#choose-time`. The embedded month
+  calendar exposed six live times from `10:00am` through `3:00pm` in the tested
+  session. The cart rendered one `LIFT — Video + PDF` item at `$11.11`, the
+  secure Stripe checkout action, and the full legal-policy set. No booking,
+  inquiry, or Checkout Session was submitted. The application emitted zero
+  browser errors; one warning came from Cal.com's own client bundle.
+- **Visual system:** simple editorial still lifes now identify Beauty, Body,
+  and Being offers while Shannon remains the human presence throughout the
+  site. Desktop, 390px mobile, and a 360px-high stress viewport showed no
+  application-level horizontal overflow; both review sheets remained
+  scrollable to their primary action.
+- **Verification:** the Next.js 16.3.1 Webpack production build generated all
+  62 routes. TypeScript, ESLint, SEO validation, and `git diff --check` pass.
+  Focused suites pass 243 cases: Auth 55/55, booking 24/24, accessibility 6/6,
+  commerce 74/74, inquiries 21/21, launch environment 44/44, and Preview
+  release policy 19/19.
+- **Release boundary:** this is Preview evidence only. No Production alias,
+  Production environment value, provider object, live payment, Cal booking,
+  public inquiry state, or `main` branch was changed by this UX release.
+
 ## September 7 Current Candidate — Launch Authority
 
 This section is the current release truth. It supersedes conflicting deployment,

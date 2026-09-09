@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** September 8, 2026
+**Updated:** September 9, 2026
 
 **Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
 Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
@@ -8,6 +8,42 @@ Vercel apex-to-www redirect, `https://preview.hwlbysmd.com` for the protected
 custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
+
+## September 9 Supabase Key-Retirement Revalidation — Current Authority
+
+This section supersedes older deployment identifiers and every older statement
+below that says the Production legacy Supabase API keys remain enabled.
+
+- **Provider state:** Production project `qwprhsrwiihfllmgallr` exposes a single
+  reversible control for the legacy JWT-based `anon` and `service_role` pair;
+  Supabase does not expose separate per-key retirement controls. During the
+  revalidation window the dashboard first reported that its JWT update was in
+  progress. After that provider operation settled, it exposed **Re-enable
+  JWT-based API keys**, confirming that the pair is disabled. No second mutation
+  or rollback was attempted.
+- **Direct key canaries:** the default modern `sb_publishable_...` key returned
+  HTTP 200 from Auth settings. The default modern `sb_secret_...` key returned
+  HTTP 200 from a bounded profile read and HTTP 200 from a private
+  `member-content` listing containing one bounded result. Direct requests with
+  the retired legacy `anon` and `service_role` keys each returned HTTP 401. No
+  credential value was committed or retained in a temporary file.
+- **Current application postflight:** the canonical Production site returned
+  HTTP 200 for `/`, `/login`, and the Wild Glow booking page; HTTP 307 for
+  anonymous `/library` and LIFT PDF requests; HTTP 401 for anonymous LIFT video;
+  the intentional HTTP 503 for a valid same-origin checkout request while sales
+  remain closed; and HTTP 400 for an unsigned Stripe webhook. The audit created
+  no appointment, Checkout Session, payment, order, entitlement, or delivery
+  mutation.
+- **Current deployment:** both canonical domains resolve to READY Production
+  deployment `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i`
+  (`hwl-by-pybjd8mlv-whole-body-earth.vercel.app`), exact checkpoint commit
+  `6a260bcfa7c752562be264d1a077013fc8ff9f4d` on
+  `checkpoint/platform-overhaul-2026-08-20`. The 30-minute postflight window
+  contained no Vercel warning- or error-level runtime logs.
+- **Unchanged boundaries:** `COMMERCE_SALES_READY=false`; `main` remains
+  untouched. Entitled-user playback/PDF delivery and the owner-driven live
+  `$11.11` purchase remain separate launch canaries because no authenticated
+  Production buyer session was available during this non-mutating revalidation.
 
 ## September 8 Supabase Production Key Cutover — Current Authority
 

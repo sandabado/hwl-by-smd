@@ -9,6 +9,70 @@ custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
 
+## September 9 Security-Patched Preview Purchase — Current Candidate
+
+This section records the current checkpoint and supersedes older Preview
+deployment identifiers. It does not authorize a Production promotion or a
+`main` push.
+
+- **Exact candidate:** checkpoint commit
+  `4ea17b40af05f43a32b9a3fdac65f986151d2869` updates Next.js and
+  `eslint-config-next` to `16.3.4`, the transitive Sharp runtime to `0.35.4`,
+  and the `js-yaml` override to `4.3.2`. Local lint, TypeScript, SEO, the full
+  production build, all 356 launch-boundary tests, `git diff --check`, and the
+  current production-dependency audit passed; the audit reported zero
+  vulnerabilities. Exact-SHA GitHub Actions run `34405555776` passed the same
+  locked-install, audit, test, and production-compile sequence. `main` was not
+  pushed or merged.
+- **Exact protected Preview:** Vercel deployment
+  `dpl_7Vc1qbMZYRHoQDoxd2haNahQpucP`
+  (`hwl-by-n0pjc3pn5-whole-body-earth.vercel.app`) is READY, names the exact
+  checkpoint SHA in its Git metadata, and owns the protected
+  `https://preview.hwlbysmd.com` branch alias. Its real Preview build passed the
+  environment gate with sandbox sales open, inquiries closed, and Cal.com
+  booking history disabled. No Production alias or environment changed.
+- **Hosted application canaries:** `/`, `/login`, and the Wild Glow booking
+  route returned HTTP 200; anonymous `/library` and LIFT downloads redirected
+  to login; anonymous LIFT video returned HTTP 401; and an unsigned Stripe
+  webhook returned HTTP 400. The signed-in booking page rendered the exact
+  Wild Glow Cal.com embed and an enabled 10:00am appointment time. Vercel
+  reported no runtime errors during the verification window.
+- **Approved sandbox purchase:** one signed-in staging user completed the
+  `$11.11` LIFT purchase through hosted Stripe Checkout. Stripe independently
+  reports a complete, paid, test-mode Checkout Session; a succeeded
+  PaymentIntent; and a paid, unrefunded Charge, each for exactly 1,111 cents
+  ($11.11 USD) and the exact `preview` / `lift-complete-v2` metadata. The
+  hosted checkout route returned HTTP 200 and the signed Stripe webhook
+  returned HTTP 200.
+- **Durable fulfillment:** the exact Session maps to one `paid` Preview order
+  and one `active` purchase in staging, under sandbox account
+  `acct_1U9cEQAdcj2oNOF4`, Product `prod_VACTsFboJAEOF0`, and Price
+  `price_1U9s49Adcj2oNOF4jcyMjyDB`. Fulfillment source is `webhook`; the order
+  is fulfilled and has a PaymentIntent. Replaying the success page preserved
+  exactly one order and one purchase.
+- **Entitled delivery:** the purchaser's private library exposed the LIFT
+  course. Its protected video endpoint issued a signed redirect; the browser
+  loaded the 234.526-second video to ready state 4 and played it past 1.3
+  seconds without media error. The lesson exposed its protected Download Guide
+  control and the application issued its signed HTTP 307 download. The private
+  source object independently returned HTTP 200 as a 6,036,808-byte
+  `application/pdf` beginning `%PDF-`, SHA-256
+  `652c3c6eb6e87a44d47e5326e4e3a385d3704596a19020bc75ae318c6c117ad6`.
+  After purchase, the LIFT offer stopped presenting checkout and instead
+  presented the unlocked library state.
+- **Resend credential hygiene:** under the existing owner authorization, the
+  legacy `Onboarding` API key was deleted in Resend. The current provider
+  inventory contains exactly three named operational keys:
+  `HWLbySMD Production Auth SMTP`, `HWLbySMD Production App`, and
+  `HWLbySMD checkpoint Preview`. No token value was printed or committed. This
+  cleanup does not by itself prove receipt in Shannon's human-monitored inbox.
+- **Remaining release boundary:** Production remains on
+  `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i` with `COMMERCE_SALES_READY=false`.
+  Production promotion and the owner-driven live `$11.11` canary remain
+  unapproved for this candidate. Public inquiries, human inbox receipt,
+  administrator activation, and Cal.com booking-history sync retain their
+  separately documented gates.
+
 ## September 9 Supabase Key-Retirement Revalidation — Current Authority
 
 This section supersedes older deployment identifiers and every older statement

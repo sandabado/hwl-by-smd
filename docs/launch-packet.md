@@ -26,11 +26,14 @@ deployment identifiers. It does not authorize a Production promotion or a
   pushed or merged.
 - **Exact protected Preview:** Vercel deployment
   `dpl_7Vc1qbMZYRHoQDoxd2haNahQpucP`
-  (`hwl-by-n0pjc3pn5-whole-body-earth.vercel.app`) is READY, names the exact
-  checkpoint SHA in its Git metadata, and owns the protected
-  `https://preview.hwlbysmd.com` branch alias. Its real Preview build passed the
-  environment gate with sandbox sales open, inquiries closed, and Cal.com
-  booking history disabled. No Production alias or environment changed.
+  (`hwl-by-n0pjc3pn5-whole-body-earth.vercel.app`) was READY, named the exact
+  checkpoint SHA in its Git metadata, and owned the protected
+  `https://preview.hwlbysmd.com` branch alias during the E2E verification. Its
+  real Preview build passed the environment gate with sandbox sales open,
+  inquiries closed, and Cal.com booking history disabled. Vercel advances the
+  branch alias on later checkpoint pushes, so resolve its current deployment
+  separately instead of substituting the mutable alias for this immutable
+  evidence ID. No Production alias or environment changed.
 - **Hosted application canaries:** `/`, `/login`, and the Wild Glow booking
   route returned HTTP 200; anonymous `/library` and LIFT downloads redirected
   to login; anonymous LIFT video returned HTTP 401; and an unsigned Stripe

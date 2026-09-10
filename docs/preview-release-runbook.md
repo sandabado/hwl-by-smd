@@ -16,14 +16,17 @@ mail-forwarding records and the exact verified Resend sending records.
 This section supersedes the historical September 5 status below. Keep the
 older section as an audit trail; do not use it as current release evidence.
 
-- Local `HEAD` and `origin/checkpoint/platform-overhaul-2026-08-20` are both
-  `ff62d06` before the current uncommitted admin candidate. The working tree
-  must be committed, pushed only to the checkpoint branch with owner authority,
-  and verified at its exact SHA before it becomes a Preview candidate.
-- `preview.hwlbysmd.com` currently resolves to READY deployment
-  `dpl_5FspL1jsx3UuiZ31sZ2YhA2UZcrV` at `ff62d06`. That deployment predates the
-  current admin work. The protected Preview homepage has been browser-checked
-  with zero console errors.
+- The read-oriented administrator runtime was committed and pushed only to
+  `checkpoint/platform-overhaul-2026-08-20` at `450188fb9950`. Exact-SHA GitHub
+  CI passed, and the clean post-push repository preflight confirmed local and
+  upstream synchronization.
+- `preview.hwlbysmd.com` resolved to READY deployment
+  `dpl_ALJWgaPjEcK1Bppsbo6RHjedvmxb` at `450188fb9950`. Protected-Preview
+  canaries passed for the homepage, the single $11.11 LIFT video-plus-PDF cart,
+  signed-out checkout recovery, Tarot availability, and the individual
+  20-minute Wild Glow Express calendar. Browser console evidence contained no
+  application errors; Cal.com's embedded page emitted only its own unused-font
+  preload warning.
 - The immutable successful Stripe sandbox purchase and private LIFT fulfillment
   proof belongs to deployment `dpl_7Vc1qbMZYRHoQDoxd2haNahQpucP` at
   `4ea17b40`. The mutable Preview alias moved afterward. Never transfer that
@@ -41,11 +44,17 @@ older section as an audit trail; do not use it as current release evidence.
   intermittent `/book` upstream `fetch failed` timeouts were also present in
   recent Vercel runtime evidence, so the next candidate still needs repeated
   booking canaries and a graceful-fallback check.
-- The current admin candidate is a seven-workspace, read-oriented console. It
-  has not been committed, deployed, or connected-Preview verified. The Cal.com
-  booking ledger remains gated until migration 016 and a signed webhook
-  lifecycle pass; client-message writes remain gated by
-  `ADMIN_CLIENT_MESSAGING_READY=false`.
+- The current admin candidate is a seven-workspace, read-oriented console.
+  Local authenticated desktop/mobile browser checks passed across all eight
+  canonical surfaces. Hosted administrator reads still require an authenticated
+  operator canary, and private Cal.com booking queues require a key from the
+  exact Shannon account. The Cal.com booking ledger remains gated until
+  migrations 016 and 017 plus a signed webhook lifecycle pass are applied and
+  verified in the intended hosted environment; client-message writes remain
+  gated by `ADMIN_CLIENT_MESSAGING_READY=false`.
+- Migrations 014–017 and both rollback-only SQL harnesses passed in an isolated
+  local Supabase database. This is local database evidence only; neither
+  migration 016 nor 017 has been applied to hosted Supabase.
 - Live LIFT selling remains a separate owner-driven Production gate. Do not
   infer live-money readiness from the completed sandbox purchase.
 

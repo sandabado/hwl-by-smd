@@ -322,9 +322,24 @@ begin
     or (
       select count(*)
       from public.booking_records
-      where current_cal_booking_uid = 'booking-fixture-original'
+      where cal_ical_uid = 'booking-fixture-series@example.invalid'
     ) <> 2 then
     raise exception 'The explicit deployment namespace was not isolated.';
+  end if;
+
+  if not exists (
+    select 1
+    from public.booking_records
+    where id = development_record_id
+      and deployment_target = 'development'
+      and current_cal_booking_uid = 'booking-fixture-original'
+  ) or (
+    select count(*)
+    from public.calcom_booking_aliases
+    where cal_booking_uid = 'booking-fixture-original'
+      and deployment_target in ('development', 'preview')
+  ) <> 2 then
+    raise exception 'The deployment-scoped booking aliases were not isolated.';
   end if;
 end;
 $test$;

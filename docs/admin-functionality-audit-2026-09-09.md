@@ -262,8 +262,7 @@ Settings is now a read-only authority map. It reports configuration presence wit
 
 - Role/capability model for super admin vs permanent admin.
 - Append-only mutation audit log.
-- Migration 016 and Cal.com webhook verification in each hosted environment.
-- Rollback-only execution of the migration 017 SQL harness against an isolated migrated database, followed by owner-approved hosted application and verification.
+- Owner-approved hosted application and verification of migrations 016 and 017, including the signed Cal.com webhook lifecycle in each intended environment.
 - Service-payment linkage and replay-safe invoice delivery.
 - Chat entitlement decision and end-to-end messaging canary.
 - Retention/deletion schedules for profiles, booking history, conversations, and future care notes.
@@ -277,6 +276,7 @@ Settings is now a read-only authority map. It reports configuration presence wit
 - SEO validation: 21 pages, 21 metadata records, and 7 long-form documents passed.
 - Production dependency audit: zero vulnerabilities reported for production dependencies.
 - Next.js 16 production build: passed; 63 static pages generated and dynamic admin routes compiled.
+- Isolated database proof: migrations 014–017 applied to a disposable local Supabase database; the Cal.com booking-ledger lifecycle and practitioner-boundary SQL harnesses both passed and rolled back every fixture/assertion transaction.
 - Desktop browser pass at 1280 x 720: all eight canonical admin surfaces returned 200, displayed the expected heading and seven-item navigation, had no horizontal overflow, and showed no fixture/sample label.
 - Mobile browser pass at 375 x 667: all eight canonical admin surfaces returned 200, displayed the expected heading and menu control, and had no horizontal overflow.
 - Mobile navigation: dialog semantics, current Inbox state on the Messages route, Escape close, body-scroll restoration, and trigger-focus restoration passed.
@@ -286,7 +286,7 @@ Settings is now a read-only authority map. It reports configuration presence wit
 
 These checks do not prove hosted private data, provider mutations, Preview environment variables, or Production deployment. Those require a Preview deployment and provider-side evidence for this exact revision.
 
-The 470-check total includes static verification that both database harnesses are transactional and rollback-only. Neither SQL harness was executed in this environment because no local PostgreSQL client/database runtime is available; migration 017 therefore remains unapplied and is not represented as hosted proof.
+The 470-check total includes static verification that both database harnesses are transactional and rollback-only. The separate database executions add real local SQL proof but do not represent hosted application, provider configuration, or Production evidence; migrations 016 and 017 remain unapplied to hosted Supabase.
 
 ## Recommended delivery sequence
 

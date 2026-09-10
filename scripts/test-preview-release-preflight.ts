@@ -14,12 +14,15 @@ import {
 function repositoryFixture(): PreviewRepositoryFiles {
   return {
     ci: `
+      - run: npm run test:admin
       - run: npm run test:auth
       - run: npm run test:launch-env
       - run: npm run test:preview-release
+      - run: npm run test:relationships
       - run: npm run build:ci
     `,
     envExample: `
+ADMIN_CLIENT_MESSAGING_READY=false
 HWL_DEPLOYMENT_TARGET=development
 HWL_LOCAL_BUILD=false
 NEXT_PUBLIC_SITE_URL=https://www.hwlbysmd.com
@@ -28,6 +31,7 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 CALCOM_BOOKING_LEDGER_READY=false
+CALCOM_API_KEY=
 CALCOM_WEBHOOK_SECRET=
 COMMERCE_SALES_READY=false
 STRIPE_LIVEMODE=false
@@ -59,10 +63,13 @@ MUX_PRIVATE_KEY=
           "node scripts/preflight-preview-release.ts --repository-only --require-upstream-sync",
         "preflight:preview:repository":
           "node scripts/preflight-preview-release.ts --repository-only",
+        "test:admin": "node --test scripts/test-admin-client-directory.ts",
         "test:auth": "node --test scripts/test-auth-boundaries.ts",
         "test:launch-env": "node scripts/test-launch-env.ts",
         "test:preview-release":
           "node --test scripts/test-preview-release-preflight.ts",
+        "test:relationships":
+          "node --test scripts/test-relationship-practitioner-boundary-migration.ts",
       },
     }),
     vercelJson: JSON.stringify({
@@ -262,6 +269,21 @@ test("populated secret in the committed template fails", () => {
   fixture.envExample = fixture.envExample.replace(
     "STRIPE_SECRET_KEY=",
     "STRIPE_SECRET_KEY=sk_live_this_must_not_ship"
+  )
+
+  assert.match(
+    failures(auditPreviewRepositoryFiles(fixture))
+      .map((item) => item.name)
+      .join("\n"),
+    /Environment template secrecy/
+  )
+})
+
+test("populated Cal.com API key in the committed template fails", () => {
+  const fixture = repositoryFixture()
+  fixture.envExample = fixture.envExample.replace(
+    "CALCOM_API_KEY=",
+    "CALCOM_API_KEY=cal_live_this_must_not_ship"
   )
 
   assert.match(

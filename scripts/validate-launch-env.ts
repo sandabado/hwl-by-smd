@@ -351,6 +351,13 @@ if (inquiryCollectionReady !== "true" && inquiryCollectionReady !== "false") {
   )
 }
 
+const adminClientMessagingReady = process.env.ADMIN_CLIENT_MESSAGING_READY
+if (adminClientMessagingReady !== "false") {
+  errors.push(
+    "ADMIN_CLIENT_MESSAGING_READY: must be exactly false for this read-only launch candidate"
+  )
+}
+
 const cronSecret = requireValue("CRON_SECRET")
 if (cronSecret && cronSecret.length < 32) {
   errors.push("CRON_SECRET: must contain at least 32 characters")
@@ -568,6 +575,9 @@ console.log(
 )
 console.log(
   `Inquiry collection: ${inquiryCollectionReady === "true" ? "open" : "closed"} (NEXT_PUBLIC_INQUIRY_COLLECTION_READY=${inquiryCollectionReady}).`
+)
+console.log(
+  "Admin client messaging: read only (ADMIN_CLIENT_MESSAGING_READY=false)."
 )
 console.log(
   `Booking history: ${bookingLedgerReady === "true" ? "enabled" : "disabled"} (CALCOM_BOOKING_LEDGER_READY=${bookingLedgerReady}).`

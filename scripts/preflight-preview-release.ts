@@ -44,6 +44,8 @@ export type PreviewGitAuditOptions = {
 }
 
 const REQUIRED_TEMPLATE_KEYS = [
+  "ADMIN_CLIENT_MESSAGING_READY",
+  "CALCOM_API_KEY",
   "CALCOM_BOOKING_LEDGER_READY",
   "CALCOM_PROFILE_URL",
   "CALCOM_WEBHOOK_SECRET",
@@ -73,6 +75,7 @@ const REQUIRED_TEMPLATE_KEYS = [
 ] as const
 
 const SENSITIVE_TEMPLATE_KEYS = [
+  "CALCOM_API_KEY",
   "CALCOM_WEBHOOK_SECRET",
   "CRON_SECRET",
   "INQUIRY_RATE_LIMIT_SECRET",
@@ -243,9 +246,11 @@ export function auditPreviewRepositoryFiles(
       "preflight:preview",
       "preflight:preview:post-push",
       "preflight:preview:repository",
+      "test:admin",
       "test:auth",
       "test:launch-env",
       "test:preview-release",
+      "test:relationships",
     ]
     const missingScripts = requiredScripts.filter(
       (name) => typeof scriptMap[name] !== "string"
@@ -291,9 +296,11 @@ export function auditPreviewRepositoryFiles(
   )
 
   const requiredCiCommands = [
+    "npm run test:admin",
     "npm run test:auth",
     "npm run test:launch-env",
     "npm run test:preview-release",
+    "npm run test:relationships",
     "npm run build:ci",
   ]
   const missingCiCommands = requiredCiCommands.filter(
@@ -335,7 +342,7 @@ export function auditPreviewRepositoryFiles(
     (key) => (template.get(key) ?? "").trim().length > 0
   )
   const secretShape =
-    /(?:sk|rk)_(?:test|live)_[A-Za-z0-9_]{12,}|whsec_[A-Za-z0-9_]{12,}|sb_secret_[A-Za-z0-9_-]{12,}|re_[A-Za-z0-9_-]{20,}/.test(
+    /(?:sk|rk)_(?:test|live)_[A-Za-z0-9_]{12,}|whsec_[A-Za-z0-9_]{12,}|sb_secret_[A-Za-z0-9_-]{12,}|re_[A-Za-z0-9_-]{20,}|cal_[A-Za-z0-9_-]{16,}/.test(
       files.envExample
     )
   checks.push(
@@ -353,6 +360,7 @@ export function auditPreviewRepositoryFiles(
   )
 
   const safeDefaults =
+    template.get("ADMIN_CLIENT_MESSAGING_READY") === "false" &&
     template.get("HWL_LOCAL_BUILD") === "false" &&
     template.get("CALCOM_BOOKING_LEDGER_READY") === "false" &&
     template.get("COMMERCE_SALES_READY") === "false" &&
@@ -363,12 +371,12 @@ export function auditPreviewRepositoryFiles(
       ? check(
           "pass",
           "Template fail-closed defaults",
-          "local bypass, booking history, commerce sales, inquiry collection, and Stripe live mode default to false"
+          "admin message writes, local bypass, booking history, commerce sales, inquiry collection, and Stripe live mode default to false"
         )
       : check(
           "fail",
           "Template fail-closed defaults",
-          "HWL_LOCAL_BUILD, CALCOM_BOOKING_LEDGER_READY, COMMERCE_SALES_READY, NEXT_PUBLIC_INQUIRY_COLLECTION_READY, and STRIPE_LIVEMODE must all default to false"
+          "ADMIN_CLIENT_MESSAGING_READY, HWL_LOCAL_BUILD, CALCOM_BOOKING_LEDGER_READY, COMMERCE_SALES_READY, NEXT_PUBLIC_INQUIRY_COLLECTION_READY, and STRIPE_LIVEMODE must all default to false"
         )
   )
 
@@ -530,7 +538,7 @@ function collectGitSnapshot(root: string): PreviewGitSnapshot {
 
 function redactProviderSecrets(value: string) {
   return value.replace(
-    /(?:sk|rk)_(?:test|live)_[A-Za-z0-9_]+|whsec_[A-Za-z0-9_]+|sb_secret_[A-Za-z0-9_-]+|re_[A-Za-z0-9_-]+/g,
+    /(?:sk|rk)_(?:test|live)_[A-Za-z0-9_]+|whsec_[A-Za-z0-9_]+|sb_secret_[A-Za-z0-9_-]+|re_[A-Za-z0-9_-]+|cal_[A-Za-z0-9_-]+/g,
     "[REDACTED]"
   )
 }

@@ -6,5 +6,5 @@ export const dynamic = "force-dynamic"
 
 export default async function LegacyCampaignConversationsPage() {
   await requireAdmin()
-  redirect("/admin/connection")
+  redirect("/admin/messages")
 }

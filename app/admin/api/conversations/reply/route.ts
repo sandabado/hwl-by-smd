@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server"
 
 import { authenticateAdminApi } from "@/lib/relationships/admin-api"
+import { isAdminConversationReplyReady } from "@/lib/relationships/messaging-readiness"
 import {
-  hasAcceptableBodySize,
   hasJsonContentType,
   isSameOriginMutation,
   isUuid,
+  readLimitedJson,
 } from "@/lib/relationships/request"
 import { createAdminClient, createClient } from "@/lib/supabase/server"
 
@@ -31,7 +32,7 @@ function isSafeCtaLink(value: string) {
 }
 
 export async function POST(request: Request) {
-  if (!isSameOriginMutation(request)) {
+  if (!isSameOriginMutation(request, { requireOrigin: true })) {
     return NextResponse.json({ error: "Request not allowed." }, { status: 403 })
   }
   if (!hasJsonContentType(request)) {
@@ -40,10 +41,20 @@ export async function POST(request: Request) {
       { status: 415 }
     )
   }
-  if (!hasAcceptableBodySize(request, MAXIMUM_REQUEST_BYTES)) {
+
+  const parsedJson = await readLimitedJson<unknown>(
+    request,
+    MAXIMUM_REQUEST_BYTES
+  )
+  if (!parsedJson.ok) {
     return NextResponse.json(
-      { error: "Message is too large." },
-      { status: 413 }
+      {
+        error:
+          parsedJson.reason === "too_large"
+            ? "Message is too large."
+            : "A JSON request is required.",
+      },
+      { status: parsedJson.reason === "too_large" ? 413 : 400 }
     )
   }
 
@@ -64,13 +75,22 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Live replies require the production relationship database and Shannon's verified account.",
+          "Live replies require the production relationship database and a verified assigned-practitioner account.",
       },
       { status: 503 }
     )
   }
+  if (!isAdminConversationReplyReady()) {
+    return NextResponse.json(
+      {
+        error:
+          "Client replies remain read only until delivery notifications and the audit trail are verified.",
+      },
+      { headers: { "Cache-Control": "no-store" }, status: 503 }
+    )
+  }
 
-  const payload = (await request.json().catch(() => null)) as {
+  const payload = parsedJson.value as {
     body?: unknown
     conversationId?: unknown
     ctaLabel?: unknown
@@ -208,7 +228,7 @@ export async function POST(request: Request) {
         ctaLabel: message.cta_label ?? undefined,
         id: message.id,
         readAt: message.read_at,
-        sender: "shannon" as const,
+        sender: "practitioner" as const,
         sentAt: message.sent_at,
       },
     },

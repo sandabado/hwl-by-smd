@@ -6,10 +6,10 @@ import {
   isRelationshipSchemaUnavailable,
 } from "@/lib/relationships/conversations"
 import {
-  hasAcceptableBodySize,
   hasJsonContentType,
   isSameOriginMutation,
   isUuid,
+  readLimitedJson,
 } from "@/lib/relationships/request"
 import { createClient } from "@/lib/supabase/server"
 
@@ -24,7 +24,7 @@ function normalizeMessage(value: string) {
 }
 
 export async function POST(request: Request) {
-  if (!isSameOriginMutation(request)) {
+  if (!isSameOriginMutation(request, { requireOrigin: true })) {
     return NextResponse.json({ error: "Request not allowed." }, { status: 403 })
   }
   if (!hasJsonContentType(request)) {
@@ -33,10 +33,19 @@ export async function POST(request: Request) {
       { status: 415 }
     )
   }
-  if (!hasAcceptableBodySize(request, MAXIMUM_REQUEST_BYTES)) {
+  const parsedJson = await readLimitedJson<unknown>(
+    request,
+    MAXIMUM_REQUEST_BYTES
+  )
+  if (!parsedJson.ok) {
     return NextResponse.json(
-      { error: "Message is too large." },
-      { status: 413 }
+      {
+        error:
+          parsedJson.reason === "too_large"
+            ? "Message is too large."
+            : "A JSON request is required.",
+      },
+      { status: parsedJson.reason === "too_large" ? 413 : 400 }
     )
   }
 
@@ -52,7 +61,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const payload = (await request.json().catch(() => null)) as {
+  const payload = parsedJson.value as {
     body?: unknown
     conversationId?: unknown
     replyToId?: unknown

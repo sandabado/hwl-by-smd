@@ -2,10 +2,10 @@ import { NextResponse } from "next/server"
 
 import { authenticateAdminApi } from "@/lib/relationships/admin-api"
 import {
-  hasAcceptableBodySize,
   hasJsonContentType,
   isSameOriginMutation,
   isUuid,
+  readLimitedJson,
 } from "@/lib/relationships/request"
 import { findBookingService } from "@/lib/booking-services"
 import { createClient } from "@/lib/supabase/server"
@@ -26,13 +26,26 @@ function isServiceCategory(value: unknown): value is ServiceCategory {
 }
 
 export async function POST(request: Request) {
-  if (!isSameOriginMutation(request)) {
+  if (!isSameOriginMutation(request, { requireOrigin: true })) {
     return NextResponse.json({ error: "Request not allowed." }, { status: 403 })
   }
-  if (!hasJsonContentType(request) || !hasAcceptableBodySize(request, 8_000)) {
+  if (!hasJsonContentType(request)) {
     return NextResponse.json(
       { error: "A valid JSON request is required." },
       { status: 400 }
+    )
+  }
+
+  const parsedJson = await readLimitedJson<unknown>(request, 8_000)
+  if (!parsedJson.ok) {
+    return NextResponse.json(
+      {
+        error:
+          parsedJson.reason === "too_large"
+            ? "The booking-link request is too large."
+            : "A valid JSON request is required.",
+      },
+      { status: parsedJson.reason === "too_large" ? 413 : 400 }
     )
   }
 
@@ -50,7 +63,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const payload = (await request.json().catch(() => null)) as {
+  const payload = parsedJson.value as {
     conversationId?: unknown
     durationMinutes?: unknown
     message?: unknown

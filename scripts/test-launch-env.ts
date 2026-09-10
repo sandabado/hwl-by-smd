@@ -28,6 +28,7 @@ const STAGING_SUPABASE_URL = "https://lkxppynmdfzljuptauxf.supabase.co"
 const PRODUCTION_SUPABASE_URL = "https://qwprhsrwiihfllmgallr.supabase.co"
 
 const developmentFixture: NodeJS.ProcessEnv = {
+  ADMIN_CLIENT_MESSAGING_READY: "false",
   CALCOM_BOOKING_LEDGER_READY: "false",
   CALCOM_PROFILE_URL: "https://cal.com/hwlbysmd",
   COMMERCE_SALES_READY: "false",
@@ -134,6 +135,28 @@ const fixtures: Fixture[] = [
     expectedExit: 0,
     expectedText: "Inquiry collection: closed",
     name: "preview closed without Stripe provider values",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      ADMIN_CLIENT_MESSAGING_READY: "true",
+    },
+    expectedExit: 1,
+    expectedText:
+      "ADMIN_CLIENT_MESSAGING_READY: must be exactly false for this read-only launch candidate",
+    name: "Preview rejects dormant admin message writes",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      ADMIN_CLIENT_MESSAGING_READY: "",
+    },
+    expectedExit: 1,
+    expectedText:
+      "ADMIN_CLIENT_MESSAGING_READY: must be exactly false for this read-only launch candidate",
+    name: "Preview requires an explicit admin message-write denial",
   },
   {
     args: ["--target=preview", "--expect-sales=closed"],

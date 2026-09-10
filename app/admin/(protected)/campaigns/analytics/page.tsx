@@ -6,5 +6,5 @@ export const dynamic = "force-dynamic"
 
 export default async function LegacyCampaignAnalyticsPage() {
   await requireAdmin()
-  redirect("/admin/journeys/insights")
+  redirect("/admin/website")
 }

@@ -11,6 +11,11 @@ import { createAdminClient } from "@/lib/supabase/server"
 
 const MAXIMUM_CALCOM_WEBHOOK_BYTES = 256_000
 const CALCOM_USERNAME = "hwlbysmd"
+const CALCOM_LEDGER_OUTCOMES = new Set([
+  "applied",
+  "ignored_stale",
+  "manual_review",
+])
 
 export async function POST(request: Request) {
   const secret = process.env.CALCOM_WEBHOOK_SECRET?.trim()
@@ -101,7 +106,15 @@ export async function POST(request: Request) {
     })
   }
 
-  const outcome = Array.isArray(data) ? data[0]?.outcome : null
+  const outcome =
+    Array.isArray(data) && data.length === 1 ? data[0]?.outcome : null
+  if (typeof outcome !== "string" || !CALCOM_LEDGER_OUTCOMES.has(outcome)) {
+    console.error("Cal.com webhook persistence returned an invalid receipt")
+    return new Response("Cal.com webhook could not be recorded.", {
+      status: 500,
+    })
+  }
+
   if (outcome === "manual_review") {
     console.error("Cal.com booking event requires manual review")
   }

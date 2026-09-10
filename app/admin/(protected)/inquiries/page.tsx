@@ -4,6 +4,7 @@ import {
   ChevronRight,
   Inbox,
   Mail,
+  MessagesSquare,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -144,10 +145,43 @@ export default async function AdminInquiriesPage({
   return (
     <>
       <AdminPageHeader
-        description="The durable record of website notes and booking requests. A record remains here even when its optional email notification is delayed or unavailable."
-        eyebrow="Private operations"
+        description="Website notes and booking requests arrive here as durable private records. A record remains available even when its optional email notification is delayed or unavailable."
+        eyebrow="Inbox"
         title="Inquiries"
       />
+
+      <nav aria-label="Inbox views" className="mt-6 flex flex-wrap gap-2">
+        <Link
+          aria-current="page"
+          className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[#273029] px-4 text-xs font-medium text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#273029]"
+          href="/admin/inquiries"
+        >
+          <Inbox aria-hidden="true" className="size-3.5" />
+          Inquiries
+        </Link>
+        <Link
+          className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#cfc5b6] bg-white/60 px-4 text-xs font-medium text-[#6f573d] transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f573d]"
+          href="/admin/messages"
+        >
+          <MessagesSquare aria-hidden="true" className="size-3.5" />
+          Client messages
+        </Link>
+      </nav>
+
+      <AdminPanel className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="max-w-2xl">
+          <h2 className="font-serif text-xl font-medium text-[#273029]">
+            Two distinct kinds of contact
+          </h2>
+          <p className="mt-1 text-xs leading-5 text-[#59645b]">
+            Inquiries are unverified website submissions and stay here. Client
+            messages are consent-based relationship threads and have their own
+            read-only history. Email replies to inquiries are not synchronized
+            back into HWL.
+          </p>
+        </div>
+        <StatusPill tone="quiet">Identity kept separate</StatusPill>
+      </AdminPanel>
 
       {inbox.status !== "ready" ? (
         inboxUnavailable(inbox.status)

@@ -11,6 +11,44 @@ apex-to-www redirect. The custom Preview is now configured, TLS-valid, assigned
 only to the checkpoint branch, and protected by Vercel SSO. Preserve existing
 mail-forwarding records and the exact verified Resend sending records.
 
+## September 9 current authority snapshot
+
+This section supersedes the historical September 5 status below. Keep the
+older section as an audit trail; do not use it as current release evidence.
+
+- Local `HEAD` and `origin/checkpoint/platform-overhaul-2026-08-20` are both
+  `ff62d06` before the current uncommitted admin candidate. The working tree
+  must be committed, pushed only to the checkpoint branch with owner authority,
+  and verified at its exact SHA before it becomes a Preview candidate.
+- `preview.hwlbysmd.com` currently resolves to READY deployment
+  `dpl_5FspL1jsx3UuiZ31sZ2YhA2UZcrV` at `ff62d06`. That deployment predates the
+  current admin work. The protected Preview homepage has been browser-checked
+  with zero console errors.
+- The immutable successful Stripe sandbox purchase and private LIFT fulfillment
+  proof belongs to deployment `dpl_7Vc1qbMZYRHoQDoxd2haNahQpucP` at
+  `4ea17b40`. The mutable Preview alias moved afterward. Never transfer that
+  proof to a later SHA without rerunning the exact-host lifecycle.
+- Public Production currently resolves to
+  `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i` at `6a260bc`. It is intentionally
+  sales-closed and inquiry-closed, predates the dependency-patched baseline,
+  and produced a reproducible React hydration error on the homepage during the
+  September 9 browser audit. Production is not an acceptable source candidate
+  for the next release.
+- The dependency-patched repository baseline uses Next.js `16.3.4`; the current
+  Production deployment reports Next.js `16.3.1`.
+- Public Production booking currently loads the exact Cal.com service and shows
+  Shannon's available dates and times without collecting payment. Three
+  intermittent `/book` upstream `fetch failed` timeouts were also present in
+  recent Vercel runtime evidence, so the next candidate still needs repeated
+  booking canaries and a graceful-fallback check.
+- The current admin candidate is a seven-workspace, read-oriented console. It
+  has not been committed, deployed, or connected-Preview verified. The Cal.com
+  booking ledger remains gated until migration 016 and a signed webhook
+  lifecycle pass; client-message writes remain gated by
+  `ADMIN_CLIENT_MESSAGING_READY=false`.
+- Live LIFT selling remains a separate owner-driven Production gate. Do not
+  infer live-money readiness from the completed sandbox purchase.
+
 ## Fixed Preview boundary
 
 | Boundary            | Required Preview value                    |
@@ -25,7 +63,7 @@ mail-forwarding records and the exact verified Resend sending records.
 | Supabase            | Staging project `lkxppynmdfzljuptauxf`    |
 | Production mutation | Forbidden during Preview preparation      |
 
-## September 5 checkpoint baseline and candidate
+## Historical September 5 checkpoint baseline and candidate
 
 - The last externally verified pushed commit before this candidate was
   `8e841fc2db78bf42126c2ee365c0f65228076980`. It

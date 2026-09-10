@@ -16,13 +16,13 @@ export function AdminPageHeader({
   return (
     <header className="flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
       <div className="max-w-3xl">
-        <p className="text-[10px] font-semibold tracking-[0.24em] text-[#9d8464] uppercase">
+        <p className="text-[10px] font-semibold tracking-[0.24em] text-[#6f512f] uppercase">
           {eyebrow}
         </p>
         <h1 className="mt-2 text-4xl leading-none font-medium text-[#273029] sm:text-5xl">
           {title}
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-[#6f786f]">
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-[#59645b]">
           {description}
         </p>
       </div>
@@ -65,12 +65,12 @@ export function PanelHeading({
   return (
     <div>
       {eyebrow && (
-        <p className="text-[10px] font-semibold tracking-[0.2em] text-[#9d8464] uppercase">
+        <p className="text-[10px] font-semibold tracking-[0.2em] text-[#6f512f] uppercase">
           {eyebrow}
         </p>
       )}
       <h2 className="mt-1 text-2xl font-medium text-[#273029]">{title}</h2>
-      {detail && <p className="mt-1 text-xs text-[#7c847c]">{detail}</p>}
+      {detail && <p className="mt-1 text-xs text-[#59645b]">{detail}</p>}
     </div>
   )
 }
@@ -206,7 +206,7 @@ export function EmptyState({
       <p className="mt-4 font-serif text-xl font-medium text-[#273029]">
         {title}
       </p>
-      <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-[#7b837b]">
+      <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-[#59645b]">
         {description}
       </p>
     </div>

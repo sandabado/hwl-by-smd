@@ -111,13 +111,13 @@ export function HeroEntry({
           className="absolute inset-0 bg-[linear-gradient(90deg,rgba(232,236,231,0.98)_0%,rgba(232,236,231,0.9)_34%,rgba(232,236,231,0.28)_68%,rgba(232,236,231,0.05)_100%)] max-md:bg-[linear-gradient(180deg,rgba(232,236,231,0.96)_0%,rgba(232,236,231,0.82)_42%,rgba(232,236,231,0.1)_72%,rgba(31,38,33,0.12)_100%)]"
         />
 
-        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-20 sm:py-24 lg:py-32">
+        <div className="relative z-10 mx-auto w-full max-w-7xl px-6 py-20 sm:py-24 lg:py-32 [@media(max-height:720px)]:py-8">
           <div className="max-w-xl">
             <p className="text-xs font-semibold tracking-[0.3em] text-[#4a5c50] uppercase">
               Body · Beauty · Being
             </p>
             <h1
-              className="mt-7 text-[clamp(3rem,7.5vw,6.9rem)] leading-[0.91] font-medium tracking-[-0.04em] text-[#20251f]"
+              className="mt-7 text-[clamp(3rem,7.5vw,6.9rem)] leading-[0.91] font-medium tracking-[-0.04em] text-[#20251f] [@media(max-height:720px)]:text-[clamp(2.75rem,6vw,5rem)]"
               id="home-hero-heading"
             >
               Come back to your whole body.
@@ -125,12 +125,24 @@ export function HeroEntry({
             <p className="mt-7 max-w-md text-base leading-7 text-[#4d554f] sm:text-lg">
               Beauty, movement and ritual with Shannon Mary Dixon.
             </p>
-            <div className="mt-9">
+            <div className="mt-9 flex flex-wrap items-center gap-2 sm:gap-3">
               <Button
                 asChild
-                className="min-h-12 rounded-full bg-[#20251f] px-7 text-xs font-semibold tracking-[0.16em] text-white uppercase hover:bg-[#765538]"
+                className="min-h-12 rounded-full bg-[#20251f] px-5 text-xs font-semibold tracking-[0.16em] text-white uppercase hover:bg-[#765538] sm:px-7"
               >
                 <Link href="#worlds">Explore HWL</Link>
+              </Button>
+              <Button
+                asChild
+                className="min-h-12 rounded-full border-[#20251f]/25 bg-[#f7f3ec]/45 px-5 text-xs font-semibold tracking-[0.16em] text-[#20251f] uppercase backdrop-blur-sm hover:border-[#765538]/45 hover:bg-[#f7f3ec]/80 sm:px-7"
+                variant="outline"
+              >
+                <Link
+                  data-home-hero-lift-cta=""
+                  href={getCanonicalHomepageLiftHref(featuredExperience)}
+                >
+                  Discover LIFT
+                </Link>
               </Button>
             </div>
           </div>

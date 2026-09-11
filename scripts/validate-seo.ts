@@ -289,6 +289,16 @@ if (
 }
 
 if (
+  !/<Link\s+data-home-hero-lift-cta=""\s+href=\{getCanonicalHomepageLiftHref\(featuredExperience\)\}\s*>\s*Discover LIFT\s*<\/Link>/.test(
+    homepageSource
+  )
+) {
+  errors.push(
+    "/: homepage hero must include a Discover LIFT CTA using the canonical destination guard"
+  )
+}
+
+if (
   HOMEPAGE_LIFT_FEATURE.key !== "lift-daily-ritual" ||
   HOMEPAGE_LIFT_FEATURE.ctaHref !== "/beauty/lift" ||
   !isCanonicalHomepageLiftFeatureDestination({

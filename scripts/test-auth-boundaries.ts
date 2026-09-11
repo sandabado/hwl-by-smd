@@ -47,6 +47,8 @@ test("auth redirect destinations remain same-origin paths", async (t) => {
     "/%5cevil.example/steal",
     "/%0a//evil.example/steal",
     "/%09//evil.example/steal",
+    "/a/..//evil.example/steal",
+    "/%2e%2e//evil.example/steal",
     "/%E0%A4%A",
   ]
 

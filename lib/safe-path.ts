@@ -26,7 +26,12 @@ export function safeInternalPath(
 
   try {
     const resolved = new URL(value, INTERNAL_ORIGIN)
-    if (resolved.origin !== INTERNAL_ORIGIN) return fallback
+    if (
+      resolved.origin !== INTERNAL_ORIGIN ||
+      resolved.pathname.startsWith("//")
+    ) {
+      return fallback
+    }
     return `${resolved.pathname}${resolved.search}${resolved.hash}`
   } catch {
     return fallback

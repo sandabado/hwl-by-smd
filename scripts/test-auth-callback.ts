@@ -153,6 +153,24 @@ test("magic link callbacks reject external destinations", async () => {
   )
 })
 
+test("magic link callbacks reject paths that normalize cross-origin", async () => {
+  const calls = callLog()
+  const response = await handleAuthCallback(
+    new Request(
+      "https://www.hwlbysmd.com/auth/callback?token_hash=private-token&type=magiclink&next=%2Fa%2F..%2F%2Fevil.example%2Fsteal"
+    ),
+    dependencies(calls)
+  )
+
+  assert.deepEqual(calls.verify, [
+    { token_hash: "private-token", type: "magiclink" },
+  ])
+  assert.equal(
+    response.headers.get("location"),
+    "https://www.hwlbysmd.com/library"
+  )
+})
+
 test("unsupported token types fail closed without provider verification", async () => {
   const calls = callLog()
   const response = await handleAuthCallback(

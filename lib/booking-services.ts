@@ -16,12 +16,20 @@ export type BookingService = {
   calendarBooking: CalendarBooking
   description: string
   duration: string
-  format: "In person" | "Virtual" | "Virtual or in person"
+  format:
+    | "In person"
+    | "In person · HWL Beauty"
+    | "Virtual"
+    | "Virtual or in person"
   guestRange: {
     maximum?: number
     minimum: number
   }
   image: { alt: string; src: string }
+  locationPolicy:
+    | { kind: "attendee-address" }
+    | { kind: "fixed"; label: "HWL Beauty" }
+    | { kind: "virtual-or-attendee-address" }
   payment: {
     basis: "flat" | "per_guest"
     currency: "usd"
@@ -55,8 +63,9 @@ export const bookingPillars: readonly BookingPillar[] = [
         title: "Wild Glow Express Facial",
         duration: "20 min",
         price: "$111",
-        format: "In person",
+        format: "In person · HWL Beauty",
         guestRange: { maximum: 1, minimum: 1 },
+        locationPolicy: { kind: "fixed", label: "HWL Beauty" },
         description:
           "A focused facial ritual for fresh, luminous skin when time is brief.",
         image: media.shannon.beautyLift,
@@ -74,6 +83,7 @@ export const bookingPillars: readonly BookingPillar[] = [
         price: "$222",
         format: "In person",
         guestRange: { maximum: 1, minimum: 1 },
+        locationPolicy: { kind: "attendee-address" },
         description:
           "A quiet blend of aromatherapy and Reiki held at an unhurried pace.",
         image: media.shannon.botanicalPortrait,
@@ -88,14 +98,15 @@ export const bookingPillars: readonly BookingPillar[] = [
         slug: "signature-facial",
         title: "Signature Facial",
         duration: "60 min",
-        price: "$277/guest",
-        format: "In person",
-        guestRange: { minimum: 1 },
+        price: "$277",
+        format: "In person · HWL Beauty",
+        guestRange: { maximum: 1, minimum: 1 },
+        locationPolicy: { kind: "fixed", label: "HWL Beauty" },
         description:
           "Personalized professional skin care with massage and room to soften.",
         image: media.shannon.beautyLift,
         payment: {
-          basis: "per_guest",
+          basis: "flat",
           currency: "usd",
           unitAmountMinor: 27700,
         },
@@ -105,14 +116,15 @@ export const bookingPillars: readonly BookingPillar[] = [
         slug: "beauty-being-ritual",
         title: "Beauty & Being Ritual",
         duration: "90 min",
-        price: "$333/guest",
-        format: "In person",
-        guestRange: { minimum: 1 },
+        price: "$333",
+        format: "In person · HWL Beauty",
+        guestRange: { maximum: 1, minimum: 1 },
+        locationPolicy: { kind: "fixed", label: "HWL Beauty" },
         description:
           "An extended facial and restorative ritual for skin, senses, and stillness.",
         image: media.shannon.beautyPortrait,
         payment: {
-          basis: "per_guest",
+          basis: "flat",
           currency: "usd",
           unitAmountMinor: 33300,
         },
@@ -122,14 +134,15 @@ export const bookingPillars: readonly BookingPillar[] = [
         slug: "wild-glow-luxury-facial",
         title: "Wild Glow Luxury Facial",
         duration: "120 min",
-        price: "$444/guest",
-        format: "In person",
-        guestRange: { minimum: 1 },
+        price: "$444",
+        format: "In person · HWL Beauty",
+        guestRange: { maximum: 1, minimum: 1 },
+        locationPolicy: { kind: "fixed", label: "HWL Beauty" },
         description:
           "Shannon’s most spacious facial experience, shaped as a complete ceremony of care.",
         image: media.shannon.beautyLift,
         payment: {
-          basis: "per_guest",
+          basis: "flat",
           currency: "usd",
           unitAmountMinor: 44400,
         },
@@ -151,6 +164,7 @@ export const bookingPillars: readonly BookingPillar[] = [
         price: "$555",
         format: "In person",
         guestRange: { maximum: 4, minimum: 1 },
+        locationPolicy: { kind: "attendee-address" },
         description:
           "Breath-led private movement followed by a restorative sound experience.",
         image: media.experiences.movementEagle,
@@ -168,6 +182,7 @@ export const bookingPillars: readonly BookingPillar[] = [
         price: "$444",
         format: "In person",
         guestRange: { maximum: 8, minimum: 1 },
+        locationPolicy: { kind: "attendee-address" },
         description:
           "A private sound practice designed for rest, reflection, and spacious attention.",
         image: media.brand.sanctuaryHero,
@@ -185,6 +200,7 @@ export const bookingPillars: readonly BookingPillar[] = [
         price: "$666",
         format: "In person",
         guestRange: { maximum: 4, minimum: 2 },
+        locationPolicy: { kind: "attendee-address" },
         description:
           "A private practice shaped around your body, breath, experience, and energy that day.",
         image: media.brand.standingStretch,
@@ -210,7 +226,8 @@ export const bookingPillars: readonly BookingPillar[] = [
         duration: "45–60 min",
         price: "$222",
         format: "Virtual or in person",
-        guestRange: { minimum: 1 },
+        guestRange: { maximum: 1, minimum: 1 },
+        locationPolicy: { kind: "virtual-or-attendee-address" },
         description:
           "Reflective card work for transitions, choices, patterns, and the season you are in.",
         image: media.shannon.ritualSpace,
@@ -227,7 +244,8 @@ export const bookingPillars: readonly BookingPillar[] = [
         duration: "45–60 min",
         price: "$222",
         format: "Virtual or in person",
-        guestRange: { minimum: 1 },
+        guestRange: { maximum: 1, minimum: 1 },
+        locationPolicy: { kind: "virtual-or-attendee-address" },
         description:
           "A lunar and astrological reading for reflection, timing, and present-season clarity.",
         image: media.experiences.ritualWolf,
@@ -244,7 +262,8 @@ export const bookingPillars: readonly BookingPillar[] = [
         duration: "60–75 min",
         price: "$444",
         format: "In person",
-        guestRange: { minimum: 1 },
+        guestRange: { maximum: 1, minimum: 1 },
+        locationPolicy: { kind: "attendee-address" },
         description:
           "Intuitive guidance followed by restorative Reiki support in person.",
         image: media.shannon.ritualSpace,

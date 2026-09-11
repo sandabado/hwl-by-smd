@@ -21,6 +21,8 @@ import {
 } from "@/components/admin/admin-ui"
 import {
   type AdminClientDetail,
+  type AdminClientTimelineEvent,
+  buildAdminClientTimeline,
   getAdminClientDetail,
 } from "@/lib/admin/client-directory"
 
@@ -63,13 +65,68 @@ function historyUnavailable(
   return <EmptyState description={description} icon={icon} title={title} />
 }
 
+const ACTIVITY_ICONS = {
+  booking: CalendarDays,
+  checkout: ShoppingBag,
+  conversation: MessageCircle,
+  learning: BookOpen,
+  profile: UserRound,
+  purchase: CircleDollarSign,
+} satisfies Record<AdminClientTimelineEvent["kind"], typeof CalendarDays>
+
+const CLIENT_SECTION_LINKS = [
+  ["Overview", "client-overview"],
+  ["Activity", "client-activity"],
+  ["Bookings", "client-bookings"],
+  ["Money", "client-money"],
+  ["Messages", "client-messages"],
+] as const
+
+function activityTone(
+  event: AdminClientTimelineEvent
+): "neutral" | "positive" | "quiet" | "warning" {
+  if (
+    event.status === "active" ||
+    event.status === "confirmed" ||
+    event.status === "resolved"
+  ) {
+    return "positive"
+  }
+  if (
+    event.status === "awaiting_practitioner" ||
+    event.status === "creating" ||
+    event.status === "disputed" ||
+    event.status === "open" ||
+    event.status === "requested"
+  ) {
+    return "warning"
+  }
+  return event.kind === "conversation" ? "quiet" : "neutral"
+}
+
 function ClientRecord({ detail }: { detail: AdminClientDetail }) {
   const { client } = detail
+  const timeline = buildAdminClientTimeline(detail)
 
   return (
     <>
-      <div className="mt-8 grid gap-5 xl:grid-cols-[0.72fr_1.28fr]">
-        <AdminPanel>
+      <nav
+        aria-label="Client record sections"
+        className="mt-6 flex flex-wrap gap-2"
+      >
+        {CLIENT_SECTION_LINKS.map(([text, id]) => (
+          <a
+            className="inline-flex min-h-10 shrink-0 items-center rounded-full border border-[#d4cdc1] bg-white/50 px-4 text-xs font-medium text-[#5b655c] transition hover:border-[#9d8464] hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6f573d]"
+            href={`#${id}`}
+            key={id}
+          >
+            {text}
+          </a>
+        ))}
+      </nav>
+
+      <div className="mt-5 grid gap-5 xl:grid-cols-[0.72fr_1.28fr]">
+        <AdminPanel className="scroll-mt-24" id="client-overview">
           <div className="flex items-center gap-4">
             <span className="grid size-14 shrink-0 place-items-center rounded-full bg-[#9d8464]/12 text-[#806443]">
               <UserRound className="size-5" aria-hidden="true" />
@@ -113,98 +170,145 @@ function ClientRecord({ detail }: { detail: AdminClientDetail }) {
           </div>
         </AdminPanel>
 
-        <div className="grid gap-5 sm:grid-cols-2">
-          <AdminPanel>
-            <PanelHeading eyebrow="Care" title="Booking history" />
-            <div className="mt-5">
-              {detail.bookings === null ? (
-                historyUnavailable(
-                  CalendarDays,
-                  "Booking ledger unavailable",
-                  "Migration 016 and the canonical Cal.com webhook must be active before linked booking history can appear here."
-                )
-              ) : detail.bookings.length === 0 ? (
-                <EmptyState
-                  description="No Cal.com booking has been explicitly linked to this confirmed account."
-                  icon={CalendarDays}
-                  title="No linked bookings"
-                />
-              ) : (
-                <div className="divide-y divide-[#e0dbd1]">
-                  {detail.bookings.map((booking) => (
-                    <article className="py-4 first:pt-0" key={booking.id}>
-                      <div className="flex flex-wrap items-start justify-between gap-2">
-                        <h3 className="text-sm font-medium text-[#273029]">
-                          {booking.serviceTitle}
-                        </h3>
-                        <StatusPill
-                          tone={
-                            booking.bookingStatus === "confirmed"
-                              ? "positive"
-                              : booking.bookingStatus === "requested"
-                                ? "warning"
-                                : "neutral"
-                          }
-                        >
-                          {label(booking.bookingStatus)}
-                        </StatusPill>
-                      </div>
-                      <p className="mt-2 text-xs leading-5 text-[#59645b]">
-                        {DATE_TIME_FORMATTER.format(new Date(booking.startAt))}
-                        {" · "}
-                        {booking.timeZone}
-                      </p>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </div>
-          </AdminPanel>
-
-          <AdminPanel>
-            <PanelHeading eyebrow="Learning" title="LIFT progress" />
-            <div className="mt-5">
-              {detail.progress === null ? (
-                historyUnavailable(
-                  BookOpen,
-                  "Progress unavailable",
-                  "Course progress could not be read safely in this environment."
-                )
-              ) : detail.progress.startedCount === 0 ? (
-                <EmptyState
-                  description="No LIFT lesson has been started from this account."
-                  icon={BookOpen}
-                  title="No learning activity"
-                />
-              ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <FieldPreview
-                      label="Lessons started"
-                      value={String(detail.progress.startedCount)}
-                    />
-                    <FieldPreview
-                      label="Completed"
-                      value={String(detail.progress.completedCount)}
-                    />
+        <AdminPanel className="scroll-mt-24" id="client-activity">
+          <PanelHeading
+            detail="A unified care timeline for records explicitly linked to this registered account. Appointments use their scheduled time; all other entries use their recorded activity time."
+            eyebrow="Relationship"
+            title="Client timeline"
+          />
+          <ol className="mt-5 divide-y divide-[#e0dbd1]">
+            {timeline.map((event) => {
+              const Icon = ACTIVITY_ICONS[event.kind]
+              return (
+                <li
+                  className="grid gap-3 py-4 first:pt-0 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"
+                  key={event.id}
+                >
+                  <span className="grid size-9 place-items-center rounded-full bg-[#9d8464]/10 text-[#806443]">
+                    <Icon aria-hidden="true" className="size-4" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-[#273029]">
+                      {event.title}
+                    </p>
+                    <p className="mt-1 text-xs text-[#59645b]">
+                      {event.description}
+                    </p>
                   </div>
-                  <p className="text-xs leading-5 text-[#59645b]">
-                    Last activity{" "}
-                    {detail.progress.lastActivityAt
-                      ? DATE_TIME_FORMATTER.format(
-                          new Date(detail.progress.lastActivityAt)
-                        )
-                      : "not recorded"}
-                  </p>
-                </div>
-              )}
-            </div>
-          </AdminPanel>
-        </div>
+                  <div className="flex items-center gap-2 sm:flex-col sm:items-end">
+                    <time
+                      className="text-[10px] whitespace-nowrap text-[#727b73]"
+                      dateTime={event.at}
+                    >
+                      {DATE_TIME_FORMATTER.format(new Date(event.at))}
+                    </time>
+                    {event.status ? (
+                      <StatusPill tone={activityTone(event)}>
+                        {label(event.status)}
+                      </StatusPill>
+                    ) : null}
+                  </div>
+                </li>
+              )
+            })}
+          </ol>
+        </AdminPanel>
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
-        <AdminPanel>
+        <AdminPanel className="scroll-mt-24" id="client-bookings">
+          <PanelHeading eyebrow="Care" title="Booking history" />
+          <div className="mt-5">
+            {detail.bookings === null ? (
+              historyUnavailable(
+                CalendarDays,
+                "Booking ledger unavailable",
+                "Migration 016 and the canonical Cal.com webhook must be active before linked booking history can appear here."
+              )
+            ) : detail.bookings.length === 0 ? (
+              <EmptyState
+                description="No Cal.com booking has been explicitly linked to this registered account."
+                icon={CalendarDays}
+                title="No linked bookings"
+              />
+            ) : (
+              <div className="divide-y divide-[#e0dbd1]">
+                {detail.bookings.map((booking) => (
+                  <article className="py-4 first:pt-0" key={booking.id}>
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <h3 className="text-sm font-medium text-[#273029]">
+                        {booking.serviceTitle}
+                      </h3>
+                      <StatusPill
+                        tone={
+                          booking.bookingStatus === "confirmed"
+                            ? "positive"
+                            : booking.bookingStatus === "requested"
+                              ? "warning"
+                              : "neutral"
+                        }
+                      >
+                        {label(booking.bookingStatus)}
+                      </StatusPill>
+                    </div>
+                    <p className="mt-2 text-xs leading-5 text-[#59645b]">
+                      {DATE_TIME_FORMATTER.format(new Date(booking.startAt))}
+                      {" · "}
+                      {booking.timeZone}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </AdminPanel>
+
+        <AdminPanel className="scroll-mt-24" id="client-learning">
+          <PanelHeading eyebrow="Learning" title="LIFT progress" />
+          <div className="mt-5">
+            {detail.progress === null ? (
+              historyUnavailable(
+                BookOpen,
+                "Progress unavailable",
+                "Course progress could not be read safely in this environment."
+              )
+            ) : detail.progress.startedCount === 0 ? (
+              <EmptyState
+                description="No LIFT lesson has been started from this account."
+                icon={BookOpen}
+                title="No learning activity"
+              />
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <FieldPreview
+                    label="Lessons started"
+                    value={String(detail.progress.startedCount)}
+                  />
+                  <FieldPreview
+                    label="Completed"
+                    value={String(detail.progress.completedCount)}
+                  />
+                </div>
+                <p className="text-xs leading-5 text-[#59645b]">
+                  Last activity{" "}
+                  {detail.progress.lastActivityAt
+                    ? DATE_TIME_FORMATTER.format(
+                        new Date(detail.progress.lastActivityAt)
+                      )
+                    : "not recorded"}
+                </p>
+              </div>
+            )}
+          </div>
+        </AdminPanel>
+      </div>
+
+      <div
+        className="mt-5 grid scroll-mt-24 gap-5 xl:grid-cols-2"
+        id="client-money"
+      >
+        <AdminPanel className="scroll-mt-24" id="client-purchases">
           <PanelHeading
             detail="Only fulfilled purchase evidence grants access."
             eyebrow="Commerce"
@@ -256,11 +360,11 @@ function ClientRecord({ detail }: { detail: AdminClientDetail }) {
           </div>
         </AdminPanel>
 
-        <AdminPanel>
+        <AdminPanel className="scroll-mt-24" id="client-checkouts">
           <PanelHeading
-            detail="Attempts are retained separately from fulfilled access."
+            detail="Product checkout attempts are retained separately from fulfilled access. Service-payment history will join this client record only after its dedicated ledger is active."
             eyebrow="Checkout"
-            title="Payment activity"
+            title="Checkout activity"
           />
           <div className="mt-5">
             {detail.checkouts.length === 0 ? (
@@ -304,7 +408,7 @@ function ClientRecord({ detail }: { detail: AdminClientDetail }) {
         </AdminPanel>
       </div>
 
-      <AdminPanel className="mt-5">
+      <AdminPanel className="mt-5 scroll-mt-24" id="client-messages">
         <PanelHeading
           detail="Website inquiries are not auto-matched by email and remain in the Inbox."
           eyebrow="Relationship"
@@ -424,7 +528,7 @@ export default async function AdminClientDetailPage({
         All clients
       </Link>
       <AdminPageHeader
-        description="A private, read-only timeline built only from this confirmed account and its explicitly linked records."
+        description="A private, read-only timeline built only from this registered account and its explicitly linked records."
         eyebrow="Client relationship"
         title={result.status === "ready" ? result.detail.client.name : "Client"}
       />

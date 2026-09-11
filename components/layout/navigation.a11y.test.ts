@@ -113,6 +113,15 @@ test("persistent header actions retain generous pointer targets", () => {
   assert.match(cart, /"w-11 px-0"/)
 })
 
+test("member navigation remains fully visible at narrow widths", () => {
+  const memberNav = source("components/member/member-navigation.tsx")
+
+  assert.match(memberNav, /aria-label="Member area"/)
+  assert.match(memberNav, /grid-cols-2/)
+  assert.match(memberNav, /sm:flex/)
+  assert.doesNotMatch(memberNav, /overflow-x-auto/)
+})
+
 test("the final cart action presents the complete purchase policy set", () => {
   const cartSheet = source("components/cart/cart-sheet.tsx")
 

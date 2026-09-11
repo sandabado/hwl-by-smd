@@ -421,6 +421,10 @@ test("booking catalog keeps available Cal discovery exact", async (t) => {
         kind: "exact-event",
       })
       assert.deepEqual(express.guestRange, { maximum: 1, minimum: 1 })
+      assert.deepEqual(express.locationPolicy, {
+        kind: "fixed",
+        label: "HWL Beauty",
+      })
       assert.equal(express.price, "$111")
       assert.equal(
         isExactCalEventForBookingService(express, {
@@ -512,17 +516,56 @@ test("booking catalog keeps available Cal discovery exact", async (t) => {
       )
     }
   })
+
+  await t.test("direct Beauty and ritual services stay one-person", () => {
+    const individualSlugs = [
+      "wild-glow-express-facial",
+      "reiki-aromatherapy-healing",
+      "signature-facial",
+      "beauty-being-ritual",
+      "wild-glow-luxury-facial",
+      "intuitive-tarot-reading",
+      "moon-oracle-reading",
+      "tarot-and-reiki",
+    ]
+
+    for (const slug of individualSlugs) {
+      const service = findBookingService(slug)?.service
+      assert.ok(service, `${slug} must remain in the public catalog`)
+      assert.deepEqual(service.guestRange, { maximum: 1, minimum: 1 })
+      assert.equal(service.payment.basis, "flat")
+    }
+
+    for (const slug of [
+      "wild-glow-express-facial",
+      "signature-facial",
+      "beauty-being-ritual",
+      "wild-glow-luxury-facial",
+    ]) {
+      const service = findBookingService(slug)?.service
+      assert.equal(service?.format, "In person · HWL Beauty")
+      assert.deepEqual(service?.locationPolicy, {
+        kind: "fixed",
+        label: "HWL Beauty",
+      })
+    }
+
+    assert.deepEqual(
+      findBookingService("reiki-aromatherapy-healing")?.service.locationPolicy,
+      { kind: "attendee-address" }
+    )
+  })
 })
 
 test("booking request presentation stays actionable in both readiness states", async (t) => {
-  const recipientEmail = "shannonmarydixon@gmail.com"
+  const recipientEmail = "shannon@hwlbysmd.com"
 
   const scenarios = [
     {
       calendarBookingKind: "inquiry-only" as const,
       closed: {
         actionHref:
-          "mailto:shannonmarydixon@gmail.com?subject=Booking%20request%3A%20Wild%20Glow%20Express%20Facial",
+          "mailto:shannon@hwlbysmd.com?subject=Booking%20request%3A%20Wild%20Glow%20Express%20Facial",
         actionLabel: "Email Shannon about Wild Glow Express Facial",
         announcement:
           "Use the email link below to arrange this experience directly. The website request form is paused.",
@@ -541,7 +584,7 @@ test("booking request presentation stays actionable in both readiness states", a
       calendarBookingKind: "exact-event" as const,
       closed: {
         actionHref:
-          "mailto:shannonmarydixon@gmail.com?subject=Booking%20request%3A%20Signature%20Facial",
+          "mailto:shannon@hwlbysmd.com?subject=Booking%20request%3A%20Signature%20Facial",
         actionLabel: "Email Shannon about another time",
         announcement:
           "Live dates and appointment times are available below. The website request form is paused; email Shannon directly for help with another time.",
@@ -561,7 +604,7 @@ test("booking request presentation stays actionable in both readiness states", a
       calendarBookingKind: "exact-event" as const,
       closed: {
         actionHref:
-          "mailto:shannonmarydixon@gmail.com?subject=Booking%20request%3A%20Moon%20Oracle%20Reading",
+          "mailto:shannon@hwlbysmd.com?subject=Booking%20request%3A%20Moon%20Oracle%20Reading",
         actionLabel: "Email Shannon about Moon Oracle Reading",
         announcement:
           "The live calendar is not available for this experience right now. Use the email link below to book directly with Shannon.",
@@ -630,6 +673,7 @@ test("closed-mode presentation remains connected to the rendered email action", 
 })
 
 test("stepped booking keeps navigation and calendar recovery inside the journey", () => {
+  const bookingPage = source("app/book/page.tsx")
   const bookingFlow = source("components/booking/booking-request-flow.tsx")
   const calEmbed = source("components/booking/cal-inline-embed.tsx")
 
@@ -645,6 +689,18 @@ test("stepped booking keeps navigation and calendar recovery inside the journey"
   assert.match(calEmbed, /cssVarsPerTheme:\s*\{/)
   assert.match(calEmbed, /CAL_BOOKER_LAYOUT = "month_view"/)
   assert.doesNotMatch(calEmbed, /week_view/)
+  assert.match(bookingPage, /user\.email_confirmed_at/)
+  assert.match(bookingPage, /attendee=\{attendee\}/)
+  assert.match(bookingFlow, /attendee=\{attendee\}/)
+  assert.match(bookingFlow, /defaultValue=\{attendee\?\.name\}/)
+  assert.match(bookingFlow, /defaultValue=\{attendee\?\.email\}/)
+  assert.match(calEmbed, /\{ email: attendeeEmail \}/)
+  assert.match(calEmbed, /\{ name: attendeeName \}/)
+  assert.match(bookingFlow, /withCalAttendee/)
+  assert.match(bookingFlow, /maximum === 1/)
+  assert.match(bookingFlow, /name="guestCount" type="hidden" value="1"/)
+  assert.match(bookingFlow, /selectedService\.locationPolicy\.kind === "fixed"/)
+  assert.match(bookingFlow, /name="location" type="hidden" value=\{fixedLocation\}/)
 })
 
 test("products and appointments share a review-shelf journey without sharing transaction authority", () => {

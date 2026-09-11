@@ -19,6 +19,7 @@ import {
   getStripe,
   isExpectedStripeAccount,
   isExpectedStripePrice,
+  isLiftCheckoutCommerceMetadata,
   isProductCheckoutReady,
   isProductId,
   PRODUCTS,
@@ -193,7 +194,7 @@ function sessionMatchesOrder(
   order: CheckoutOrder
 ) {
   return (
-    session.metadata?.application === COMMERCE_APPLICATION &&
+    isLiftCheckoutCommerceMetadata(session.metadata) &&
     session.client_reference_id === order.user_id &&
     session.livemode === order.stripe_livemode &&
     session.metadata?.checkout_order_id === order.id &&

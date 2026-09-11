@@ -3052,3 +3052,51 @@ payment flow.
   protected, alias-free open candidate and the owner-driven live-purchase
   canary are required before activating canonical checkout. `main` is not part
   of this release.
+
+## September 10 Booking + Operations Candidate — Current Authority
+
+This section supersedes earlier current-state statements about facial location,
+direct-service guest intake, catalog payment basis, canonical inquiry routing,
+and local verification counts. Older dated sections remain historical evidence.
+
+- **Owner-approved service model:** Wild Glow Express Facial, Signature Facial,
+  Beauty & Being Ritual, and Wild Glow Luxury Facial are flat, one-person
+  appointments held at HWL Beauty. The private street address is shared after
+  Shannon confirms the request. Reiki Aromatherapy remains a flat, one-person
+  appointment at the attendee's address. Intuitive Tarot, Moon Oracle, and
+  Tarot + Reiki are also flat, one-person direct bookings. Group Beauty and
+  ritual work belongs in the Retreats inquiry journey.
+- **Minimal intake:** those eight individual services do not ask for party size.
+  The four fixed-location facial events do not ask clients for an address. Only
+  Private Yoga + Sound, Private Sound Healing, and Private Yoga retain a bounded
+  guest-count question and attendee location. The duplicate custom location
+  question is disabled for all eleven events; Cal.com's native location control
+  remains the provider source of truth.
+- **Provider evidence:** the four facial event types were saved in Cal.com with
+  the private organizer location label `HWL Beauty — address shared after
+  confirmation`. A fresh, non-submitting Beauty & Being form smoke displayed
+  name, email, and optional notes only—no group-size or attendee-address field.
+  Provider settings were read back for all eleven events after the change. No
+  appointment or payment was submitted during this correction.
+- **Website containment:** the catalog now carries an explicit location policy,
+  so fixed-location behavior is no longer inferred from display copy. The
+  fallback inquiry form uses that policy, preserves signed-in name/email, fixes
+  facial location to HWL Beauty, and hides guest count for individual services.
+- **Canonical private email routing:** inquiry, relationship-alert, and Journey
+  reply-to paths admit only `shannon@hwlbysmd.com`; altered, padded, or missing
+  recipients fail closed or omit the optional reply-to.
+- **Current local proof:** the focused suites pass 489 cases: accessibility 7,
+  admin 18, Auth 97, booking 117, commerce 149, inquiries 21, launch-environment
+  fixtures 57, Preview policy 20, and relationship boundaries 3. TypeScript,
+  ESLint, SEO for 21 pages, `git diff --check`, and the Next.js 16.3.4 Webpack
+  production build all pass; the build generated 63 routes.
+- **Release boundary:** these September 10 changes are local until an immutable
+  checkpoint commit is pushed and a fresh exact-commit Preview is deployed and
+  canaried. `main` and Production remain outside this candidate. Cal.com public
+  discovery cannot attest intake/location settings, so the non-submitting
+  provider smoke remains a required release artifact.
+- **Payment boundary:** LIFT checkout and fulfillment are isolated from future
+  service invoicing. Unknown, mismatched, or inactive same-application Stripe
+  flows fail without a webhook receipt. Automatic post-appointment payment
+  email remains unimplemented; Shannon's truthful launch workflow is still a
+  manually issued Stripe Invoice or Payment Link after completing the service.

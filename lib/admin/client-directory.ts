@@ -131,6 +131,21 @@ export type AdminClientProgress = Readonly<{
   startedCount: number
 }>
 
+export type AdminClientTimelineEvent = Readonly<{
+  at: string
+  description: string
+  id: string
+  kind:
+    | "booking"
+    | "checkout"
+    | "conversation"
+    | "learning"
+    | "profile"
+    | "purchase"
+  status: string | null
+  title: string
+}>
+
 export type AdminClientDetail = Readonly<{
   bookings: readonly AdminClientBooking[] | null
   checkouts: readonly AdminClientCheckout[]
@@ -722,6 +737,90 @@ function publicPurchase(row: PurchaseRow): AdminClientPurchase {
     purchasedAt: row.purchasedAt,
     status: row.status,
   }
+}
+
+function productName(productType: string) {
+  if (productType === "lift_guide") return "LIFT"
+  return productType
+    .split("_")
+    .filter(Boolean)
+    .map((word) => word[0]?.toUpperCase() + word.slice(1))
+    .join(" ")
+}
+
+export function buildAdminClientTimeline(
+  detail: AdminClientDetail
+): readonly AdminClientTimelineEvent[] {
+  const activity: AdminClientTimelineEvent[] = [
+    {
+      at: detail.client.joinedAt,
+      description: "Registered HWL account",
+      id: `profile:${detail.client.id}`,
+      kind: "profile",
+      status: null,
+      title: "Joined HWL",
+    },
+    ...detail.purchases.map((purchase) => ({
+      at: purchase.purchasedAt,
+      description: `${purchase.currency.toUpperCase()} ${purchase.amountPaid.toFixed(2)}`,
+      id: `purchase:${purchase.id}`,
+      kind: "purchase" as const,
+      status: purchase.status,
+      title: `${productName(purchase.productType)} purchase`,
+    })),
+    ...detail.checkouts
+      .filter((checkout) => checkout.status !== "paid")
+      .map((checkout) => ({
+        at: checkout.createdAt,
+        description: "Checkout attempt",
+        id: `checkout:${checkout.id}`,
+        kind: "checkout" as const,
+        status: checkout.status,
+        title: `${productName(checkout.productType)} checkout`,
+      })),
+    ...(detail.bookings ?? []).map((booking) => ({
+      at: booking.startAt,
+      description: booking.timeZone,
+      id: `booking:${booking.id}`,
+      kind: "booking" as const,
+      status: booking.bookingStatus,
+      title: booking.serviceTitle,
+    })),
+    ...(detail.conversations ?? []).flatMap((conversation) =>
+      conversation.lastMessageAt
+        ? [
+            {
+              at: conversation.lastMessageAt,
+              description:
+                conversation.practitionerUnreadCount > 0
+                  ? `${conversation.practitionerUnreadCount} unread`
+                  : "Client conversation",
+              id: `conversation:${conversation.id}`,
+              kind: "conversation" as const,
+              status: conversation.status,
+              title: conversation.subject,
+            },
+          ]
+        : []
+    ),
+    ...(detail.progress?.lastActivityAt
+      ? [
+          {
+            at: detail.progress.lastActivityAt,
+            description: `${detail.progress.completedCount} of ${detail.progress.startedCount} started lessons complete`,
+            id: `learning:${detail.client.id}`,
+            kind: "learning" as const,
+            status: null,
+            title: "LIFT learning activity",
+          },
+        ]
+      : []),
+  ]
+
+  return activity.sort((left, right) => {
+    const byTime = Date.parse(right.at) - Date.parse(left.at)
+    return byTime || left.id.localeCompare(right.id)
+  })
 }
 
 export async function getAdminClientDirectory(

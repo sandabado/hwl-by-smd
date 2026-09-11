@@ -9,6 +9,7 @@ export type DeploymentTarget = (typeof DEPLOYMENT_TARGETS)[number]
 type RuntimeEnvironment = Readonly<Record<string, string | undefined>>
 
 export const CANONICAL_EMAIL_DOMAIN = "hwlbysmd.com"
+export const CANONICAL_CONTACT_TO_EMAIL = "shannon@hwlbysmd.com"
 export const CANONICAL_COMMERCE_ALERT_TO_EMAIL = "admin@ghosthand.studio"
 
 export const CANONICAL_LAUNCH_AUTHORITY = {
@@ -73,6 +74,13 @@ const PLACEHOLDER_VALUES = new Set([
 function exactValue(environment: RuntimeEnvironment, key: string) {
   const value = environment[key] ?? ""
   return value === value.trim() ? value : ""
+}
+
+export function getCanonicalContactToEmail(environment: RuntimeEnvironment) {
+  return exactValue(environment, "CONTACT_TO_EMAIL") ===
+    CANONICAL_CONTACT_TO_EMAIL
+    ? CANONICAL_CONTACT_TO_EMAIL
+    : null
 }
 
 function hasInvalidEdgeWhitespace(

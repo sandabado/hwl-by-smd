@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { getCanonicalHomepageLiftHref } from "@/lib/homepage-feature"
 import { findBookingService } from "@/lib/booking-services"
 import { media } from "@/lib/media"
+import { isProductCheckoutReady } from "@/lib/stripe"
 import type { PublishedHomepageFeature } from "@/lib/site-content"
 
 const brandWorlds = [
@@ -94,6 +95,8 @@ export function HeroEntry({
 }: {
   featuredExperience: PublishedHomepageFeature
 }) {
+  const liftCheckoutReady = isProductCheckoutReady("lift_guide")
+
   return (
     <div className="overflow-hidden bg-[#f7f3ec]" data-homepage="">
       <section
@@ -146,6 +149,19 @@ export function HeroEntry({
                 <Link href="/book">Book with Shannon</Link>
               </Button>
             </div>
+            <Link
+              className="group mt-5 inline-flex min-h-11 items-center gap-3 text-sm font-medium text-[#20251f] underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[#765538] focus-visible:ring-offset-2 focus-visible:outline-none"
+              href={getCanonicalHomepageLiftHref(featuredExperience)}
+            >
+              <span className="rounded-full bg-[#765538] px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-white uppercase">
+                {liftCheckoutReady ? "Available now" : "Discover LIFT"}
+              </span>
+              <span>LIFT · Video + PDF · $11.11</span>
+              <ArrowRight
+                aria-hidden="true"
+                className="size-4 transition-transform group-hover:translate-x-0.5"
+              />
+            </Link>
           </div>
         </div>
       </section>

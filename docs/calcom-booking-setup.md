@@ -1,6 +1,6 @@
 # Cal.com booking launch setup
 
-Last revised: September 7, 2026
+Last revised: September 10, 2026
 
 ## Current provider state
 
@@ -37,11 +37,11 @@ continue through the inquiry flow and are not Cal.com event candidates.
 
 | Exact public title         | Exact slug                   | Fixed reservation | Schedule               | Location mode                 | Per-event daily cap |
 | -------------------------- | ---------------------------- | ----------------: | ---------------------- | ----------------------------- | ------------------: |
-| Wild Glow Express Facial   | `wild-glow-express-facial`   |            20 min | HWL Beauty             | Attendee address              |                   2 |
+| Wild Glow Express Facial   | `wild-glow-express-facial`   |            20 min | HWL Beauty             | HWL Beauty location           |                   2 |
 | Reiki Aromatherapy Healing | `reiki-aromatherapy-healing` |            45 min | HWL Beauty             | Attendee address              |                   2 |
-| Signature Facial           | `signature-facial`           |            60 min | HWL Beauty             | Attendee address              |                   2 |
-| Beauty & Being Ritual      | `beauty-being-ritual`        |            90 min | HWL Beauty             | Attendee address              |                   2 |
-| Wild Glow Luxury Facial    | `wild-glow-luxury-facial`    |           120 min | HWL Beauty             | Attendee address              |                   2 |
+| Signature Facial           | `signature-facial`           |            60 min | HWL Beauty             | HWL Beauty location           |                   2 |
+| Beauty & Being Ritual      | `beauty-being-ritual`        |            90 min | HWL Beauty             | HWL Beauty location           |                   2 |
+| Wild Glow Luxury Facial    | `wild-glow-luxury-facial`    |           120 min | HWL Beauty             | HWL Beauty location           |                   2 |
 | Private Yoga + Sound       | `private-yoga-and-sound`     |            60 min | HWL Yoga Sound         | Attendee address              |                   2 |
 | Private Sound Healing      | `private-sound-healing`      |            75 min | HWL Yoga Sound         | Attendee address              |                   2 |
 | Private Yoga               | `private-yoga`               |            90 min | HWL Yoga Sound         | Attendee address              |                   2 |
@@ -74,23 +74,30 @@ request, organizer-confirmation, cancellation, and slot-release lifecycle.
   unconfirmed request blocks its slot.
 - Every published event must have 48 hours' minimum notice, 60 minutes before
   and after, and a rolling 30-calendar-day booking horizon.
-- Guest invitations are hidden. Group-capable events use the required number
-  question “How many people will participate, including you?” and the required
-  long-text question “Where will this session take place?” Wild Glow Express
-  and Reiki Aromatherapy are individual appointments: the provider guest-count
-  and duplicate custom-location questions are hidden, while Cal.com's built-in
-  attendee-address field remains required.
+- Guest invitations are hidden. Only Private Yoga + Sound, Private Sound
+  Healing, and Private Yoga retain the required number question “How many
+  people will participate, including you?” All eight direct individual services
+  hide that question. The duplicate custom “Where will this session take
+  place?” question is hidden on all eleven events; Cal.com's native location
+  control is the single source of location truth.
+- The four facial appointments use the fixed private HWL Beauty organizer
+  location. The street address is not displayed before confirmation. Reiki and
+  Tarot + Reiki use an attendee-supplied address; the three movement events use
+  an attendee-supplied address for the party. Optional Notes remain available
+  for access, parking, preparation, or accessibility details.
 - Intuitive Tarot Reading and Moon Oracle Reading alone offer the choice of Cal
-  Video or an attendee-supplied address. All other events use an
-  attendee-supplied address.
+  Video or an attendee-supplied address. Reiki, Tarot + Reiki, and the three
+  movement events use an attendee-supplied address. The four facial events stay
+  fixed at HWL Beauty.
 - Cal.com paid booking and seats must remain disabled for every event. One
   booking is a request for one party; Shannon confirms it manually. No payment
   is collected when the appointment is requested. Shannon arranges payment
   after the completed appointment.
 
-Reiki Aromatherapy is also a flat individual service: the website price is
-$222 with a maximum of one attendee, and its provider description says `$222
-for one person`.
+All five Beauty-catalog services are flat individual appointments. Facial
+appointments are held at HWL Beauty; Reiki Aromatherapy uses the attendee's
+address. The three ritual services are also flat individual direct bookings;
+group ritual and group Beauty requests belong in the Retreats inquiry flow.
 
 The per-event daily caps are provider safety limits, not a proven aggregate cap
 across every event in a schedule family. Required guest-count answers are
@@ -112,9 +119,9 @@ link.
   state which guests are included in the $444 base price.
 - `Private Yoga` says “$666 for 2–4 guests” and also “+$66 per additional
   guest,” while the website form caps the booking at four.
-- `Signature Facial`, `Beauty & Being Ritual`, and `Wild Glow Luxury Facial`
-  use per-guest prices without a published maximum group size; the three ritual
-  services also have no published maximum.
+- Direct Beauty and ritual bookings are one-person services. Group Beauty or
+  ritual requests are custom Retreats inquiries and are not represented by
+  these Cal.com event types.
 
 These phrases remain display and intake copy. They are not automated capacity
 or payment rules. Cal.com collects no service payment; appointment payment is

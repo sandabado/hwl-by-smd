@@ -124,6 +124,22 @@ function guestRangeError({
   return `This experience requires at least ${minimum} guests.`
 }
 
+function withCalAttendee(
+  href: string,
+  attendee: { email: string; name?: string } | undefined
+) {
+  if (!attendee?.email) return href
+
+  try {
+    const url = new URL(href)
+    url.searchParams.set("email", attendee.email)
+    if (attendee.name) url.searchParams.set("name", attendee.name)
+    return url.toString()
+  } catch {
+    return href
+  }
+}
+
 function BookingProgress({ step }: { step: BookingStep }) {
   const steps = [
     { id: "experience", label: "Session" },
@@ -180,6 +196,7 @@ function BookingProgress({ step }: { step: BookingStep }) {
 }
 
 function BookingInquiryForm({
+  attendee,
   feedback,
   hasLiveCalendar,
   isFlexible,
@@ -190,6 +207,10 @@ function BookingInquiryForm({
   status,
   timeZone,
 }: {
+  attendee?: {
+    email: string
+    name?: string
+  }
   feedback: string
   hasLiveCalendar: boolean
   isFlexible: boolean
@@ -201,6 +222,11 @@ function BookingInquiryForm({
   timeZone: string
 }) {
   const guestRangeLabel = describeGuestRange(selectedService.guestRange)
+  const isIndividual = selectedService.guestRange.maximum === 1
+  const fixedLocation =
+    selectedService.locationPolicy.kind === "fixed"
+      ? selectedService.locationPolicy.label
+      : undefined
   const isInquiryOnly = selectedService.calendarBooking.kind === "inquiry-only"
 
   return (
@@ -345,6 +371,7 @@ function BookingInquiryForm({
           <input
             autoComplete="name"
             className={inputClassName}
+            defaultValue={attendee?.name}
             name="name"
             required
           />
@@ -354,50 +381,72 @@ function BookingInquiryForm({
           <input
             autoComplete="email"
             className={inputClassName}
+            defaultValue={attendee?.email}
             name="email"
             required
             type="email"
           />
         </label>
       </div>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
-          <span className="flex items-baseline justify-between gap-3">
-            <span>Number of guests</span>
-            {guestRangeLabel ? (
-              <span className="font-normal text-[var(--muted-foreground)]">
-                {guestRangeLabel}
+      {isIndividual ? (
+        <input name="guestCount" type="hidden" value="1" />
+      ) : null}
+      {fixedLocation ? (
+        <input name="location" type="hidden" value={fixedLocation} />
+      ) : null}
+      {!isIndividual || !fixedLocation ? (
+        <div
+          className={cn(
+            "mt-3 grid gap-3",
+            !isIndividual && !fixedLocation && "sm:grid-cols-2"
+          )}
+        >
+          {!isIndividual ? (
+            <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
+              <span className="flex items-baseline justify-between gap-3">
+                <span>Number of guests</span>
+                {guestRangeLabel ? (
+                  <span className="font-normal text-[var(--muted-foreground)]">
+                    {guestRangeLabel}
+                  </span>
+                ) : null}
               </span>
-            ) : null}
-          </span>
-          <input
-            className={inputClassName}
-            defaultValue={selectedService.guestRange.minimum}
-            key={selectedService.slug}
-            max={selectedService.guestRange.maximum ?? 100}
-            min={selectedService.guestRange.minimum}
-            name="guestCount"
-            required
-            type="number"
-          />
-        </label>
-        <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
-          Location
-          <input
-            className={inputClassName}
-            name="location"
-            placeholder="City, venue, or Virtual"
-            required
-          />
-        </label>
-      </div>
+              <input
+                className={inputClassName}
+                defaultValue={selectedService.guestRange.minimum}
+                key={selectedService.slug}
+                max={selectedService.guestRange.maximum ?? 100}
+                min={selectedService.guestRange.minimum}
+                name="guestCount"
+                required
+                type="number"
+              />
+            </label>
+          ) : null}
+          {!fixedLocation ? (
+            <label className="grid gap-1.5 text-xs font-medium text-[var(--primary)]">
+              Location
+              <input
+                className={inputClassName}
+                name="location"
+                placeholder="City, venue, or Virtual"
+                required
+              />
+            </label>
+          ) : null}
+        </div>
+      ) : null}
       <label className="mt-3 grid gap-1.5 text-xs font-medium text-[var(--primary)]">
         Anything Shannon should know?{" "}
         <span className="font-normal">Optional</span>
         <textarea
           className="min-h-20 w-full rounded-xl border border-[var(--border)] bg-white/82 px-4 py-3 text-sm text-[var(--foreground)] transition outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
           name="message"
-          placeholder="Location, accessibility needs, or a second window that could work."
+          placeholder={
+            fixedLocation
+              ? "Accessibility needs, skin sensitivities, or a second window that could work."
+              : "Location, accessibility needs, or a second window that could work."
+          }
         />
       </label>
 
@@ -432,10 +481,15 @@ function BookingInquiryForm({
 }
 
 export function BookingRequestFlow({
+  attendee,
   calBookingOptionsByServiceSlug,
   initialServiceSlug,
   minimumDate,
 }: {
+  attendee?: {
+    email: string
+    name?: string
+  }
   calBookingOptionsByServiceSlug: Readonly<Record<string, CalcomBookingOption>>
   initialServiceSlug?: string
   minimumDate: string
@@ -470,6 +524,9 @@ export function BookingRequestFlow({
       ? calBookingOptionsByServiceSlug[selectedService.slug]
       : undefined
   const selectedCalLink = selectedCalOption?.url
+  const selectedExternalCalLink = selectedCalLink
+    ? withCalAttendee(selectedCalLink, attendee)
+    : undefined
   const inquiryCollectionReady = isInquiryCollectionReady()
   const bookingRequestPresentation = selectedService
     ? getBookingRequestPresentation({
@@ -818,7 +875,7 @@ export function BookingRequestFlow({
                   <a
                     aria-label={`Open ${selectedService.title} scheduling in Cal.com in a new tab`}
                     className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-3 text-xs font-medium text-[var(--accent)] underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
-                    href={selectedCalLink}
+                    href={selectedExternalCalLink}
                     rel="noreferrer"
                     target="_blank"
                   >
@@ -833,6 +890,7 @@ export function BookingRequestFlow({
               <div>
                 <CalendarEmbedBoundary key={selectedCalLink}>
                   <CalInlineEmbed
+                    attendee={attendee}
                     calLink={selectedCalLink}
                     className="mt-4"
                     serviceTitle={selectedService.title}
@@ -844,6 +902,7 @@ export function BookingRequestFlow({
 
             {bookingRequestPresentation?.kind === "online-form" ? (
               <BookingInquiryForm
+                attendee={attendee}
                 feedback={feedback}
                 hasLiveCalendar={Boolean(selectedCalLink)}
                 isFlexible={isFlexible}

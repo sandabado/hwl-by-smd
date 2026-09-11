@@ -33,7 +33,7 @@ const developmentFixture: NodeJS.ProcessEnv = {
   CALCOM_PROFILE_URL: "https://cal.com/hwlbysmd",
   COMMERCE_SALES_READY: "false",
   CONTACT_FROM_EMAIL: "HWL by SMD <hello@hwlbysmd.com>",
-  CONTACT_TO_EMAIL: "shannonmarydixon@gmail.com",
+  CONTACT_TO_EMAIL: "shannon@hwlbysmd.com",
   HWL_DEPLOYMENT_TARGET: "development",
   INQUIRY_RATE_LIMIT_MAX: "5",
   LIFT_PDF_STORAGE_PATH: "lift/lift-guide.pdf",
@@ -135,6 +135,17 @@ const fixtures: Fixture[] = [
     expectedExit: 0,
     expectedText: "Inquiry collection: closed",
     name: "preview closed without Stripe provider values",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      CONTACT_TO_EMAIL: "other@example.com",
+    },
+    expectedExit: 1,
+    expectedText:
+      "CONTACT_TO_EMAIL: must use the canonical shannon@hwlbysmd.com recipient",
+    name: "unapproved inquiry recipient fails",
   },
   {
     args: ["--target=preview", "--expect-sales=closed"],

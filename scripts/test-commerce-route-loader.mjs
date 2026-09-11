@@ -36,6 +36,8 @@ export async function createClient() {
 const stripeStub = `
 const harness = () => globalThis[${JSON.stringify(HARNESS_KEY)}];
 export const COMMERCE_APPLICATION = "hwl-by-smd";
+export const LIFT_CHECKOUT_COMMERCE_FLOW = "lift_checkout_v2";
+export const SERVICE_INVOICE_COMMERCE_FLOW = "service_invoice_v1";
 export const PRODUCTS = {
   lift_guide: {
     amount: "$11.11",
@@ -93,6 +95,13 @@ export async function isExpectedStripeAccount(stripe) {
 export function isExpectedStripePrice(productId, price) {
   return harness().isExpectedStripePrice(productId, price);
 }
+export function isLiftCheckoutCommerceMetadata(metadata) {
+  return metadata?.application === COMMERCE_APPLICATION &&
+    (metadata.commerce_flow === LIFT_CHECKOUT_COMMERCE_FLOW ||
+      (metadata.commerce_flow === undefined &&
+        metadata.catalog_version === "lift-complete-v2" &&
+        metadata.product_type === "lift_guide"));
+}
 export function isProductCheckoutReady(productId) {
   return harness().isProductCheckoutReady(productId);
 }
@@ -101,6 +110,10 @@ export function isProductId(value) {
 }
 export function isStripeModeConfigured() {
   return harness().isStripeModeConfigured();
+}
+export function isServiceInvoiceCommerceMetadata(metadata) {
+  return metadata?.application === COMMERCE_APPLICATION &&
+    metadata.commerce_flow === SERVICE_INVOICE_COMMERCE_FLOW;
 }
 `
 

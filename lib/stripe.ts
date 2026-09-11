@@ -17,6 +17,8 @@ export type { DeploymentTarget } from "@/lib/commerce/launch-authority"
 export type ProductId = "lift_guide" | "pdf_download" | "membership"
 
 export const COMMERCE_APPLICATION = "hwl-by-smd"
+export const LIFT_CHECKOUT_COMMERCE_FLOW = "lift_checkout_v2"
+export const SERVICE_INVOICE_COMMERCE_FLOW = "service_invoice_v1"
 export const LAUNCH_PRODUCT_ID = "lift_guide" as const
 
 const STRIPE_REQUEST_TIMEOUT_MS = 10_000
@@ -182,6 +184,27 @@ export function isProductCheckoutReady(productId: ProductId) {
   if (productId !== "lift_guide") return false
 
   return isCommerceRuntimeAuthorityConfigured(process.env)
+}
+
+export function isLiftCheckoutCommerceMetadata(
+  metadata: Stripe.Metadata | null | undefined
+) {
+  return (
+    metadata?.application === COMMERCE_APPLICATION &&
+    (metadata.commerce_flow === LIFT_CHECKOUT_COMMERCE_FLOW ||
+      (metadata.commerce_flow === undefined &&
+        metadata.catalog_version === "lift-complete-v2" &&
+        metadata.product_type === LAUNCH_PRODUCT_ID))
+  )
+}
+
+export function isServiceInvoiceCommerceMetadata(
+  metadata: Stripe.Metadata | null | undefined
+) {
+  return (
+    metadata?.application === COMMERCE_APPLICATION &&
+    metadata.commerce_flow === SERVICE_INVOICE_COMMERCE_FLOW
+  )
 }
 
 function hasExpectedLiftMetadata(metadata: Stripe.Metadata) {

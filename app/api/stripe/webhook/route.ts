@@ -14,11 +14,55 @@ import {
   getExpectedStripeLivemode,
   getStripe,
   isExpectedStripeAccount,
+  isLiftCheckoutCommerceMetadata,
+  isServiceInvoiceCommerceMetadata,
   isStripeModeConfigured,
 } from "@/lib/stripe"
 import { createAdminClient } from "@/lib/supabase/server"
 
 const MAXIMUM_WEBHOOK_BYTES = 1_000_000
+
+function paymentIntentId(paymentIntent: string | Stripe.PaymentIntent | null) {
+  return typeof paymentIntent === "string"
+    ? paymentIntent
+    : (paymentIntent?.id ?? null)
+}
+
+async function retrieveTerminalPaymentIntent(
+  stripe: NonNullable<ReturnType<typeof getStripe>>,
+  paymentIntent: string | Stripe.PaymentIntent | null
+) {
+  const id = paymentIntentId(paymentIntent)
+  if (!id) return null
+
+  return stripe.paymentIntents.retrieve(id, {
+    expand: ["latest_charge"],
+  })
+}
+
+function deferredServiceFlowResponse() {
+  return new Response("Service commerce flow is not active.", { status: 503 })
+}
+
+function terminalCommerceFlowMismatchResponse() {
+  return new Response("Stripe commerce flow metadata did not match.", {
+    status: 500,
+  })
+}
+
+function claimsHwlCommerce(metadata: Stripe.Metadata | null | undefined) {
+  return metadata?.application === COMMERCE_APPLICATION
+}
+
+function claimsUnknownHwlCommerceFlow(
+  metadata: Stripe.Metadata | null | undefined
+) {
+  return (
+    claimsHwlCommerce(metadata) &&
+    !isLiftCheckoutCommerceMetadata(metadata) &&
+    !isServiceInvoiceCommerceMetadata(metadata)
+  )
+}
 
 export async function POST(request: Request) {
   const stripe = getStripe()
@@ -103,8 +147,24 @@ export async function POST(request: Request) {
     let ignoredForeignNamespace = false
 
     if (
+      (event.type === "checkout.session.completed" ||
+        event.type === "checkout.session.expired") &&
+      claimsUnknownHwlCommerceFlow(event.data.object.metadata)
+    ) {
+      return terminalCommerceFlowMismatchResponse()
+    }
+
+    if (
+      (event.type === "checkout.session.completed" ||
+        event.type === "checkout.session.expired") &&
+      isServiceInvoiceCommerceMetadata(event.data.object.metadata)
+    ) {
+      return deferredServiceFlowResponse()
+    }
+
+    if (
       event.type === "checkout.session.completed" &&
-      event.data.object.metadata?.application === COMMERCE_APPLICATION
+      isLiftCheckoutCommerceMetadata(event.data.object.metadata)
     ) {
       const result = await fulfillCompletedCheckout({
         deploymentTarget,
@@ -118,7 +178,10 @@ export async function POST(request: Request) {
       ignoredForeignNamespace = result.state === "ignored"
     }
 
-    if (event.type === "checkout.session.expired") {
+    if (
+      event.type === "checkout.session.expired" &&
+      isLiftCheckoutCommerceMetadata(event.data.object.metadata)
+    ) {
       const result = await markCheckoutExpired(
         supabase,
         event.data.object,
@@ -130,25 +193,71 @@ export async function POST(request: Request) {
     }
 
     if (event.type === "charge.refunded") {
+      const paymentIntent = await retrieveTerminalPaymentIntent(
+        stripe,
+        event.data.object.payment_intent
+      )
+      if (
+        claimsUnknownHwlCommerceFlow(event.data.object.metadata) ||
+        claimsUnknownHwlCommerceFlow(paymentIntent?.metadata)
+      ) {
+        return terminalCommerceFlowMismatchResponse()
+      }
+      if (
+        claimsHwlCommerce(event.data.object.metadata) &&
+        (isServiceInvoiceCommerceMetadata(event.data.object.metadata) !==
+          isServiceInvoiceCommerceMetadata(paymentIntent?.metadata) ||
+          isLiftCheckoutCommerceMetadata(event.data.object.metadata) !==
+            isLiftCheckoutCommerceMetadata(paymentIntent?.metadata))
+      ) {
+        return terminalCommerceFlowMismatchResponse()
+      }
+      if (isServiceInvoiceCommerceMetadata(paymentIntent?.metadata)) {
+        return deferredServiceFlowResponse()
+      }
       const result = await reconcileFullRefund(
         stripe,
         supabase,
         event.data.object,
         deploymentTarget,
         stripeAccountId,
-        stripeLivemode
+        stripeLivemode,
+        paymentIntent ?? undefined
       )
       ignoredForeignNamespace = result === "ignored_foreign"
     }
 
     if (event.type === "charge.dispute.created") {
+      const paymentIntent = await retrieveTerminalPaymentIntent(
+        stripe,
+        event.data.object.payment_intent
+      )
+      if (
+        claimsUnknownHwlCommerceFlow(event.data.object.metadata) ||
+        claimsUnknownHwlCommerceFlow(paymentIntent?.metadata)
+      ) {
+        return terminalCommerceFlowMismatchResponse()
+      }
+      if (
+        claimsHwlCommerce(event.data.object.metadata) &&
+        (isServiceInvoiceCommerceMetadata(event.data.object.metadata) !==
+          isServiceInvoiceCommerceMetadata(paymentIntent?.metadata) ||
+          isLiftCheckoutCommerceMetadata(event.data.object.metadata) !==
+            isLiftCheckoutCommerceMetadata(paymentIntent?.metadata))
+      ) {
+        return terminalCommerceFlowMismatchResponse()
+      }
+      if (isServiceInvoiceCommerceMetadata(paymentIntent?.metadata)) {
+        return deferredServiceFlowResponse()
+      }
       const result = await revokeDisputedCharge(
         stripe,
         supabase,
         event.data.object,
         deploymentTarget,
         stripeAccountId,
-        stripeLivemode
+        stripeLivemode,
+        paymentIntent ?? undefined
       )
       ignoredForeignNamespace = result === "ignored_foreign"
     }

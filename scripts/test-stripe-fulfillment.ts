@@ -17,6 +17,7 @@ type CheckoutMetadata = {
   application: string
   catalog_version: string
   checkout_order_id: string
+  commerce_flow?: string
   deployment_target: "development" | "preview" | "production"
   price_id: string
   product_type: "lift_guide"
@@ -486,6 +487,27 @@ test("the shared verifier fulfills once and duplicate replay only repairs", asyn
   )
 })
 
+test("the explicit LIFT flow marker fulfills while legacy metadata stays valid", async () => {
+  const markedMetadata = checkoutMetadata({
+    commerce_flow: "lift_checkout_v2",
+  })
+  const markedIntent = paymentIntent(markedMetadata)
+  const markedSession = checkoutSession({
+    metadata: markedMetadata,
+    payment_intent: markedIntent,
+  })
+  const fakeDatabase = database()
+
+  const result = await reconcile(
+    fakeDatabase,
+    stripe(markedSession, markedIntent),
+    "webhook"
+  )
+
+  assert.deepEqual(result, { purchaseStatus: "active", state: "fulfilled" })
+  assert.equal(fakeDatabase.state.purchases.length, 1)
+})
+
 test("scheduled reconciliation is recorded as its own first-writer source", async () => {
   const fakeDatabase = database()
   const result = await reconcile(
@@ -927,6 +949,62 @@ test("partial-refund replay retains active LIFT access without provider calls", 
   assert.equal(fakeDatabase.state.purchases.length, 1)
   assert.equal(fakeDatabase.state.purchases[0].status, "active")
   assert.equal(fakeDatabase.state.checkout_orders[0].status, "paid")
+})
+
+test("service invoice refunds and disputes never mutate the LIFT ledger", async () => {
+  const serviceMetadata = checkoutMetadata({
+    commerce_flow: "service_invoice_v1",
+  })
+  const serviceRefundIntent = paymentIntent(serviceMetadata, {
+    amount_refunded: 1111,
+    refunded: true,
+  })
+  const serviceDisputeIntent = paymentIntent(serviceMetadata, {
+    disputed: true,
+  })
+
+  for (const fixture of [
+    {
+      event: serviceRefundIntent.latest_charge,
+      intent: serviceRefundIntent,
+      kind: "refund" as const,
+    },
+    {
+      event: {
+        amount: 1111,
+        charge: chargeId,
+        currency: "usd",
+        livemode: false,
+        payment_intent: paymentIntentId,
+      },
+      intent: serviceDisputeIntent,
+      kind: "dispute" as const,
+    },
+  ]) {
+    const fakeDatabase = database({ purchases: [purchase("active")] })
+    const before = structuredClone(fakeDatabase.state)
+    const result =
+      fixture.kind === "refund"
+        ? await reconcileFullRefund(
+            stripe(checkoutSession(), fixture.intent) as never,
+            fakeDatabase as never,
+            fixture.event as never,
+            "preview",
+            identity.stripe_account_id,
+            false
+          )
+        : await revokeDisputedCharge(
+            stripe(checkoutSession(), fixture.intent) as never,
+            fakeDatabase as never,
+            fixture.event as never,
+            "preview",
+            identity.stripe_account_id,
+            false
+          )
+
+    assert.equal(result, "ignored_foreign")
+    assert.deepEqual(fakeDatabase.state, before)
+  }
 })
 
 test("full-refund replay repairs an incomplete order and remains idempotent", async () => {

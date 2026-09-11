@@ -12,6 +12,11 @@ const SESSION_ID = "cs_test_route_fixture"
 const SITE_URL = "https://preview.hwlbysmd.com"
 const USER_ID = "10000000-0000-4000-8000-000000000001"
 const USER_EMAIL = "member@example.com"
+const LEGACY_LIFT_METADATA = {
+  application: "hwl-by-smd",
+  catalog_version: "lift-complete-v2",
+  product_type: "lift_guide",
+} as const
 
 const ENVIRONMENT_KEYS = [
   "LIFT_PDF_STORAGE_PATH",
@@ -57,6 +62,7 @@ type WebhookCalls = {
   accountChecks: number
   dispatches: Array<{ args: unknown[]; kind: string }>
   eventInserts: Record<string, unknown>[]
+  paymentIntentRetrievals: string[]
   rawBody: string | null
   signature: string | null
   webhookSecret: string | null
@@ -296,6 +302,7 @@ function createWebhookCalls(): WebhookCalls {
     accountChecks: 0,
     dispatches: [],
     eventInserts: [],
+    paymentIntentRetrievals: [],
     rawBody: null,
     signature: null,
     webhookSecret: null,
@@ -339,9 +346,24 @@ function createWebhookAdminClient(
 function createWebhookStripe(
   calls: WebhookCalls,
   event: Record<string, unknown>,
-  options: { invalidSignature?: boolean } = {}
+  options: {
+    invalidSignature?: boolean
+    paymentIntentMetadata?: Record<string, string>
+  } = {}
 ) {
   return {
+    paymentIntents: {
+      async retrieve(id: string) {
+        calls.paymentIntentRetrievals.push(id)
+        return {
+          id,
+          metadata: options.paymentIntentMetadata ?? {
+            application: "hwl-by-smd",
+            commerce_flow: "lift_checkout_v2",
+          },
+        }
+      },
+    },
     webhooks: {
       constructEvent(
         body: Uint8Array,
@@ -368,6 +390,7 @@ function webhookHarness(
     insertError?: { code?: string } | null
     invalidSignature?: boolean
     lookupError?: { code?: string } | null
+    paymentIntentMetadata?: Record<string, string>
   } = {}
 ) {
   const database = createWebhookAdminClient(calls, options)
@@ -628,7 +651,7 @@ test("commerce HTTP route boundaries are fail-closed and provider-free", async (
       Reflect.set(process.env, "STRIPE_WEBHOOK_SECRET", "whsec_route_fixture")
       const event = stripeEvent("checkout.session.completed", {
         id: SESSION_ID,
-        metadata: { application: "hwl-by-smd" },
+        metadata: LEGACY_LIFT_METADATA,
       })
 
       setHarness(baseHarness())
@@ -682,7 +705,7 @@ test("commerce HTTP route boundaries are fail-closed and provider-free", async (
           wrongModeCalls,
           stripeEvent(
             "checkout.session.completed",
-            { id: SESSION_ID, metadata: { application: "hwl-by-smd" } },
+            { id: SESSION_ID, metadata: LEGACY_LIFT_METADATA },
             true
           )
         )
@@ -697,7 +720,7 @@ test("commerce HTTP route boundaries are fail-closed and provider-free", async (
           wrongAccountCalls,
           stripeEvent("checkout.session.completed", {
             id: SESSION_ID,
-            metadata: { application: "hwl-by-smd" },
+            metadata: LEGACY_LIFT_METADATA,
           }),
           { accountMatches: false }
         )
@@ -716,22 +739,29 @@ test("commerce HTTP route boundaries are fail-closed and provider-free", async (
       const cases = [
         {
           kind: "completed",
-          object: { id: SESSION_ID, metadata: { application: "hwl-by-smd" } },
+          object: { id: SESSION_ID, metadata: LEGACY_LIFT_METADATA },
           type: "checkout.session.completed",
         },
         {
           kind: "expired",
-          object: { id: SESSION_ID, metadata: { application: "hwl-by-smd" } },
+          object: { id: SESSION_ID, metadata: LEGACY_LIFT_METADATA },
           type: "checkout.session.expired",
         },
         {
           kind: "refunded",
-          object: { id: "ch_route_fixture", refunded: true },
+          object: {
+            id: "ch_route_fixture",
+            payment_intent: "pi_route_fixture",
+            refunded: true,
+          },
           type: "charge.refunded",
         },
         {
           kind: "disputed",
-          object: { id: "dp_route_fixture" },
+          object: {
+            id: "dp_route_fixture",
+            payment_intent: "pi_route_fixture",
+          },
           type: "charge.dispute.created",
         },
       ] as const
@@ -775,6 +805,217 @@ test("commerce HTTP route boundaries are fail-closed and provider-free", async (
           assert.equal(calls.eventInserts.length, 1)
         }
       )
+
+      for (const fixture of [
+        {
+          object: {
+            id: "cs_service_completed_fixture",
+            metadata: {
+              application: "hwl-by-smd",
+              commerce_flow: "service_invoice_v1",
+            },
+          },
+          type: "checkout.session.completed",
+        },
+        {
+          object: {
+            id: "cs_service_expired_fixture",
+            metadata: {
+              application: "hwl-by-smd",
+              commerce_flow: "service_invoice_v1",
+            },
+          },
+          type: "checkout.session.expired",
+        },
+      ] as const) {
+        await t.test(
+          `${fixture.type} fails closed while service payments are inactive`,
+          async () => {
+            const calls = createWebhookCalls()
+            setHarness(webhookHarness(calls, stripeEvent(fixture.type, fixture.object)))
+
+            const response = await receiveStripeWebhook(webhookRequest())
+            assert.equal(response.status, 503)
+            assert.equal(
+              await response.text(),
+              "Service commerce flow is not active."
+            )
+            assert.deepEqual(calls.dispatches, [])
+            assert.deepEqual(calls.eventInserts, [])
+          }
+        )
+      }
+
+      for (const type of [
+        "checkout.session.completed",
+        "checkout.session.expired",
+      ] as const) {
+        await t.test(
+          `${type} rejects an unknown HWL commerce flow without a receipt`,
+          async () => {
+            const calls = createWebhookCalls()
+            setHarness(
+              webhookHarness(
+                calls,
+                stripeEvent(type, {
+                  id: "cs_unknown_flow_fixture",
+                  metadata: {
+                    application: "hwl-by-smd",
+                    commerce_flow: "lift_checkout_v3_typo",
+                  },
+                })
+              )
+            )
+
+            const response = await receiveStripeWebhook(webhookRequest())
+            assert.equal(response.status, 500)
+            assert.equal(
+              await response.text(),
+              "Stripe commerce flow metadata did not match."
+            )
+            assert.deepEqual(calls.dispatches, [])
+            assert.deepEqual(calls.eventInserts, [])
+          }
+        )
+      }
+
+      for (const fixture of [
+        {
+          object: {
+            id: "ch_service_fixture",
+            payment_intent: "pi_service_fixture",
+            refunded: true,
+          },
+          type: "charge.refunded",
+        },
+        {
+          object: {
+            id: "dp_service_fixture",
+            payment_intent: "pi_service_fixture",
+          },
+          type: "charge.dispute.created",
+        },
+      ] as const) {
+        await t.test(
+          `${fixture.type} for service invoices never enters LIFT`,
+          async () => {
+            const calls = createWebhookCalls()
+            const event = stripeEvent(fixture.type, fixture.object)
+            setHarness(
+              webhookHarness(calls, event, {
+                paymentIntentMetadata: {
+                  application: "hwl-by-smd",
+                  commerce_flow: "service_invoice_v1",
+                },
+              })
+            )
+
+            const response = await receiveStripeWebhook(webhookRequest())
+            assert.equal(response.status, 503)
+            assert.equal(
+              await response.text(),
+              "Service commerce flow is not active."
+            )
+            assert.deepEqual(calls.paymentIntentRetrievals, [
+              "pi_service_fixture",
+            ])
+            assert.deepEqual(calls.dispatches, [])
+            assert.deepEqual(calls.eventInserts, [])
+          }
+        )
+      }
+
+      for (const fixture of [
+        {
+          object: {
+            id: "ch_mismatch_fixture",
+            metadata: {
+              application: "hwl-by-smd",
+              commerce_flow: "service_invoice_v1",
+            },
+            payment_intent: "pi_mismatch_fixture",
+            refunded: true,
+          },
+          type: "charge.refunded",
+        },
+        {
+          object: {
+            id: "dp_mismatch_fixture",
+            metadata: {
+              application: "hwl-by-smd",
+              commerce_flow: "service_invoice_v1",
+            },
+            payment_intent: "pi_mismatch_fixture",
+          },
+          type: "charge.dispute.created",
+        },
+      ] as const) {
+        await t.test(
+          `${fixture.type} rejects contradictory event and PaymentIntent flows`,
+          async () => {
+            const calls = createWebhookCalls()
+            const event = stripeEvent(fixture.type, fixture.object)
+            setHarness(webhookHarness(calls, event))
+
+            const response = await receiveStripeWebhook(webhookRequest())
+            assert.equal(response.status, 500)
+            assert.equal(
+              await response.text(),
+              "Stripe commerce flow metadata did not match."
+            )
+            assert.deepEqual(calls.paymentIntentRetrievals, [
+              "pi_mismatch_fixture",
+            ])
+            assert.deepEqual(calls.dispatches, [])
+            assert.deepEqual(calls.eventInserts, [])
+          }
+        )
+      }
+
+      for (const fixture of [
+        {
+          object: {
+            id: "ch_unknown_flow_fixture",
+            payment_intent: "pi_unknown_flow_fixture",
+            refunded: true,
+          },
+          type: "charge.refunded",
+        },
+        {
+          object: {
+            id: "dp_unknown_flow_fixture",
+            payment_intent: "pi_unknown_flow_fixture",
+          },
+          type: "charge.dispute.created",
+        },
+      ] as const) {
+        await t.test(
+          `${fixture.type} rejects an unknown authoritative HWL flow`,
+          async () => {
+            const calls = createWebhookCalls()
+            setHarness(
+              webhookHarness(calls, stripeEvent(fixture.type, fixture.object), {
+                paymentIntentMetadata: {
+                  application: "hwl-by-smd",
+                  commerce_flow: "service_invoice_v1_typo",
+                },
+              })
+            )
+
+            const response = await receiveStripeWebhook(webhookRequest())
+            assert.equal(response.status, 500)
+            assert.equal(
+              await response.text(),
+              "Stripe commerce flow metadata did not match."
+            )
+            assert.deepEqual(calls.paymentIntentRetrievals, [
+              "pi_unknown_flow_fixture",
+            ])
+            assert.deepEqual(calls.dispatches, [])
+            assert.deepEqual(calls.eventInserts, [])
+          }
+        )
+      }
     }
   )
 
@@ -784,7 +1025,7 @@ test("commerce HTTP route boundaries are fail-closed and provider-free", async (
       Reflect.set(process.env, "STRIPE_WEBHOOK_SECRET", "whsec_route_fixture")
       const event = stripeEvent("checkout.session.completed", {
         id: SESSION_ID,
-        metadata: { application: "hwl-by-smd" },
+        metadata: LEGACY_LIFT_METADATA,
       })
 
       const foreignCalls = createWebhookCalls()

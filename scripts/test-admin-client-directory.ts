@@ -5,6 +5,7 @@ import { test } from "node:test"
 import {
   type AdminClientDirectoryDependencies,
   type AdminClientRawRows,
+  buildAdminClientTimeline,
   getAdminClientDetail,
   getAdminClientDirectory,
 } from "../lib/admin/client-directory.ts"
@@ -253,6 +254,78 @@ test("client detail keeps only linked histories and strips provider identifiers"
   })
   assert.equal("stripe_payment_intent_id" in result.detail.purchases[0], false)
   assert.equal("intake_answers" in (result.detail.bookings?.[0] ?? {}), false)
+})
+
+test("client timeline is newest-first, sanitized, and does not duplicate a paid checkout", async () => {
+  const result = await getAdminClientDetail(CLIENT_ID, dependencies())
+
+  assert.equal(result.status, "ready")
+  if (result.status !== "ready") return
+
+  const timeline = buildAdminClientTimeline(result.detail)
+  assert.deepEqual(
+    timeline.map(({ at, kind, title }) => ({ at, kind, title })),
+    [
+      {
+        at: "2026-09-08T21:00:00.000Z",
+        kind: "learning",
+        title: "LIFT learning activity",
+      },
+      {
+        at: "2026-09-08T20:00:00.000Z",
+        kind: "conversation",
+        title: "Aftercare",
+      },
+      {
+        at: "2026-09-08T18:00:00.000Z",
+        kind: "booking",
+        title: "Signature Facial",
+      },
+      {
+        at: "2026-09-06T19:05:00.000Z",
+        kind: "purchase",
+        title: "LIFT purchase",
+      },
+      {
+        at: "2026-09-01T17:00:00.000Z",
+        kind: "profile",
+        title: "Joined HWL",
+      },
+    ]
+  )
+  assert.equal(
+    timeline.some(({ kind }) => kind === "checkout"),
+    false
+  )
+  assert.equal(
+    JSON.stringify(timeline).includes("must-not-leave-the-dal"),
+    false
+  )
+
+  const withOpenCheckout = buildAdminClientTimeline({
+    ...result.detail,
+    bookings: [],
+    checkouts: [
+      {
+        createdAt: "2026-09-09T16:00:00.000Z",
+        fulfilledAt: null,
+        id: "open-checkout",
+        productType: "lift_guide",
+        status: "open",
+      },
+    ],
+    conversations: [],
+    progress: null,
+    purchases: [],
+  })
+  assert.deepEqual(withOpenCheckout[0], {
+    at: "2026-09-09T16:00:00.000Z",
+    description: "Checkout attempt",
+    id: "checkout:open-checkout",
+    kind: "checkout",
+    status: "open",
+    title: "LIFT checkout",
+  })
 })
 
 test("invalid routes and malformed database rows fail closed", async (t) => {

@@ -11,6 +11,7 @@ import {
   prepareInquirySubmissionClaim,
 } from "@/lib/inquiries/rate-limit"
 import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
+import { getCanonicalContactToEmail } from "@/lib/commerce/launch-authority"
 import { createAdminClient } from "@/lib/supabase/server"
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -491,10 +492,14 @@ export async function POST(request: Request) {
   }
 
   const apiKey = process.env.RESEND_API_KEY
-  const to = process.env.CONTACT_TO_EMAIL
+  const to = getCanonicalContactToEmail(process.env)
   const from = process.env.CONTACT_FROM_EMAIL
 
-  if (!apiKey || !to || !from) {
+  if (
+    !apiKey ||
+    !to ||
+    !from
+  ) {
     const audited = await markNotification(
       "not_configured",
       "configuration_missing"

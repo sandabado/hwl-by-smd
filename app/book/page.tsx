@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { BookingRequestFlow } from "@/components/booking/booking-request-flow"
 import { CtaBlock } from "@/components/shared/cta-block"
+import { getAuthenticatedUser } from "@/lib/access"
 import { resolveCalcomBookingOptions } from "@/lib/calcom-booking-links"
 import { getCalcomPublicEventTypes } from "@/lib/calcom"
 import { normalizeBookingServiceSlug } from "@/lib/booking-services"
@@ -20,14 +21,27 @@ export default async function BookPage({
 }: {
   searchParams: Promise<{ service?: string | string[] }>
 }) {
-  const [params, calcomResult] = await Promise.all([
+  const [params, calcomResult, user] = await Promise.all([
     searchParams,
     getCalcomPublicEventTypes(),
+    getAuthenticatedUser(),
   ])
   const inquiryCollectionReady = isInquiryCollectionReady()
   const calBookingOptionsByServiceSlug =
     resolveCalcomBookingOptions(calcomResult)
   const initialServiceSlug = normalizeBookingServiceSlug(params.service)
+  const attendee =
+    user?.email && user.email_confirmed_at
+      ? {
+          email: user.email,
+          ...(typeof user.user_metadata.full_name === "string" &&
+          user.user_metadata.full_name.trim()
+            ? {
+                name: user.user_metadata.full_name.trim().slice(0, 120),
+              }
+            : {}),
+        }
+      : undefined
 
   const palmSpringsDateParts = new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
@@ -79,6 +93,7 @@ export default async function BookPage({
       </section>
 
       <BookingRequestFlow
+        attendee={attendee}
         calBookingOptionsByServiceSlug={calBookingOptionsByServiceSlug}
         initialServiceSlug={initialServiceSlug}
         minimumDate={minimumDate}

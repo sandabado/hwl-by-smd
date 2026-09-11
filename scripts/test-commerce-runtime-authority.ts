@@ -3,6 +3,7 @@ import test from "node:test"
 
 import {
   CANONICAL_LAUNCH_AUTHORITY,
+  getCanonicalContactToEmail,
   getCanonicalStripeAccountId,
   getCanonicalStripeLivemode,
   getCanonicalStripePriceId,
@@ -49,6 +50,26 @@ const productionEnvironment = {
   VERCEL: "1",
   VERCEL_ENV: "production",
 } as const
+
+test("canonical contact routing rejects missing, altered, and padded recipients", () => {
+  assert.equal(
+    getCanonicalContactToEmail({
+      CONTACT_TO_EMAIL: "shannon@hwlbysmd.com",
+    }),
+    "shannon@hwlbysmd.com"
+  )
+  assert.equal(
+    getCanonicalContactToEmail({ CONTACT_TO_EMAIL: "other@example.com" }),
+    null
+  )
+  assert.equal(
+    getCanonicalContactToEmail({
+      CONTACT_TO_EMAIL: " shannon@hwlbysmd.com",
+    }),
+    null
+  )
+  assert.equal(getCanonicalContactToEmail({}), null)
+})
 
 test("canonical Production runtime authority opens only the one LIFT catalog", () => {
   assert.equal(getCommerceDeploymentTarget(productionEnvironment), "production")

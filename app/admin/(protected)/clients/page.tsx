@@ -104,7 +104,7 @@ export default async function AdminClientsPage() {
             <MetricCard
               icon={UsersRound}
               label="Client accounts"
-              note="Confirmed client profiles"
+              note="Registered client profiles"
               value={String(directory.clients.length)}
             />
             <MetricCard

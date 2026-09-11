@@ -59,6 +59,10 @@ const EMBED_READY_TIMEOUT_MS = 12_000
 export interface CalInlineEmbedProps {
   calLink: string
   serviceTitle: string
+  attendee?: {
+    email: string
+    name?: string
+  }
   className?: string
   showExternalLink?: boolean
 }
@@ -84,6 +88,7 @@ function canonicalCalUrl(calLink: string) {
 function CalEmbedInstance({
   calLink,
   serviceTitle,
+  attendee,
   className,
   showExternalLink = true,
 }: CalInlineEmbedProps) {
@@ -101,14 +106,18 @@ function CalEmbedInstance({
   const descriptionId = `${namespace}-description`
   const iframeId = `${namespace}-iframe`
   const iframeTitle = `Choose a date and time for ${serviceTitle}`
+  const attendeeEmail = attendee?.email
+  const attendeeName = attendee?.name
   const embedConfig = useMemo(
     () => ({
       ...CAL_EMBED_CONFIG,
+      ...(attendeeEmail ? { email: attendeeEmail } : {}),
+      ...(attendeeName ? { name: attendeeName } : {}),
       iframeAttrs: {
         id: iframeId,
       },
     }),
-    [iframeId]
+    [attendeeEmail, attendeeName, iframeId]
   )
   const externalUrl = canonicalCalUrl(calLink)
 
@@ -184,11 +193,11 @@ function CalEmbedInstance({
       )}
     >
       <div className="border-b border-[var(--border)] px-5 py-4 sm:px-7">
-        <h4 className="font-serif text-xl text-[var(--primary)]" id={headingId}>
+        <h3 className="font-serif text-xl text-[var(--primary)]" id={headingId}>
           {bookingComplete
             ? "Your booking was received"
             : "Available dates and times"}
-        </h4>
+        </h3>
         <p
           className="mt-1 text-sm leading-relaxed text-[var(--muted-foreground)]"
           id={descriptionId}
@@ -211,9 +220,9 @@ function CalEmbedInstance({
             <span className="mx-auto grid size-14 place-items-center rounded-full bg-[#52694d]/10 text-[#52694d]">
               <CircleCheck aria-hidden="true" className="size-7" />
             </span>
-            <h5 className="mt-5 font-serif text-3xl text-[var(--primary)]">
+            <h4 className="mt-5 font-serif text-3xl text-[var(--primary)]">
               Time made for you.
-            </h5>
+            </h4>
             <p className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]">
               Shannon will confirm your request personally. No payment is
               collected now; she will arrange payment after the appointment. Use
@@ -304,6 +313,7 @@ function CalEmbedInstance({
 export function CalInlineEmbed({
   calLink,
   serviceTitle,
+  attendee,
   className,
   showExternalLink,
 }: CalInlineEmbedProps) {
@@ -325,6 +335,7 @@ export function CalInlineEmbed({
 
   return (
     <CalEmbedInstance
+      attendee={attendee}
       calLink={normalizedCalLink}
       className={className}
       key={normalizedCalLink}

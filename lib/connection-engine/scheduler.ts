@@ -12,6 +12,7 @@ import type {
   RelationshipRecord,
 } from "@/lib/connection-engine/types"
 import { DEFAULT_CONNECTION_PREFERENCES } from "@/lib/connection-engine/types"
+import { getCanonicalContactToEmail } from "@/lib/commerce/launch-authority"
 import { getSiteUrl } from "@/lib/env"
 import {
   getCommerceDeploymentTarget,
@@ -561,7 +562,7 @@ async function deliverOne(
       optOutText: context.milestone.opt_out_text,
     }),
     idempotencyKey: `journey-delivery-${delivery.id}`,
-    replyTo: process.env.CONTACT_TO_EMAIL,
+    replyTo: getCanonicalContactToEmail(process.env) ?? undefined,
     subject,
     to: context.member.email,
   })

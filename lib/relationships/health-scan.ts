@@ -1,5 +1,6 @@
 import "server-only"
 
+import { getCanonicalContactToEmail } from "@/lib/commerce/launch-authority"
 import { getSiteUrl } from "@/lib/env"
 import { createAdminClient } from "@/lib/supabase/server"
 
@@ -60,7 +61,7 @@ async function notifyShannon(
   }>
 ) {
   const apiKey = process.env.RESEND_API_KEY
-  const to = process.env.CONTACT_TO_EMAIL
+  const to = getCanonicalContactToEmail(process.env)
   if (!apiKey || !to || !alerts.length) return { skipped: true }
 
   const siteUrl = getSiteUrl()

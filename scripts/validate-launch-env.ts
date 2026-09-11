@@ -1,4 +1,5 @@
 import {
+  CANONICAL_CONTACT_TO_EMAIL,
   CANONICAL_COMMERCE_ALERT_TO_EMAIL,
   CANONICAL_EMAIL_DOMAIN,
   CANONICAL_LAUNCH_AUTHORITY,
@@ -366,7 +367,15 @@ if (rateLimitSecret && cronSecret && rateLimitSecret === cronSecret) {
   errors.push("CRON_SECRET: must be distinct from INQUIRY_RATE_LIMIT_SECRET")
 }
 
-requireEmail("CONTACT_TO_EMAIL")
+const contactDestination = requireEmail("CONTACT_TO_EMAIL")
+if (
+  contactDestination &&
+  contactDestination.toLowerCase() !== CANONICAL_CONTACT_TO_EMAIL
+) {
+  errors.push(
+    `CONTACT_TO_EMAIL: must use the canonical ${CANONICAL_CONTACT_TO_EMAIL} recipient`
+  )
+}
 requireCanonicalSenderEmail("CONTACT_FROM_EMAIL")
 const commerceAlertDestination = read("COMMERCE_ALERT_TO_EMAIL")
 if (target === "production" && salesExpectation === "open") {

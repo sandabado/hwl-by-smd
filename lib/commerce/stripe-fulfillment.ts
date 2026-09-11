@@ -5,11 +5,13 @@ import type Stripe from "stripe"
 import { getCheckoutIdentityRuntimeDisposition } from "@/lib/commerce/checkout-reconciliation-policy"
 import { isUuid } from "@/lib/relationships/request"
 import {
-  COMMERCE_APPLICATION,
   getCheckoutCatalog,
   getStripe,
   isExpectedCatalogPrice,
+  isLiftCheckoutCommerceMetadata,
   isProductId,
+  isServiceInvoiceCommerceMetadata,
+  LIFT_CHECKOUT_COMMERCE_FLOW,
   type DeploymentTarget,
   type ProductId,
 } from "@/lib/stripe"
@@ -20,6 +22,7 @@ type StripeClient = NonNullable<ReturnType<typeof getStripe>>
 
 type CheckoutIdentity = {
   catalogVersion: string
+  commerceFlow: typeof LIFT_CHECKOUT_COMMERCE_FLOW | null
   deploymentTarget: DeploymentTarget
   orderId: string
   priceId: string
@@ -136,6 +139,7 @@ function getCheckoutIdentity(
   metadata: Stripe.Metadata | null
 ): CheckoutIdentity {
   const catalogVersion = metadata?.catalog_version
+  const commerceFlow = metadata?.commerce_flow
   const deploymentTarget = metadata?.deployment_target
   const orderId = metadata?.checkout_order_id
   const priceId = metadata?.price_id
@@ -146,7 +150,7 @@ function getCheckoutIdentity(
   const userId = metadata?.user_id
 
   if (
-    metadata?.application !== COMMERCE_APPLICATION ||
+    !isLiftCheckoutCommerceMetadata(metadata) ||
     typeof catalogVersion !== "string" ||
     (deploymentTarget !== "development" &&
       deploymentTarget !== "preview" &&
@@ -164,6 +168,10 @@ function getCheckoutIdentity(
 
   return {
     catalogVersion,
+    commerceFlow:
+      commerceFlow === LIFT_CHECKOUT_COMMERCE_FLOW
+        ? LIFT_CHECKOUT_COMMERCE_FLOW
+        : null,
     deploymentTarget,
     orderId,
     priceId,
@@ -279,6 +287,7 @@ function assertMatchingPaymentIntent(
     paymentIntent.livemode !== stripeLivemode ||
     paymentIntent.status !== "succeeded" ||
     paymentIdentity.catalogVersion !== identity.catalogVersion ||
+    paymentIdentity.commerceFlow !== identity.commerceFlow ||
     paymentIdentity.deploymentTarget !== identity.deploymentTarget ||
     paymentIdentity.orderId !== identity.orderId ||
     paymentIdentity.priceId !== identity.priceId ||
@@ -483,6 +492,12 @@ export async function fulfillCompletedCheckout({
   const session = await stripe.checkout.sessions.retrieve(sessionId, {
     expand: ["line_items.data.price.product", "payment_intent.latest_charge"],
   })
+  if (isServiceInvoiceCommerceMetadata(session.metadata)) {
+    if (source === "webhook") {
+      return { purchaseStatus: null, state: "ignored" }
+    }
+    throw new Error("Checkout Session belongs to a different commerce flow.")
+  }
   const identity = getCheckoutIdentity(session.metadata)
   assertExpectedIdentity(identity, expectation)
 
@@ -809,7 +824,8 @@ export async function reconcileFullRefund(
   eventCharge: Stripe.Charge,
   deploymentTarget: DeploymentTarget,
   stripeAccountId: string,
-  stripeLivemode: boolean
+  stripeLivemode: boolean,
+  retrievedPaymentIntent?: Stripe.PaymentIntent
 ) {
   if (!eventCharge.refunded) return "processed" as const
 
@@ -820,10 +836,18 @@ export async function reconcileFullRefund(
   // can share one Stripe sandbox account, so each endpoint receives the other
   // target's account-level events and must acknowledge them without mutating
   // its own ledger.
-  const paymentIntent = await stripe.paymentIntents.retrieve(id, {
-    expand: ["latest_charge"],
-  })
-  if (paymentIntent.metadata.application !== COMMERCE_APPLICATION) {
+  const paymentIntent =
+    retrievedPaymentIntent ??
+    (await stripe.paymentIntents.retrieve(id, {
+      expand: ["latest_charge"],
+    }))
+  if (paymentIntent.id !== id) {
+    throw new Error("Refunded charge payment identity was inconsistent.")
+  }
+  if (isServiceInvoiceCommerceMetadata(paymentIntent.metadata)) {
+    return "ignored_foreign" as const
+  }
+  if (!isLiftCheckoutCommerceMetadata(paymentIntent.metadata)) {
     return "processed" as const
   }
 
@@ -907,7 +931,8 @@ export async function revokeDisputedCharge(
   eventDispute: Stripe.Dispute,
   deploymentTarget: DeploymentTarget,
   stripeAccountId: string,
-  stripeLivemode: boolean
+  stripeLivemode: boolean,
+  retrievedPaymentIntent?: Stripe.PaymentIntent
 ) {
   const id = paymentIntentId(eventDispute.payment_intent)
   const disputedChargeId = chargeId(eventDispute.charge)
@@ -915,10 +940,18 @@ export async function revokeDisputedCharge(
     throw new Error("Dispute is missing its payment identity.")
   }
 
-  const paymentIntent = await stripe.paymentIntents.retrieve(id, {
-    expand: ["latest_charge"],
-  })
-  if (paymentIntent.metadata.application !== COMMERCE_APPLICATION) {
+  const paymentIntent =
+    retrievedPaymentIntent ??
+    (await stripe.paymentIntents.retrieve(id, {
+      expand: ["latest_charge"],
+    }))
+  if (paymentIntent.id !== id) {
+    throw new Error("Dispute payment identity was inconsistent.")
+  }
+  if (isServiceInvoiceCommerceMetadata(paymentIntent.metadata)) {
+    return "ignored_foreign" as const
+  }
+  if (!isLiftCheckoutCommerceMetadata(paymentIntent.metadata)) {
     return "processed" as const
   }
 
@@ -1041,7 +1074,10 @@ export async function markCheckoutExpired(
   stripeAccountId: string,
   stripeLivemode: boolean
 ) {
-  if (session.metadata?.application !== COMMERCE_APPLICATION) {
+  if (isServiceInvoiceCommerceMetadata(session.metadata)) {
+    return "ignored_foreign" as const
+  }
+  if (!isLiftCheckoutCommerceMetadata(session.metadata)) {
     return "processed" as const
   }
 

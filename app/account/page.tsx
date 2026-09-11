@@ -1,6 +1,8 @@
 import Link from "next/link"
 import type { Metadata } from "next"
 import {
+  ArrowRight,
+  CalendarHeart,
   CalendarDays,
   Download,
   HeartHandshake,
@@ -8,8 +10,14 @@ import {
 } from "lucide-react"
 
 import { AccountActions } from "@/components/account/account-actions"
+import { MemberNavigation } from "@/components/member/member-navigation"
 import { Button } from "@/components/ui/button"
 import { requireAccess } from "@/lib/access"
+import {
+  findNextMemberBooking,
+  getMemberBookings,
+  isCalcomBookingLedgerReady,
+} from "@/lib/bookings/member-bookings"
 
 export const dynamic = "force-dynamic"
 
@@ -34,21 +42,53 @@ function purchaseStatusLabel(status: string) {
   return status.replaceAll("_", " ")
 }
 
+function readableSessionDate(value: string, timeZone: string) {
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "long",
+      timeStyle: "short",
+      timeZone,
+    }).format(new Date(value))
+  } catch {
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "long",
+      timeStyle: "short",
+      timeZone: "America/Los_Angeles",
+    }).format(new Date(value))
+  }
+}
+
+function bookingStatusLabel(status: string) {
+  if (status === "confirmed") return "Confirmed"
+  if (status === "requested") return "Awaiting Shannon"
+  if (status === "cancelled") return "Cancelled"
+  if (status === "rejected") return "Not confirmed"
+  return status.replaceAll("_", " ")
+}
+
 export default async function AccountPage() {
   const { access, user } = await requireAccess("authenticated", "/account")
+  const bookingLedgerReady = isCalcomBookingLedgerReady()
+  const bookings = await getMemberBookings(user.id)
+  const nextSession = findNextMemberBooking(bookings)
   const membership = access.membership
 
   return (
     <section className="member-atmosphere px-6 py-16 md:py-24">
       <div className="mx-auto max-w-5xl">
-        <p className="text-xs tracking-[0.3em] text-[var(--accent)] uppercase">
-          Account
-        </p>
-        <h1 className="mt-4 text-6xl font-medium text-[var(--primary)]">
-          Your Account
-        </h1>
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+          <div>
+            <p className="text-xs tracking-[0.3em] text-[var(--accent)] uppercase">
+              Account
+            </p>
+            <h1 className="mt-4 text-6xl font-medium text-[var(--primary)]">
+              Your Account
+            </h1>
+          </div>
+          <MemberNavigation showSessions={bookingLedgerReady} />
+        </div>
         <p className="mt-4 text-lg text-[var(--muted-foreground)]">
-          Profile, membership, purchases, and preferences.
+          Profile, sessions, purchases, and preferences.
         </p>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2">
@@ -88,6 +128,62 @@ export default async function AccountPage() {
             )}
           </article>
         </div>
+
+        <article className="den-card mt-6 rounded-[2rem] p-8">
+          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-start">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-3">
+                <CalendarHeart
+                  className="size-5 text-[var(--accent)]"
+                  aria-hidden="true"
+                />
+                <h2 className="text-3xl text-[var(--primary)]">
+                  Your sessions
+                </h2>
+              </div>
+
+              {nextSession ? (
+                <div className="mt-6">
+                  <p className="text-xs font-medium tracking-[0.2em] text-[var(--accent)] uppercase">
+                    {bookingStatusLabel(nextSession.bookingStatus)}
+                  </p>
+                  <p className="mt-2 font-serif text-2xl text-[var(--primary)]">
+                    {nextSession.serviceTitle}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">
+                    {readableSessionDate(
+                      nextSession.startAt,
+                      nextSession.timeZone
+                    )}
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-5 leading-relaxed text-[var(--muted-foreground)]">
+                  {bookingLedgerReady
+                    ? "Appointments booked with this account email will appear here once Cal.com records them."
+                    : "Your account is ready to book. Session history will appear here once Shannon’s secure Cal.com connection is switched on."}
+                </p>
+              )}
+            </div>
+
+            <div className="flex shrink-0 flex-wrap gap-3">
+              {bookingLedgerReady && bookings.length ? (
+                <Button asChild className="rounded-full" variant="outline">
+                  <Link href="/the-den/sessions">
+                    View history
+                    <ArrowRight aria-hidden="true" className="size-4" />
+                  </Link>
+                </Button>
+              ) : null}
+              <Button asChild className="rounded-full">
+                <Link href="/book">
+                  Book a session
+                  <ArrowRight aria-hidden="true" className="size-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </article>
 
         <article className="den-card mt-6 rounded-[2rem] p-8">
           <div className="flex items-center gap-3">

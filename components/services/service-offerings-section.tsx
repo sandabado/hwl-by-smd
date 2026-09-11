@@ -168,7 +168,7 @@ export function ServiceOfferingsSection({
             </p>
           </div>
 
-          <figure className="relative aspect-[5/3] min-h-64 overflow-hidden rounded-[2rem] border border-white/45 shadow-[0_24px_70px_rgba(47,36,31,0.14)]">
+          <figure className="relative aspect-[5/3] w-full min-w-0 overflow-hidden rounded-[2rem] border border-white/45 shadow-[0_24px_70px_rgba(47,36,31,0.14)]">
             <Image
               alt={presentation.image.alt}
               className="object-cover"

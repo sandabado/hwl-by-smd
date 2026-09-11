@@ -8,7 +8,7 @@ import {
 
 type Calls = {
   exchange: string[]
-  verify: Array<{ token_hash: string; type: "invite" }>
+  verify: Array<{ token_hash: string; type: "invite" | "magiclink" }>
 }
 
 function dependencies(
@@ -111,11 +111,53 @@ test("invite callbacks reject external destinations", async () => {
   )
 })
 
+test("auth callback verifies a magic link token hash on the server", async () => {
+  const calls = callLog()
+  const response = await handleAuthCallback(
+    new Request(
+      "https://www.hwlbysmd.com/auth/callback?token_hash=private-token&type=magiclink&next=%2Fbeauty%2Flift%3Fcart%3Dopen"
+    ),
+    dependencies(calls)
+  )
+
+  assert.deepEqual(calls.exchange, [])
+  assert.deepEqual(calls.verify, [
+    { token_hash: "private-token", type: "magiclink" },
+  ])
+  assert.equal(response.status, 307)
+  assert.equal(
+    response.headers.get("location"),
+    "https://www.hwlbysmd.com/beauty/lift?cart=open"
+  )
+  assert.equal(
+    response.headers.get("location")?.includes("private-token"),
+    false
+  )
+})
+
+test("magic link callbacks reject external destinations", async () => {
+  const calls = callLog()
+  const response = await handleAuthCallback(
+    new Request(
+      "https://www.hwlbysmd.com/auth/callback?token_hash=private-token&type=magiclink&next=https://evil.example/steal"
+    ),
+    dependencies(calls)
+  )
+
+  assert.deepEqual(calls.verify, [
+    { token_hash: "private-token", type: "magiclink" },
+  ])
+  assert.equal(
+    response.headers.get("location"),
+    "https://www.hwlbysmd.com/library"
+  )
+})
+
 test("unsupported token types fail closed without provider verification", async () => {
   const calls = callLog()
   const response = await handleAuthCallback(
     new Request(
-      "https://www.hwlbysmd.com/auth/callback?token_hash=private-token&type=magiclink"
+      "https://www.hwlbysmd.com/auth/callback?token_hash=private-token&type=recovery"
     ),
     dependencies(calls)
   )

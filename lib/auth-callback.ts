@@ -10,7 +10,7 @@ type AuthCallbackClient = {
     exchangeCodeForSession: (code: string) => Promise<{ error: unknown | null }>
     verifyOtp: (parameters: {
       token_hash: string
-      type: "invite"
+      type: "invite" | "magiclink"
     }) => Promise<{ error: unknown | null }>
   }
 }
@@ -20,6 +20,10 @@ export type AuthCallbackDependencies = {
 }
 
 const runtimeDependencies: AuthCallbackDependencies = { createClient }
+
+function serverVerifiedEmailOtpType(value: string | null) {
+  return value === "invite" || value === "magiclink" ? value : null
+}
 
 function noStoreRedirect(url: URL) {
   const response = NextResponse.redirect(url)
@@ -35,9 +39,9 @@ function failureRedirect(url: URL, redirectTo: string) {
 }
 
 /**
- * Completes browser-initiated PKCE callbacks and server-verifiable admin
- * invitations. Admin invitations cannot share the sender's PKCE verifier, so
- * their email template must deliver a token hash with type=invite instead.
+ * Completes browser-initiated PKCE callbacks and server-verifiable email links.
+ * Links generated outside the receiving browser cannot share its PKCE verifier,
+ * so they must deliver a token hash with an explicitly supported email type.
  */
 export async function handleAuthCallback(
   request: Request,
@@ -46,7 +50,7 @@ export async function handleAuthCallback(
   const url = new URL(request.url)
   const code = url.searchParams.get("code")
   const tokenHash = url.searchParams.get("token_hash")
-  const type = url.searchParams.get("type")
+  const type = serverVerifiedEmailOtpType(url.searchParams.get("type"))
   const redirectTo = safeInternalPath(
     url.searchParams.get("next"),
     tokenHash && type === "invite" ? "/update-password" : "/library"
@@ -61,10 +65,10 @@ export async function handleAuthCallback(
       if (!error) {
         return noStoreRedirect(new URL(redirectTo, url.origin))
       }
-    } else if (tokenHash && type === "invite") {
+    } else if (tokenHash && type) {
       const { error } = await supabase.auth.verifyOtp({
         token_hash: tokenHash,
-        type: "invite",
+        type,
       })
       if (!error) {
         return noStoreRedirect(new URL(redirectTo, url.origin))

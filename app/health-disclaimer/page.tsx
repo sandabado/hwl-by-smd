@@ -12,7 +12,7 @@ const sections: LegalSection[] = [
   {
     title: "Wellness and beauty practices",
     body: [
-      "Shannon Mary Dixon is a Licensed Aesthetician, 500-hour Yoga Instructor, Reiki Practitioner, and Aromatherapy Specialist. Her services are wellness and beauty practices, not medical treatments.",
+      "HWL by SMD offers beauty and wellness practices for personal care and reflection. These services are not medical treatments.",
       "Facial massage, lymphatic drainage, and skincare services are cosmetic and supportive in nature. They are not intended to diagnose, treat, cure, or prevent any medical condition.",
     ],
   },

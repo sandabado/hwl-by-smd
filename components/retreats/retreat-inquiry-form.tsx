@@ -9,6 +9,7 @@ import {
 import { InquiryCollectionPaused } from "@/components/shared/inquiry-collection-paused"
 import { InquiryPrivacyNotice } from "@/components/shared/inquiry-privacy-notice"
 import { Button } from "@/components/ui/button"
+import { SITE_CONFIG } from "@/lib/constants"
 import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 import { cn } from "@/lib/utils"
 
@@ -40,9 +41,12 @@ export function RetreatInquiryForm() {
   if (!isInquiryCollectionReady()) {
     return (
       <InquiryCollectionPaused
+        actionHref={`mailto:${SITE_CONFIG.email}?subject=Retreat%20with%20HWL`}
+        actionLabel="Email Shannon about a retreat"
         className="rounded-[1.75rem] border-white/65 p-6 shadow-[0_24px_80px_rgba(61,47,37,0.11)] backdrop-blur-md sm:p-8"
-        description="Retreat inquiries will open after Shannon’s private inquiry operations are finalized. No gathering details are collected here while the form is paused."
-        title="Retreat inquiries are paused."
+        description="Share the place, approximate dates, group size, and what you hope the gathering will feel like. Shannon will reply personally."
+        showBookingLink={false}
+        title="Begin the retreat conversation."
       />
     )
   }

@@ -102,7 +102,10 @@ export const seoJournalArticles = {
     ],
     serviceLinks: [
       { href: "/astrology", label: "Explore astrology and tarot readings" },
-      { href: "/book", label: "Request a private session" },
+      {
+        href: "/book?service=intuitive-tarot-reading#choose-time",
+        label: "See tarot availability",
+      },
       { href: "/about", label: "Meet Shannon" },
     ],
   },
@@ -167,7 +170,10 @@ export const seoJournalArticles = {
     serviceLinks: [
       { href: "/yoga", label: "Explore movement and sound" },
       { href: "/retreats", label: "Plan retreat wellness" },
-      { href: "/book", label: "Request a sound bath" },
+      {
+        href: "/book?service=private-sound-healing#choose-time",
+        label: "See sound healing availability",
+      },
     ],
   },
   "desert-skincare": {
@@ -231,7 +237,10 @@ export const seoJournalArticles = {
     serviceLinks: [
       { href: "/beauty", label: "Explore facial rituals" },
       { href: "/beauty/lift", label: "Discover the LIFT guide" },
-      { href: "/book", label: "Request a facial" },
+      {
+        href: "/book?service=signature-facial#choose-time",
+        label: "See facial availability",
+      },
     ],
   },
 } as const satisfies Record<SeoJournalArticleSlug, SeoJournalArticle>

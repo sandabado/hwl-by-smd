@@ -38,7 +38,7 @@ continue through the inquiry flow and are not Cal.com event candidates.
 | Exact public title         | Exact slug                   | Fixed reservation | Schedule               | Location mode                 | Per-event daily cap |
 | -------------------------- | ---------------------------- | ----------------: | ---------------------- | ----------------------------- | ------------------: |
 | Wild Glow Express Facial   | `wild-glow-express-facial`   |            20 min | HWL Beauty             | HWL Beauty location           |                   2 |
-| Reiki Aromatherapy Healing | `reiki-aromatherapy-healing` |            45 min | HWL Beauty             | Attendee address              |                   2 |
+| Reiki Aromatherapy Healing | `reiki-aromatherapy-healing` |            45 min | HWL Beauty             | HWL Beauty location           |                   2 |
 | Signature Facial           | `signature-facial`           |            60 min | HWL Beauty             | HWL Beauty location           |                   2 |
 | Beauty & Being Ritual      | `beauty-being-ritual`        |            90 min | HWL Beauty             | HWL Beauty location           |                   2 |
 | Wild Glow Luxury Facial    | `wild-glow-luxury-facial`    |           120 min | HWL Beauty             | HWL Beauty location           |                   2 |
@@ -80,24 +80,25 @@ request, organizer-confirmation, cancellation, and slot-release lifecycle.
   hide that question. The duplicate custom “Where will this session take
   place?” question is hidden on all eleven events; Cal.com's native location
   control is the single source of location truth.
-- The four facial appointments use the fixed private HWL Beauty organizer
-  location. The street address is not displayed before confirmation. Reiki and
-  Tarot + Reiki use an attendee-supplied address; the three movement events use
-  an attendee-supplied address for the party. Optional Notes remain available
-  for access, parking, preparation, or accessibility details.
+- All five Beauty-catalog appointments use the fixed private HWL Beauty
+  organizer location. The street address is not displayed before confirmation.
+  Tarot + Reiki and the three movement events use an attendee-supplied address.
+  Optional Notes remain available for access, parking, preparation, or
+  accessibility details.
 - Intuitive Tarot Reading and Moon Oracle Reading alone offer the choice of Cal
-  Video or an attendee-supplied address. Reiki, Tarot + Reiki, and the three
-  movement events use an attendee-supplied address. The four facial events stay
-  fixed at HWL Beauty.
+  Video or an attendee-supplied address. Tarot + Reiki and the three movement
+  events use an attendee-supplied address. The four facial events and Reiki
+  Aromatherapy stay fixed at HWL Beauty.
 - Cal.com paid booking and seats must remain disabled for every event. One
   booking is a request for one party; Shannon confirms it manually. No payment
   is collected when the appointment is requested. Shannon arranges payment
   after the completed appointment.
 
-All five Beauty-catalog services are flat individual appointments. Facial
-appointments are held at HWL Beauty; Reiki Aromatherapy uses the attendee's
-address. The three ritual services are also flat individual direct bookings;
-group ritual and group Beauty requests belong in the Retreats inquiry flow.
+All five Beauty-catalog services are flat individual appointments held at HWL
+Beauty. No Beauty-catalog booking asks for a customer address or guest count;
+the private street address is shared after Shannon confirms the request. The
+three ritual services are also flat individual direct bookings; group ritual
+and group Beauty requests belong in the Retreats inquiry flow.
 
 The per-event daily caps are provider safety limits, not a proven aggregate cap
 across every event in a schedule family. Required guest-count answers are

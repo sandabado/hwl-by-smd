@@ -23,6 +23,10 @@ function articleSchema(article: SeoJournalArticle): JsonLdNode {
 }
 
 export function SeoArticlePage({ article }: { article: SeoJournalArticle }) {
+  const bookingLink = article.serviceLinks.find((link) =>
+    link.href.startsWith("/book?service=")
+  )
+
   return (
     <>
       <JsonLd
@@ -140,8 +144,8 @@ export function SeoArticlePage({ article }: { article: SeoJournalArticle }) {
             asChild
             className="min-h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
           >
-            <Link href="/book">
-              Begin a conversation <ArrowRight aria-hidden="true" />
+            <Link href={bookingLink?.href ?? "/book"}>
+              See live availability <ArrowRight aria-hidden="true" />
             </Link>
           </Button>
         </div>

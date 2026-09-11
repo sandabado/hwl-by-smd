@@ -538,6 +538,7 @@ test("booking catalog keeps available Cal discovery exact", async (t) => {
 
     for (const slug of [
       "wild-glow-express-facial",
+      "reiki-aromatherapy-healing",
       "signature-facial",
       "beauty-being-ritual",
       "wild-glow-luxury-facial",
@@ -549,11 +550,6 @@ test("booking catalog keeps available Cal discovery exact", async (t) => {
         label: "HWL Beauty",
       })
     }
-
-    assert.deepEqual(
-      findBookingService("reiki-aromatherapy-healing")?.service.locationPolicy,
-      { kind: "attendee-address" }
-    )
   })
 })
 
@@ -654,14 +650,13 @@ test("booking request presentation stays actionable in both readiness states", a
 })
 
 test("closed-mode presentation remains connected to the rendered email action", () => {
-  const bookingPage = source("app/book/page.tsx")
   const bookingFlow = source("components/booking/booking-request-flow.tsx")
   const calEmbed = source("components/booking/cal-inline-embed.tsx")
   const pausedPanel = source("components/shared/inquiry-collection-paused.tsx")
 
   assert.match(
-    bookingPage,
-    /Custom arrangements include a direct way to email her/
+    bookingFlow,
+    /bookingRequestPresentation\?\.kind === "direct-email"/
   )
   assert.match(
     bookingFlow,
@@ -677,8 +672,19 @@ test("stepped booking keeps navigation and calendar recovery inside the journey"
   const bookingFlow = source("components/booking/booking-request-flow.tsx")
   const calEmbed = source("components/booking/cal-inline-embed.tsx")
 
-  assert.match(bookingFlow, /aria-label="Booking progress"/)
-  assert.match(bookingFlow, /aria-current=\{isCurrent \? "step" : undefined\}/)
+  assert.doesNotMatch(bookingFlow, /BookingProgress|aria-label="Booking progress"/)
+  assert.match(bookingFlow, /aria-label="Jump to a service category"/)
+  assert.match(bookingFlow, /href=\{`#booking-pillar-\$\{pillar\.id\}`\}/)
+  assert.match(bookingFlow, /bookingPillars\.map\(\(pillar\) =>/)
+  assert.match(bookingFlow, /pillar\.services\.map\(\(service\) =>/)
+  assert.doesNotMatch(
+    bookingFlow,
+    /activePillar|activeServices|choosePillar/
+  )
+  assert.match(bookingFlow, /const serviceIconBySlug = \{/)
+  assert.match(bookingFlow, /With Shannon Mary Dixon/)
+  assert.match(bookingFlow, /HWL Beauty · Palm Springs/)
+  assert.match(bookingFlow, /Private address shared after confirmation\./)
   assert.match(bookingFlow, /window\.history\.pushState/)
   assert.match(bookingFlow, /window\.addEventListener\("popstate"/)
   assert.match(bookingFlow, /class CalendarEmbedBoundary/)
@@ -688,6 +694,11 @@ test("stepped booking keeps navigation and calendar recovery inside the journey"
   assert.doesNotMatch(calEmbed, /styles:\s*\{/)
   assert.match(calEmbed, /cssVarsPerTheme:\s*\{/)
   assert.match(calEmbed, /CAL_BOOKER_LAYOUT = "month_view"/)
+  assert.match(calEmbed, /hideEventTypeDetails: true/)
+  assert.match(
+    calEmbed,
+    /Cal will show your selected date and time again before you confirm/
+  )
   assert.doesNotMatch(calEmbed, /week_view/)
   assert.match(bookingPage, /user\.email_confirmed_at/)
   assert.match(bookingPage, /attendee=\{attendee\}/)

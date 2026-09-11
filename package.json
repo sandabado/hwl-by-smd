@@ -24,6 +24,7 @@
     "test:booking": "node --experimental-strip-types --experimental-loader ./scripts/test-calcom-webhook-route-loader.mjs --test scripts/test-booking-boundaries.ts scripts/test-calcom-admin-bookings.ts scripts/test-calcom-booking-ledger-migration.ts scripts/test-calcom-booking-webhook.ts scripts/test-calcom-webhook-route.ts scripts/test-member-bookings.ts",
     "test:booking:database": "psql -X --set=ON_ERROR_STOP=on --file scripts/test-calcom-booking-ledger-database.sql",
     "test:commerce": "node --experimental-strip-types --experimental-loader ./scripts/test-commerce-route-loader.mjs --test scripts/test-commerce-reconciliation.ts scripts/test-commerce-route-boundaries.ts scripts/test-commerce-runtime-authority.ts scripts/test-scheduled-reconciliation.ts scripts/test-stripe-admin.ts scripts/test-stripe-fulfillment.ts",
+    "test:email": "node --experimental-strip-types --test scripts/test-email-branding.ts",
     "test:inquiries": "node --experimental-strip-types --experimental-loader ./scripts/test-module-loader.mjs --test scripts/test-admin-inquiry-access.ts scripts/test-inquiry-boundaries.ts scripts/test-inquiry-retention.ts",
     "test:launch-env": "node --experimental-strip-types scripts/test-launch-env.ts",
     "test:preview-release": "node --experimental-strip-types --test scripts/test-preview-release-preflight.ts",

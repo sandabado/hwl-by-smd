@@ -11,6 +11,7 @@ import {
 } from "@/lib/booking-services"
 import { media } from "@/lib/media"
 import { LIFT_STOREFRONT_PRODUCT } from "@/lib/storefront-product"
+import { isProductCheckoutReady } from "@/lib/stripe"
 import { cn } from "@/lib/utils"
 
 const presentationByPillar = {
@@ -50,18 +51,18 @@ const presentationByPillar = {
     cardClass:
       "border-white/12 bg-white/[0.065] text-white shadow-[0_18px_55px_rgba(8,5,10,0.24)] hover:border-[#dcc5a5]/38 hover:bg-white/[0.09] hover:shadow-[0_24px_70px_rgba(8,5,10,0.34)]",
     description:
-      "See timing, format, and investment before you choose. Every reading opens its own live calendar, with the offering carried into the next step.",
+      "Tarot, astrology, and Reiki with timing, format, and investment visible before you choose.",
     categoryLabel: "Being",
-    eyebrow: "Being sessions",
+    eyebrow: "Being",
     image: media.editorial.beingOfferings,
     imageLabel: "The ritual table",
     sectionClass:
       "bg-[radial-gradient(circle_at_80%_12%,rgba(122,78,111,0.25),transparent_32%),linear-gradient(180deg,#241e26_0%,#302631_100%)] text-white",
-    title: "Choose the reading that meets this season.",
+    title: "Choose what meets this season.",
   },
 } as const
 
-function LiftSpotlight() {
+function LiftSpotlight({ checkoutReady }: { checkoutReady: boolean }) {
   return (
     <article className="mt-10 grid overflow-hidden rounded-[2rem] border border-white/65 bg-[var(--primary)] text-white shadow-[0_26px_75px_rgba(63,48,39,0.18)] sm:grid-cols-[11rem_1fr] lg:grid-cols-[15rem_1fr_auto]">
       <div className="relative min-h-52 sm:min-h-full">
@@ -83,7 +84,9 @@ function LiftSpotlight() {
 
       <div className="p-6 sm:p-7 lg:p-8">
         <p className="text-[11px] font-medium tracking-[0.22em] text-[var(--accent-on-dark)] uppercase">
-          Available now · Digital ritual
+          {checkoutReady
+            ? "Available now · Digital ritual"
+            : "Digital ritual · Save to cart"}
         </p>
         <h3 className="mt-3 text-3xl leading-tight font-medium text-white md:text-4xl">
           {LIFT_STOREFRONT_PRODUCT.name}
@@ -113,7 +116,9 @@ function LiftSpotlight() {
           label={`Add LIFT to cart · ${LIFT_STOREFRONT_PRODUCT.price}`}
         />
         <p className="mt-3 text-center text-[11px] leading-5 text-white/55">
-          Secure Stripe checkout · Account-based access
+          {checkoutReady
+            ? "Secure Stripe checkout · Account-based access"
+            : "Checkout opens after final delivery verification"}
         </p>
       </div>
     </article>
@@ -186,7 +191,9 @@ export function ServiceOfferingsSection({
           </figure>
         </div>
 
-        {pillarId === "beauty" ? <LiftSpotlight /> : null}
+        {pillarId === "beauty" ? (
+          <LiftSpotlight checkoutReady={isProductCheckoutReady("lift_guide")} />
+        ) : null}
 
         <ol
           className={cn(

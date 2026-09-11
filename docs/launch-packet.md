@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** September 9, 2026
+**Updated:** September 11, 2026
 
 **Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
 Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
@@ -8,6 +8,68 @@ Vercel apex-to-www redirect, `https://preview.hwlbysmd.com` for the protected
 custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
+
+## Current authority snapshot — read this first
+
+All dated sections below remain evidence history. This table is the controlling
+status for the current release decision.
+
+| Surface              | Current authority                                                                                                                                           | Status                                                                                                                                                                                                                 |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local candidate      | `checkpoint/platform-overhaul-2026-08-20` at committed base `d1f3f49`, plus the uncommitted September 10–11 UX and launch-truth pass                        | Full lint, TypeScript, SEO, repository boundary suites, Next.js 16.3.4 Webpack build, and production dependency audit pass. The working tree is intentionally dirty and cannot be tied to an immutable deployment yet. |
+| Preview              | `preview.hwlbysmd.com` remains historical deployment evidence until the current working tree is committed and deployed by fresh owner approval              | Do not treat the mutable alias or September 9 sandbox purchase as proof of the new UX candidate.                                                                                                                       |
+| Production           | Last independently recorded authority is `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i`, commit `6a260bcfa7c752562be264d1a077013fc8ff9f4d`, with commerce closed        | Production does not contain the current local UX pass. No alias change or Production mutation is authorized by this packet.                                                                                            |
+| Booking              | All 11 Cal.com services exposed live dates and times. One zero-payment QA request was created and later appeared Rejected, leaving no active QA appointment | Confirm → reschedule → cancel and both mailbox receipts remain unproved. The temporary organizer email `wholebodymastery@pm.me` is an owner-accepted follow-up; the target remains `shannon@hwlbysmd.com`.             |
+| Booking history      | Cal.com has no configured webhook and HWL booking-ledger readiness remains disabled                                                                         | My Account/Admin cannot promise synchronized lifecycle history yet.                                                                                                                                                    |
+| LIFT commerce        | One $11.11 video + PDF product, one cart shelf, strict checkout/webhook code, and prior sandbox fulfillment evidence exist                                  | The exact current candidate still needs its own approved sandbox purchase and entitlement canary. Production sales remain closed.                                                                                      |
+| Contact and retreats | The current local candidate uses a direct email path while durable inquiry collection is closed                                                             | Verify mail links on Preview; do not advertise the database form until its full path is proven.                                                                                                                        |
+| Release authority    | No current-candidate commit, branch push, Preview deployment, Production promotion, or `main` update has been approved                                      | Next release step is a reviewed checkpoint commit and exact-SHA Preview, each under fresh owner approval.                                                                                                              |
+
+## September 10 Booking, Brand, and Email Polish — Local Working Tree
+
+This section records the current uncommitted local working tree. It does not
+replace the immutable Preview evidence below and does not authorize a Preview
+push, Production promotion, or `main` update.
+
+- **Booking viewport:** the duplicate standalone booking hero and two-item step
+  rail are removed. One compact, softly contrasted masthead now shares the
+  global `max-w-7xl` content spine with every service section and card. The
+  visible page keeps a single `h1`, category `h2` headings, 44-pixel category
+  jump targets, and larger duration/format metadata.
+- **Catalog visibility:** all eleven Beauty, Yoga + Sound, and Tarot + Reiki
+  services render in the initial document. The category controls are jump
+  links, not content filters, and every service has a distinct lightweight
+  brand sigil rather than a repeated photograph.
+- **Reiki appointment truth:** authenticated Cal.com event `6876527`
+  (`reiki-aromatherapy-healing`) now uses the organizer location `HWL Beauty,
+Palm Springs, CA`, displays that location on its booking page, remains free
+  at booking, and requires Shannon's confirmation. The public form showed an
+  available date/time selector plus only name, email, and optional notes; it
+  did not ask for an attendee address or guest count. No appointment was
+  submitted during this verification.
+- **Schedule clarity:** before the embed, the website now restates the selected
+  service, duration, price, Shannon Mary Dixon, and the safe location label.
+  Cal.com's repeated event-detail panel is hidden so its live month grid and
+  times begin within the first mobile viewport.
+  Cal.com's native review state remains the single authority for the selected
+  date/time and final `Confirm` action; the website does not add a competing
+  submit control.
+- **Purpose-built imagery:** the homepage Body door, retreat group-practice
+  scene, seasonal editorial images, and Store hero now use existing
+  offer-specific generated or editorial assets. The Store hero depicts the
+  currently purchasable LIFT video rather than repeating a category image.
+- **Transactional email presentation:** all direct Resend senders use one
+  image-independent HWL by SMD HTML shell with a matching text alternative,
+  accessible preheader/article structure, warm neutral and copper styling,
+  one clear action, and restrained site footer. Provider identities,
+  recipients, and readiness gates are unchanged.
+- **Local verification:** rendered `/book` and the Reiki schedule route passed
+  browser and accessibility-tree review; live Cal.com dates and times loaded.
+  TypeScript, full ESLint, SEO validation, the Next.js 16.3.4 Webpack production
+  build, all `492/492` executed repository boundary cases, the production
+  dependency audit with zero known vulnerabilities, and `git diff --check`
+  passed. The local development server remains available at
+  `http://localhost:3000`.
 
 ## September 9 Security-Patched Preview Purchase — Current Candidate
 
@@ -3059,29 +3121,30 @@ This section supersedes earlier current-state statements about facial location,
 direct-service guest intake, catalog payment basis, canonical inquiry routing,
 and local verification counts. Older dated sections remain historical evidence.
 
-- **Owner-approved service model:** Wild Glow Express Facial, Signature Facial,
-  Beauty & Being Ritual, and Wild Glow Luxury Facial are flat, one-person
-  appointments held at HWL Beauty. The private street address is shared after
-  Shannon confirms the request. Reiki Aromatherapy remains a flat, one-person
-  appointment at the attendee's address. Intuitive Tarot, Moon Oracle, and
-  Tarot + Reiki are also flat, one-person direct bookings. Group Beauty and
-  ritual work belongs in the Retreats inquiry journey.
+- **Owner-approved service model:** Wild Glow Express Facial, Reiki Aromatherapy
+  Healing, Signature Facial, Beauty & Being Ritual, and Wild Glow Luxury Facial
+  are flat, one-person appointments held at HWL Beauty. The private street
+  address is shared after Shannon confirms the request. Intuitive Tarot, Moon
+  Oracle, and Tarot + Reiki are also flat, one-person direct bookings. Group
+  Beauty and ritual work belongs in the Retreats inquiry journey.
 - **Minimal intake:** those eight individual services do not ask for party size.
-  The four fixed-location facial events do not ask clients for an address. Only
-  Private Yoga + Sound, Private Sound Healing, and Private Yoga retain a bounded
-  guest-count question and attendee location. The duplicate custom location
-  question is disabled for all eleven events; Cal.com's native location control
-  remains the provider source of truth.
-- **Provider evidence:** the four facial event types were saved in Cal.com with
-  the private organizer location label `HWL Beauty — address shared after
-  confirmation`. A fresh, non-submitting Beauty & Being form smoke displayed
-  name, email, and optional notes only—no group-size or attendee-address field.
-  Provider settings were read back for all eleven events after the change. No
-  appointment or payment was submitted during this correction.
+  The five fixed-location Beauty events do not ask clients for an address. Only
+  Private Yoga + Sound, Private Sound Healing, and Private Yoga retain a
+  bounded guest-count question and attendee location. The duplicate custom
+  location question is disabled for all eleven events; Cal.com's native
+  location control remains the provider source of truth.
+- **Provider evidence boundary:** the four facial event types were previously
+  saved in Cal.com with the private organizer location label
+  `HWL Beauty — address shared after confirmation`. Reiki Aromatherapy now
+  requires the same organizer location and a fresh non-submitting form smoke
+  showing name, email, and optional notes only—no guest-count or
+  attendee-address field—before this provider correction is release-ready. No
+  appointment or payment is required to verify that intake boundary.
 - **Website containment:** the catalog now carries an explicit location policy,
   so fixed-location behavior is no longer inferred from display copy. The
   fallback inquiry form uses that policy, preserves signed-in name/email, fixes
-  facial location to HWL Beauty, and hides guest count for individual services.
+  every Beauty-catalog location to HWL Beauty, and hides guest count for
+  individual services.
 - **Canonical private email routing:** inquiry, relationship-alert, and Journey
   reply-to paths admit only `shannon@hwlbysmd.com`; altered, padded, or missing
   recipients fail closed or omit the optional reply-to.

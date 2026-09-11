@@ -1,5 +1,3 @@
-import { media } from "@/lib/media"
-
 export type BookingPillarId = "beauty" | "movement" | "ritual"
 
 export type CalendarBooking =
@@ -25,7 +23,6 @@ export type BookingService = {
     maximum?: number
     minimum: number
   }
-  image: { alt: string; src: string }
   locationPolicy:
     | { kind: "attendee-address" }
     | { kind: "fixed"; label: "HWL Beauty" }
@@ -44,7 +41,6 @@ export type BookingPillar = {
   description: string
   format: string
   id: BookingPillarId
-  image: { alt: string; src: string }
   services: readonly BookingService[]
   title: string
 }
@@ -55,7 +51,6 @@ export const bookingPillars: readonly BookingPillar[] = [
     title: "Beauty",
     description: "Skin as landscape.",
     format: "In-person care",
-    image: media.shannon.beautyPortrait,
     services: [
       {
         calendarBooking: { durationMinutes: 20, kind: "exact-event" },
@@ -68,7 +63,6 @@ export const bookingPillars: readonly BookingPillar[] = [
         locationPolicy: { kind: "fixed", label: "HWL Beauty" },
         description:
           "A focused facial ritual for fresh, luminous skin when time is brief.",
-        image: media.shannon.beautyLift,
         payment: {
           basis: "flat",
           currency: "usd",
@@ -81,12 +75,11 @@ export const bookingPillars: readonly BookingPillar[] = [
         title: "Reiki Aromatherapy Healing",
         duration: "30–45 min",
         price: "$222",
-        format: "In person",
+        format: "In person · HWL Beauty",
         guestRange: { maximum: 1, minimum: 1 },
-        locationPolicy: { kind: "attendee-address" },
+        locationPolicy: { kind: "fixed", label: "HWL Beauty" },
         description:
           "A quiet blend of aromatherapy and Reiki held at an unhurried pace.",
-        image: media.shannon.botanicalPortrait,
         payment: {
           basis: "flat",
           currency: "usd",
@@ -104,7 +97,6 @@ export const bookingPillars: readonly BookingPillar[] = [
         locationPolicy: { kind: "fixed", label: "HWL Beauty" },
         description:
           "Personalized professional skin care with massage and room to soften.",
-        image: media.shannon.beautyLift,
         payment: {
           basis: "flat",
           currency: "usd",
@@ -122,7 +114,6 @@ export const bookingPillars: readonly BookingPillar[] = [
         locationPolicy: { kind: "fixed", label: "HWL Beauty" },
         description:
           "An extended facial and restorative ritual for skin, senses, and stillness.",
-        image: media.shannon.beautyPortrait,
         payment: {
           basis: "flat",
           currency: "usd",
@@ -140,7 +131,6 @@ export const bookingPillars: readonly BookingPillar[] = [
         locationPolicy: { kind: "fixed", label: "HWL Beauty" },
         description:
           "Shannon’s most spacious facial experience, shaped as a complete ceremony of care.",
-        image: media.shannon.beautyLift,
         payment: {
           basis: "flat",
           currency: "usd",
@@ -154,7 +144,6 @@ export const bookingPillars: readonly BookingPillar[] = [
     title: "Movement",
     description: "Move at your own rhythm.",
     format: "Private, in-person sessions",
-    image: media.experiences.movementStretch,
     services: [
       {
         calendarBooking: { durationMinutes: 60, kind: "exact-event" },
@@ -167,7 +156,6 @@ export const bookingPillars: readonly BookingPillar[] = [
         locationPolicy: { kind: "attendee-address" },
         description:
           "Breath-led private movement followed by a restorative sound experience.",
-        image: media.experiences.movementEagle,
         payment: {
           basis: "flat",
           currency: "usd",
@@ -185,7 +173,6 @@ export const bookingPillars: readonly BookingPillar[] = [
         locationPolicy: { kind: "attendee-address" },
         description:
           "A private sound practice designed for rest, reflection, and spacious attention.",
-        image: media.brand.sanctuaryHero,
         payment: {
           basis: "flat",
           currency: "usd",
@@ -203,7 +190,6 @@ export const bookingPillars: readonly BookingPillar[] = [
         locationPolicy: { kind: "attendee-address" },
         description:
           "A private practice shaped around your body, breath, experience, and energy that day.",
-        image: media.brand.standingStretch,
         payment: {
           basis: "flat",
           currency: "usd",
@@ -217,7 +203,6 @@ export const bookingPillars: readonly BookingPillar[] = [
     title: "Ritual",
     description: "A mirror, not a map.",
     format: "Virtual + in-person care",
-    image: media.experiences.ritualWolf,
     services: [
       {
         calendarBooking: { durationMinutes: 60, kind: "exact-event" },
@@ -230,7 +215,6 @@ export const bookingPillars: readonly BookingPillar[] = [
         locationPolicy: { kind: "virtual-or-attendee-address" },
         description:
           "Reflective card work for transitions, choices, patterns, and the season you are in.",
-        image: media.shannon.ritualSpace,
         payment: {
           basis: "flat",
           currency: "usd",
@@ -248,7 +232,6 @@ export const bookingPillars: readonly BookingPillar[] = [
         locationPolicy: { kind: "virtual-or-attendee-address" },
         description:
           "A lunar and astrological reading for reflection, timing, and present-season clarity.",
-        image: media.experiences.ritualWolf,
         payment: {
           basis: "flat",
           currency: "usd",
@@ -266,7 +249,6 @@ export const bookingPillars: readonly BookingPillar[] = [
         locationPolicy: { kind: "attendee-address" },
         description:
           "Intuitive guidance followed by restorative Reiki support in person.",
-        image: media.shannon.ritualSpace,
         payment: {
           basis: "flat",
           currency: "usd",

@@ -12,6 +12,7 @@ import {
 } from "@/lib/inquiries/rate-limit"
 import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 import { getCanonicalContactToEmail } from "@/lib/commerce/launch-authority"
+import { escapeEmailHtml, renderBrandedEmail } from "@/lib/email-branding"
 import { createAdminClient } from "@/lib/supabase/server"
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -495,11 +496,7 @@ export async function POST(request: Request) {
   const to = getCanonicalContactToEmail(process.env)
   const from = process.env.CONTACT_FROM_EMAIL
 
-  if (
-    !apiKey ||
-    !to ||
-    !from
-  ) {
+  if (!apiKey || !to || !from) {
     const audited = await markNotification(
       "not_configured",
       "configuration_missing"
@@ -530,6 +527,28 @@ export async function POST(request: Request) {
     adminInboxUrl = loginUrl.toString()
   }
 
+  const inquiryEmail = renderBrandedEmail({
+    bodyHtml: `<p style="margin:0 0 20px">A new website inquiry is safely stored in the private HWL inbox.</p><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background:#f8f1e8;border:1px solid #e5d8c7;border-radius:12px;width:100%"><tr><td style="color:#74675d;font-family:Arial,Helvetica,sans-serif;font-size:12px;padding:16px 18px 5px;text-transform:uppercase">Inquiry ID</td></tr><tr><td style="color:#312a25;font-family:Arial,Helvetica,sans-serif;font-size:14px;padding:0 18px 12px;word-break:break-all">${escapeEmailHtml(
+      inquiryId
+    )}</td></tr><tr><td style="border-top:1px solid #e5d8c7;color:#74675d;font-family:Arial,Helvetica,sans-serif;font-size:12px;padding:13px 18px 5px;text-transform:uppercase">Source</td></tr><tr><td style="color:#312a25;font-family:Arial,Helvetica,sans-serif;font-size:14px;padding:0 18px 16px">${escapeEmailHtml(
+      source
+    )}</td></tr></table>`,
+    bodyText: [
+      "A new website inquiry is safely stored in the private HWL inbox.",
+      `Inquiry ID: ${inquiryId}`,
+      `Source: ${source}`,
+    ].join("\n\n"),
+    cta: { href: adminInboxUrl, label: "Review inquiry" },
+    eyebrow: "Private inbox",
+    finePrintHtml:
+      "Submitted contact details and message content are intentionally omitted from this email.",
+    finePrintText:
+      "Submitted contact details and message content are intentionally omitted from this email.",
+    heading: "A new private inquiry has arrived.",
+    preheader:
+      "A new website inquiry is safely stored in the private HWL inbox.",
+  })
+
   let response: Response
   try {
     response = await fetch("https://api.resend.com/emails", {
@@ -541,15 +560,10 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         from,
+        html: inquiryEmail.html,
         to: [to],
         subject: "HWL by SMD · New private inquiry",
-        text: [
-          "A new website inquiry is stored in the private HWL inbox.",
-          `Inquiry ID: ${inquiryId}`,
-          `Source: ${source}`,
-          `Review securely: ${adminInboxUrl}`,
-          "Submitted contact details and message content are intentionally omitted from this email.",
-        ].join("\n\n"),
+        text: inquiryEmail.text,
       }),
       signal: AbortSignal.timeout(10_000),
     })

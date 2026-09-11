@@ -14,7 +14,21 @@ import {
   CalendarDays,
   Check,
   Clock3,
+  Droplets,
+  Eye,
   ExternalLink,
+  Flower2,
+  Gem,
+  HandHeart,
+  MapPin,
+  MoonStar,
+  Music2,
+  PersonStanding,
+  Sparkles,
+  Sun,
+  UserRound,
+  Waves,
+  type LucideIcon,
 } from "lucide-react"
 import dynamic from "next/dynamic"
 
@@ -93,6 +107,40 @@ const pillarLabels: Record<BookingPillarId, string> = {
   ritual: "Tarot + Reiki",
 }
 
+const serviceIconBySlug = {
+  "wild-glow-express-facial": Sparkles,
+  "reiki-aromatherapy-healing": Flower2,
+  "signature-facial": Droplets,
+  "beauty-being-ritual": Gem,
+  "wild-glow-luxury-facial": Sun,
+  "private-yoga-and-sound": PersonStanding,
+  "private-sound-healing": Music2,
+  "private-yoga": Waves,
+  "intuitive-tarot-reading": Eye,
+  "moon-oracle-reading": MoonStar,
+  "tarot-and-reiki": HandHeart,
+} as const satisfies Record<string, LucideIcon>
+
+type ServiceIconSlug = keyof typeof serviceIconBySlug
+
+const pillarSigilStyles: Record<
+  BookingPillarId,
+  { icon: string; surface: string }
+> = {
+  beauty: {
+    icon: "text-[#9a5f3f]",
+    surface: "border-[#c9906d]/35 bg-[#f4e7dc]",
+  },
+  movement: {
+    icon: "text-[#665c4c]",
+    surface: "border-[#b6a789]/35 bg-[#eee7d9]",
+  },
+  ritual: {
+    icon: "text-[#654e50]",
+    surface: "border-[#a98a82]/35 bg-[#eee2df]",
+  },
+}
+
 const inputClassName =
   "min-h-11 w-full rounded-xl border border-[var(--border)] bg-white/82 px-4 text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
 
@@ -124,6 +172,21 @@ function guestRangeError({
   return `This experience requires at least ${minimum} guests.`
 }
 
+function getBookingLocationLabel(service: BookingService) {
+  switch (service.locationPolicy.kind) {
+    case "fixed":
+      return "HWL Beauty · Palm Springs"
+    case "attendee-address":
+      return "Your selected location"
+    case "virtual-or-attendee-address":
+      return "Virtual or your selected location"
+  }
+}
+
+function getServiceIcon(slug: string) {
+  return serviceIconBySlug[slug as ServiceIconSlug] ?? Sparkles
+}
+
 function withCalAttendee(
   href: string,
   attendee: { email: string; name?: string } | undefined
@@ -138,61 +201,6 @@ function withCalAttendee(
   } catch {
     return href
   }
-}
-
-function BookingProgress({ step }: { step: BookingStep }) {
-  const steps = [
-    { id: "experience", label: "Session" },
-    { id: "schedule", label: "Time & details" },
-  ] as const
-
-  return (
-    <ol
-      aria-label="Booking progress"
-      className="mx-auto grid w-full max-w-lg grid-cols-2 gap-2"
-    >
-      {steps.map((item, index) => {
-        const isCurrent = item.id === step
-        const isComplete = step === "schedule" && item.id === "experience"
-
-        return (
-          <li
-            aria-current={isCurrent ? "step" : undefined}
-            className={cn(
-              "flex min-h-11 items-center gap-2.5 rounded-xl border px-3 py-2 text-left transition-colors sm:px-4",
-              isCurrent
-                ? "border-[var(--accent)] bg-[var(--accent)]/[0.09] text-[var(--primary)]"
-                : "border-[var(--border)] bg-white/45 text-[var(--muted-foreground)]",
-              isComplete && "border-[var(--primary)]/20 bg-white/72"
-            )}
-            key={item.id}
-          >
-            <span
-              aria-hidden="true"
-              className={cn(
-                "grid size-6 shrink-0 place-items-center rounded-full border text-[11px] font-semibold",
-                isCurrent
-                  ? "border-[var(--accent)] bg-[var(--accent)] text-white"
-                  : "border-[var(--border)] bg-white",
-                isComplete &&
-                  "border-[var(--primary)] bg-[var(--primary)] text-white"
-              )}
-            >
-              {isComplete ? <Check className="size-3.5" /> : index + 1}
-            </span>
-            <span>
-              <span className="block text-[8px] font-semibold tracking-[0.14em] uppercase">
-                Step {index + 1}
-              </span>
-              <span className="block text-[11px] font-medium sm:text-xs">
-                {item.label}
-              </span>
-            </span>
-          </li>
-        )
-      })}
-    </ol>
-  )
 }
 
 function BookingInquiryForm({
@@ -495,9 +503,6 @@ export function BookingRequestFlow({
   minimumDate: string
 }) {
   const initialSelection = findBookingService(initialServiceSlug)
-  const [activePillar, setActivePillar] = useState<BookingPillarId>(
-    initialSelection?.pillar.id ?? "beauty"
-  )
   const [selectedServiceSlug, setSelectedServiceSlug] = useState(
     initialSelection?.service.slug ?? ""
   )
@@ -515,10 +520,9 @@ export function BookingRequestFlow({
   const submitInquiry = useInquirySubmission()
   const selectedResult = findBookingService(selectedServiceSlug)
   const selectedService = selectedResult?.service
-  const activePillarData =
-    bookingPillars.find((pillar) => pillar.id === activePillar) ??
-    bookingPillars[0]
-  const activeServices = activePillarData.services
+  const selectedLocationLabel = selectedService
+    ? getBookingLocationLabel(selectedService)
+    : undefined
   const selectedCalOption =
     selectedService?.calendarBooking.kind === "exact-event"
       ? calBookingOptionsByServiceSlug[selectedService.slug]
@@ -577,7 +581,6 @@ export function BookingRequestFlow({
       shouldFocusStepRef.current = true
 
       if (result) {
-        setActivePillar(result.pillar.id)
         setSelectedServiceSlug(result.service.slug)
         setStep("schedule")
         return
@@ -593,15 +596,6 @@ export function BookingRequestFlow({
   function resetFeedback() {
     if (status !== "idle") setStatus("idle")
     if (feedback) setFeedback("")
-  }
-
-  function choosePillar(pillarId: BookingPillarId) {
-    setActivePillar(pillarId)
-
-    const selectedPillar = findBookingService(selectedServiceSlug)?.pillar.id
-    if (selectedPillar !== pillarId) setSelectedServiceSlug("")
-
-    resetFeedback()
   }
 
   function chooseService(serviceSlug: string) {
@@ -709,152 +703,215 @@ export function BookingRequestFlow({
 
   return (
     <section
-      className="scroll-mt-24 border-y border-[var(--border)] bg-white/38 px-5 py-5 sm:px-6 md:py-6"
+      className="scroll-mt-24 border-b border-[var(--border)] bg-[#f7f3ec] px-5 py-5 sm:px-6 md:py-7"
       id="choose-time"
       ref={bookingFlowRef}
     >
       <div className="mx-auto max-w-6xl">
-        <BookingProgress step={step} />
+        {step === "experience" ? (
+          <header className="grid gap-4 rounded-[1.25rem] bg-[#eee7dc] px-5 py-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(28rem,0.72fr)] lg:items-end">
+            <div className="min-w-0">
+              <h1
+                className="font-serif text-2xl leading-tight text-[var(--primary)] outline-none sm:text-3xl"
+                ref={stepHeadingRef}
+                tabIndex={-1}
+              >
+                Book with Shannon
+              </h1>
+              <p className="mt-1 max-w-2xl text-sm leading-5 text-[var(--muted-foreground)]">
+                Choose a service, then see Shannon’s live dates and times.
+              </p>
+            </div>
+            <nav
+              aria-label="Jump to a service category"
+              className="grid w-full grid-cols-3 gap-2"
+            >
+              {bookingPillars.map((pillar) => (
+                <a
+                  className="inline-flex min-h-11 min-w-0 items-center justify-center rounded-full border border-[var(--border)] bg-white/68 px-2.5 py-2 text-center text-xs font-medium text-[var(--primary)] transition hover:border-[var(--accent)] hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none sm:text-sm"
+                  href={`#booking-pillar-${pillar.id}`}
+                  key={pillar.id}
+                >
+                  {pillarLabels[pillar.id]}
+                </a>
+              ))}
+            </nav>
+          </header>
+        ) : null}
 
         {step === "experience" || !selectedService ? (
-          <div className="mt-5">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-xl text-left">
-                <h2
-                  className="text-2xl font-medium text-[var(--primary)] outline-none sm:text-3xl md:text-4xl"
-                  ref={stepHeadingRef}
-                  tabIndex={-1}
+          <div>
+            <div className="mt-7 space-y-7" id="booking-service-options">
+              {bookingPillars.map((pillar) => (
+                <section
+                  aria-labelledby={`booking-pillar-${pillar.id}-title`}
+                  className="scroll-mt-24"
+                  id={`booking-pillar-${pillar.id}`}
+                  key={pillar.id}
                 >
-                  Find the session that fits.
-                </h2>
-                <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                  Compare format, timing, and price. Then choose from
-                  Shannon&apos;s live openings.
-                </p>
-              </div>
-
-              <div
-                aria-label="Service categories"
-                className="grid w-full grid-cols-3 gap-2 lg:max-w-xl"
-                role="group"
-              >
-                {bookingPillars.map((pillar) => (
-                  <button
-                    aria-controls="booking-service-options"
-                    aria-pressed={activePillar === pillar.id}
-                    className={cn(
-                      "min-h-11 rounded-full border px-2.5 py-2 text-xs font-medium transition focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none sm:text-sm",
-                      activePillar === pillar.id
-                        ? "border-[var(--primary)] bg-[var(--primary)] text-white"
-                        : "border-[var(--border)] bg-white/58 text-[var(--primary)] hover:border-[var(--accent)]"
-                    )}
-                    key={pillar.id}
-                    onClick={() => choosePillar(pillar.id)}
-                    type="button"
-                  >
-                    {pillarLabels[pillar.id]}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div
-              aria-label={`${pillarLabels[activePillar]} services`}
-              className="mt-4 grid gap-3 md:grid-cols-2"
-              id="booking-service-options"
-              role="group"
-            >
-              {activeServices.map((service) => {
-                const selected = service.slug === selectedServiceSlug
-
-                return (
-                  <div
-                    className={cn(
-                      "group overflow-hidden rounded-[1.25rem] border text-left transition",
-                      selected
-                        ? "border-[var(--accent)] bg-white shadow-[0_16px_42px_rgba(90,74,63,0.09)] ring-2 ring-[var(--accent)]/12"
-                        : "border-[var(--border)] bg-white/55 hover:border-[var(--accent)]/60 hover:bg-white/78"
-                    )}
-                    key={service.slug}
-                  >
-                    <button
-                      aria-controls={
-                        selected ? `continue-${service.slug}` : undefined
-                      }
-                      aria-pressed={selected}
-                      className="w-full p-4 text-left focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none focus-visible:ring-inset sm:p-5"
-                      onClick={() => chooseService(service.slug)}
-                      type="button"
+                  <div className="mb-3 border-b border-[var(--border)] pb-3">
+                    <h2
+                      className="font-serif text-2xl text-[var(--primary)]"
+                      id={`booking-pillar-${pillar.id}-title`}
                     >
-                      <span className="flex items-start justify-between gap-4">
-                        <span className="min-w-0">
-                          <span className="block font-serif text-xl leading-tight text-[var(--primary)]">
-                            {service.title}
-                          </span>
-                          <span className="mt-1.5 block text-[10px] font-medium tracking-[0.1em] text-[var(--muted-foreground)] uppercase">
-                            {service.duration} · {service.format}
-                          </span>
-                        </span>
-                        <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-[var(--accent)]">
-                          {service.price}
-                          {selected ? (
-                            <span className="grid size-6 place-items-center rounded-full bg-[var(--accent)] text-white">
-                              <Check aria-hidden="true" className="size-3.5" />
-                            </span>
-                          ) : null}
-                        </span>
-                      </span>
-                      <span className="mt-3 block text-sm leading-6 text-[var(--muted-foreground)]">
-                        {service.description}
-                      </span>
-                    </button>
-
-                    {selected ? (
-                      <div
-                        className="border-t border-[var(--accent)]/20 px-4 py-3 sm:px-5"
-                        id={`continue-${service.slug}`}
-                      >
-                        <Button
-                          className="min-h-11 w-full rounded-full bg-[var(--primary)] px-5 text-white hover:bg-[var(--accent)]"
-                          onClick={continueToSchedule}
-                          type="button"
-                        >
-                          {selectedCalLink
-                            ? "See available dates & times"
-                            : "Continue to request details"}
-                          <ArrowRight aria-hidden="true" className="size-4" />
-                        </Button>
-                      </div>
-                    ) : null}
+                      {pillarLabels[pillar.id]}
+                    </h2>
                   </div>
-                )
-              })}
+
+                  <div
+                    aria-label={`${pillarLabels[pillar.id]} services`}
+                    className="grid gap-3 md:grid-cols-2"
+                    role="group"
+                  >
+                    {pillar.services.map((service) => {
+                      const selected = service.slug === selectedServiceSlug
+                      const ServiceIcon = getServiceIcon(service.slug)
+                      const sigilStyles = pillarSigilStyles[pillar.id]
+
+                      return (
+                        <div
+                          className={cn(
+                            "group overflow-hidden rounded-2xl border text-left transition-colors",
+                            selected
+                              ? "border-[var(--accent)] bg-[#fffaf4] ring-2 ring-[var(--accent)]/12"
+                              : "border-[var(--border)] bg-white/42 hover:border-[var(--accent)]/60 hover:bg-white/68"
+                          )}
+                          key={service.slug}
+                        >
+                          <button
+                            aria-controls={
+                              selected ? `continue-${service.slug}` : undefined
+                            }
+                            aria-pressed={selected}
+                            className="w-full p-3 text-left focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none focus-visible:ring-inset sm:p-4"
+                            onClick={() => chooseService(service.slug)}
+                            type="button"
+                          >
+                            <span className="grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3 sm:grid-cols-[3rem_minmax(0,1fr)] sm:gap-4">
+                              <span
+                                aria-hidden="true"
+                                className={cn(
+                                  "grid size-10 place-items-center self-center rounded-full border sm:size-11",
+                                  sigilStyles.surface
+                                )}
+                              >
+                                <ServiceIcon
+                                  className={cn(
+                                    "size-[1.125rem]",
+                                    sigilStyles.icon
+                                  )}
+                                  strokeWidth={1.4}
+                                />
+                              </span>
+                              <span className="min-w-0 self-center">
+                                <span className="flex items-start justify-between gap-3">
+                                  <span className="min-w-0">
+                                    <span className="block font-serif text-lg leading-tight text-[var(--primary)] sm:text-xl">
+                                      {service.title}
+                                    </span>
+                                    <span className="mt-1.5 block text-xs font-medium text-[var(--muted-foreground)]">
+                                      {service.duration} · {service.format}
+                                    </span>
+                                  </span>
+                                  <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-[var(--accent)]">
+                                    {service.price}
+                                    {selected ? (
+                                      <span className="grid size-6 place-items-center rounded-full bg-[var(--accent)] text-white">
+                                        <Check
+                                          aria-hidden="true"
+                                          className="size-3.5"
+                                        />
+                                      </span>
+                                    ) : null}
+                                  </span>
+                                </span>
+                                <span className="mt-2 block text-xs leading-5 text-[var(--muted-foreground)] sm:text-sm sm:leading-6">
+                                  {service.description}
+                                </span>
+                              </span>
+                            </span>
+                          </button>
+
+                          {selected ? (
+                            <div
+                              className="border-t border-[var(--accent)]/20 px-3 py-3 sm:px-4"
+                              id={`continue-${service.slug}`}
+                            >
+                              <Button
+                                className="min-h-11 w-full rounded-full bg-[var(--primary)] px-5 text-white hover:bg-[var(--accent)]"
+                                onClick={continueToSchedule}
+                                type="button"
+                              >
+                                {selectedCalLink
+                                  ? "See available dates & times"
+                                  : "Continue to request details"}
+                                <ArrowRight
+                                  aria-hidden="true"
+                                  className="size-4"
+                                />
+                              </Button>
+                            </div>
+                          ) : null}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </section>
+              ))}
             </div>
 
             <p aria-atomic="true" aria-live="polite" className="sr-only">
               {selectedService
                 ? `${selectedService.title} selected. ${selectedService.duration}. ${selectedService.price}. Continue from the selected card.`
-                : `${pillarLabels[activePillar]} category selected. Choose an experience to continue.`}
+                : "All service categories are visible. Choose an experience to continue."}
             </p>
           </div>
         ) : (
           <div className="mt-4 scroll-mt-24" ref={scheduleStepRef}>
-            <div className="flex flex-col justify-between gap-4 rounded-[1.35rem] border border-[var(--border)] bg-white/72 p-4 shadow-[0_14px_42px_rgba(90,74,63,0.055)] sm:flex-row sm:items-center sm:p-5">
+            <div className="flex flex-col justify-between gap-4 rounded-[1.25rem] border border-[var(--border)] bg-[#eee7dc] p-4 sm:flex-row sm:items-center sm:p-5">
               <div className="min-w-0">
-                <p className="text-[10px] font-semibold tracking-[0.18em] text-[var(--accent)] uppercase">
-                  Selected session
-                </p>
-                <h2
-                  className="mt-1 font-serif text-xl leading-tight text-[var(--primary)] outline-none sm:text-2xl"
+                <h1
+                  className="font-serif text-xl leading-tight text-[var(--primary)] outline-none sm:text-2xl"
                   ref={stepHeadingRef}
                   tabIndex={-1}
                 >
                   {selectedService.title}
-                </h2>
-                <p className="mt-1 text-xs text-[var(--muted-foreground)]">
-                  {selectedService.duration} · {selectedService.format} ·{" "}
-                  {selectedService.price}
-                </p>
+                </h1>
+                <dl className="mt-3 grid gap-x-5 gap-y-2 text-xs text-[var(--muted-foreground)] sm:grid-cols-2">
+                  <div>
+                    <dt className="sr-only">Duration and price</dt>
+                    <dd className="font-medium text-[var(--primary)]">
+                      {selectedService.duration} · {selectedService.price}
+                    </dd>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <UserRound
+                      aria-hidden="true"
+                      className="mt-px size-3.5 shrink-0 text-[var(--accent)]"
+                    />
+                    <div>
+                      <dt className="sr-only">Practitioner</dt>
+                      <dd>With Shannon Mary Dixon</dd>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2 sm:col-span-2">
+                    <MapPin
+                      aria-hidden="true"
+                      className="mt-px size-3.5 shrink-0 text-[var(--accent)]"
+                    />
+                    <div>
+                      <dt className="sr-only">Location</dt>
+                      <dd>
+                        {selectedLocationLabel}
+                        {selectedService.locationPolicy.kind === "fixed" ? (
+                          <span className="block text-[11px] leading-4">
+                            Private address shared after confirmation.
+                          </span>
+                        ) : null}
+                      </dd>
+                    </div>
+                  </div>
+                </dl>
                 <p className="mt-2 text-xs leading-5 text-[var(--muted-foreground)]">
                   {selectedCalLink
                     ? "Choose a live time below. No payment is collected now; your request remains pending until Shannon confirms it."

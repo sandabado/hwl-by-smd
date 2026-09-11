@@ -12,13 +12,19 @@ export function SiteEffects() {
   const pathname = usePathname()
   const allowAmbientMotion = allowsAmbientMotion(pathname)
 
-  if (pathname === "/" || pathname.startsWith("/admin")) return null
+  if (
+    pathname === "/" ||
+    pathname.startsWith("/admin") ||
+    !allowAmbientMotion
+  ) {
+    return null
+  }
 
   return (
     <>
       <ScrollProgress />
-      {allowAmbientMotion ? <ScrollBreath /> : null}
-      {allowAmbientMotion ? <CursorGlow /> : null}
+      <ScrollBreath />
+      <CursorGlow />
       <BackToTop />
     </>
   )

@@ -9,6 +9,7 @@ import {
   inquiryReceiptMessage,
   useInquirySubmission,
 } from "@/components/shared/use-inquiry-submission"
+import { SITE_CONFIG } from "@/lib/constants"
 import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 
 type ContactField = {
@@ -39,8 +40,10 @@ export function ContactForm({
   if (!isInquiryCollectionReady()) {
     return (
       <InquiryCollectionPaused
-        description="Shannon’s private website inbox will open after its privacy operations are finalized. Published appointment times remain available now."
-        title="The online contact form is paused."
+        actionHref={`mailto:${SITE_CONFIG.email}?subject=HWL%20inquiry`}
+        actionLabel="Email Shannon"
+        description="For a question, retreat conversation, or personal note, write to Shannon directly. For an appointment, choose from her live availability."
+        title="Begin with a simple note."
       />
     )
   }

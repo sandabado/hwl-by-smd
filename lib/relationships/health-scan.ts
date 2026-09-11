@@ -1,6 +1,7 @@
 import "server-only"
 
 import { getCanonicalContactToEmail } from "@/lib/commerce/launch-authority"
+import { escapeEmailHtml, renderBrandedEmail } from "@/lib/email-branding"
 import { getSiteUrl } from "@/lib/env"
 import { createAdminClient } from "@/lib/supabase/server"
 
@@ -44,15 +45,6 @@ function matchedKeywords(body: string) {
   )
 }
 
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;")
-}
-
 async function notifyShannon(
   alerts: Array<{
     conversationId: string
@@ -65,21 +57,44 @@ async function notifyShannon(
   if (!apiKey || !to || !alerts.length) return { skipped: true }
 
   const siteUrl = getSiteUrl()
+  const queueUrl = new URL("/admin/connection", `${siteUrl}/`).toString()
   const items = alerts
     .map(
       (alert) =>
-        `<li style="margin:0 0 14px"><strong>${escapeHtml(alert.memberName)}</strong> · ${escapeHtml(alert.subject)}<br><a href="${siteUrl}/admin/connection">Open the Connection queue</a></li>`
+        `<li style="margin:0 0 10px"><strong>${escapeEmailHtml(alert.memberName)}</strong> · ${escapeEmailHtml(alert.subject)}</li>`
     )
     .join("")
+  const relationshipCount =
+    alerts.length === 1
+      ? "One relationship was"
+      : `${alerts.length} relationships were`
+  const email = renderBrandedEmail({
+    bodyHtml: `<p style="margin:0 0 18px">${relationshipCount} flagged for human support. Automated journey messages have been paused where applicable.</p><ul style="margin:0;padding:0 0 0 20px">${items}</ul>`,
+    bodyText: [
+      `${relationshipCount} flagged for human support. Automated journey messages have been paused where applicable.`,
+      alerts
+        .map((alert) => `• ${alert.memberName} · ${alert.subject}`)
+        .join("\n"),
+    ].join("\n\n"),
+    cta: { href: queueUrl, label: "Open the Connection queue" },
+    eyebrow: "Care signal",
+    finePrintHtml:
+      "This operational note is private. Review the relationship before resuming any automated journey.",
+    finePrintText:
+      "This operational note is private. Review the relationship before resuming any automated journey.",
+    heading: "A gentle check-in is needed.",
+    preheader: `${alerts.length} ${alerts.length === 1 ? "relationship needs" : "relationships need"} thoughtful review.`,
+  })
 
   const response = await fetch("https://api.resend.com/emails", {
     body: JSON.stringify({
       from: process.env.CONTACT_FROM_EMAIL ?? "HWL by SMD <hello@hwlbysmd.com>",
-      html: `<div style="font-family:Arial,sans-serif;color:#3f4a42;line-height:1.65"><h1 style="font-family:Georgia,serif">A gentle check-in is needed.</h1><p>${alerts.length === 1 ? "One relationship was" : `${alerts.length} relationships were`} flagged for human support. Automated journey messages have been paused where applicable.</p><ul>${items}</ul></div>`,
+      html: email.html,
       subject:
         alerts.length === 1
           ? `Check on ${alerts[0].memberName} — flagged for support`
           : `${alerts.length} members were flagged for support`,
+      text: email.text,
       to,
     }),
     headers: {

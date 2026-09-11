@@ -200,7 +200,12 @@ if (/createProductJsonLd|store-products-schema/.test(storePageSource)) {
   )
 }
 
-if (!/href=["']\/beauty\/lift["']/.test(homepageSource)) {
+if (
+  !/href=["']\/beauty\/lift["']/.test(homepageSource) &&
+  !/href=\{getCanonicalHomepageLiftHref\(featuredExperience\)\}/.test(
+    homepageSource
+  )
+) {
   errors.push("/: missing direct canonical LIFT link")
 }
 

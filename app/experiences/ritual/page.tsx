@@ -1,20 +1,19 @@
 import Image from "next/image"
 import Link from "next/link"
+import { ArrowRight } from "lucide-react"
 
-import { SelectBookingButton } from "@/components/booking/select-booking-button"
 import { JsonLd } from "@/components/seo/json-ld"
 import { ServiceOfferingsSection } from "@/components/services/service-offerings-section"
 import { PullQuote } from "@/components/shared/pull-quote"
 import { ServiceAreaNote } from "@/components/shared/service-area-note"
 import { Button } from "@/components/ui/button"
-import { findBookingService } from "@/lib/booking-services"
 import { media } from "@/lib/media"
 import { createPageMetadata, createServiceJsonLd } from "@/lib/seo"
 
 export const metadata = createPageMetadata({
-  title: "Astrology & Tarot Readings in Palm Springs | HWL by SMD",
+  title: "Tarot, Astrology & Reiki in Palm Springs | HWL by SMD",
   description:
-    "Private astrology consultations, tarot readings, and ritual ceremony in Palm Springs and the Hi-Desert.",
+    "Private tarot, astrology, and Reiki experiences for reflection and renewal in Palm Springs and the Hi-Desert.",
   path: "/astrology",
 })
 
@@ -46,23 +45,15 @@ const seasons = [
 ] as const
 
 export default function AstrologyPage() {
-  const readingBooking = findBookingService("intuitive-tarot-reading")
-
-  if (!readingBooking) {
-    throw new Error(
-      "Intuitive Tarot Reading is missing from the booking catalog."
-    )
-  }
-
   return (
     <>
       <JsonLd
         data={createServiceJsonLd({
-          name: "HWL Astrology Experiences",
+          name: "HWL Being Experiences",
           description:
-            "Astrology, tarot, and intentional ritual offered as reflective wellness practices for private guests and groups.",
+            "Tarot, astrology, and Reiki offered as reflective wellness practices for private guests and groups.",
           path: "/astrology",
-          serviceType: "Reflective ritual and intuitive guidance",
+          serviceType: "Tarot, astrology, Reiki, and reflective ritual",
           image: media.experiences.tarotSpread.src,
         })}
         id="astrology-service-schema"
@@ -73,7 +64,7 @@ export default function AstrologyPage() {
           alt={media.experiences.tarotSpread.alt}
           className="object-cover object-[67%_center] [filter:saturate(.82)_contrast(1.02)] md:object-center"
           fill
-          loading="eager"
+          preload
           sizes="100vw"
           src={media.experiences.tarotSpread.src}
         />
@@ -83,26 +74,21 @@ export default function AstrologyPage() {
         />
         <div className="relative z-10 mx-auto w-full max-w-7xl pb-8 md:pb-16">
           <p className="text-xs tracking-[0.3em] text-[#dcc5a5] uppercase">
-            Astrology
+            Being
           </p>
           <h1 className="mt-6 max-w-4xl text-5xl leading-[1.02] font-medium text-white md:text-7xl lg:text-8xl">
             A mirror, not a map.
           </h1>
           <p className="mt-7 max-w-2xl text-lg leading-[1.9] text-white/65 md:text-xl">
-            Pattern-reading for the season you&apos;re in.
+            Tarot · Astrology · Reiki
           </p>
-          <SelectBookingButton
-            className="mt-10 h-12 rounded-full bg-[#dcc5a5] px-7 text-[#211c22] hover:bg-white sm:w-auto"
-            label="Book a Reading"
-            pillarId={readingBooking.pillar.id}
-            service={readingBooking.service}
-          />
           <Button
             asChild
-            className="mt-4 h-12 rounded-full border-white/35 bg-white/10 px-7 text-white hover:bg-white/20 hover:text-white sm:mt-10 sm:ml-3"
-            variant="outline"
+            className="mt-10 h-12 rounded-full bg-[#dcc5a5] px-7 text-[#211c22] hover:bg-white"
           >
-            <Link href="/the-den">Explore The Den</Link>
+            <Link href="#offerings">
+              Explore Being Sessions <ArrowRight aria-hidden="true" />
+            </Link>
           </Button>
         </div>
       </section>
@@ -192,29 +178,6 @@ export default function AstrologyPage() {
         </div>
       </section>
 
-      <section
-        className="relative overflow-hidden bg-[#211c22] px-6 py-36 text-center text-white md:py-52"
-        id="invitation"
-      >
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(circle_at_50%_105%,rgba(210,150,100,0.17),transparent_48%)]"
-        />
-        <div className="relative mx-auto max-w-3xl">
-          <p className="text-xs tracking-[0.3em] text-[#dcc5a5] uppercase">
-            Astrology
-          </p>
-          <h2 className="mt-6 text-5xl leading-tight text-white md:text-7xl">
-            Begin the inner work.
-          </h2>
-          <SelectBookingButton
-            className="mt-10 bg-[#dcc5a5] text-[#211c22] hover:bg-white sm:w-auto"
-            label="Book a Reading"
-            pillarId={readingBooking.pillar.id}
-            service={readingBooking.service}
-          />
-        </div>
-      </section>
       <ServiceAreaNote />
     </>
   )

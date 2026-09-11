@@ -19,16 +19,6 @@ export const metadata = createPageMetadata({
   path: "/about",
 })
 
-const credentials = [
-  "Licensed Aesthetician",
-  "500hr Yoga Instructor",
-  "Reiki Practitioner",
-  "Aromatherapy Specialist",
-  "Wellness Facilitator",
-  "Actress",
-  "Former Elite Figure Skater",
-] as const
-
 const shannonJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -65,9 +55,8 @@ export default function AboutPage() {
               className="mt-7 max-w-lg text-[var(--muted-foreground)]"
               size="subheading"
             >
-              Aesthetician, movement teacher, astrologer, former skater—and a
-              person who has always paid close attention to what the body is
-              saying.
+              Shannon brings beauty, movement, reflection, and a lifetime of
+              attention to what the body is saying.
             </BreathingText>
             <p className="mt-8 max-w-md text-base leading-[1.85] text-[var(--muted-foreground)]">
               HWL is where Shannon&apos;s worlds meet: beauty, movement, and
@@ -312,7 +301,7 @@ export default function AboutPage() {
             className="mt-7 text-[var(--muted-foreground)]"
             size="body"
           >
-            As an aesthetician, Shannon works through skin, touch, pace, and
+            In her beauty practice, Shannon works through skin, touch, pace, and
             thoughtful personal care.
           </BreathingText>
           <p className="mt-6 text-base leading-[1.85] text-[var(--muted-foreground)]">
@@ -382,56 +371,6 @@ export default function AboutPage() {
             Shannon Mary Dixon
           </figcaption>
         </figure>
-      </BreathingSection>
-
-      <BreathingSection
-        background="dark"
-        contentClassName="mx-auto grid w-full max-w-6xl gap-12 px-6 lg:grid-cols-[0.74fr_1.26fr] lg:gap-20"
-        id="credentials"
-        padding="expansive"
-        variant="kitchen"
-      >
-        <div>
-          <p className="text-xs font-semibold tracking-[0.24em] text-[var(--room-clay)] uppercase">
-            Training &amp; experience
-          </p>
-          <BreathingText
-            as="h2"
-            className="mt-5 text-[var(--background)]"
-            size="heading"
-          >
-            The foundations she brings.
-          </BreathingText>
-        </div>
-
-        <div>
-          <ul
-            aria-label="Training and experience currently shared by Shannon"
-            className="flex flex-wrap gap-3"
-          >
-            {credentials.map((credential) => (
-              <li
-                className="rounded-full border border-white/18 bg-white/[0.055] px-5 py-3 text-sm text-white/88"
-                key={credential}
-              >
-                {credential}
-              </li>
-            ))}
-          </ul>
-
-          <aside className="mt-10 border-l border-[var(--room-clay)] pl-6">
-            <p className="text-xs font-semibold tracking-[0.2em] text-[var(--room-clay)] uppercase">
-              Verification note
-            </p>
-            <p className="mt-4 max-w-2xl text-sm leading-[1.8] text-white/68">
-              These titles reflect information Shannon provided for the site.
-              Exact licenses, awarding bodies, and supporting documentation have
-              not yet been independently verified for publication. This list
-              describes wellness training and experience; it does not represent
-              medical credentials or medical care.
-            </p>
-          </aside>
-        </div>
       </BreathingSection>
 
       <BreathingSection

@@ -1,16 +1,15 @@
-import { ArrowRight, ArrowUpRight } from "lucide-react"
+import { ArrowUpRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
 import { SelectBookingButton } from "@/components/booking/select-booking-button"
 import { AddToCartButton } from "@/components/cart/add-to-cart-button"
 import { LiftPreviewFilm } from "@/components/home/lift-preview-film"
-import { NewsletterForm } from "@/components/shared/newsletter-form"
 import { Button } from "@/components/ui/button"
-import { getCanonicalHomepageLiftHref } from "@/lib/homepage-feature"
 import { findBookingService } from "@/lib/booking-services"
+import { getCanonicalHomepageLiftHref } from "@/lib/homepage-feature"
 import { media } from "@/lib/media"
-import { isProductCheckoutReady } from "@/lib/stripe"
+import { seoJournalArticleList } from "@/lib/seo-journal-articles"
 import type { PublishedHomepageFeature } from "@/lib/site-content"
 
 const brandWorlds = [
@@ -36,7 +35,7 @@ const brandWorlds = [
   {
     id: "being",
     title: "Being",
-    detail: "Tarot · Astrology · Ritual",
+    detail: "Tarot · Astrology · Reiki",
     description:
       "Practices for listening deeper, noticing what’s moving, and meeting yourself where you are.",
     href: "/astrology",
@@ -50,7 +49,6 @@ const sessionPathways = [
     title: "Facials",
     location: "Palm Springs",
     description: "Customized facial treatments and intentional touch.",
-    detailsHref: "/beauty",
     serviceSlug: "signature-facial",
     cta: "Book a facial",
     image: media.home.proofFacial,
@@ -59,7 +57,6 @@ const sessionPathways = [
     title: "Private Yoga",
     location: "Palm Springs · Joshua Tree · Surrounding Desert",
     description: "Private movement for individuals, groups and celebrations.",
-    detailsHref: "/yoga",
     serviceSlug: "private-yoga",
     cta: "Book or inquire",
     image: media.home.proofPrivateYoga,
@@ -68,7 +65,6 @@ const sessionPathways = [
     title: "Readings",
     location: "Virtual + select in-person sessions",
     description: "Private tarot and intuitive sessions with Shannon.",
-    detailsHref: "/astrology",
     serviceSlug: "intuitive-tarot-reading",
     cta: "Book a reading",
     image: media.home.proofReadings,
@@ -95,8 +91,6 @@ export function HeroEntry({
 }: {
   featuredExperience: PublishedHomepageFeature
 }) {
-  const liftCheckoutReady = isProductCheckoutReady("lift_guide")
-
   return (
     <div className="overflow-hidden bg-[#f7f3ec]" data-homepage="">
       <section
@@ -128,57 +122,18 @@ export function HeroEntry({
             >
               Come back to your whole body.
             </h1>
-            <p className="mt-7 text-sm font-medium tracking-[0.19em] text-[#465149] uppercase sm:text-base">
-              Beauty · Movement · Ritual
+            <p className="mt-7 max-w-md text-base leading-7 text-[#4d554f] sm:text-lg">
+              Beauty, movement and ritual with Shannon Mary Dixon.
             </p>
-            <p className="mt-5 max-w-md text-base leading-7 text-[#4d554f]">
-              Practices, products + experiences by Shannon Mary Dixon.
-            </p>
-            <div className="mt-9 flex flex-wrap gap-3">
+            <div className="mt-9">
               <Button
                 asChild
                 className="min-h-12 rounded-full bg-[#20251f] px-7 text-xs font-semibold tracking-[0.16em] text-white uppercase hover:bg-[#765538]"
               >
                 <Link href="#worlds">Explore HWL</Link>
               </Button>
-              <Button
-                asChild
-                className="min-h-12 rounded-full border-[#20251f]/25 bg-white/30 px-7 text-xs font-semibold tracking-[0.16em] text-[#20251f] uppercase backdrop-blur-sm hover:bg-white/75"
-                variant="outline"
-              >
-                <Link href="/book">Book with Shannon</Link>
-              </Button>
             </div>
-            <Link
-              className="group mt-5 inline-flex min-h-11 items-center gap-3 text-sm font-medium text-[#20251f] underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[#765538] focus-visible:ring-offset-2 focus-visible:outline-none"
-              href={getCanonicalHomepageLiftHref(featuredExperience)}
-            >
-              <span className="rounded-full bg-[#765538] px-3 py-1 text-[10px] font-semibold tracking-[0.14em] text-white uppercase">
-                {liftCheckoutReady ? "Available now" : "Discover LIFT"}
-              </span>
-              <span>LIFT · Video + PDF · $11.11</span>
-              <ArrowRight
-                aria-hidden="true"
-                className="size-4 transition-transform group-hover:translate-x-0.5"
-              />
-            </Link>
           </div>
-        </div>
-      </section>
-
-      <section className="px-6 py-24 sm:py-28 lg:py-36">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="text-xs font-semibold tracking-[0.28em] text-[var(--accent)] uppercase">
-            A practice for wherever you are
-          </p>
-          <h2 className="mt-7 text-4xl leading-tight font-medium text-[var(--primary)] sm:text-5xl lg:text-6xl">
-            HWL is a practice in coming back to yourself.
-          </h2>
-          <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-[var(--muted-foreground)] sm:text-lg">
-            Through skin, movement and ritual, HWL brings together simple
-            practices designed to help you feel more at home in your body —
-            wherever you are.
-          </p>
         </div>
       </section>
 
@@ -207,43 +162,35 @@ export function HeroEntry({
               <article className="group" id={world.id} key={world.title}>
                 <Link
                   aria-label={`Explore ${world.title}`}
-                  className="relative block aspect-[4/5] overflow-hidden bg-[#cfd3cc]"
+                  className="block rounded-sm focus-visible:ring-2 focus-visible:ring-[#765538] focus-visible:ring-offset-4 focus-visible:outline-none"
                   href={world.href}
                 >
-                  <Image
-                    alt={world.image.alt}
-                    className={`${world.imagePosition} object-cover transition duration-700 ease-out group-hover:scale-[1.025]`}
-                    fill
-                    sizes="(max-width: 1023px) 92vw, 31vw"
-                    src={world.image.src}
-                  />
-                  <span className="absolute top-5 left-5 grid size-10 place-items-center rounded-full bg-[#f7f3ec]/90 font-serif text-sm text-[#20251f] backdrop-blur-sm">
-                    0{index + 1}
-                  </span>
+                  <div className="relative aspect-[4/5] overflow-hidden bg-[#cfd3cc]">
+                    <Image
+                      alt={world.image.alt}
+                      className={`${world.imagePosition} object-cover transition duration-700 ease-out group-hover:scale-[1.025]`}
+                      fill
+                      sizes="(max-width: 1023px) 92vw, 31vw"
+                      src={world.image.src}
+                    />
+                    <span className="absolute top-5 left-5 grid size-10 place-items-center rounded-full bg-[#f7f3ec]/90 font-serif text-sm text-[#20251f] backdrop-blur-sm">
+                      0{index + 1}
+                    </span>
+                  </div>
+                  <p className="mt-7 text-xs font-semibold tracking-[0.2em] text-[#626a61] uppercase">
+                    {world.detail}
+                  </p>
+                  <h3 className="mt-3 flex items-center gap-3 text-4xl font-medium text-[#20251f]">
+                    {world.title}
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      className="size-5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    />
+                  </h3>
+                  <p className="mt-4 min-h-20 text-sm leading-7 text-[#5b625b]">
+                    {world.description}
+                  </p>
                 </Link>
-                <p className="mt-7 text-xs font-semibold tracking-[0.2em] text-[#626a61] uppercase">
-                  {world.detail}
-                </p>
-                <h3 className="mt-3 text-4xl font-medium text-[#20251f]">
-                  {world.title}
-                </h3>
-                <p className="mt-4 min-h-20 text-sm leading-7 text-[#5b625b]">
-                  {world.description}
-                </p>
-                <div className="flex flex-wrap items-center gap-x-7">
-                  <EditorialLink
-                    href={world.href}
-                    label={`Explore ${world.title}`}
-                  />
-                  {world.id === "beauty" ? (
-                    <Link
-                      className="inline-flex min-h-11 items-center text-xs font-medium tracking-[0.14em] text-[#626a61] uppercase underline-offset-8 transition-colors hover:text-[#20251f] hover:underline"
-                      href="/beauty/lift"
-                    >
-                      Discover LIFT
-                    </Link>
-                  ) : null}
-                </div>
               </article>
             ))}
           </div>
@@ -257,7 +204,12 @@ export function HeroEntry({
               HWL Beauty
             </p>
             <h2 className="mt-6 text-[clamp(4.5rem,11vw,8rem)] leading-[0.85] font-medium tracking-[-0.05em]">
-              LIFT
+              <Link
+                className="rounded-sm underline-offset-8 hover:underline focus-visible:ring-2 focus-visible:ring-[#d8b98e] focus-visible:ring-offset-4 focus-visible:ring-offset-[#20251f] focus-visible:outline-none"
+                href={getCanonicalHomepageLiftHref(featuredExperience)}
+              >
+                LIFT
+              </Link>
             </h2>
             <h3 className="mt-8 text-3xl font-medium sm:text-4xl">
               A Daily Facial Ritual
@@ -276,18 +228,11 @@ export function HeroEntry({
                 Complete video + PDF · One time
               </p>
             </div>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8">
               <AddToCartButton
                 className="min-h-12 bg-[#f7f3ec] px-7 text-[#20251f] hover:bg-[#d8b98e] sm:w-auto"
                 label="Add LIFT to cart · $11.11"
               />
-              <Link
-                className="inline-flex min-h-12 items-center justify-center gap-3 rounded-full border border-white/24 px-7 text-xs font-semibold tracking-[0.18em] text-white uppercase transition hover:bg-white/10"
-                href={getCanonicalHomepageLiftHref(featuredExperience)}
-              >
-                See LIFT details
-                <ArrowRight aria-hidden="true" className="size-4" />
-              </Link>
             </div>
           </div>
 
@@ -329,9 +274,6 @@ export function HeroEntry({
                 the surrounding desert, with select sessions available
                 virtually.
               </p>
-              <div className="mt-5">
-                <EditorialLink href="/book" label="Book with Shannon" />
-              </div>
             </div>
           </div>
 
@@ -343,19 +285,15 @@ export function HeroEntry({
 
               return (
                 <article key={pathway.title}>
-                  <Link
-                    aria-label={`Explore ${pathway.title}`}
-                    className="group relative block aspect-[4/3] overflow-hidden bg-[#ded7cc]"
-                    href={pathway.detailsHref}
-                  >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-[#ded7cc]">
                     <Image
                       alt={pathway.image.alt}
-                      className="object-cover transition duration-700 ease-out group-hover:scale-[1.025]"
+                      className="object-cover"
                       fill
                       sizes="(max-width: 1023px) 92vw, 31vw"
                       src={pathway.image.src}
                     />
-                  </Link>
+                  </div>
                   <p className="mt-6 text-xs font-semibold tracking-[0.16em] text-[var(--accent)] uppercase">
                     {pathway.location}
                   </p>
@@ -416,9 +354,8 @@ export function HeroEntry({
             <p className="mt-5 text-xs font-semibold tracking-[0.18em] text-[var(--accent)] uppercase">
               Facials · Yoga · Sound · Tarot · Astrology
             </p>
-            <div className="mt-6 flex flex-wrap gap-x-7">
+            <div className="mt-6">
               <EditorialLink href="/retreats" label="Explore retreats" />
-              <EditorialLink href="/contact" label="Inquire" />
             </div>
           </div>
         </div>
@@ -444,9 +381,9 @@ export function HeroEntry({
             </h2>
             <div className="mt-7 space-y-5 text-base leading-8 text-[var(--muted-foreground)]">
               <p>
-                HWL was created by Shannon Mary Dixon — an esthetician, movement
-                teacher, intuitive practitioner and lifelong athlete whose work
-                lives at the intersection of body, beauty and being.
+                HWL was created by Shannon Mary Dixon — a beauty practitioner,
+                movement guide, intuitive practitioner and lifelong athlete
+                whose work lives at the intersection of body, beauty and being.
               </p>
               <p>
                 Her approach brings professional technique together with
@@ -461,19 +398,63 @@ export function HeroEntry({
         </div>
       </section>
 
-      <section className="border-t border-[var(--border)] bg-[#eee8dd] px-6 py-24 text-center sm:py-28">
-        <div className="mx-auto max-w-3xl">
-          <p className="text-xs font-semibold tracking-[0.28em] text-[var(--accent)] uppercase">
-            Notes from HWL
-          </p>
-          <h2 className="mt-5 text-5xl font-medium text-[var(--primary)] sm:text-6xl">
-            Stay close.
-          </h2>
-          <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-[var(--muted-foreground)]">
-            Seasonal notes on skin, movement, astrology + whatever we’re working
-            with right now.
-          </p>
-          <NewsletterForm />
+      <section
+        className="scroll-mt-20 border-t border-[var(--border)] bg-[#eee8dd] px-6 py-20 sm:py-24"
+        id="journal"
+      >
+        <div className="mx-auto max-w-7xl">
+          <div className="flex items-end justify-between gap-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold tracking-[0.28em] text-[var(--accent)] uppercase">
+                Notes from HWL
+              </p>
+              <h2 className="mt-4 text-4xl font-medium text-[var(--primary)] sm:text-5xl">
+                From the practice.
+              </h2>
+            </div>
+            <Link
+              className="hidden min-h-11 shrink-0 items-center text-xs font-semibold tracking-[0.16em] text-[var(--primary)] uppercase underline-offset-8 hover:underline focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none sm:inline-flex"
+              href="/journal"
+            >
+              All notes
+            </Link>
+          </div>
+          <div className="mt-10 grid border-t border-[var(--border)] md:grid-cols-3">
+            {seoJournalArticleList.map((article) => (
+              <article
+                className="border-b border-[var(--border)] md:border-r md:last:border-r-0"
+                key={article.slug}
+              >
+                <Link
+                  className="group flex h-full min-h-64 flex-col px-1 py-8 focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none focus-visible:ring-inset md:px-7 md:first:pl-0"
+                  href={`/journal/${article.slug}`}
+                >
+                  <p className="text-[11px] font-semibold tracking-[0.2em] text-[var(--accent)] uppercase">
+                    {article.eyebrow}
+                  </p>
+                  <h3 className="mt-5 text-2xl leading-tight font-medium text-[var(--primary)]">
+                    {article.h1}
+                  </h3>
+                  <p className="mt-5 line-clamp-3 text-sm leading-7 text-[var(--muted-foreground)]">
+                    {article.dek}
+                  </p>
+                  <span className="mt-auto inline-flex min-h-11 items-end gap-2 pt-7 text-xs font-semibold tracking-[0.16em] text-[var(--primary)] uppercase">
+                    Read note
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      className="mb-0.5 size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    />
+                  </span>
+                </Link>
+              </article>
+            ))}
+          </div>
+          <Link
+            className="mt-7 inline-flex min-h-11 items-center text-xs font-semibold tracking-[0.16em] text-[var(--primary)] uppercase underline-offset-8 hover:underline focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:outline-none sm:hidden"
+            href="/journal"
+          >
+            All notes
+          </Link>
         </div>
       </section>
     </div>

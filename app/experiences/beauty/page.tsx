@@ -1,12 +1,10 @@
 import Link from "next/link"
-import { ArrowRight, Check, Droplets, Sparkles } from "lucide-react"
+import { Droplets } from "lucide-react"
 
-import { AddToCartButton } from "@/components/cart/add-to-cart-button"
 import { JsonLd } from "@/components/seo/json-ld"
 import { ServiceOfferingsSection } from "@/components/services/service-offerings-section"
 import { PageSection } from "@/components/shared/internal-page"
 import { ParallaxImage } from "@/components/shared/parallax-image"
-import { PullQuote } from "@/components/shared/pull-quote"
 import { SectionHeading } from "@/components/shared/section-heading"
 import { ServiceAreaNote } from "@/components/shared/service-area-note"
 import { Button } from "@/components/ui/button"
@@ -25,67 +23,6 @@ export const metadata = createPageMetadata({
     "Facial rituals, lymphatic care, and skin consultation with Shannon Mary Dixon in Palm Springs and the Coachella Valley.",
   path: "/beauty",
 })
-
-const benefits = [
-  {
-    title: "A refreshed finish",
-    description:
-      "Thoughtful skin care and an unhurried pace create a polished, rested-looking finish.",
-  },
-  {
-    title: "Space to soften",
-    description:
-      "Intentional touch around the jaw, brow, and temples is offered at a comfortable pace, based on your preferences.",
-  },
-  {
-    title: "A quieter pace",
-    description:
-      "The room, rhythm, and touch are designed to make slowing down feel possible.",
-  },
-  {
-    title: "Personal attention",
-    description:
-      "Products, pressure, and pacing are chosen around what you share with Shannon.",
-  },
-  {
-    title: "Simple continuity",
-    description:
-      "You leave with clear, realistic guidance for caring for your skin between visits.",
-  },
-  {
-    title: "Time to receive",
-    description:
-      "Nothing to perform. Nothing to solve. Just a protected interval of care.",
-  },
-]
-
-const process = [
-  {
-    title: "Arrive",
-    description:
-      "Settle into a quiet room and let the pace of the day begin to change.",
-  },
-  {
-    title: "Listen",
-    description:
-      "Share what your skin has been doing, what it is sensitive to, and what you need today.",
-  },
-  {
-    title: "Receive",
-    description:
-      "Shannon shapes the facial, products, pressure, and rhythm around that conversation.",
-  },
-  {
-    title: "Rest",
-    description:
-      "The final moments are deliberately unhurried so the experience can close without a rush.",
-  },
-  {
-    title: "Continue",
-    description:
-      "Leave with a few grounded suggestions—not a complicated list—for the days ahead.",
-  },
-]
 
 const faqs = [
   {
@@ -155,17 +92,12 @@ export default function BeautyPage() {
             <p className="experience-hero-subtitle hero-reveal hero-reveal--3 mx-auto mt-7 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)] md:mx-0 md:text-xl">
               The face holds what the body carries.
             </p>
-            <div className="experience-hero-actions mt-9 flex flex-col justify-center gap-3 sm:flex-row md:justify-start">
-              <AddToCartButton
-                className="h-12 sm:w-auto"
-                label="Get LIFT · $11.11"
-              />
+            <div className="experience-hero-actions mt-9 flex justify-center md:justify-start">
               <Button
                 asChild
-                className="h-12 rounded-full border-[var(--border)] bg-white/35 px-7 text-[var(--primary)] backdrop-blur-sm hover:bg-white/65"
-                variant="outline"
+                className="h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
               >
-                <Link href="#offerings">Explore Beauty</Link>
+                <Link href="#offerings">Choose a facial or LIFT</Link>
               </Button>
             </div>
           </div>
@@ -196,40 +128,6 @@ export default function BeautyPage() {
       </section>
 
       <ServiceOfferingsSection pillarId="beauty" />
-
-      <PageSection className="py-24 md:py-32" id="overview">
-        <div className="mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[0.72fr_1fr] lg:gap-24">
-          <div className="relative mx-auto grid aspect-square w-full max-w-sm place-items-center rounded-full border border-[var(--accent)]/25 bg-[radial-gradient(circle,rgba(255,255,255,0.88)_0%,rgba(232,223,211,0.36)_52%,transparent_72%)]">
-            <div
-              aria-hidden="true"
-              className="absolute inset-[12%] rounded-full border border-white"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-[27%] rounded-full border border-[var(--accent)]/20"
-            />
-            <Droplets
-              className="size-10 text-[var(--accent)]/70"
-              aria-hidden="true"
-            />
-          </div>
-          <div>
-            <p className="text-xs font-medium tracking-[0.3em] text-[var(--accent)] uppercase">
-              Beneath the surface
-            </p>
-            <p className="mt-6 text-lg leading-[1.9] text-[var(--foreground)] md:text-xl">
-              Shannon&apos;s approach to skin is slow. As a licensed
-              aesthetician, she works with lymphatic drainage, facial sculpting,
-              and circulation — not to erase age, but to move what&apos;s
-              stagnant. The glow that comes from flow, not from product.
-            </p>
-          </div>
-        </div>
-        <PullQuote
-          className="mt-20"
-          quote="Your face is not a problem to solve. It's a landscape to tend."
-        />
-      </PageSection>
 
       <section className="relative isolate overflow-hidden border-y border-[var(--border)] bg-[#f3e9dc] px-6 py-16 md:py-20">
         <div
@@ -272,88 +170,6 @@ export default function BeautyPage() {
         </div>
       </section>
 
-      <PageSection className="py-24 md:py-32" id="benefits">
-        <SectionHeading
-          align="center"
-          eyebrow="What the room makes possible"
-          title="Care you can feel after you leave."
-        />
-        <div className="mt-14 grid gap-px overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2 lg:grid-cols-3">
-          {benefits.map((benefit) => (
-            <article
-              className="bg-[var(--background)] p-7 md:p-9"
-              key={benefit.title}
-            >
-              <Check
-                className="size-4 text-[var(--accent)]"
-                aria-hidden="true"
-              />
-              <h3 className="mt-5 text-2xl font-medium text-[var(--primary)]">
-                {benefit.title}
-              </h3>
-              <p className="mt-3 text-sm leading-[1.9] text-[var(--muted-foreground)]">
-                {benefit.description}
-              </p>
-            </article>
-          ))}
-        </div>
-      </PageSection>
-
-      <PageSection className="bg-white/35 py-24 md:py-32" id="process">
-        <SectionHeading
-          align="center"
-          eyebrow="Your experience"
-          title="Five unhurried moments."
-        />
-        <ol className="mx-auto mt-16 max-w-5xl">
-          {process.map((step, index) => (
-            <li
-              className="grid gap-5 border-t border-[var(--border)] py-8 first:border-t-0 md:grid-cols-[7rem_0.75fr_1fr] md:items-baseline"
-              key={step.title}
-            >
-              <span className="text-xs tracking-[0.25em] text-[var(--accent)] uppercase">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <h3 className="text-3xl font-medium text-[var(--primary)]">
-                {step.title}
-              </h3>
-              <p className="text-base leading-[1.9] text-[var(--muted-foreground)]">
-                {step.description}
-              </p>
-            </li>
-          ))}
-        </ol>
-      </PageSection>
-
-      <PageSection className="py-24 md:py-32" id="investment">
-        <div className="mx-auto max-w-4xl rounded-[2.5rem] border border-[var(--accent)]/25 bg-[linear-gradient(135deg,rgba(255,255,255,0.72),rgba(232,223,211,0.32))] p-8 text-center shadow-[0_28px_80px_rgba(90,74,63,0.08)] md:p-14">
-          <Sparkles
-            className="mx-auto size-5 text-[var(--accent)]"
-            aria-hidden="true"
-          />
-          <p className="mt-5 text-xs tracking-[0.28em] text-[var(--accent)] uppercase">
-            Investment
-          </p>
-          <h2 className="mt-5 text-4xl font-medium text-[var(--primary)] md:text-5xl">
-            Book your facial ritual.
-          </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-[1.9] text-[var(--muted-foreground)]">
-            Each facial ritual above can be booked as an individual appointment.
-            Choose one to see Shannon’s live dates and times. No payment is
-            collected with the request; Shannon confirms the appointment
-            personally.
-          </p>
-          <Button
-            asChild
-            className="mt-8 h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
-          >
-            <Link href="#offerings">
-              Choose a Facial <ArrowRight aria-hidden="true" />
-            </Link>
-          </Button>
-        </div>
-      </PageSection>
-
       <PageSection className="bg-white/35 py-24 md:py-32" id="faq">
         <SectionHeading align="center" title="Questions, answered gently." />
         <Accordion
@@ -378,42 +194,6 @@ export default function BeautyPage() {
         </Accordion>
       </PageSection>
 
-      <PageSection className="py-24 md:py-32" id="lift">
-        <div className="mx-auto grid max-w-6xl overflow-hidden rounded-[2.5rem] bg-[var(--primary)] text-[var(--background)] shadow-[0_35px_90px_rgba(43,39,36,0.18)] lg:grid-cols-[0.88fr_1.12fr]">
-          <ParallaxImage
-            alt={media.shannon.beautyLift.alt}
-            aspectRatio="4 / 3"
-            className="h-full min-h-80 rounded-none"
-            imageClassName="object-cover opacity-85"
-            sizes="(max-width: 1023px) 100vw, 42vw"
-            speed={0.1}
-            src={media.shannon.beautyLift.src}
-          />
-          <div className="flex flex-col justify-center p-8 md:p-12 lg:p-16">
-            <p className="text-xs tracking-[0.3em] text-[var(--accent-on-dark)] uppercase">
-              LIFT · A daily ritual
-            </p>
-            <h2 className="mt-5 text-4xl leading-tight font-medium md:text-5xl">
-              Your hands know more than you think.
-            </h2>
-            <p className="mt-6 max-w-xl text-lg leading-[1.9] text-[var(--background)]/72">
-              LIFT is Shannon&apos;s daily facial massage ritual — seven
-              movements, five minutes, your own two hands. It&apos;s the
-              practice she teaches every client to do at home, between sessions,
-              when the appointment ends and the maintenance begins.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-5">
-              <span className="font-serif text-4xl text-[var(--accent-on-dark)]">
-                $11.11
-              </span>
-              <AddToCartButton
-                className="h-12 rounded-full bg-[var(--background)] px-7 text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
-                label="Add LIFT to cart"
-              />
-            </div>
-          </div>
-        </div>
-      </PageSection>
       <ServiceAreaNote />
     </div>
   )

@@ -2,6 +2,7 @@ import "server-only"
 
 import { createHash } from "node:crypto"
 
+import { escapeEmailHtml, renderBrandedEmail } from "@/lib/email-branding"
 import type { DeploymentTarget } from "@/lib/stripe"
 
 const RESEND_EMAIL_ENDPOINT = "https://api.resend.com/emails"
@@ -135,22 +136,40 @@ export async function sendCommerceRecoveryAlert(
   }
 
   const reviewUrl = adminReviewUrl(input.deploymentTarget)
-  const text = [
+  const statusText = statusUncertain
+    ? "Recovery status refresh: unavailable; inspect the durable queue."
+    : "Recovery status refresh: current."
+  const bodyText = [
     "HWL by SMD commerce recovery needs human review.",
     `Environment: ${input.deploymentTarget}`,
     `Recovery alerts pending now: ${reportedCount(alertsPending)}`,
     `Worker-classified manual-review outcomes this run: ${manualReview}`,
-    statusUncertain
-      ? "Recovery status refresh: unavailable; inspect the durable queue."
-      : "Recovery status refresh: current.",
-    `Review securely: ${reviewUrl}`,
-    "Customer, order, payment, and provider identifiers are intentionally omitted.",
+    statusText,
   ].join("\n\n")
+  const email = renderBrandedEmail({
+    bodyHtml: `<p style="margin:0 0 20px">The commerce recovery queue needs a human review.</p><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background:#f8f1e8;border:1px solid #e5d8c7;border-radius:12px;width:100%"><tr><td style="color:#74675d;font-family:Arial,Helvetica,sans-serif;font-size:12px;padding:16px 18px 5px;text-transform:uppercase">Environment</td><td align="right" style="color:#312a25;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;padding:16px 18px 5px">${escapeEmailHtml(
+      input.deploymentTarget
+    )}</td></tr><tr><td style="color:#74675d;font-family:Arial,Helvetica,sans-serif;font-size:12px;padding:9px 18px;text-transform:uppercase">Alerts pending</td><td align="right" style="color:#312a25;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;padding:9px 18px">${escapeEmailHtml(
+      reportedCount(alertsPending)
+    )}</td></tr><tr><td style="color:#74675d;font-family:Arial,Helvetica,sans-serif;font-size:12px;padding:5px 18px 16px;text-transform:uppercase">Manual review</td><td align="right" style="color:#312a25;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;padding:5px 18px 16px">${manualReview}</td></tr></table><p style="margin:20px 0 0">${escapeEmailHtml(
+      statusText
+    )}</p>`,
+    bodyText,
+    cta: { href: reviewUrl, label: "Review securely" },
+    eyebrow: "Commerce care",
+    finePrintHtml:
+      "Customer, order, payment, and provider identifiers are intentionally omitted.",
+    finePrintText:
+      "Customer, order, payment, and provider identifiers are intentionally omitted.",
+    heading: "Commerce recovery needs attention.",
+    preheader: `${reportedCount(alertsPending)} recovery alerts need review in ${input.deploymentTarget}.`,
+  })
 
   const payload = JSON.stringify({
     from,
+    html: email.html,
     subject: `HWL by SMD · ${input.deploymentTarget} commerce recovery needs attention`,
-    text,
+    text: email.text,
     to: [to],
   })
 

@@ -18,6 +18,9 @@ const CAL_EMBED_CONFIG = {
 const CAL_UI_CONFIG = {
   theme: "light",
   layout: CAL_BOOKER_LAYOUT,
+  // The site already summarizes the selected service above the embed. Let the
+  // provider-owned step begin with Shannon's live dates and times instead of
+  // repeating the event description and pushing availability below the fold.
   hideEventTypeDetails: true,
   cssVarsPerTheme: {
     light: {
@@ -54,6 +57,10 @@ const CAL_UI_CONFIG = {
 } as const
 
 type EmbedStatus = "error" | "loading" | "ready"
+type BookingReceipt = {
+  endTime?: string
+  startTime?: string
+}
 const EMBED_READY_TIMEOUT_MS = 12_000
 
 export interface CalInlineEmbedProps {
@@ -94,7 +101,9 @@ function CalEmbedInstance({
 }: CalInlineEmbedProps) {
   const reactId = useId()
   const [status, setStatus] = useState<EmbedStatus>("loading")
-  const [bookingComplete, setBookingComplete] = useState(false)
+  const [bookingReceipt, setBookingReceipt] = useState<BookingReceipt | null>(
+    null
+  )
   const successRef = useRef<HTMLDivElement>(null)
   const namespace = useMemo(() => {
     const safeId = reactId.replace(/[^a-z0-9]/gi, "")
@@ -120,6 +129,25 @@ function CalEmbedInstance({
     [attendeeEmail, attendeeName, iframeId]
   )
   const externalUrl = canonicalCalUrl(calLink)
+  const bookingTime = useMemo(() => {
+    if (!bookingReceipt?.startTime) return null
+
+    const start = new Date(bookingReceipt.startTime)
+    if (Number.isNaN(start.getTime())) return null
+
+    const end = bookingReceipt.endTime ? new Date(bookingReceipt.endTime) : null
+    const date = new Intl.DateTimeFormat(undefined, {
+      dateStyle: "full",
+    }).format(start)
+    const timeFormatter = new Intl.DateTimeFormat(undefined, {
+      timeStyle: "short",
+    })
+    const startTime = timeFormatter.format(start)
+    const endTime =
+      end && !Number.isNaN(end.getTime()) ? timeFormatter.format(end) : null
+
+    return `${date} · ${startTime}${endTime ? `–${endTime}` : ""}`
+  }, [bookingReceipt])
 
   useEffect(() => {
     let active = true
@@ -141,12 +169,22 @@ function CalEmbedInstance({
       window.clearTimeout(readyTimeout)
       setStatus("error")
     }
-    const handleBookingSuccess = () => {
+    const handleBookingSuccess = (event: CustomEvent) => {
       if (!active) return
 
       window.clearTimeout(readyTimeout)
       setStatus("ready")
-      setBookingComplete(true)
+      const detail = event.detail
+      const data =
+        typeof detail === "object" && detail !== null && "data" in detail
+          ? (detail.data as Record<string, unknown>)
+          : undefined
+
+      setBookingReceipt({
+        endTime: typeof data?.endTime === "string" ? data.endTime : undefined,
+        startTime:
+          typeof data?.startTime === "string" ? data.startTime : undefined,
+      })
       window.requestAnimationFrame(() => successRef.current?.focus())
     }
 
@@ -188,27 +226,27 @@ function CalEmbedInstance({
       aria-describedby={descriptionId}
       aria-labelledby={headingId}
       className={cn(
-        "overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[#faf7f2] shadow-[0_24px_70px_rgba(43,39,36,0.08)]",
+        "overflow-hidden rounded-[1.25rem] border border-[var(--border)] bg-[#faf7f2]",
         className
       )}
     >
       <div className="border-b border-[var(--border)] px-5 py-4 sm:px-7">
-        <h3 className="font-serif text-xl text-[var(--primary)]" id={headingId}>
-          {bookingComplete
+        <h2 className="font-serif text-xl text-[var(--primary)]" id={headingId}>
+          {bookingReceipt
             ? "Your booking was received"
             : "Available dates and times"}
-        </h3>
+        </h2>
         <p
           className="mt-1 text-sm leading-relaxed text-[var(--muted-foreground)]"
           id={descriptionId}
         >
-          {bookingComplete
+          {bookingReceipt
             ? `Cal.com will email the current booking status for ${serviceTitle}. No payment is collected when you request a time.`
-            : `Choose an available time for ${serviceTitle}. Times remain visible in your local timezone.`}
+            : `Choose an available time for ${serviceTitle}. Cal will show your selected date and time again before you confirm. Times remain visible in your local timezone.`}
         </p>
       </div>
 
-      {bookingComplete ? (
+      {bookingReceipt ? (
         <div
           aria-live="polite"
           className="grid min-h-72 place-items-center px-6 py-10 text-center outline-none"
@@ -220,13 +258,19 @@ function CalEmbedInstance({
             <span className="mx-auto grid size-14 place-items-center rounded-full bg-[#52694d]/10 text-[#52694d]">
               <CircleCheck aria-hidden="true" className="size-7" />
             </span>
-            <h4 className="mt-5 font-serif text-3xl text-[var(--primary)]">
+            <h3 className="mt-5 font-serif text-3xl text-[var(--primary)]">
               Time made for you.
-            </h4>
+            </h3>
             <p className="mt-3 text-sm leading-7 text-[var(--muted-foreground)]">
-              Shannon will confirm your request personally. No payment is
-              collected now; she will arrange payment after the appointment. Use
-              the same email if you sign in to The Den.
+              {bookingTime ? (
+                <strong className="mb-2 block font-medium text-[var(--primary)]">
+                  {bookingTime}
+                </strong>
+              ) : null}
+              With Shannon Mary Dixon. Shannon will confirm your request
+              personally. No payment is collected now; she will arrange payment
+              after the appointment. Use the same email if you sign in to My
+              Account.
             </p>
             <Link
               className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-6 text-sm font-medium text-white transition hover:bg-[var(--accent)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
@@ -292,7 +336,7 @@ function CalEmbedInstance({
         </div>
       )}
 
-      {showExternalLink && !bookingComplete ? (
+      {showExternalLink && !bookingReceipt ? (
         <div className="flex justify-end border-t border-[var(--border)] px-5 py-4 sm:px-7">
           <a
             aria-label={`Open ${serviceTitle} scheduling in Cal.com in a new tab`}

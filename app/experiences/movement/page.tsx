@@ -1,7 +1,6 @@
 import Link from "next/link"
-import { ArrowRight, Check, Circle, Wind } from "lucide-react"
+import { ArrowRight, Circle, Wind } from "lucide-react"
 
-import { SelectBookingButton } from "@/components/booking/select-booking-button"
 import { JsonLd } from "@/components/seo/json-ld"
 import { ServiceOfferingsSection } from "@/components/services/service-offerings-section"
 import { PageSection } from "@/components/shared/internal-page"
@@ -16,7 +15,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { findBookingService } from "@/lib/booking-services"
 import { media } from "@/lib/media"
 import { createPageMetadata, createServiceJsonLd } from "@/lib/seo"
 
@@ -26,67 +24,6 @@ export const metadata = createPageMetadata({
     "Private yoga, restorative movement, and sound bath sessions in Palm Springs, Joshua Tree, and Yucca Valley.",
   path: "/yoga",
 })
-
-const process = [
-  {
-    title: "Connect",
-    description:
-      "Share how your body feels, what has been asking for energy, and what you hope to receive.",
-  },
-  {
-    title: "Arrive",
-    description:
-      "Begin with breath and simple grounding so the session meets your actual nervous system.",
-  },
-  {
-    title: "Move",
-    description:
-      "Explore an adaptive practice shaped around mobility, strength, recovery, or rest.",
-  },
-  {
-    title: "Receive",
-    description:
-      "Integrate through sound, stillness, breathwork, or a slower closing practice.",
-  },
-  {
-    title: "Return",
-    description:
-      "Leave with one or two accessible practices to come back to between sessions.",
-  },
-]
-
-const benefits = [
-  {
-    title: "A steadier breath",
-    description:
-      "Space to notice the breath without forcing it into a particular shape.",
-  },
-  {
-    title: "Tension release",
-    description:
-      "Slow movement and supportive positions invite effort to soften gradually.",
-  },
-  {
-    title: "Body awareness",
-    description:
-      "Practice listening to sensation before habit or momentum takes over.",
-  },
-  {
-    title: "Adaptive movement",
-    description:
-      "The session changes with your energy, experience, and range on that day.",
-  },
-  {
-    title: "Rest without performance",
-    description:
-      "No metrics and no audience—only time to be present inside your own body.",
-  },
-  {
-    title: "A practice to keep",
-    description:
-      "Simple movements or pauses you can return to long after the session ends.",
-  },
-]
 
 const faqs = [
   {
@@ -117,12 +54,6 @@ const faqs = [
 ]
 
 export default function MovementPage() {
-  const privateYogaBooking = findBookingService("private-yoga")
-
-  if (!privateYogaBooking) {
-    throw new Error("Private Yoga is missing from the booking catalog.")
-  }
-
   return (
     <div className="overflow-hidden">
       <JsonLd
@@ -170,13 +101,6 @@ export default function MovementPage() {
                 <Link href="#offerings">
                   Explore Body Sessions <ArrowRight aria-hidden="true" />
                 </Link>
-              </Button>
-              <Button
-                asChild
-                className="h-12 rounded-full border-[#68735f]/25 bg-white/35 px-7 text-[var(--primary)] hover:bg-white/70"
-                variant="outline"
-              >
-                <Link href="/the-den">Explore The Den</Link>
               </Button>
             </div>
           </div>
@@ -242,107 +166,6 @@ export default function MovementPage() {
         />
       </PageSection>
 
-      <PageSection className="py-24 md:py-32" id="for-you">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="text-xs font-medium tracking-[0.3em] text-[#68735f] uppercase">
-            Who this is for
-          </p>
-          <h2 className="mt-5 text-4xl leading-tight font-medium text-[var(--primary)] md:text-5xl">
-            You do not need to arrive ready.
-          </h2>
-          <p className="mt-7 text-lg leading-[1.9] text-[var(--muted-foreground)] md:text-xl">
-            This is for you if you are tired of being asked to perform wellness.
-            You do not need to be flexible, experienced, or good at stillness.
-            Come with the body you have and the energy available that day. The
-            practice will meet you there.
-          </p>
-        </div>
-      </PageSection>
-
-      <PageSection
-        className="bg-[linear-gradient(180deg,rgba(233,236,228,0.54),rgba(250,247,242,0.9))] py-24 md:py-32"
-        id="process"
-      >
-        <SectionHeading
-          align="center"
-          eyebrow="Your session"
-          title="Five ways the room holds you."
-        />
-        <ol className="relative mx-auto mt-16 grid max-w-6xl gap-5 md:grid-cols-5">
-          <span
-            aria-hidden="true"
-            className="absolute top-7 right-[8%] left-[8%] hidden h-px bg-[#839078]/25 md:block"
-          />
-          {process.map((step, index) => (
-            <li
-              className="relative rounded-[1.5rem] border border-white/70 bg-[var(--background)]/70 p-6 shadow-[0_18px_55px_rgba(67,79,61,0.06)] backdrop-blur-sm"
-              key={step.title}
-            >
-              <span className="relative z-10 inline-grid size-9 place-items-center rounded-full border border-[#839078]/30 bg-[var(--background)] text-xs text-[#68735f]">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <h3 className="mt-5 text-2xl font-medium text-[var(--primary)]">
-                {step.title}
-              </h3>
-              <p className="mt-3 text-sm leading-[1.9] text-[var(--muted-foreground)]">
-                {step.description}
-              </p>
-            </li>
-          ))}
-        </ol>
-      </PageSection>
-
-      <PageSection className="py-24 md:py-32" id="benefits">
-        <SectionHeading
-          align="center"
-          eyebrow="What this supports"
-          title="Less force. More feeling."
-        />
-        <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {benefits.map((benefit) => (
-            <article
-              className="rounded-[1.75rem] border border-[var(--border)] p-7 transition duration-500 hover:border-[#839078]/35 hover:bg-white/35 motion-safe:hover:-translate-y-1"
-              key={benefit.title}
-            >
-              <Check className="size-4 text-[#68735f]" aria-hidden="true" />
-              <h3 className="mt-5 text-2xl font-medium text-[var(--primary)]">
-                {benefit.title}
-              </h3>
-              <p className="mt-3 text-sm leading-[1.9] text-[var(--muted-foreground)]">
-                {benefit.description}
-              </p>
-            </article>
-          ))}
-        </div>
-      </PageSection>
-
-      <PageSection className="bg-white/35 py-24 md:py-32" id="investment">
-        <div className="mx-auto grid max-w-5xl items-center gap-10 rounded-[2.5rem] border border-[#839078]/20 bg-[linear-gradient(135deg,rgba(255,255,255,0.76),rgba(221,225,214,0.48))] p-8 shadow-[0_30px_80px_rgba(67,79,61,0.08)] md:grid-cols-[0.7fr_1.3fr] md:p-14">
-          <div className="mx-auto grid size-36 place-items-center rounded-full border border-[#839078]/25">
-            <Wind className="size-8 text-[#68735f]" aria-hidden="true" />
-          </div>
-          <div>
-            <p className="text-xs tracking-[0.28em] text-[#68735f] uppercase">
-              Investment
-            </p>
-            <h2 className="mt-5 text-4xl font-medium text-[var(--primary)] md:text-5xl">
-              Let the format follow the need.
-            </h2>
-            <p className="mt-6 text-lg leading-[1.9] text-[var(--muted-foreground)]">
-              Group rates are shown above. Individual one-to-one pricing is
-              confirmed through booking. All sessions are in person in the
-              desert.
-            </p>
-            <SelectBookingButton
-              className="mt-8 h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[#68735f] sm:w-auto"
-              label="Book a Yoga Session"
-              pillarId={privateYogaBooking.pillar.id}
-              service={privateYogaBooking.service}
-            />
-          </div>
-        </div>
-      </PageSection>
-
       <PageSection className="bg-white/35 py-24 md:py-32" id="faq">
         <SectionHeading
           align="center"
@@ -370,22 +193,6 @@ export default function MovementPage() {
         </Accordion>
       </PageSection>
 
-      <section className="px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="text-xs tracking-[0.3em] text-[#68735f] uppercase">
-            The studio is ready
-          </p>
-          <h2 className="mt-5 text-5xl leading-tight font-medium text-[var(--primary)] md:text-6xl">
-            Come home to your body.
-          </h2>
-          <SelectBookingButton
-            className="mt-9 h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[#68735f] sm:w-auto"
-            label="Book a Yoga Session"
-            pillarId={privateYogaBooking.pillar.id}
-            service={privateYogaBooking.service}
-          />
-        </div>
-      </section>
       <ServiceAreaNote />
     </div>
   )

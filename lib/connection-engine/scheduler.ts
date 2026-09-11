@@ -13,6 +13,7 @@ import type {
 } from "@/lib/connection-engine/types"
 import { DEFAULT_CONNECTION_PREFERENCES } from "@/lib/connection-engine/types"
 import { getCanonicalContactToEmail } from "@/lib/commerce/launch-authority"
+import { emailHtmlToText, renderBrandedEmail } from "@/lib/email-branding"
 import { getSiteUrl } from "@/lib/env"
 import {
   getCommerceDeploymentTarget,
@@ -48,6 +49,7 @@ class InactiveMembershipError extends Error {
 
 export type JourneyDeliveryEmail = {
   bodyHtml: string
+  bodyText: string
   idempotencyKey: string
   replyTo?: string
   subject: string
@@ -152,31 +154,36 @@ function emailShell({
   bodyHtml,
   ctaHref,
   ctaLabel,
+  heading,
   optOutText,
 }: {
   bodyHtml: string
   ctaHref: string | null
   ctaLabel: string | null
+  heading: string
   optOutText: string
 }) {
   const preferencesUrl = new URL(
     "/account/preferences/communication",
     `${getSiteUrl()}/`
   ).toString()
-  const cta =
-    ctaHref && ctaLabel
-      ? `<p style="margin:28px 0"><a href="${escapeHtml(
-          absoluteHref(ctaHref)
-        )}" style="display:inline-block;border-radius:999px;background:#5a4a3f;color:#faf7f2;padding:12px 22px;text-decoration:none">${escapeHtml(
-          ctaLabel
-        )}</a></p>`
-      : ""
-
-  return `<div style="margin:0 auto;max-width:640px;background:#faf7f2;color:#2b2724;font-family:Arial,sans-serif;font-size:16px;line-height:1.7;padding:32px"><div>${bodyHtml}</div>${cta}<hr style="margin:32px 0;border:0;border-top:1px solid #e8dfd3"><p style="color:#8b7e6d;font-size:12px">${escapeHtml(
-    optOutText
-  )} <a href="${escapeHtml(
+  const finePrintHtml = `${escapeHtml(optOutText)} <a href="${escapeHtml(
     preferencesUrl
-  )}" style="color:#5a4a3f">Adjust frequency</a>.</p></div>`
+  )}" style="color:#6f4a2f;font-weight:700;text-decoration:underline">Adjust frequency</a>.`
+
+  return renderBrandedEmail({
+    bodyHtml,
+    bodyText: emailHtmlToText(bodyHtml),
+    cta:
+      ctaHref && ctaLabel
+        ? { href: absoluteHref(ctaHref), label: ctaLabel }
+        : null,
+    eyebrow: "A note from Shannon",
+    finePrintHtml,
+    finePrintText: `${optOutText} Adjust frequency: ${preferencesUrl}.`,
+    heading,
+    preheader: heading,
+  })
 }
 
 function defaultSender(): JourneyMessageSender | null {
@@ -191,6 +198,7 @@ function defaultSender(): JourneyMessageSender | null {
         html: email.bodyHtml,
         reply_to: email.replyTo,
         subject: email.subject,
+        text: email.bodyText,
         to: [email.to],
       }),
       headers: {
@@ -554,13 +562,16 @@ async function deliverOne(
     { firstName: memberFirstName, journeyName: context.journey.name },
     false
   )
+  const brandedEmail = emailShell({
+    bodyHtml: emailBody,
+    ctaHref: cta.href,
+    ctaLabel: cta.label,
+    heading: subject,
+    optOutText: context.milestone.opt_out_text,
+  })
   const providerResult = await sender({
-    bodyHtml: emailShell({
-      bodyHtml: emailBody,
-      ctaHref: cta.href,
-      ctaLabel: cta.label,
-      optOutText: context.milestone.opt_out_text,
-    }),
+    bodyHtml: brandedEmail.html,
+    bodyText: brandedEmail.text,
     idempotencyKey: `journey-delivery-${delivery.id}`,
     replyTo: getCanonicalContactToEmail(process.env) ?? undefined,
     subject,

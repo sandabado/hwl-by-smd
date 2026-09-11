@@ -70,7 +70,10 @@ export const media = {
       src: "/images/home/hwl-home-being-celestial-v3.webp",
       alt: "Shannon in luminous white fabric with celestial details across her cheek",
     },
-    ritualMoon: shannon.botanicalPortrait,
+    ritualMoon: {
+      src: "/images/experiences/ritual-moon-forest.webp",
+      alt: "A full moon rising over a quiet forest and golden field",
+    },
   },
   editorial: {
     beautyOfferings: {
@@ -98,7 +101,10 @@ export const media = {
       label: "Shannon in the high desert",
       disclosure: "Original photography from Shannon's archive.",
     },
-    liftBotanicals: shannon.homeRitual,
+    liftBotanicals: {
+      src: "/images/editorial/lift-dried-botanicals.webp",
+      alt: "Dried botanicals casting soft shadows across warm plaster",
+    },
     liftVideoPreview: {
       src: "/images/editorial/lift-video-preview.jpg",
       alt: "Shannon demonstrating a facial massage movement with her hands",
@@ -111,8 +117,8 @@ export const media = {
     },
     beauty: shannon.beautyLift,
     body: {
-      src: "/images/home/hwl-home-beauty-touch-v2.webp",
-      alt: "An editorial study of Shannon's torso and natural skin",
+      src: "/images/hero/hwl-palm-springs-yoga-v1.webp",
+      alt: "Shannon moving through a sunlit yoga practice in Palm Springs",
     },
     being: {
       src: "/images/home/hwl-home-being-celestial-v3.webp",
@@ -136,7 +142,10 @@ export const media = {
       src: "/images/retreats/retreats-high-desert-path-v1.webp",
       alt: "A path winding through Joshua trees and sunlit high-desert boulders",
     },
-    groupPractice: shannon.retreatYoga,
+    groupPractice: {
+      src: "/images/retreats/retreats-group-practice-v1.webp",
+      alt: "Shannon guiding a small outdoor yoga practice in Palm Springs",
+    },
     fanPalmOasis: {
       src: "/images/retreats/retreats-fan-palm-oasis-v1.webp",
       alt: "California fan palms glowing along a quiet desert canyon path",

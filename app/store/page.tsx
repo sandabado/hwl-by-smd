@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, Check, PlayCircle, type LucideIcon } from "lucide-react"
+import { Check, PlayCircle } from "lucide-react"
 
 import { AddToCartButton } from "@/components/cart/add-to-cart-button"
 import { BreathingSection } from "@/components/shared/breathing-section"
@@ -12,74 +12,21 @@ import { Button } from "@/components/ui/button"
 import { getAuthenticatedUser, getMemberAccess } from "@/lib/access"
 import { media } from "@/lib/media"
 import { createPageMetadata } from "@/lib/seo"
+import { LIFT_STOREFRONT_PRODUCT } from "@/lib/storefront-product"
 import { isProductCheckoutReady } from "@/lib/stripe"
 
 export const metadata = createPageMetadata({
-  title: "Beauty Products, Magical Tools & Digital Guides | HWL by SMD",
+  title: "LIFT Video + PDF | HWL by SMD",
   description:
-    "Shop Shannon's beauty shelf, magical tools, and complete LIFT video and PDF ritual from HWL by SMD.",
+    "Bring home Shannon Mary Dixon's complete seven-movement LIFT facial massage ritual with the guided video and downloadable PDF.",
   path: "/store",
 })
 
-const collections = [
-  {
-    id: "beauty-products",
-    eyebrow: "The beauty shelf",
-    title: "Beauty Products",
-    description:
-      "Professional and everyday beauty products selected by Shannon for thoughtful at-home care. The first collection is being gathered now.",
-    image: media.editorial.beautyOfferings,
-    href: "/contact",
-    label: "Ask about beauty products",
-  },
-  {
-    id: "magical-tools",
-    eyebrow: "Tools for practice",
-    title: "Magical Tools",
-    description:
-      "A home for the tarot, ritual, lunar, and sensory tools Shannon chooses to carry. The first collection is being gathered now.",
-    image: media.editorial.beingOfferings,
-    href: "/contact",
-    label: "Ask about magical tools",
-  },
+const liftFeatures = [
+  "Complete seven-movement guided video",
+  "Downloadable facial ritual PDF",
+  "Private, account-based library access",
 ] as const
-
-type Offer = {
-  cadence: string
-  description: string
-  eyebrow: string
-  features: string[]
-  featured: boolean
-  icon: LucideIcon
-  id: string
-  label: string
-  ownedHref: string
-  price: string
-  productId: "lift_guide"
-  title: string
-}
-
-const offers: Offer[] = [
-  {
-    productId: "lift_guide",
-    id: "lift-guide",
-    eyebrow: "Streaming + PDF",
-    title: "LIFT — Video + PDF",
-    price: "$11.11",
-    cadence: "one time",
-    description:
-      "A full video walkthrough of all seven movements plus the downloadable guide. Learn each technique by seeing it demonstrated.",
-    features: [
-      "Guided in-browser video",
-      "Printable PDF",
-      "Account-based access",
-    ],
-    label: "Add LIFT to cart · $11.11",
-    featured: true,
-    icon: PlayCircle,
-    ownedHref: "/course/lift-daily-facial-ritual",
-  },
-]
 
 function getFaqs({ liftReady }: { liftReady: boolean }) {
   return [
@@ -116,259 +63,115 @@ export default async function StorePage() {
     <>
       <BreathingSection
         background="gradient"
-        className="flex min-h-[64svh] items-center"
-        contentClassName="mx-auto grid w-full max-w-7xl items-center gap-14 px-6 lg:grid-cols-[1.2fr_0.8fr]"
-        padding="standard"
+        className="flex min-h-[78svh] items-center"
+        contentClassName="mx-auto w-full max-w-7xl px-6"
+        padding="expansive"
         reveal={false}
         variant="gift-shop"
       >
-        <Reveal>
-          <BreathingText
-            as="h1"
-            className="font-medium text-[var(--primary)]"
-            size="hero"
-          >
-            Beauty, ritual, and practice for home.
-          </BreathingText>
-          <BreathingText
-            className="mt-7 text-[var(--primary)]"
-            size="subheading"
-          >
-            Shannon&apos;s store, gathered with care.
-          </BreathingText>
-          <BreathingText
-            className="mt-7 max-w-3xl text-[var(--muted-foreground)]"
-            size="body"
-          >
-            Explore beauty products, magical tools, and Shannon&apos;s complete
-            LIFT ritual. The first physical collections are being gathered now.
-          </BreathingText>
-          <div className="mt-10 flex flex-wrap gap-4">
-            {access?.canAccessLift ? (
-              <Button
-                asChild
-                className="min-h-12 rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)]"
-              >
-                <Link href="/course/lift-daily-facial-ritual">Access LIFT</Link>
-              </Button>
-            ) : (
-              <AddToCartButton
-                className="min-h-12 w-auto px-7"
-                label="Get LIFT · $11.11"
-              />
-            )}
-            <Button
-              asChild
-              className="min-h-12 rounded-full border-[var(--border)] bg-white/30 px-7 text-[var(--primary)] hover:bg-white/70"
-              variant="outline"
-            >
-              <Link href="/beauty/lift">See LIFT details</Link>
-            </Button>
-          </div>
-        </Reveal>
-
-        <Reveal className="relative min-h-96" delay={120}>
-          <div className="absolute inset-0 overflow-hidden rounded-[2rem] border border-white/65 bg-[var(--muted)] shadow-[0_28px_80px_rgba(90,74,63,0.14)]">
-            <Image
-              alt={media.editorial.beautyOfferings.alt}
-              className="object-cover"
-              fill
-              sizes="(max-width: 1023px) 92vw, 38vw"
-              src={media.editorial.beautyOfferings.src}
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 bg-gradient-to-t from-[var(--primary)]/42 via-transparent to-transparent"
-            />
-            <p className="absolute right-5 bottom-5 left-5 text-[10px] font-medium tracking-[0.24em] text-white uppercase">
-              Simple tools · Daily practice · Chosen with care
+        <div className="grid items-center gap-12 lg:grid-cols-[0.92fr_1.08fr] lg:gap-20">
+          <Reveal>
+            <p className="text-xs font-medium tracking-[0.28em] text-[var(--accent)] uppercase">
+              The HWL store · Available digitally
             </p>
-          </div>
-        </Reveal>
-      </BreathingSection>
-
-      <BreathingSection
-        background="cool"
-        contentClassName="mx-auto max-w-7xl px-6"
-        variant="gift-shop"
-      >
-        <div className="max-w-3xl">
-          <p className="text-xs font-medium tracking-[0.28em] text-[var(--accent)] uppercase">
-            Shop by collection
-          </p>
-          <BreathingText
-            as="h2"
-            className="mt-5 font-medium text-[var(--primary)]"
-            size="heading"
-          >
-            A shelf for the things Shannon actually uses.
-          </BreathingText>
-          <p className="mt-6 text-base leading-[1.9] text-[var(--muted-foreground)]">
-            The physical shop has two homes. Each item will arrive with the
-            details you need to choose it with confidence.
-          </p>
-        </div>
-
-        <div className="mt-12 grid gap-6 lg:grid-cols-2">
-          {collections.map((collection) => (
-            <article
-              className="group relative min-h-[32rem] overflow-hidden rounded-[2rem] border border-white/65 bg-[var(--muted)] shadow-[0_26px_70px_rgba(90,74,63,0.1)]"
-              id={collection.id}
-              key={collection.id}
+            <BreathingText
+              as="h1"
+              className="mt-5 font-medium text-[var(--primary)]"
+              size="hero"
             >
-              <Image
-                alt={collection.image.alt}
-                className="object-cover transition duration-[1200ms] ease-out motion-safe:group-hover:scale-[1.025]"
-                fill
-                sizes="(max-width: 1023px) 100vw, 50vw"
-                src={collection.image.src}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[var(--primary)]/95 via-[var(--primary)]/40 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 p-7 text-[var(--background)] md:p-10">
-                <p className="text-xs font-medium tracking-[0.22em] text-[var(--accent-on-dark)] uppercase">
-                  {collection.eyebrow}
-                </p>
-                <h3 className="mt-4 font-serif text-4xl text-white md:text-5xl">
-                  {collection.title}
-                </h3>
-                <p className="mt-5 max-w-xl text-sm leading-[1.85] text-white/76 md:text-base">
-                  {collection.description}
-                </p>
-                <Link
-                  className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-full border border-white/38 bg-white/10 px-5 py-2 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white hover:text-[var(--primary)]"
-                  href={collection.href}
-                >
-                  {collection.label}
-                  <ArrowRight aria-hidden="true" className="size-4" />
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-      </BreathingSection>
+              {LIFT_STOREFRONT_PRODUCT.name}
+            </BreathingText>
+            <BreathingText
+              className="mt-7 max-w-xl text-[var(--primary)]"
+              size="subheading"
+            >
+              Seven movements. Five minutes. Your own two hands.
+            </BreathingText>
+            <p className="mt-7 max-w-xl text-base leading-8 text-[var(--muted-foreground)] md:text-lg">
+              Learn Shannon&apos;s complete facial massage ritual with a guided
+              video and a downloadable guide you can return to at home.
+            </p>
 
-      <BreathingSection
-        background="warm"
-        contentClassName="mx-auto max-w-7xl px-6"
-        id="digital-practice"
-        variant="gift-shop"
-      >
-        <div className="mx-auto mb-14 max-w-3xl text-center">
-          <p className="text-xs font-medium tracking-[0.28em] text-[var(--accent)] uppercase">
-            Available digitally
-          </p>
-          <BreathingText
-            as="h2"
-            className="mt-5 font-medium text-[var(--primary)]"
-            size="heading"
-          >
-            One complete digital practice.
-          </BreathingText>
-        </div>
-        <PersonalUseLicense className="mx-auto mb-12 max-w-3xl" />
-        <div className="mx-auto max-w-2xl">
-          {offers.map((offer, index) => {
-            const Icon = offer.icon
-            const owned = access?.canAccessLift
+            <div className="mt-8 flex items-end gap-3">
+              <span className="font-serif text-5xl text-[var(--primary)]">
+                {LIFT_STOREFRONT_PRODUCT.price}
+              </span>
+              <span className="pb-1 text-xs tracking-[0.16em] text-[var(--muted-foreground)] uppercase">
+                One-time purchase
+              </span>
+            </div>
 
-            return (
-              <Reveal as="article" delay={index * 80} key={offer.productId}>
-                <div
-                  className={
-                    offer.featured
-                      ? "relative flex h-full min-h-[38rem] flex-col overflow-hidden rounded-[2rem] border border-[var(--accent)] bg-[var(--primary)] p-8 text-[var(--background)] shadow-[0_32px_85px_rgba(63,48,39,0.2)] lg:-translate-y-5"
-                      : "relative flex h-full min-h-[38rem] flex-col overflow-hidden rounded-[2rem] border border-[var(--border)] bg-white/52 p-8 text-[var(--primary)]"
-                  }
-                  id={offer.id}
-                >
-                  {offer.featured ? (
-                    <span className="absolute top-7 right-7 rounded-full bg-[var(--accent)] px-3 py-1 text-[10px] font-semibold tracking-[0.18em] text-white uppercase">
-                      First release
-                    </span>
-                  ) : null}
-
-                  <span
-                    className={
-                      offer.featured
-                        ? "grid size-14 place-items-center rounded-full border border-white/16 bg-white/8 text-[var(--accent-on-dark)]"
-                        : "grid size-14 place-items-center rounded-full border border-[var(--accent)]/22 bg-[var(--muted)]/50 text-[var(--accent)]"
-                    }
-                  >
-                    <Icon className="size-6" aria-hidden="true" />
+            <ul className="mt-8 space-y-3 text-sm text-[var(--muted-foreground)]">
+              {liftFeatures.map((feature) => (
+                <li className="flex items-start gap-3" key={feature}>
+                  <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[var(--accent)]/10 text-[var(--accent)]">
+                    <Check aria-hidden="true" className="size-3" />
                   </span>
-                  <p
-                    className={
-                      offer.featured
-                        ? "mt-9 text-xs font-medium tracking-[0.22em] text-[var(--accent-on-dark)] uppercase"
-                        : "mt-9 text-xs font-medium tracking-[0.22em] text-[var(--accent)] uppercase"
-                    }
-                  >
-                    {offer.eyebrow}
-                  </p>
-                  <h2 className="mt-5 text-4xl leading-tight font-medium">
-                    {offer.title}
-                  </h2>
-                  <div className="mt-5 flex items-end gap-2">
-                    <span className="font-serif text-5xl">{offer.price}</span>
-                    <span className="pb-1 text-xs opacity-72">
-                      {offer.cadence}
-                    </span>
-                  </div>
-                  <p className="mt-7 text-sm leading-[1.85] opacity-78">
-                    {offer.description}
-                  </p>
-                  <ul className="mt-8 flex-1 space-y-4 text-sm">
-                    {offer.features.map((feature) => (
-                      <li className="flex items-start gap-3" key={feature}>
-                        <Check
-                          className={
-                            offer.featured
-                              ? "mt-0.5 size-4 shrink-0 text-[var(--accent-on-dark)]"
-                              : "mt-0.5 size-4 shrink-0 text-[var(--accent)]"
-                          }
-                          aria-hidden="true"
-                        />
-                        <span className="leading-relaxed">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <span className="leading-relaxed">{feature}</span>
+                </li>
+              ))}
+            </ul>
 
-                  <div className="mt-9">
-                    {owned ? (
-                      <Button
-                        asChild
-                        className={
-                          offer.featured
-                            ? "h-11 w-full rounded-full bg-[var(--background)] px-6 text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
-                            : "h-11 w-full rounded-full px-6"
-                        }
-                        variant={offer.featured ? "default" : "outline"}
-                      >
-                        <Link href={offer.ownedHref}>Access Now</Link>
-                      </Button>
-                    ) : (
-                      <AddToCartButton
-                        className={
-                          offer.featured
-                            ? "bg-[var(--background)] text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
-                            : undefined
-                        }
-                        label={offer.label}
-                        variant={offer.featured ? "default" : "outline"}
-                      />
-                    )}
-                  </div>
-                </div>
-              </Reveal>
-            )
-          })}
+            <div className="mt-9 max-w-sm">
+              {access?.canAccessLift ? (
+                <Button
+                  asChild
+                  className="min-h-12 w-full rounded-full bg-[var(--primary)] px-7 text-white hover:bg-[var(--accent)] sm:w-auto"
+                >
+                  <Link href="/course/lift-daily-facial-ritual">Open LIFT</Link>
+                </Button>
+              ) : (
+                <AddToCartButton
+                  className="min-h-12 px-7 sm:w-auto"
+                  label={`Add LIFT to cart · ${LIFT_STOREFRONT_PRODUCT.price}`}
+                />
+              )}
+            </div>
+
+            <Link
+              className="mt-5 inline-flex min-h-11 items-center text-sm font-medium text-[var(--accent)] underline decoration-[var(--accent)]/35 underline-offset-4 transition hover:decoration-[var(--accent)] focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-4 focus-visible:outline-none"
+              href="/beauty/lift"
+            >
+              See the complete LIFT details
+            </Link>
+
+            <p
+              className="mt-5 max-w-xl text-xs leading-6 text-[var(--muted-foreground)]"
+              role={liftSalesReady ? undefined : "status"}
+            >
+              {liftSalesReady
+                ? "Secure Stripe checkout. Your video and PDF appear in your private HWL library after payment confirmation."
+                : "You can save LIFT to your cart. Checkout remains closed until the protected delivery and Stripe paths complete verification."}
+            </p>
+          </Reveal>
+
+          <Reveal className="relative" delay={120}>
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-white/65 bg-[var(--muted)] shadow-[0_28px_80px_rgba(90,74,63,0.14)]">
+              <Image
+                alt={media.editorial.liftVideoPreview.alt}
+                className="object-cover"
+                fill
+                preload
+                sizes="(max-width: 1023px) 92vw, 50vw"
+                src={media.editorial.liftVideoPreview.src}
+              />
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 bg-gradient-to-t from-[var(--primary)]/55 via-transparent to-transparent"
+              />
+              <div className="absolute right-6 bottom-6 left-6 flex items-center gap-3 text-white">
+                <span className="grid size-11 shrink-0 place-items-center rounded-full border border-white/35 bg-white/12 backdrop-blur-sm">
+                  <PlayCircle aria-hidden="true" className="size-5" />
+                </span>
+                <p className="text-xs font-medium tracking-[0.16em] uppercase">
+                  Complete video + PDF · Private library access
+                </p>
+              </div>
+            </div>
+          </Reveal>
         </div>
 
-        <p className="mx-auto mt-10 max-w-2xl text-center text-xs leading-[1.8] text-[var(--muted-foreground)]">
-          {liftSalesReady
-            ? "One purchase unlocks the complete LIFT video and downloadable PDF inside your private HWL library."
-            : "Sales are closed until the private video, PDF, entitlement, webhook, and delivery paths have been verified together."}
-        </p>
+        <PersonalUseLicense className="mx-auto mt-12 max-w-3xl" />
       </BreathingSection>
 
       <BreathingSection

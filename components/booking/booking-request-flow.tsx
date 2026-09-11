@@ -20,13 +20,11 @@ import {
   Flower2,
   Gem,
   HandHeart,
-  MapPin,
   MoonStar,
   Music2,
   PersonStanding,
   Sparkles,
   Sun,
-  UserRound,
   Waves,
   type LucideIcon,
 } from "lucide-react"
@@ -868,7 +866,7 @@ export function BookingRequestFlow({
           </div>
         ) : (
           <div className="mt-4 scroll-mt-24" ref={scheduleStepRef}>
-            <div className="flex flex-col justify-between gap-4 rounded-[1.25rem] border border-[var(--border)] bg-[#eee7dc] p-4 sm:flex-row sm:items-center sm:p-5">
+            <div className="flex items-start justify-between gap-3 rounded-[1.25rem] border border-[var(--border)] bg-[#eee7dc] p-3.5 sm:items-center sm:px-5 sm:py-4">
               <div className="min-w-0">
                 <h1
                   className="font-serif text-xl leading-tight text-[var(--primary)] outline-none sm:text-2xl"
@@ -877,67 +875,32 @@ export function BookingRequestFlow({
                 >
                   {selectedService.title}
                 </h1>
-                <dl className="mt-3 grid gap-x-5 gap-y-2 text-xs text-[var(--muted-foreground)] sm:grid-cols-2">
-                  <div>
-                    <dt className="sr-only">Duration and price</dt>
-                    <dd className="font-medium text-[var(--primary)]">
-                      {selectedService.duration} · {selectedService.price}
-                    </dd>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <UserRound
-                      aria-hidden="true"
-                      className="mt-px size-3.5 shrink-0 text-[var(--accent)]"
-                    />
-                    <div>
-                      <dt className="sr-only">Practitioner</dt>
-                      <dd>With Shannon Mary Dixon</dd>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2 sm:col-span-2">
-                    <MapPin
-                      aria-hidden="true"
-                      className="mt-px size-3.5 shrink-0 text-[var(--accent)]"
-                    />
-                    <div>
-                      <dt className="sr-only">Location</dt>
-                      <dd>
-                        {selectedLocationLabel}
-                        {selectedService.locationPolicy.kind === "fixed" ? (
-                          <span className="block text-[11px] leading-4">
-                            Private address shared after confirmation.
-                          </span>
-                        ) : null}
-                      </dd>
-                    </div>
-                  </div>
-                </dl>
-                <p className="mt-2 text-xs leading-5 text-[var(--muted-foreground)]">
-                  {selectedCalLink
-                    ? "Choose a live time below. No payment is collected now; your request remains pending until Shannon confirms it."
-                    : "Share a preferred window so Shannon can arrange the right time and care."}
+                <p className="mt-1 text-xs leading-5 text-[var(--muted-foreground)] sm:text-sm">
+                  With Shannon · {selectedLocationLabel}
+                  {selectedCalLink ? " · Request now, pay after your visit" : ""}
                 </p>
               </div>
-              <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1.5">
                 <Button
-                  className="min-h-11 rounded-full px-4 text-[var(--primary)]"
+                  aria-label="Change service"
+                  className="min-h-11 rounded-full px-3 text-[var(--primary)] sm:px-4"
                   onClick={returnToExperience}
                   type="button"
                   variant="outline"
                 >
                   <ArrowLeft aria-hidden="true" className="size-4" />
-                  Change
+                  <span className="sr-only sm:not-sr-only">Change</span>
                 </Button>
                 {selectedCalLink ? (
                   <a
                     aria-label={`Open ${selectedService.title} scheduling in Cal.com in a new tab`}
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-3 text-xs font-medium text-[var(--accent)] underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
+                    className="inline-flex size-11 items-center justify-center rounded-full border border-[var(--border)] bg-white/45 text-[var(--accent)] transition hover:border-[var(--accent)] hover:bg-white/75 focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:outline-none"
                     href={selectedExternalCalLink}
                     rel="noreferrer"
                     target="_blank"
                   >
-                    Open in Cal.com
                     <ExternalLink aria-hidden="true" className="size-3.5" />
+                    <span className="sr-only">Open in Cal.com</span>
                   </a>
                 ) : null}
               </div>

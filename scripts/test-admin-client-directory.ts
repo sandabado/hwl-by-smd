@@ -111,6 +111,7 @@ function dependencies(
     readRows: async () => ({ ...rows, status: "ready" }),
     requireAdmin: async () => ({
       email: "admin@ghosthand.studio",
+      role: "administrator",
       source: "supabase",
       userId: PRACTITIONER_ID,
     }),
@@ -149,6 +150,7 @@ test("denied and local demo sessions never read private client rows", async (t) 
         },
         requireAdmin: async () => ({
           email: "local-preview",
+          role: "administrator",
           source: "local-preview",
           userId: null,
         }),
@@ -338,6 +340,7 @@ test("invalid routes and malformed database rows fail closed", async (t) => {
           authorizations += 1
           return {
             email: "admin@ghosthand.studio",
+            role: "administrator",
             source: "supabase",
             userId: PRACTITIONER_ID,
           }

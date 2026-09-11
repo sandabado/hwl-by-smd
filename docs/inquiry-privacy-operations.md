@@ -148,12 +148,19 @@ operator.
 Do not infer that the notification recipient, a local demo administrator, or any
 existing Auth identity is the intended production administrator.
 
-The owner-approved Production identities are `shannon@hwlbysmd.com` as the
-permanent administrator and `admin@ghosthand.studio` as the operational super
-admin and retention operator. The application still grants only one technical
-administrator tier, `profiles.is_admin`; the operational title does not create
-a second hidden privilege tier. Apply the following sequence independently to
-each exact normalized identity:
+The owner-approved intended Production identities are `shannon@hwlbysmd.com`
+as the permanent `administrator` and `admin@ghosthand.studio` as the
+operational `super_admin` and retention operator. Migration 018 represents
+those two tiers in `profiles.admin_role` while preserving `profiles.is_admin`
+for compatibility. It provisions no identity and, at the time of this local
+review, is not proof that either role exists in a hosted environment.
+
+Bootstrap is deliberately asymmetric. The first super administrator cannot be
+created by the authenticated RPC because no authorized caller exists yet. It
+requires one owner/postgres transaction after exact identity verification and
+fresh human approval. Every later change uses `change_admin_role(...)`, which
+retains the signed-in human actor UUID in the append-only audit. Apply this
+sequence:
 
 1. The owner creates or signs into that exact account through the ordinary
    `/login?redirectTo=/admin/inquiries` Supabase flow and completes email
@@ -165,40 +172,94 @@ each exact normalized identity:
 3. Query `public.profiles` by both that UUID and exact email. Require exactly one
    matching profile. Stop if the Auth and profile identities differ or either is
    absent; do not repair by promoting a near match.
-4. Obtain separate owner approval for the privilege change. Then, in the SQL
-   editor, replace both placeholders and run the narrow transaction below. The
-   UUID and email predicates must identify the same previously verified row:
+4. Record a bounded, non-secret approval or change-ticket reference. It must be
+   8–120 characters, start with a letter or number, and contain only letters,
+   numbers, `.`, `_`, `:`, `/`, `#`, or `-`. Never put a credential, token,
+   customer detail, or free-form personal data in this field.
+5. Rehearse the first `super_admin` bootstrap in an owner/postgres SQL session.
+   Replace every placeholder, including the exact current role (`member` or
+   `administrator`) observed during verification. The UUID, normalized email,
+   confirmation, and expected-role predicates must all match one row:
 
    ```sql
    begin;
 
-   update public.profiles
-   set is_admin = true
-   where id = 'REPLACE_WITH_VERIFIED_AUTH_USER_UUID'::uuid
-     and lower(email) = lower('REPLACE_WITH_OWNER_APPROVED_ADMIN_EMAIL')
-     and is_admin = false
-   returning id, email, is_admin;
+   select pg_catalog.set_config(
+     'hwl.admin_change_reference',
+     'REPLACE_WITH_NONSECRET_APPROVAL_REFERENCE',
+     true
+   );
+
+   select profile.id, profile.email, profile.admin_role, profile.is_admin
+   from public.profiles as profile
+   join auth.users as auth_user on auth_user.id = profile.id
+   where profile.id = 'REPLACE_WITH_VERIFIED_AUTH_USER_UUID'::uuid
+     and profile.email = 'REPLACE_WITH_NORMALIZED_APPROVED_EMAIL'
+     and lower(auth_user.email) = profile.email
+     and auth_user.email_confirmed_at is not null
+     and coalesce(profile.admin_role, 'member') =
+       'REPLACE_WITH_EXACT_CURRENT_ROLE'
+   for update of profile, auth_user;
+
+   update public.profiles as profile
+   set admin_role = 'super_admin'
+   from auth.users as auth_user
+   where profile.id = 'REPLACE_WITH_VERIFIED_AUTH_USER_UUID'::uuid
+     and auth_user.id = profile.id
+     and profile.email = lower('REPLACE_WITH_NORMALIZED_APPROVED_EMAIL')
+     and lower(auth_user.email) = profile.email
+     and auth_user.email_confirmed_at is not null
+     and coalesce(profile.admin_role, 'member') =
+       'REPLACE_WITH_EXACT_CURRENT_ROLE'
+   returning profile.id, profile.email, profile.admin_role, profile.is_admin;
 
    rollback;
    ```
 
-5. Require the rollback rehearsal to return exactly one row. Repeat the same
-   transaction with `COMMIT` only after the owner reviews that row and explicitly
-   authorizes promotion. If it returns zero or more than one row, stop.
-6. Sign out, sign in through the normal site flow as the approved administrator,
-   and verify `/admin/inquiries` uses a real Supabase session rather than the
-   local demo path. Confirm the private inbox can be read after migration 013 is
-   applied, while a logged-out browser is denied.
-7. Record the approver, operator, UTC time, Auth UUID, and verification result in
-   the private operations log. Do not record the password, session cookie,
-   service-role credential, or unrelated profile data.
-8. To revoke access, use the same exact UUID-and-email transaction with
-   `is_admin = false`, verify the affected row count, and confirm the former
-   session can no longer open the inbox.
+6. Require both the locked identity query and rehearsal update to return exactly
+   one row with
+   `admin_role='super_admin'` and `is_admin=true`. Verify a corresponding
+   `admin_role_change_audit` row carries the same target UUID and approval
+   reference. Repeat with `COMMIT` only after the owner reviews the evidence and
+   explicitly authorizes this bootstrap. If any predicate returns zero rows or
+   the evidence is ambiguous, stop.
+7. The current candidate intentionally has no generic role editor. Through a
+   separately reviewed invocation using that confirmed super administrator's
+   Supabase session—not an owner SQL editor or service-role request—call the
+   narrow RPC for the separately confirmed Shannon identity. Use the exact
+   current role verified at that moment:
 
-This bootstrap is authorization guidance, not permission to create an account
-or change hosted data. The website service role and public application must
-never expose a self-promotion path.
+   ```ts
+   const result = await signedInSupabase.rpc("change_admin_role", {
+     p_target_user_id: "REPLACE_WITH_SHANNON_AUTH_UUID",
+     p_target_email: "shannon@hwlbysmd.com",
+     p_expected_role: "member", // or administrator, only when verified
+     p_new_role: "administrator",
+     p_approval_reference: "REPLACE_WITH_NONSECRET_APPROVAL_REFERENCE",
+   })
+   ```
+
+   The RPC rejects unconfirmed identities, UUID/email mismatches, stale expected
+   roles, ordinary administrators, and self-change. Email is a target
+   cross-check only; it never grants privilege.
+
+8. Verify `/admin/inquiries` through each real Supabase session rather than the
+   local demo path. Confirm the permanent administrator can read the intended
+   private inbox after migration 013, while a logged-out browser is denied.
+9. Record the approver, operator, UTC time, Auth UUID, role, approval reference,
+   and verification result in the private operations log. Do not record a
+   password, token, session cookie, service-role credential, or unrelated
+   profile data.
+10. Later role changes and revocations use the same authenticated RPC with exact
+    UUID, normalized email, expected role, and a fresh approval reference. The
+    RPC never permits self-demotion. An exceptional last-super-admin recovery
+    therefore requires the same separately approved owner/postgres procedure as
+    bootstrap, followed by audit verification and session-access checks.
+
+This bootstrap is authorization guidance, not permission to create an account,
+apply migration 018, or change hosted data. Direct service-role role changes
+also require an explicit same-transaction change reference and are not a
+self-promotion path. The website must not expose a generic role editor.
 
 ## Approved retention policy
 

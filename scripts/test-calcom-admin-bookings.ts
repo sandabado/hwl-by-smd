@@ -9,6 +9,7 @@ import {
 
 const ADMIN_ACCESS = {
   email: "shannon@hwlbysmd.com",
+  role: "administrator",
   source: "supabase",
   userId: "3e218daf-e254-43c6-93cc-20fe50a9f829",
 } as const
@@ -137,6 +138,7 @@ test("Cal.com admin listing never reads a provider from the signed local preview
     assert.deepEqual(
       await getCalcomAdminBookings({
         email: "local-preview",
+        role: "administrator",
         source: "local-preview",
         userId: null,
       }),

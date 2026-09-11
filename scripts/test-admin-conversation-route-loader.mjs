@@ -8,6 +8,7 @@ export async function authenticateAdminApi() {
     return {
       access: {
         email: "shannon@hwlbysmd.com",
+        role: "administrator",
         source: "supabase",
         userId: "00000000-0000-4000-8000-000000000108"
       },

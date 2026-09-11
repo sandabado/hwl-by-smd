@@ -34,6 +34,14 @@ values
     '{}'::jsonb
   );
 
+-- Migration 018 requires an explicit, non-secret change reference for every
+-- privileged profile mutation. On databases ending at 017 this custom setting
+-- is harmless; on later schemas it keeps these disposable fixtures auditable.
+select pg_catalog.set_config(
+  'hwl.admin_change_reference',
+  'test-017:practitioner-fixtures',
+  true
+);
 update public.profiles
 set is_admin = true
 where id in (

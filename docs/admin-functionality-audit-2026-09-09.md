@@ -2,6 +2,8 @@
 
 **Audit date:** September 9, 2026
 
+**Role-boundary revision:** September 11, 2026
+
 **Repository:** `hwl-by-smd`
 
 **Branch:** `checkpoint/platform-overhaul-2026-08-20`
@@ -27,7 +29,7 @@ This gives Shannon one place to understand the business while preserving a clear
 - Supabase owns authentication and HWL's private operational ledgers.
 - Resend delivers notifications; it is not the inquiry system of record.
 
-The current working tree replaces misleading sample dashboards with live read-only views or explicit redirects. It does **not** yet make HWL a complete write-capable CRM. That is deliberate: client edits, identity merges, appointment mutations, service invoicing, and message replies need stronger roles, audit records, idempotency, and recovery behavior before they are safe to expose.
+The current working tree replaces misleading sample dashboards with live read-only views or explicit redirects. It also prepares a narrow two-tier administrator identity boundary and audited role-change path. It does **not** yet make HWL a complete write-capable CRM. That is deliberate: client edits, identity merges, appointment mutations, service invoicing, and message replies still need domain-specific capabilities, audit records, idempotency, and recovery behavior before they are safe to expose.
 
 ## Environment and evidence boundary
 
@@ -79,19 +81,39 @@ The underlying database tables for courses, journeys, relationships, and convers
 **Implemented**
 
 - Every protected admin route re-establishes server-side authentication.
-- Hosted access requires a confirmed Supabase user whose own `profiles` row has `is_admin = true`.
+- In this candidate, hosted access requires a confirmed Supabase user whose own
+  profile has both `is_admin=true` and an explicit `administrator` or
+  `super_admin` role. Either field missing or inconsistent fails closed.
 - The local demo-admin path is development-only and is barred from hosted PII reads.
-- The active administrator identity and environment authority are visible in the shell.
+- The active administrator identity, tier, and environment authority are visible in the shell.
+- Migration 018 preserves legacy `is_admin` compatibility while adding the two
+  explicit tiers and a NULL-safe consistency constraint.
+- Privileged profile inserts, role updates, deletions, and the migration
+  backfill require a bounded non-secret change reference and create append-only
+  audit evidence. Audit target UUIDs survive profile deletion; service-role
+  `TRUNCATE`, `REFERENCES`, and `TRIGGER` privileges are removed so runtime code
+  cannot bypass or alter that row-level evidence path.
+- A narrow authenticated RPC lets only a confirmed `super_admin` change another
+  exact confirmed identity. It requires UUID, normalized email, expected role,
+  new role, and approval-reference agreement; it rejects self-change and
+  records the signed-in actor UUID.
+- Migration 018 contains no identity or email seeds and does not modify the
+  practitioner-correlated policies established by migration 017.
 
 **Missing**
 
-- There is no persisted distinction between `super_admin`, `administrator`, support, editor, or finance roles. The database currently has one `is_admin` boolean.
-- There is no general admin mutation audit log.
-- The requested operating distinction—`admin@ghosthand.studio` as super admin and `shannon@hwlbysmd.com` as permanent admin—is not yet represented as role capabilities in application code.
+- Migration 018 has not been applied or verified in a hosted environment by
+  this local audit, and neither approved human identity is provisioned by code.
+- There is no general admin mutation audit log. The new ledger covers
+  administrator-role changes only.
+- Support, editor, finance, and domain-action capabilities do not exist.
+- There is no generic role-management UI. Initial super-admin bootstrap remains
+  a manual, separately approved owner/postgres operation after exact Auth and
+  profile confirmation; later changes use the authenticated RPC.
 
 **Decision**
 
-Keep current views read-only unless a mutation already has a narrowly governed server action. Add capabilities and an append-only audit log before exposing client, booking, message, or money writes.
+Keep current views read-only unless a mutation already has a narrowly governed server action. Apply and verify migration 018, manually bootstrap the first confirmed super administrator, then use the audited RPC for later role changes. Add domain-specific capabilities and audit records before exposing client, booking, message, or money writes.
 
 ### 2. Bookings
 
@@ -257,11 +279,20 @@ Settings is now a read-only authority map. It reports configuration presence wit
 - Sample operational records are removed from canonical admin paths.
 - Admin conversation mutation endpoints now require same-origin requests and bounded streamed JSON bodies.
 - Migration 017 is prepared to replace broad administrator relationship reads with practitioner-correlated policies and does not add a super-administrator bypass.
+- Migration 018 is prepared locally with explicit `administrator` and
+  `super_admin` tiers, strict server guards, a visible shell label, and a
+  constrained authenticated role-change RPC. It preserves migration 017's
+  practitioner isolation.
+- Role-change evidence is append-only, carries a non-secret change reference,
+  preserves the authenticated actor UUID, and survives target-profile deletion.
 
 ### Still required
 
-- Role/capability model for super admin vs permanent admin.
-- Append-only mutation audit log.
+- Owner-approved hosted application and verification of migration 018, followed
+  by exact confirmed-identity bootstrap and two-account authorization canaries.
+- Domain capabilities beyond the two administrator tiers.
+- Append-only mutation audit logs for booking, client, message, money, and
+  publishing changes. Migration 018 audits role changes only.
 - Owner-approved hosted application and verification of migrations 016 and 017, including the signed Cal.com webhook lifecycle in each intended environment.
 - Service-payment linkage and replay-safe invoice delivery.
 - Chat entitlement decision and end-to-end messaging canary.
@@ -272,21 +303,44 @@ Settings is now a read-only authority map. It reports configuration presence wit
 
 - TypeScript: passed.
 - ESLint: passed with zero errors and zero warnings.
-- Automated checks: 470 passed across admin authorization, messages, client privacy, bookings, Cal.com webhook boundaries, commerce, Stripe reads and fulfillment, inquiries, accessibility, navigation, environment/release policy, relationship-policy structure, and legacy-route truthfulness.
+- The September 9 baseline recorded 470 passing automated checks across admin
+  authorization, messages, client privacy, bookings, Cal.com webhook
+  boundaries, commerce, Stripe reads and fulfillment, inquiries,
+  accessibility, navigation, environment/release policy,
+  relationship-policy structure, and legacy-route truthfulness.
+- The September 11 role-boundary revision separately passed 26 admin checks,
+  113 authentication checks, and 3 migration-017 boundary checks, plus focused
+  ESLint and TypeScript verification.
 - SEO validation: 21 pages, 21 metadata records, and 7 long-form documents passed.
 - Production dependency audit: zero vulnerabilities reported for production dependencies.
 - Next.js 16 production build: passed; 63 static pages generated and dynamic admin routes compiled.
-- Isolated database proof: migrations 014–017 applied to a disposable local Supabase database; the Cal.com booking-ledger lifecycle and practitioner-boundary SQL harnesses both passed and rolled back every fixture/assertion transaction.
-- Desktop browser pass at 1280 x 720: all eight canonical admin surfaces returned 200, displayed the expected heading and seven-item navigation, had no horizontal overflow, and showed no fixture/sample label.
-- Mobile browser pass at 375 x 667: all eight canonical admin surfaces returned 200, displayed the expected heading and menu control, and had no horizontal overflow.
+- Isolated database proof: migrations 014–018 applied to a disposable local Supabase database; the Cal.com booking-ledger lifecycle and practitioner-boundary SQL harnesses both passed and rolled back every fixture/assertion transaction.
+- A third rollback-only harness now covers migration 018's live PostgreSQL
+  constraints, grants, bootstrap audit, direct service-role context gate,
+  authenticated RPC, actor attribution, profile-deletion retention, and
+  super-admin practitioner isolation. It passed against that disposable local
+  Supabase database and rolled back every fixture and assertion. The migration
+  017 practitioner-isolation harness also passed again after migration 018.
+- The September 9 desktop browser pass at 1280 x 720 found all eight
+  canonical admin surfaces returning 200 with the expected heading and
+  seven-item navigation, no horizontal overflow, and no fixture/sample label.
+- The September 9 mobile browser pass at 375 x 667 found all eight canonical
+  admin surfaces returning 200 with the expected heading and menu control and
+  no horizontal overflow.
 - Mobile navigation: dialog semantics, current Inbox state on the Messages route, Escape close, body-scroll restoration, and trigger-focus restoration passed.
 - Redirect browser canaries passed for Members to Clients, Calendar to Bookings, Revenue to Money, Connection to Messages, Content to Studio, and Campaign Conversations to Messages.
 - Fresh browser console pass: zero errors.
-- The local development server remains available at `http://localhost:3002`.
+- The September 11 role-boundary work did not retain a server on port 3002 or
+  repeat the connected browser/provider canaries.
 
 These checks do not prove hosted private data, provider mutations, Preview environment variables, or Production deployment. Those require a Preview deployment and provider-side evidence for this exact revision.
 
-The 470-check total includes static verification that both database harnesses are transactional and rollback-only. The separate database executions add real local SQL proof but do not represent hosted application, provider configuration, or Production evidence; migrations 016 and 017 remain unapplied to hosted Supabase.
+The earlier 470-check total includes static verification that the migration 016
+and 017 database harnesses are transactional and rollback-only. Their separate
+database executions add real local SQL proof but do not represent hosted
+application, provider configuration, or Production evidence. The migration 018
+harness is also transactional and rollback-only; its passing execution was
+against a disposable local database containing the ordered migrations through 018. No statement here claims migration 018 is applied to hosted Supabase.
 
 ## Recommended delivery sequence
 
@@ -307,7 +361,9 @@ The 470-check total includes static verification that both database harnesses ar
 
 ### Phase 3 — safe management actions
 
-1. Add roles/capabilities and an append-only admin audit log.
+1. Apply and verify the prepared two-tier role migration, bootstrap the first
+   confirmed super administrator manually, and provision later roles only
+   through the authenticated audited RPC.
 2. Add confirm, request-reschedule, and cancel booking actions with idempotency and clear provider outcomes.
 3. Add a narrow post-appointment payment-request workflow.
 4. Decide chat entitlement, restore the client inbox, and add atomic reply/read operations plus privacy-light notification.
@@ -323,6 +379,6 @@ Do not claim the following until separately proven:
 - automatic post-appointment payment requests
 - client-visible service payment history
 - two-way in-app chat
-- role separation between super admin and permanent admin
+- hosted role separation and provisioning for the two approved identities
 - live LIFT checkout/fulfillment readiness
 - Production deployment of these admin changes

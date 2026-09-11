@@ -6,17 +6,27 @@ import { notFound, redirect } from "next/navigation"
 import { hasDemoAdminSession, isDemoAdminEnabled } from "@/lib/demo-admin"
 import { createClient } from "@/lib/supabase/server"
 
+export const ADMIN_ROLES = ["administrator", "super_admin"] as const
+
+export type AdminRole = (typeof ADMIN_ROLES)[number]
+
 export type AdminAccess =
   | {
       source: "local-preview"
       userId: null
       email: string
+      role: "administrator"
     }
   | {
       source: "supabase"
       userId: string
       email: string
+      role: AdminRole
     }
+
+export type SuperAdminAccess = Extract<AdminAccess, { source: "supabase" }> & {
+  role: "super_admin"
+}
 
 type AdminAuthUser = {
   email?: string | null
@@ -25,6 +35,7 @@ type AdminAuthUser = {
 }
 
 type AdminProfile = {
+  admin_role: string | null
   id: string
   is_admin: boolean
 }
@@ -37,7 +48,7 @@ type AdminAuthClient = {
     }>
   }
   from: (table: "profiles") => {
-    select: (columns: "id, is_admin") => {
+    select: (columns: "id, is_admin, admin_role") => {
       eq: (
         column: "id",
         value: string
@@ -71,6 +82,10 @@ function normalizedEmail(value: string | null | undefined) {
   return value?.trim().toLowerCase() ?? ""
 }
 
+function adminRole(value: string | null | undefined): AdminRole | null {
+  return value === "administrator" || value === "super_admin" ? value : null
+}
+
 /**
  * Server-only admin authorization.
  *
@@ -89,6 +104,7 @@ export async function requireAdminWithDependencies(
       source: "local-preview",
       userId: null,
       email: process.env.DEMO_ADMIN_EMAIL ?? "local-preview",
+      role: "administrator",
     }
   }
 
@@ -117,11 +133,12 @@ export async function requireAdminWithDependencies(
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, is_admin")
+    .select("id, is_admin, admin_role")
     .eq("id", user.id)
     .maybeSingle()
 
-  if (profileError || !profile?.is_admin || profile.id !== user.id) {
+  const role = adminRole(profile?.admin_role)
+  if (profileError || !profile?.is_admin || !role || profile.id !== user.id) {
     dependencies.notFound()
   }
 
@@ -129,7 +146,24 @@ export async function requireAdminWithDependencies(
     source: "supabase",
     userId: user.id,
     email: userEmail,
+    role,
   }
 }
 
 export const requireAdmin = cache(() => requireAdminWithDependencies())
+
+export async function requireSuperAdminWithDependencies(
+  dependencies: AdminAuthorizationDependencies = runtimeDependencies
+): Promise<SuperAdminAccess> {
+  const access = await requireAdminWithDependencies(dependencies)
+
+  if (access.source !== "supabase" || access.role !== "super_admin") {
+    dependencies.notFound()
+  }
+
+  return { ...access, role: "super_admin" }
+}
+
+export const requireSuperAdmin = cache(() =>
+  requireSuperAdminWithDependencies()
+)

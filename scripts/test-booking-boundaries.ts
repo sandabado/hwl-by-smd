@@ -682,9 +682,8 @@ test("stepped booking keeps navigation and calendar recovery inside the journey"
     /activePillar|activeServices|choosePillar/
   )
   assert.match(bookingFlow, /const serviceIconBySlug = \{/)
-  assert.match(bookingFlow, /With Shannon Mary Dixon/)
+  assert.match(bookingFlow, /With Shannon/)
   assert.match(bookingFlow, /HWL Beauty · Palm Springs/)
-  assert.match(bookingFlow, /Private address shared after confirmation\./)
   assert.match(bookingFlow, /window\.history\.pushState/)
   assert.match(bookingFlow, /window\.addEventListener\("popstate"/)
   assert.match(bookingFlow, /class CalendarEmbedBoundary/)
@@ -694,10 +693,10 @@ test("stepped booking keeps navigation and calendar recovery inside the journey"
   assert.doesNotMatch(calEmbed, /styles:\s*\{/)
   assert.match(calEmbed, /cssVarsPerTheme:\s*\{/)
   assert.match(calEmbed, /CAL_BOOKER_LAYOUT = "month_view"/)
-  assert.match(calEmbed, /hideEventTypeDetails: true/)
+  assert.match(calEmbed, /hideEventTypeDetails: false/)
   assert.match(
     calEmbed,
-    /Cal will show your selected date and time again before you confirm/
+    /review the appointment details, then confirm your request/
   )
   assert.doesNotMatch(calEmbed, /week_view/)
   assert.match(bookingPage, /user\.email_confirmed_at/)

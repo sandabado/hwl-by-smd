@@ -18,10 +18,10 @@ const CAL_EMBED_CONFIG = {
 const CAL_UI_CONFIG = {
   theme: "light",
   layout: CAL_BOOKER_LAYOUT,
-  // The site already summarizes the selected service above the embed. Let the
-  // provider-owned step begin with Shannon's live dates and times instead of
-  // repeating the event description and pushing availability below the fold.
-  hideEventTypeDetails: true,
+  // Keep Cal's provider-owned review visible so the final confirmation form
+  // repeats the chosen date, time, location, duration, and practitioner before
+  // the attendee submits the request.
+  hideEventTypeDetails: false,
   cssVarsPerTheme: {
     light: {
       "cal-brand": "#765538",
@@ -230,8 +230,11 @@ function CalEmbedInstance({
         className
       )}
     >
-      <div className="border-b border-[var(--border)] px-5 py-4 sm:px-7">
-        <h2 className="font-serif text-xl text-[var(--primary)]" id={headingId}>
+      <div className="border-b border-[var(--border)] px-4 py-3 sm:px-6 sm:py-4">
+        <h2
+          className="font-serif text-lg text-[var(--primary)] sm:text-xl"
+          id={headingId}
+        >
           {bookingReceipt
             ? "Your booking was received"
             : "Available dates and times"}
@@ -242,7 +245,7 @@ function CalEmbedInstance({
         >
           {bookingReceipt
             ? `Cal.com will email the current booking status for ${serviceTitle}. No payment is collected when you request a time.`
-            : `Choose an available time for ${serviceTitle}. Cal will show your selected date and time again before you confirm. Times remain visible in your local timezone.`}
+            : "Choose a time, review the appointment details, then confirm your request. Times are shown in your local timezone."}
         </p>
       </div>
 

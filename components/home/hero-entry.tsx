@@ -349,7 +349,7 @@ export function HeroEntry({
             </div>
           </div>
 
-          <div className="bg-[#f7f3ec] p-7 sm:p-9 lg:mb-10 lg:-ml-24">
+          <div className="relative z-10 bg-[#f7f3ec] p-7 sm:p-9 lg:mb-10 lg:-ml-24">
             <div className="relative aspect-[4/3] overflow-hidden bg-[#d5cabd]">
               <Image
                 alt={media.home.proofRetreat.alt}

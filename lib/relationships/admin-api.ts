@@ -6,15 +6,18 @@ import {
   isLocalRequest,
 } from "@/lib/demo-admin"
 import { createClient } from "@/lib/supabase/server"
+import type { AdminRole } from "@/lib/admin-auth"
 
 export type ApiAdminAccess =
   | {
       source: "local-preview"
       userId: null
+      role: "administrator"
     }
   | {
       source: "supabase"
       userId: string
+      role: AdminRole
     }
 
 export type ApiAdminAuthResult =
@@ -27,6 +30,7 @@ type ApiAdminAuthUser = {
 }
 
 type ApiAdminProfile = {
+  admin_role: string | null
   id: string
   is_admin: boolean
 }
@@ -39,7 +43,7 @@ type ApiAdminAuthClient = {
     }>
   }
   from: (table: "profiles") => {
-    select: (columns: "id, is_admin") => {
+    select: (columns: "id, is_admin, admin_role") => {
       eq: (
         column: "id",
         value: string
@@ -71,6 +75,10 @@ function normalizedEmail(value: string | null | undefined) {
   return value?.trim().toLowerCase() ?? ""
 }
 
+function adminRole(value: string | null | undefined): AdminRole | null {
+  return value === "administrator" || value === "super_admin" ? value : null
+}
+
 export async function authenticateAdminApiWithDependencies(
   request: Request,
   dependencies: ApiAdminAuthorizationDependencies = runtimeDependencies
@@ -81,7 +89,11 @@ export async function authenticateAdminApiWithDependencies(
     (await dependencies.hasDemoAdminSession())
   ) {
     return {
-      access: { source: "local-preview", userId: null },
+      access: {
+        role: "administrator",
+        source: "local-preview",
+        userId: null,
+      },
       ok: true,
     }
   }
@@ -101,16 +113,17 @@ export async function authenticateAdminApiWithDependencies(
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, is_admin")
+    .select("id, is_admin, admin_role")
     .eq("id", user.id)
     .maybeSingle()
 
-  if (profileError || !profile?.is_admin || profile.id !== user.id) {
+  const role = adminRole(profile?.admin_role)
+  if (profileError || !profile?.is_admin || !role || profile.id !== user.id) {
     return { ok: false, status: 403 }
   }
 
   return {
-    access: { source: "supabase", userId: user.id },
+    access: { role, source: "supabase", userId: user.id },
     ok: true,
   }
 }

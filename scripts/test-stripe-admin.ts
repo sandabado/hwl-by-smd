@@ -15,6 +15,7 @@ function dependencies(
   return {
     authorizeAdmin: async () => ({
       email: "admin@ghosthand.studio",
+      role: "administrator",
       source: "supabase",
       userId: "admin-user",
     }),
@@ -119,6 +120,7 @@ test("local preview never creates a Stripe client", async () => {
     dependencies({
       authorizeAdmin: async () => ({
         email: "local-preview",
+        role: "administrator",
         source: "local-preview",
         userId: null,
       }),

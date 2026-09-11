@@ -28,6 +28,7 @@ function dependencies(
     readThread: async () => ({ status: "not_found" }),
     requireAdmin: async () => ({
       email: "shannon@hwlbysmd.com",
+      role: "administrator",
       source: "supabase",
       userId: PRACTITIONER_ID,
     }),
@@ -78,6 +79,7 @@ test("local preview cannot trigger a service-role conversation read", async () =
     },
     requireAdmin: async () => ({
       email: "local-preview",
+      role: "administrator",
       source: "local-preview",
       userId: null,
     }),
@@ -304,6 +306,7 @@ test("invalid thread IDs fail before authorization or database access", async ()
         authorizationChecks += 1
         return {
           email: "shannon@hwlbysmd.com",
+          role: "administrator",
           source: "supabase",
           userId: PRACTITIONER_ID,
         }

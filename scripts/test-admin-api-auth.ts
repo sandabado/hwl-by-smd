@@ -16,6 +16,7 @@ function dependencies({
   localRequest = false,
   profileAdmin = true,
   profileId = USER_ID,
+  profileRole = "administrator",
   supabaseConfigured = true,
   user = true,
   userEmail = "admin@ghosthand.studio",
@@ -26,6 +27,7 @@ function dependencies({
   localRequest?: boolean
   profileAdmin?: boolean
   profileId?: string
+  profileRole?: string | null
   supabaseConfigured?: boolean
   user?: boolean
   userEmail?: string | null
@@ -56,7 +58,11 @@ function dependencies({
                   maybeSingle: async () => {
                     profileReads += 1
                     return {
-                      data: { id: profileId, is_admin: profileAdmin },
+                      data: {
+                        admin_role: profileRole,
+                        id: profileId,
+                        is_admin: profileAdmin,
+                      },
                       error: null,
                     }
                   },
@@ -125,6 +131,18 @@ test("admin API rejects a mismatched profile identity", async () => {
   assert.equal(setup.profileReadCount(), 1)
 })
 
+test("admin API rejects missing and unrecognized role tiers", async (t) => {
+  for (const profileRole of [null, "owner"]) {
+    await t.test(String(profileRole), async () => {
+      const setup = dependencies({ profileRole })
+      assert.deepEqual(
+        await authenticateAdminApiWithDependencies(request, setup.deps),
+        { ok: false, status: 403 }
+      )
+    })
+  }
+})
+
 test("both confirmed owner-approved administrators pass the same technical guard", async (t) => {
   for (const userEmail of ["admin@ghosthand.studio", "shannon@hwlbysmd.com"]) {
     await t.test(userEmail, async () => {
@@ -132,7 +150,11 @@ test("both confirmed owner-approved administrators pass the same technical guard
       assert.deepEqual(
         await authenticateAdminApiWithDependencies(request, setup.deps),
         {
-          access: { source: "supabase", userId: USER_ID },
+          access: {
+            role: "administrator",
+            source: "supabase",
+            userId: USER_ID,
+          },
           ok: true,
         }
       )
@@ -152,7 +174,11 @@ test("the demo administrator bypass is local-only and otherwise fails closed", a
     assert.deepEqual(
       await authenticateAdminApiWithDependencies(request, setup.deps),
       {
-        access: { source: "local-preview", userId: null },
+        access: {
+          role: "administrator",
+          source: "local-preview",
+          userId: null,
+        },
         ok: true,
       }
     )
@@ -170,4 +196,20 @@ test("the demo administrator bypass is local-only and otherwise fails closed", a
       { ok: false, status: 503 }
     )
   })
+})
+
+test("admin API returns an explicit hosted super-admin tier", async () => {
+  const setup = dependencies({ profileRole: "super_admin" })
+
+  assert.deepEqual(
+    await authenticateAdminApiWithDependencies(request, setup.deps),
+    {
+      access: {
+        role: "super_admin",
+        source: "supabase",
+        userId: USER_ID,
+      },
+      ok: true,
+    }
+  )
 })

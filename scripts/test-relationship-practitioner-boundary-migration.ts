@@ -100,5 +100,9 @@ test("the migration 017 database harness is isolated, transactional, and covers 
 
   assert.match(databaseHarness, /set local role authenticated/)
   assert.match(databaseHarness, /request\.jwt\.claim\.sub/)
+  assert.match(
+    databaseHarness,
+    /hwl\.admin_change_reference.*?test-017:practitioner-fixtures/
+  )
   assert.match(databaseHarness, /public\.mark_conversation_read/)
 })

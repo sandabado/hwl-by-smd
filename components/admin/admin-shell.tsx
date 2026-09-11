@@ -30,6 +30,7 @@ const navigation = [
 ] as const
 
 export type AdminPrincipalSource = "local-preview" | "supabase"
+export type AdminPrincipalRole = "administrator" | "super_admin"
 
 export type AdminDeploymentTarget =
   | "production"
@@ -67,6 +68,10 @@ function routeMatches(pathname: string, href: string) {
 export function getPrincipalInitial(email: string) {
   const localPart = email.trim().split("@", 1)[0]
   return Array.from(localPart)[0]?.toUpperCase() ?? "?"
+}
+
+export function getAdminRoleLabel(role: AdminPrincipalRole) {
+  return role === "super_admin" ? "Super administrator" : "Administrator"
 }
 
 export function getAdminShellContext(
@@ -301,11 +306,13 @@ function activeFor(pathname: string, href: string) {
 
 function Sidebar({
   adminEmail,
+  adminRole,
   adminSource,
   pathname,
   onNavigate,
 }: {
   adminEmail: string
+  adminRole: AdminPrincipalRole
   adminSource: AdminPrincipalSource
   pathname: string
   onNavigate?: () => void
@@ -365,9 +372,8 @@ function Sidebar({
               {adminEmail}
             </p>
             <p className="truncate text-[10px] text-white/65">
-              {adminSource === "supabase"
-                ? "Verified administrator"
-                : "Local preview · Read only"}
+              {getAdminRoleLabel(adminRole)}
+              {adminSource === "local-preview" ? " · Local read only" : ""}
             </p>
           </div>
         </div>
@@ -379,11 +385,13 @@ function Sidebar({
 
 export function AdminShell({
   adminEmail,
+  adminRole,
   adminSource,
   children,
   deploymentTarget,
 }: {
   adminEmail: string
+  adminRole: AdminPrincipalRole
   adminSource: AdminPrincipalSource
   children: React.ReactNode
   deploymentTarget: AdminDeploymentTarget
@@ -462,6 +470,7 @@ export function AdminShell({
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 flex-col bg-[#273029] lg:flex">
         <Sidebar
           adminEmail={adminEmail}
+          adminRole={adminRole}
           adminSource={adminSource}
           pathname={pathname}
         />
@@ -494,6 +503,7 @@ export function AdminShell({
             </button>
             <Sidebar
               adminEmail={adminEmail}
+              adminRole={adminRole}
               adminSource={adminSource}
               pathname={pathname}
               onNavigate={() => setMobileOpen(false)}

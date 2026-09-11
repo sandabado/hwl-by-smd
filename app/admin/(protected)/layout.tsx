@@ -36,6 +36,7 @@ export default async function ProtectedAdminLayout({
   return (
     <AdminShell
       adminEmail={access.email}
+      adminRole={access.role}
       adminSource={access.source}
       deploymentTarget={getAdminDeploymentTarget()}
     >

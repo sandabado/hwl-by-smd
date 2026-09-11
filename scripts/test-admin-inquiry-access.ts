@@ -15,6 +15,7 @@ function inboxDependencies(
     readInquiries: async () => ({ count: 0, rows: [], status: "ready" }),
     requireAdmin: async () => ({
       email: "admin@ghosthand.studio",
+      role: "administrator",
       source: "supabase",
       userId: "2db86e10-4c97-45c3-a8b6-0ef074881091",
     }),
@@ -55,6 +56,7 @@ test("denied and demo sessions stop before any service-role inquiry read", async
         },
         requireAdmin: async () => ({
           email: "local-preview",
+          role: "administrator",
           source: "local-preview",
           userId: null,
         }),

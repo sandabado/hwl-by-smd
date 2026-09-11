@@ -13,6 +13,7 @@ type ShellContext = {
 }
 
 type LoadedAdminShell = {
+  getAdminRoleLabel: (role: "administrator" | "super_admin") => string
   getAdminShellContext: (
     pathname: string,
     source: "local-preview" | "supabase",
@@ -92,6 +93,7 @@ function loadAdminShell(): LoadedAdminShell {
   )
 
   assert.equal(typeof loadedModule.exports.getAdminShellContext, "function")
+  assert.equal(typeof loadedModule.exports.getAdminRoleLabel, "function")
   assert.equal(typeof loadedModule.exports.getPrincipalInitial, "function")
 
   return loadedModule.exports as LoadedAdminShell
@@ -136,11 +138,22 @@ test("authenticated identity supplies the visible principal and derived initial"
   assert.match(shellSource, /getPrincipalInitial\(adminEmail\)/)
   assert.match(layoutSource, /const access = await requireAdmin\(\)/)
   assert.match(layoutSource, /adminEmail=\{access\.email\}/)
+  assert.match(layoutSource, /adminRole=\{access\.role\}/)
   assert.match(layoutSource, /adminSource=\{access\.source\}/)
   assert.match(
     layoutSource,
     /deploymentTarget=\{getAdminDeploymentTarget\(\)\}/
   )
+})
+
+test("the signed-in administrator tier is visible and human-readable", () => {
+  const shell = loadAdminShell()
+  const shellSource = source("components/admin/admin-shell.tsx")
+
+  assert.equal(shell.getAdminRoleLabel("administrator"), "Administrator")
+  assert.equal(shell.getAdminRoleLabel("super_admin"), "Super administrator")
+  assert.match(shellSource, /getAdminRoleLabel\(adminRole\)/)
+  assert.match(shellSource, /adminRole: AdminPrincipalRole/)
 })
 
 test("route authority is live only where the connected source supports it", () => {

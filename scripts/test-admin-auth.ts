@@ -3,6 +3,7 @@ import { test } from "node:test"
 
 import {
   requireAdminWithDependencies,
+  requireSuperAdminWithDependencies,
   type AdminAuthorizationDependencies,
 } from "../lib/admin-auth.ts"
 
@@ -22,6 +23,7 @@ function dependencies({
   demo = false,
   profileAdmin = true,
   profileId = USER_ID,
+  profileRole = "administrator",
   user = true,
   userEmail = "admin@ghosthand.studio",
 }: {
@@ -29,6 +31,7 @@ function dependencies({
   demo?: boolean
   profileAdmin?: boolean
   profileId?: string
+  profileRole?: string | null
   user?: boolean
   userEmail?: string
 } = {}) {
@@ -57,6 +60,7 @@ function dependencies({
               profileReads += 1
               return {
                 data: {
+                  admin_role: profileRole,
                   id: profileId,
                   is_admin: profileAdmin,
                 },
@@ -124,6 +128,26 @@ test("unconfirmed and non-administrator identities fail closed", async (t) => {
     )
     assert.equal(setup.profileReadCount(), 1)
   })
+
+  await t.test("administrator flag without an explicit role", async () => {
+    const setup = dependencies({ profileRole: null })
+    await assert.rejects(
+      requireAdminWithDependencies(setup.deps),
+      (error) =>
+        error instanceof NavigationDenied && error.destination === "not-found"
+    )
+    assert.equal(setup.profileReadCount(), 1)
+  })
+
+  await t.test("unknown administrator role", async () => {
+    const setup = dependencies({ profileRole: "owner" })
+    await assert.rejects(
+      requireAdminWithDependencies(setup.deps),
+      (error) =>
+        error instanceof NavigationDenied && error.destination === "not-found"
+    )
+    assert.equal(setup.profileReadCount(), 1)
+  })
 })
 
 test("an exact confirmed administrator receives the minimal access identity", async () => {
@@ -131,8 +155,52 @@ test("an exact confirmed administrator receives the minimal access identity", as
 
   assert.deepEqual(await requireAdminWithDependencies(setup.deps), {
     email: "admin@ghosthand.studio",
+    role: "administrator",
     source: "supabase",
     userId: USER_ID,
   })
   assert.equal(setup.profileReadCount(), 1)
+})
+
+test("a super administrator receives the explicit higher tier", async () => {
+  const setup = dependencies({ profileRole: "super_admin" })
+
+  assert.deepEqual(await requireAdminWithDependencies(setup.deps), {
+    email: "admin@ghosthand.studio",
+    role: "super_admin",
+    source: "supabase",
+    userId: USER_ID,
+  })
+})
+
+test("the super-admin guard rejects every lower-trust principal", async (t) => {
+  await t.test("ordinary administrator", async () => {
+    const setup = dependencies({ profileRole: "administrator" })
+    await assert.rejects(
+      requireSuperAdminWithDependencies(setup.deps),
+      (error) =>
+        error instanceof NavigationDenied && error.destination === "not-found"
+    )
+  })
+
+  await t.test("local preview administrator", async () => {
+    const setup = dependencies({ demo: true })
+    await assert.rejects(
+      requireSuperAdminWithDependencies(setup.deps),
+      (error) =>
+        error instanceof NavigationDenied && error.destination === "not-found"
+    )
+    assert.equal(setup.profileReadCount(), 0)
+  })
+})
+
+test("the super-admin guard accepts only an explicit hosted super-admin role", async () => {
+  const setup = dependencies({ profileRole: "super_admin" })
+
+  assert.deepEqual(await requireSuperAdminWithDependencies(setup.deps), {
+    email: "admin@ghosthand.studio",
+    role: "super_admin",
+    source: "supabase",
+    userId: USER_ID,
+  })
 })

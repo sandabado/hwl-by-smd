@@ -16,21 +16,23 @@ status for the current release decision.
 
 | Surface              | Current authority                                                                                                                                           | Status                                                                                                                                                                                                                 |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Local candidate      | Clean `checkpoint/platform-overhaul-2026-08-20` at exact SHA `45b864c862df6ef43083c3d12f2b59785283d88e`, synchronized with its remote before this dated documentation correction | All 520 repository cases, lint, TypeScript, SEO for 21 pages, `git diff --check`, and the Next.js 16.3.4 Webpack production build pass. The documentation and CI corrections made after that verification are local until separately approved. |
-| Preview              | READY deployment `dpl_DhAiuL4EMEZ3K3Rc7UK7Ctjt5Jim`, exact SHA `45b864c862df6ef43083c3d12f2b59785283d88e`, assigned to protected `preview.hwlbysmd.com` | The homepage and booking route render, all eleven services remain discoverable, and an Intuitive Tarot calendar currently exposes live times. This exact SHA still lacks a fresh end-to-end sandbox receipt and fulfillment canary. |
+| Local candidate      | Current tip of `checkpoint/platform-overhaul-2026-08-20`; resolve it with `git rev-parse HEAD` and require the same value from `git rev-parse origin/checkpoint/platform-overhaul-2026-08-20` | All 520 repository cases, lint, TypeScript, SEO for 21 pages, `git diff --check`, and the Next.js 16.3.4 Webpack production build pass. The candidate is valid only while the worktree is clean and both resolved SHAs match. |
+| Preview              | Latest READY branch Preview whose Vercel Source SHA exactly equals the two resolved checkpoint SHAs and whose Domains list includes protected `preview.hwlbysmd.com` | The homepage and booking route render, all eleven services remain discoverable, and an Intuitive Tarot calendar exposes live times. The current exact candidate still lacks a fresh end-to-end sandbox receipt and fulfillment canary. |
 | Production           | Public aliases remain on independently recorded deployment `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i`, commit `6a260bcfa7c752562be264d1a077013fc8ff9f4d`, with commerce closed | No exact-`45b864c` Production deployment, alias reassignment, or sales opening is authorized. |
 | Booking              | All 11 Cal.com services expose live dates and times with manual confirmation and no Cal payment                                                             | Cal still shows one Primary and one Unverified account email. Complete the pending `shannon@hwlbysmd.com` verification before relying on the private admin API identity.                                               |
 | Booking history      | Cal.com still shows “Create your first webhook”; HWL booking-ledger readiness remains disabled                                                               | Public scheduling works, but My Account/Admin cannot promise synchronized lifecycle history until the signed webhook and request → confirm → reschedule → cancel canary pass.                                 |
 | LIFT commerce        | One active $11.11 video + PDF product, strict checkout/webhook code, deterministic Stripe receipts, private media, and prior sandbox fulfillment evidence exist | The exact current candidate still needs a fresh approved sandbox purchase; Production still needs the owner-approved live $11.11 canary. Public sales remain closed.                                                  |
 | Contact and retreats | Preview renders the durable inquiry path; recent Resend records show inquiry alerts to `shannon@hwlbysmd.com` as Delivered                                   | Human inbox handling remains unproved. Public Production inquiry collection stays closed until a monitored destination and end-to-end receipt are verified.                                                           |
-| Release authority    | The owner approved only exact SHA `45b864c862df6ef43083c3d12f2b59785283d88e` for the checkpoint branch and Vercel Preview                                   | `main`, Production, public domains, provider roles, and open sales remain outside the current authorization.                                                                                                          |
+| Release authority    | The owner approved this September 12 release-control correction chain for the checkpoint branch and Vercel Preview only; the exact resulting SHA is resolved and matched through the Local and Preview checks above | `main`, Production, public domains, provider roles, and open sales remain outside the current authorization. |
 
 ## September 12 Exact-SHA Preview and Launch-Gate Recheck
 
-- GitHub and the clean local checkpoint matched exact SHA
-  `45b864c862df6ef43083c3d12f2b59785283d88e`; `main` remained unchanged.
-  Vercel independently reports that SHA as the latest READY branch Preview and
-  assigns `preview.hwlbysmd.com` to it.
+- The runtime parent `45b864c862df6ef43083c3d12f2b59785283d88e`
+  passed its complete check set before the approved privacy, CI, and operator-
+  documentation corrections were added. Because a committed packet cannot
+  embed its own future SHA, release operators must resolve the current tip and
+  require exact local, remote, GitHub CI, and Vercel Source equality. `main`
+  remains outside this chain.
 - Fresh local verification passed all 520 repository cases, lint, TypeScript,
   SEO for 21 pages, and the 63-route Next.js 16.3.4 Webpack production build.
   The first parallel TypeScript invocation raced the build-generated `.next`

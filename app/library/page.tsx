@@ -1,9 +1,9 @@
+import Link from "next/link"
 import type { Metadata } from "next"
 
 import { CourseCard } from "@/components/member/course-card"
-import { MemberNavigation } from "@/components/member/member-navigation"
+import { BackToDenLink } from "@/components/member/den-links"
 import { requireAccess } from "@/lib/access"
-import { isCalcomBookingLedgerReady } from "@/lib/bookings/member-bookings"
 import { getPublishedCourses } from "@/lib/member-content"
 
 export const dynamic = "force-dynamic"
@@ -17,11 +17,7 @@ export default async function LibraryPage({
 }: {
   searchParams: Promise<{ category?: string }>
 }) {
-  const bookingLedgerReady = isCalcomBookingLedgerReady()
-  const { access } = await requireAccess(
-    bookingLedgerReady ? "authenticated" : "any_purchase",
-    "/library"
-  )
+  const { access } = await requireAccess("authenticated", "/library")
   const { category } = await searchParams
   const courses = await getPublishedCourses()
   const visible = courses.filter(
@@ -43,7 +39,7 @@ export default async function LibraryPage({
               The Library
             </h1>
           </div>
-          <MemberNavigation showSessions={bookingLedgerReady} />
+          <BackToDenLink />
         </div>
 
         <div className="mt-10 flex flex-wrap gap-2">
@@ -67,11 +63,41 @@ export default async function LibraryPage({
         ) : (
           <div className="den-card mt-10 rounded-[2rem] p-12 text-center">
             <p className="font-serif text-4xl text-[var(--primary)]">
-              Shannon is filming now.
+              {access.canDownloadLift
+                ? "Your LIFT guide is here."
+                : access.hasAnyPurchase
+                  ? "Your library is resting."
+                  : "Your library is ready."}
             </p>
             <p className="mt-3 text-[var(--muted-foreground)]">
-              Check back soon. New practices will arrive quietly, right here.
+              {access.canDownloadLift
+                ? "Open the printable ritual whenever you want to return to the practice."
+                : access.hasAnyPurchase
+                  ? "If you expected a practice here, visit your account for purchase details."
+                  : "Your purchased practices will gather here. Begin with LIFT whenever it feels right."}
             </p>
+            {access.canDownloadLift ? (
+              <Link
+                className="mt-5 inline-flex min-h-11 items-center text-sm font-medium text-[var(--primary)] underline underline-offset-4"
+                href="/api/download/lift"
+              >
+                Open Your LIFT Guide
+              </Link>
+            ) : access.hasAnyPurchase ? (
+              <Link
+                className="mt-5 inline-flex min-h-11 items-center text-sm font-medium text-[var(--primary)] underline underline-offset-4"
+                href="/account"
+              >
+                View Your Account
+              </Link>
+            ) : (
+              <Link
+                className="mt-5 inline-flex min-h-11 items-center text-sm font-medium text-[var(--primary)] underline underline-offset-4"
+                href="/beauty/lift"
+              >
+                Discover LIFT
+              </Link>
+            )}
           </div>
         )}
       </div>

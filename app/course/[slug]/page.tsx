@@ -3,10 +3,9 @@ import { notFound, redirect } from "next/navigation"
 import { Check, Circle, Clock3 } from "lucide-react"
 
 import { ContentLicenseNote } from "@/components/member/content-license-note"
-import { MemberNavigation } from "@/components/member/member-navigation"
+import { BackToDenLink } from "@/components/member/den-links"
 import { PrivateVideoPlayer } from "@/components/video/private-video-player"
 import { requireAccess } from "@/lib/access"
-import { isCalcomBookingLedgerReady } from "@/lib/bookings/member-bookings"
 import { media } from "@/lib/media"
 import { getCourseBySlug } from "@/lib/member-content"
 import { createClient } from "@/lib/supabase/server"
@@ -60,7 +59,7 @@ export default async function CoursePage({
     <section className="member-atmosphere min-h-screen px-6 py-12 md:py-20">
       <div className="mx-auto max-w-6xl">
         <div className="flex justify-end">
-          <MemberNavigation showSessions={isCalcomBookingLedgerReady()} />
+          <BackToDenLink />
         </div>
         <div className="mt-12 max-w-3xl">
           <p className="text-xs tracking-[0.3em] text-[var(--accent)] uppercase">

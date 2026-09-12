@@ -11,13 +11,12 @@ import {
 } from "lucide-react"
 
 import { CourseCard } from "@/components/member/course-card"
-import { MemberNavigation } from "@/components/member/member-navigation"
+import { DenShortcuts } from "@/components/member/den-links"
 import { Button } from "@/components/ui/button"
 import { requireAccess } from "@/lib/access"
 import {
   findNextMemberBooking,
   getMemberBookings,
-  isCalcomBookingLedgerReady,
 } from "@/lib/bookings/member-bookings"
 import { getPublishedCourses } from "@/lib/member-content"
 
@@ -45,11 +44,7 @@ function readableSessionDate(value: string, timeZone: string) {
 }
 
 export default async function TheDenPage() {
-  const bookingLedgerReady = isCalcomBookingLedgerReady()
-  const { access, user } = await requireAccess(
-    bookingLedgerReady ? "authenticated" : "any_purchase",
-    "/the-den"
-  )
+  const { access, user } = await requireAccess("authenticated", "/the-den")
   const [courses, bookings] = await Promise.all([
     getPublishedCourses(),
     getMemberBookings(user.id),
@@ -77,16 +72,13 @@ export default async function TheDenPage() {
         className="pointer-events-none absolute inset-0 [background-image:radial-gradient(circle_at_12%_8%,rgba(196,168,130,0.25),transparent_34%),radial-gradient(circle_at_88%_68%,rgba(112,82,104,0.14),transparent_38%),repeating-linear-gradient(115deg,transparent_0,transparent_12px,rgba(43,39,36,0.015)_13px)] opacity-30"
       />
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
-          <div>
-            <p className="text-xs tracking-[0.3em] text-[var(--accent)] uppercase">
-              The Den
-            </p>
-            <h1 className="mt-3 text-5xl font-medium text-[var(--primary)] md:text-7xl">
-              Welcome back, {firstName}.
-            </h1>
-          </div>
-          <MemberNavigation showSessions={bookingLedgerReady} />
+        <div>
+          <p className="text-xs tracking-[0.3em] text-[var(--accent)] uppercase">
+            The Den
+          </p>
+          <h1 className="mt-3 text-5xl font-medium text-[var(--primary)] md:text-7xl">
+            Welcome back, {firstName}.
+          </h1>
         </div>
 
         <p className="mt-5 text-xl tracking-wide text-[var(--muted-foreground)]">
@@ -97,7 +89,9 @@ export default async function TheDenPage() {
           is yours.
         </p>
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+        <DenShortcuts />
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
           <article className="relative overflow-hidden rounded-[2.25rem] bg-[var(--primary)] p-8 text-[var(--background)] shadow-[0_35px_90px_rgba(90,74,63,0.2)] md:p-12">
             <div className="absolute -top-20 -right-16 size-64 rounded-full border border-white/10" />
             <div className="absolute -top-8 -right-4 size-40 rounded-full border border-white/10" />
@@ -109,13 +103,18 @@ export default async function TheDenPage() {
               Today&apos;s ritual
             </p>
             <h2 className="mt-4 max-w-2xl text-5xl leading-none font-medium md:text-6xl">
-              {today?.title ?? "Your next practice is taking shape."}
+              {today?.title ??
+                (access.canDownloadLift
+                  ? "Your LIFT guide is here."
+                  : "Begin with LIFT.")}
             </h2>
             <p className="mt-6 max-w-xl leading-relaxed opacity-85">
               {today?.description ??
-                "Shannon is preparing the first private practice for your library."}
+                (access.canDownloadLift
+                  ? "Return to the printable ritual whenever you want a quiet, guided moment with your skin."
+                  : "A complete facial massage ritual with Shannon, including the guided video and printable guide.")}
             </p>
-            {today && (
+            {today ? (
               <Button
                 asChild
                 className="mt-9 h-12 rounded-full bg-[var(--background)] px-7 text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
@@ -123,6 +122,26 @@ export default async function TheDenPage() {
                 <Link href={`/course/${today.slug}`}>
                   <Play aria-hidden="true" />
                   Continue Watching
+                </Link>
+              </Button>
+            ) : access.canDownloadLift ? (
+              <Button
+                asChild
+                className="mt-9 h-12 rounded-full bg-[var(--background)] px-7 text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
+              >
+                <Link href="/api/download/lift">
+                  <Download aria-hidden="true" />
+                  Open Your Guide
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                asChild
+                className="mt-9 h-12 rounded-full bg-[var(--background)] px-7 text-[var(--primary)] hover:bg-[var(--accent)] hover:text-white"
+              >
+                <Link href="/beauty/lift">
+                  <Sparkles aria-hidden="true" />
+                  Discover LIFT
                 </Link>
               </Button>
             )}
@@ -238,11 +257,23 @@ export default async function TheDenPage() {
         ) : (
           <div className="den-card mt-8 rounded-[2rem] p-10 text-center">
             <p className="font-serif text-3xl text-[var(--primary)]">
-              Shannon is filming now.
+              {access.canDownloadLift
+                ? "Your LIFT guide is here."
+                : "Your library is ready."}
             </p>
             <p className="mt-3 text-sm text-[var(--muted-foreground)]">
-              Your first guided ritual will appear here as soon as it is ready.
+              {access.canDownloadLift
+                ? "Keep the printable ritual close whenever you want to return to the practice."
+                : "Your purchased practices will gather here."}
             </p>
+            {!access.canDownloadLift ? (
+              <Link
+                className="mt-5 inline-flex min-h-11 items-center text-sm font-medium text-[var(--primary)] underline underline-offset-4"
+                href="/beauty/lift"
+              >
+                Discover LIFT
+              </Link>
+            ) : null}
           </div>
         )}
         {access.canDownloadLift && !access.canAccessLift && (

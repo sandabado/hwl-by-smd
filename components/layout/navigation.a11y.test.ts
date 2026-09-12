@@ -113,13 +113,23 @@ test("persistent header actions retain generous pointer targets", () => {
   assert.match(cart, /"w-11 px-0"/)
 })
 
-test("member navigation remains fully visible at narrow widths", () => {
-  const memberNav = source("components/member/member-navigation.tsx")
+test("the Den is one home with three clear shortcuts", () => {
+  const denLinks = source("components/member/den-links.tsx")
+  const denPage = source("app/the-den/page.tsx")
+  const libraryPage = source("app/library/page.tsx")
 
-  assert.match(memberNav, /aria-label="Member area"/)
-  assert.match(memberNav, /grid-cols-2/)
-  assert.match(memberNav, /sm:flex/)
-  assert.doesNotMatch(memberNav, /overflow-x-auto/)
+  assert.match(denLinks, /aria-label="The Den shortcuts"/)
+  assert.match(denLinks, /label: "Library"/)
+  assert.match(denLinks, /label: "Book a Session"/)
+  assert.match(denLinks, /label: "Manage Account"/)
+  assert.match(denLinks, /href: "\/library"/)
+  assert.match(denLinks, /href: "\/book"/)
+  assert.match(denLinks, /href: "\/account"/)
+  assert.doesNotMatch(denLinks, /usePathname|aria-current|Today|Sessions/)
+  assert.match(denLinks, /min-h-11/)
+  assert.match(denPage, /requireAccess\("authenticated", "\/the-den"\)/)
+  assert.match(denPage, /<DenShortcuts \/>/)
+  assert.match(libraryPage, /requireAccess\("authenticated", "\/library"\)/)
 })
 
 test("the final cart action presents the complete purchase policy set", () => {

@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { ArrowRight, CalendarHeart, CalendarPlus, Clock3 } from "lucide-react"
 
-import { MemberNavigation } from "@/components/member/member-navigation"
+import { BackToDenLink } from "@/components/member/den-links"
 import { Button } from "@/components/ui/button"
 import { requireAccess } from "@/lib/access"
 import {
@@ -102,7 +102,7 @@ export default async function SessionsPage() {
               Your Sessions
             </h1>
           </div>
-          <MemberNavigation showSessions />
+          <BackToDenLink />
         </div>
 
         <div className="mt-10 flex flex-col justify-between gap-5 rounded-[2rem] border border-white/65 bg-white/42 p-6 backdrop-blur md:flex-row md:items-center md:p-8">

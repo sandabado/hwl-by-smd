@@ -10,7 +10,7 @@ import {
 } from "lucide-react"
 
 import { AccountActions } from "@/components/account/account-actions"
-import { MemberNavigation } from "@/components/member/member-navigation"
+import { BackToDenLink } from "@/components/member/den-links"
 import { Button } from "@/components/ui/button"
 import { requireAccess } from "@/lib/access"
 import {
@@ -85,7 +85,7 @@ export default async function AccountPage() {
               Your Account
             </h1>
           </div>
-          <MemberNavigation showSessions={bookingLedgerReady} />
+          <BackToDenLink />
         </div>
         <p className="mt-4 text-lg text-[var(--muted-foreground)]">
           Profile, sessions, purchases, and preferences.

@@ -3,13 +3,12 @@ import { Download, ArrowLeft, ArrowRight } from "lucide-react"
 import { notFound, redirect } from "next/navigation"
 
 import { ContentLicenseNote } from "@/components/member/content-license-note"
+import { BackToDenLink } from "@/components/member/den-links"
 import { MarkCompleteButton } from "@/components/member/lesson-actions"
-import { MemberNavigation } from "@/components/member/member-navigation"
 import { MuxPlayerWrapper } from "@/components/video/mux-player-wrapper"
 import { PrivateVideoPlayer } from "@/components/video/private-video-player"
 import { Button } from "@/components/ui/button"
 import { requireAccess } from "@/lib/access"
-import { isCalcomBookingLedgerReady } from "@/lib/bookings/member-bookings"
 import { media } from "@/lib/media"
 import { getLessonById } from "@/lib/member-content"
 import { createMuxPlaybackToken } from "@/lib/mux"
@@ -74,7 +73,7 @@ export default async function LessonPage({
             <ArrowLeft className="size-4" aria-hidden="true" />
             {result.course.title}
           </Link>
-          <MemberNavigation showSessions={isCalcomBookingLedgerReady()} />
+          <BackToDenLink />
         </div>
 
         <div className="mt-10">

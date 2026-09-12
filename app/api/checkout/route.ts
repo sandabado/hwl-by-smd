@@ -170,7 +170,9 @@ async function createOrRecoverStripeSession(
       metadata,
       mode: product.mode,
       payment_intent_data:
-        product.mode === "payment" ? { metadata } : undefined,
+        product.mode === "payment"
+          ? { metadata, receipt_email: order.customer_email }
+          : undefined,
       // The launch webhook grants access synchronously. Restrict the first
       // release to immediate card confirmation rather than silently offering a
       // delayed method whose payment can settle after the return page.

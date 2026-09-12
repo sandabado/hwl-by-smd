@@ -12,6 +12,7 @@ const SESSION_ID = "cs_test_route_fixture"
 const SITE_URL = "https://preview.hwlbysmd.com"
 const USER_ID = "10000000-0000-4000-8000-000000000001"
 const USER_EMAIL = "member@example.com"
+const STRIPE_CUSTOMER_ID = "cus_route_fixture"
 const LEGACY_LIFT_METADATA = {
   application: "hwl-by-smd",
   catalog_version: "lift-complete-v2",
@@ -140,7 +141,10 @@ function createCheckoutCalls(): CheckoutCalls {
   }
 }
 
-function createCheckoutAdminClient(calls: CheckoutCalls) {
+function createCheckoutAdminClient(
+  calls: CheckoutCalls,
+  { stripeCustomerId = null }: { stripeCustomerId?: string | null } = {}
+) {
   return {
     from(table: string) {
       let inserted: Record<string, unknown> | null = null
@@ -173,7 +177,12 @@ function createCheckoutAdminClient(calls: CheckoutCalls) {
           }
           if (table === "stripe_customers") {
             calls.events.push("customer_lookup")
-            return { data: null, error: null }
+            return {
+              data: stripeCustomerId
+                ? { stripe_customer_id: stripeCustomerId }
+                : null,
+              error: null,
+            }
           }
           if (table === "purchases") {
             calls.events.push("purchase_lookup")
@@ -637,6 +646,61 @@ test("commerce HTTP route boundaries are fail-closed and provider-free", async (
       })
       assert.deepEqual(params.payment_intent_data, {
         metadata: params.metadata,
+        receipt_email: USER_EMAIL,
+      })
+      assert.equal(
+        options.idempotencyKey,
+        `hwl:checkout:preview:${ACCOUNT_ID}:test:${String(order.id)}`
+      )
+    }
+  )
+
+  await t.test(
+    "an existing Stripe customer still receives the signed-in account receipt",
+    async () => {
+      Reflect.set(process.env, "LIFT_PDF_STORAGE_PATH", "lift/lift-guide.pdf")
+      Reflect.set(
+        process.env,
+        "LIFT_VIDEO_STORAGE_PATH",
+        "lift/complete-lift-v1.mp4"
+      )
+      const calls = createCheckoutCalls()
+      const database = createCheckoutAdminClient(calls, {
+        stripeCustomerId: STRIPE_CUSTOMER_ID,
+      })
+      const stripe = createCheckoutStripe(calls)
+
+      setHarness(
+        baseHarness({
+          createAdminClient: () => database,
+          getAuthenticatedUser: async () => ({
+            id: USER_ID,
+            email: USER_EMAIL,
+          }),
+          getStripe: () => stripe,
+          isExpectedStripeAccount: async () => true,
+          isExpectedStripePrice: () => true,
+          isProductCheckoutReady: () => true,
+        })
+      )
+
+      const response = await createCheckout(checkoutRequest())
+      assert.equal(response.status, 200)
+
+      const order = calls.orderInserts[0]
+      const params = calls.sessionCreateParams
+      const options = calls.sessionCreateOptions
+      assert.ok(order)
+      assert.ok(params)
+      assert.ok(options)
+      assert.equal(order.customer_email, USER_EMAIL)
+      assert.equal(order.stripe_customer_id, STRIPE_CUSTOMER_ID)
+      assert.equal(params.customer, STRIPE_CUSTOMER_ID)
+      assert.equal(params.customer_creation, undefined)
+      assert.equal(params.customer_email, undefined)
+      assert.deepEqual(params.payment_intent_data, {
+        metadata: params.metadata,
+        receipt_email: USER_EMAIL,
       })
       assert.equal(
         options.idempotencyKey,

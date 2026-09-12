@@ -242,11 +242,39 @@ sequence:
    explicitly authorizes the committed bootstrap. Then verify the committed
    profile and its durable audit row again. If any predicate returns zero rows
    or the evidence is ambiguous, stop.
-7. The current candidate intentionally has no generic role editor. Through a
-   separately reviewed invocation using that confirmed super administrator's
-   Supabase session—not an owner SQL editor or service-role request—call the
-   narrow RPC for the separately confirmed Shannon identity. Use the exact
-   current role verified at that moment:
+7. The current candidate intentionally has no generic role editor. Its
+   single-purpose `/admin/settings/access` page is hidden and unavailable unless
+   a closed-sales Production deployment pins all five server-only values below
+   to one freshly owner-approved operation. The signed-in Ghosthand
+   `super_admin` session—not an owner SQL editor or service-role request—then
+   calls the narrow RPC for Shannon's separately confirmed identity:
+
+   Before applying migration 020, run this read-only preflight through an
+   authorized owner database session and require zero rows. Any result is an
+   evidence collision to investigate; do not delete or rewrite audit history:
+
+   ```sql
+   select target_user_id, change_reference, count(*) as uses
+   from public.admin_role_change_audit
+   group by target_user_id, change_reference
+   having count(*) > 1;
+   ```
+
+   ```dotenv
+   ADMIN_SHANNON_HANDOFF_MODE=grant
+   ADMIN_SHANNON_HANDOFF_ACTOR_USER_ID=REPLACE_WITH_GHOSTHAND_AUTH_UUID
+   ADMIN_SHANNON_HANDOFF_TARGET_USER_ID=REPLACE_WITH_SHANNON_AUTH_UUID
+   ADMIN_SHANNON_HANDOFF_APPROVAL_REFERENCE=REPLACE_WITH_NONSECRET_APPROVAL_REFERENCE
+   ADMIN_SHANNON_HANDOFF_EXPECTED_GIT_SHA=REPLACE_WITH_EXACT_DEPLOYED_40_CHARACTER_SHA
+   ```
+
+   The application additionally requires the canonical Production domain and
+   Supabase project, Vercel Production runtime signals, exact deployed SHA, and
+   `COMMERCE_SALES_READY=false`. The actor is fixed to
+   `admin@ghosthand.studio`; the target is fixed to
+   `shannon@hwlbysmd.com`. The client can submit only the exact confirmation
+   phrase. A direct RPC equivalent, shown for boundary review rather than as a
+   preferred operator path, is:
 
    ```ts
    const result = await signedInSupabase.rpc("change_admin_role", {
@@ -260,16 +288,29 @@ sequence:
 
    The RPC rejects unconfirmed identities, UUID/email mismatches, stale expected
    roles, ordinary administrators, and self-change. Email is a target
-   cross-check only; it never grants privilege.
+   cross-check only; it never grants privilege. Migration 020 additionally
+   makes the target UUID plus approval reference unique, so an older deployment
+   cannot consume the same authority again after a later inverse role change.
 
-8. Verify `/admin/inquiries` through each real Supabase session rather than the
+8. After the page verifies Shannon's resulting profile, use an authorized
+   owner/service-role read to require exactly one matching row in
+   `public.admin_role_change_audit` for the target UUID, signed-in Ghosthand
+   actor UUID, fresh approval reference, expected previous/next roles, and the
+   operation timestamp. The browser action deliberately does not import a
+   service-role client and therefore does not claim this audit read itself.
+   Treat any ambiguous result as stop-and-inspect; never retry the role action
+   until the append-only evidence is reconciled. Then set
+   `ADMIN_SHANNON_HANDOFF_MODE=disabled`, clear the four pinned values, redeploy
+   the exact approved code with the gate closed, and verify the page returns
+   404 for both administrator identities.
+9. Verify `/admin/inquiries` through each real Supabase session rather than the
    local demo path. Confirm the permanent administrator can read the intended
    private inbox after migration 013, while a logged-out browser is denied.
-9. Record the approver, operator, UTC time, Auth UUID, role, approval reference,
-   and verification result in the private operations log. Do not record a
-   password, token, session cookie, service-role credential, or unrelated
-   profile data.
-10. Later role changes and revocations use the same authenticated RPC with exact
+10. Record the approver, operator, UTC time, Auth UUID, role, approval reference,
+    and verification result in the private operations log. Do not record a
+    password, token, session cookie, service-role credential, or unrelated
+    profile data.
+11. Later role changes and revocations use the same authenticated RPC with exact
     UUID, normalized email, expected role, and a fresh approval reference. The
     RPC never permits self-demotion. An exceptional last-super-admin recovery
     therefore requires the same separately approved owner/postgres procedure as

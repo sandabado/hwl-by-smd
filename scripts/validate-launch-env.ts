@@ -359,6 +359,99 @@ if (adminClientMessagingReady !== "false") {
   )
 }
 
+const adminHandoffMode = read("ADMIN_SHANNON_HANDOFF_MODE")
+const adminHandoffConfigurationKeys = [
+  "ADMIN_SHANNON_HANDOFF_ACTOR_USER_ID",
+  "ADMIN_SHANNON_HANDOFF_TARGET_USER_ID",
+  "ADMIN_SHANNON_HANDOFF_APPROVAL_REFERENCE",
+  "ADMIN_SHANNON_HANDOFF_EXPECTED_GIT_SHA",
+] as const
+const configuredAdminHandoffKeys = adminHandoffConfigurationKeys.filter((key) =>
+  read(key)
+)
+
+if (
+  adminHandoffMode !== null &&
+  adminHandoffMode !== "disabled" &&
+  adminHandoffMode !== "grant" &&
+  adminHandoffMode !== "revoke"
+) {
+  errors.push(
+    "ADMIN_SHANNON_HANDOFF_MODE: must be exactly disabled, grant, or revoke"
+  )
+}
+
+if (!adminHandoffMode || adminHandoffMode === "disabled") {
+  if (configuredAdminHandoffKeys.length > 0) {
+    errors.push(
+      "ADMIN_SHANNON_HANDOFF_MODE: disabled handoff must omit every pinned actor, target, approval, and SHA value"
+    )
+  }
+} else if (adminHandoffMode === "grant" || adminHandoffMode === "revoke") {
+  if (target !== "production" || salesExpectation !== "closed") {
+    errors.push(
+      "ADMIN_SHANNON_HANDOFF_MODE: role handoff is allowed only in a closed-sales Production candidate"
+    )
+  }
+  if (
+    process.env.VERCEL !== "1" ||
+    process.env.VERCEL_ENV !== "production" ||
+    process.env.NODE_ENV !== "production"
+  ) {
+    errors.push(
+      "ADMIN_SHANNON_HANDOFF_MODE: role handoff requires the trusted Vercel Production runtime signals"
+    )
+  }
+
+  const actorUserId = requirePattern(
+    "ADMIN_SHANNON_HANDOFF_ACTOR_USER_ID",
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    "must be the exact lower-case Ghosthand Auth UUID"
+  )
+  const targetUserId = requirePattern(
+    "ADMIN_SHANNON_HANDOFF_TARGET_USER_ID",
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    "must be the exact lower-case Shannon Auth UUID"
+  )
+  if (actorUserId && targetUserId && actorUserId === targetUserId) {
+    errors.push(
+      "ADMIN_SHANNON_HANDOFF_TARGET_USER_ID: must differ from the Ghosthand actor UUID"
+    )
+  }
+
+  const approvalReference = requirePattern(
+    "ADMIN_SHANNON_HANDOFF_APPROVAL_REFERENCE",
+    /^[A-Za-z0-9][A-Za-z0-9._:/#-]{7,119}$/,
+    "must be an 8-120 character non-secret approval reference"
+  )
+  if (
+    approvalReference &&
+    /(?:(?:sk|rk)_(?:live|test)_|whsec_|re_|sb_(?:secret|publishable)_|eyJ|gh[pousr]_|github_pat_|vercel_(?:token|access_token)|bearer[:_-])/i.test(
+      approvalReference
+    )
+  ) {
+    errors.push(
+      "ADMIN_SHANNON_HANDOFF_APPROVAL_REFERENCE: must not contain a secret-shaped value"
+    )
+  }
+
+  const expectedGitSha = requirePattern(
+    "ADMIN_SHANNON_HANDOFF_EXPECTED_GIT_SHA",
+    /^[0-9a-f]{40}$/,
+    "must be the exact lower-case 40-character approved Git SHA"
+  )
+  const deployedGitSha = requirePattern(
+    "VERCEL_GIT_COMMIT_SHA",
+    /^[0-9a-f]{40}$/,
+    "must be the exact lower-case 40-character deployed Git SHA"
+  )
+  if (expectedGitSha && deployedGitSha && expectedGitSha !== deployedGitSha) {
+    errors.push(
+      "ADMIN_SHANNON_HANDOFF_EXPECTED_GIT_SHA: must match VERCEL_GIT_COMMIT_SHA"
+    )
+  }
+}
+
 const cronSecret = requireValue("CRON_SECRET")
 if (cronSecret && cronSecret.length < 32) {
   errors.push("CRON_SECRET: must contain at least 32 characters")
@@ -587,6 +680,9 @@ console.log(
 )
 console.log(
   "Admin client messaging: read only (ADMIN_CLIENT_MESSAGING_READY=false)."
+)
+console.log(
+  `Shannon administrator handoff: ${adminHandoffMode === "grant" || adminHandoffMode === "revoke" ? adminHandoffMode : "disabled"}.`
 )
 console.log(
   `Booking history: ${bookingLedgerReady === "true" ? "enabled" : "disabled"} (CALCOM_BOOKING_LEDGER_READY=${bookingLedgerReady}).`

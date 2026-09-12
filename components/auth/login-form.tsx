@@ -172,6 +172,9 @@ export function LoginForm({
           <input
             required
             minLength={8}
+            aria-describedby={
+              mode === "signup" ? "signup-password-guidance" : undefined
+            }
             autoComplete={
               mode === "signin" ? "current-password" : "new-password"
             }
@@ -180,6 +183,14 @@ export function LoginForm({
             className="mt-2 h-12 w-full rounded-2xl border border-[var(--border)] bg-white/75 px-4 transition outline-none focus:border-[var(--accent)]"
             placeholder="At least 8 characters"
           />
+          {mode === "signup" && (
+            <span
+              className="mt-2 block text-xs leading-relaxed text-[var(--muted-foreground)]"
+              id="signup-password-guidance"
+            >
+              Use at least 8 characters.
+            </span>
+          )}
         </label>
 
         {error && (

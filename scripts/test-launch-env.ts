@@ -26,6 +26,9 @@ const legacySupabaseFixtureSecrets = {
 
 const STAGING_SUPABASE_URL = "https://lkxppynmdfzljuptauxf.supabase.co"
 const PRODUCTION_SUPABASE_URL = "https://qwprhsrwiihfllmgallr.supabase.co"
+const HANDOFF_ACTOR_ID = "d41943f5-133d-47e1-b2fe-c105762207e9"
+const HANDOFF_TARGET_ID = "5fa5e8b3-2579-400d-a98c-43ea5f4bb9c6"
+const HANDOFF_GIT_SHA = "1039e0e2d6c58f2f4eba19036bf03f9c736227b5"
 
 const developmentFixture: NodeJS.ProcessEnv = {
   ADMIN_CLIENT_MESSAGING_READY: "false",
@@ -635,6 +638,106 @@ const fixtures: Fixture[] = [
       "NEXT_PUBLIC_SUPABASE_URL: must use the exact canonical production Supabase URL without a path, query, or fragment",
     name: "canonical Production Supabase host rejects a path suffix",
   },
+  {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: {
+      ...productionFixture,
+      ADMIN_SHANNON_HANDOFF_ACTOR_USER_ID: HANDOFF_ACTOR_ID,
+      ADMIN_SHANNON_HANDOFF_APPROVAL_REFERENCE:
+        "owner-approval:2026-09-12:shannon-admin",
+      ADMIN_SHANNON_HANDOFF_EXPECTED_GIT_SHA: HANDOFF_GIT_SHA,
+      ADMIN_SHANNON_HANDOFF_MODE: "grant",
+      ADMIN_SHANNON_HANDOFF_TARGET_USER_ID: HANDOFF_TARGET_ID,
+      NODE_ENV: "production",
+      VERCEL_GIT_COMMIT_SHA: HANDOFF_GIT_SHA,
+    },
+    expectedExit: 0,
+    expectedText: "Shannon administrator handoff: grant.",
+    name: "closed Production accepts the exact one-time administrator handoff",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      ADMIN_SHANNON_HANDOFF_ACTOR_USER_ID: HANDOFF_ACTOR_ID,
+      ADMIN_SHANNON_HANDOFF_APPROVAL_REFERENCE:
+        "owner-approval:2026-09-12:shannon-admin",
+      ADMIN_SHANNON_HANDOFF_EXPECTED_GIT_SHA: HANDOFF_GIT_SHA,
+      ADMIN_SHANNON_HANDOFF_MODE: "grant",
+      ADMIN_SHANNON_HANDOFF_TARGET_USER_ID: HANDOFF_TARGET_ID,
+      NODE_ENV: "production",
+      VERCEL_GIT_COMMIT_SHA: HANDOFF_GIT_SHA,
+    },
+    expectedExit: 1,
+    expectedText:
+      "ADMIN_SHANNON_HANDOFF_MODE: role handoff is allowed only in a closed-sales Production candidate",
+    name: "Preview cannot activate the administrator handoff",
+  },
+  {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: {
+      ...productionFixture,
+      ADMIN_SHANNON_HANDOFF_ACTOR_USER_ID: HANDOFF_ACTOR_ID,
+      ADMIN_SHANNON_HANDOFF_MODE: "disabled",
+    },
+    expectedExit: 1,
+    expectedText:
+      "ADMIN_SHANNON_HANDOFF_MODE: disabled handoff must omit every pinned actor, target, approval, and SHA value",
+    name: "disabled handoff rejects stale pinned authority",
+  },
+  {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: {
+      ...productionFixture,
+      ADMIN_SHANNON_HANDOFF_ACTOR_USER_ID: HANDOFF_ACTOR_ID,
+      ADMIN_SHANNON_HANDOFF_APPROVAL_REFERENCE:
+        "owner-approval:2026-09-12:shannon-admin",
+      ADMIN_SHANNON_HANDOFF_EXPECTED_GIT_SHA: HANDOFF_GIT_SHA,
+      ADMIN_SHANNON_HANDOFF_MODE: "grant",
+      ADMIN_SHANNON_HANDOFF_TARGET_USER_ID: HANDOFF_TARGET_ID,
+      NODE_ENV: "production",
+      VERCEL_GIT_COMMIT_SHA: "a".repeat(40),
+    },
+    expectedExit: 1,
+    expectedText:
+      "ADMIN_SHANNON_HANDOFF_EXPECTED_GIT_SHA: must match VERCEL_GIT_COMMIT_SHA",
+    name: "administrator handoff rejects deployment SHA drift",
+  },
+  {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: {
+      ...productionFixture,
+      ADMIN_SHANNON_HANDOFF_ACTOR_USER_ID: HANDOFF_ACTOR_ID,
+      ADMIN_SHANNON_HANDOFF_APPROVAL_REFERENCE: "sk_live_not_an_approval",
+      ADMIN_SHANNON_HANDOFF_EXPECTED_GIT_SHA: HANDOFF_GIT_SHA,
+      ADMIN_SHANNON_HANDOFF_MODE: "grant",
+      ADMIN_SHANNON_HANDOFF_TARGET_USER_ID: HANDOFF_TARGET_ID,
+      NODE_ENV: "production",
+      VERCEL_GIT_COMMIT_SHA: HANDOFF_GIT_SHA,
+    },
+    expectedExit: 1,
+    expectedText:
+      "ADMIN_SHANNON_HANDOFF_APPROVAL_REFERENCE: must not contain a secret-shaped value",
+    name: "administrator handoff rejects a secret-shaped approval reference",
+  },
+  {
+    args: ["--target=production", "--expect-sales=closed"],
+    env: {
+      ...productionFixture,
+      ADMIN_SHANNON_HANDOFF_ACTOR_USER_ID: HANDOFF_ACTOR_ID,
+      ADMIN_SHANNON_HANDOFF_APPROVAL_REFERENCE:
+        "owner-approval:github_pat_not_an_approval",
+      ADMIN_SHANNON_HANDOFF_EXPECTED_GIT_SHA: HANDOFF_GIT_SHA,
+      ADMIN_SHANNON_HANDOFF_MODE: "grant",
+      ADMIN_SHANNON_HANDOFF_TARGET_USER_ID: HANDOFF_TARGET_ID,
+      NODE_ENV: "production",
+      VERCEL_GIT_COMMIT_SHA: HANDOFF_GIT_SHA,
+    },
+    expectedExit: 1,
+    expectedText:
+      "ADMIN_SHANNON_HANDOFF_APPROVAL_REFERENCE: must not contain a secret-shaped value",
+    name: "administrator handoff rejects a secret marker after a safe prefix",
+  },
 ]
 
 const inheritedEnvironment = Object.fromEntries(
@@ -650,8 +753,10 @@ const inheritedEnvironment = Object.fromEntries(
       !key.startsWith("INQUIRY_") &&
       !key.startsWith("CRON_") &&
       !key.startsWith("HWL_") &&
+      !key.startsWith("ADMIN_SHANNON_HANDOFF_") &&
       key !== "VERCEL" &&
-      key !== "VERCEL_ENV"
+      key !== "VERCEL_ENV" &&
+      key !== "VERCEL_GIT_COMMIT_SHA"
   )
 )
 

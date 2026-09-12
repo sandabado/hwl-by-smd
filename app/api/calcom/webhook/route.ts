@@ -90,6 +90,7 @@ export async function POST(request: Request) {
     p_event_created_at: event.providerCreatedAt,
     p_payload_digest: event.eventDigest,
     p_previous_cal_booking_uid: event.rescheduleUid,
+    p_provider_price_was_null: event.providerPriceWasNull,
     p_requires_confirmation: event.requiresConfirmation,
     p_service_duration_minutes: event.durationMinutes,
     p_service_slug: event.serviceSlug,

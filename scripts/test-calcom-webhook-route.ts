@@ -263,6 +263,7 @@ test("Cal.com webhook maps a valid signed request into the narrow ledger RPC", a
     p_event_created_at: "2026-09-09T18:00:00.000Z",
     p_payload_digest: createHash("sha256").update(body).digest("hex"),
     p_previous_cal_booking_uid: null,
+    p_provider_price_was_null: false,
     p_requires_confirmation: true,
     p_service_duration_minutes: 60,
     p_service_slug: "signature-facial",
@@ -271,6 +272,61 @@ test("Cal.com webhook maps a valid signed request into the narrow ledger RPC", a
     p_trigger_event: "BOOKING_REQUESTED",
     p_webhook_version: "2026-07-27",
   })
+})
+
+test("Cal.com webhook preserves missing rejection iCal metadata for database ordering", async () => {
+  const payload = webhookPayload({
+    iCalSequence: undefined,
+    iCalUID: undefined,
+    status: "REJECTED",
+  })
+  const body = JSON.stringify({
+    ...payload,
+    triggerEvent: "BOOKING_REJECTED",
+  })
+  const response = await receiveCalcomWebhook(requestFor(body))
+
+  assert.equal(response.status, 200)
+  assert.equal(rpcCalls().length, 1)
+  assert.equal(rpcCalls()[0]?.args.p_booking_status, "rejected")
+  assert.equal(rpcCalls()[0]?.args.p_cal_ical_sequence, null)
+  assert.equal(rpcCalls()[0]?.args.p_cal_ical_uid, null)
+  assert.equal(rpcCalls()[0]?.args.p_provider_price_was_null, false)
+})
+
+test("Cal.com webhook rejects a reschedule without iCalSequence", async () => {
+  const payload = webhookPayload({
+    iCalSequence: undefined,
+    iCalUID: undefined,
+    rescheduleUid: "booking-prior-uid",
+    status: "ACCEPTED",
+    uid: "booking-rescheduled-uid",
+  })
+  const body = JSON.stringify({
+    ...payload,
+    triggerEvent: "BOOKING_RESCHEDULED",
+  })
+  const response = await receiveCalcomWebhook(requestFor(body))
+
+  assert.equal(response.status, 422)
+  assert.equal(rpcCalls().length, 0)
+})
+
+test("Cal.com webhook forwards signed null-price cancellation evidence without storing payment data", async () => {
+  const payload = webhookPayload({ price: null, status: "CANCELLED" })
+  const body = JSON.stringify({
+    ...payload,
+    triggerEvent: "BOOKING_CANCELLED",
+  })
+  const response = await receiveCalcomWebhook(requestFor(body))
+
+  assert.equal(response.status, 200)
+  assert.equal(rpcCalls().length, 1)
+  assert.equal(rpcCalls()[0]?.args.p_booking_status, "cancelled")
+  assert.equal(rpcCalls()[0]?.args.p_currency, "usd")
+  assert.equal(rpcCalls()[0]?.args.p_provider_price_was_null, true)
+  assert.equal("p_price" in (rpcCalls()[0]?.args ?? {}), false)
+  assert.equal("p_payment_status" in (rpcCalls()[0]?.args ?? {}), false)
 })
 
 test("Cal.com webhook fails closed when the ledger RPC fails", async () => {

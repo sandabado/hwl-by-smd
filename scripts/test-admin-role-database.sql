@@ -1,6 +1,6 @@
 \set ON_ERROR_STOP on
 
--- Run only after migrations through 018 in an isolated local database. Every
+-- Run only after migrations through 020 in an isolated local database. Every
 -- fixture, simulated Auth claim, assertion, and schema probe is enclosed in
 -- this transaction and the script always rolls back.
 
@@ -21,6 +21,32 @@ begin
   end if;
 end;
 $function$;
+
+-- An owner approval reference is a consumed capability for one exact target.
+-- Even after a later inverse role change, an old deployment cannot reuse it.
+do $test$
+begin
+  begin
+    insert into public.admin_role_change_audit (
+      target_user_id, actor_context, operation, change_reference,
+      previous_role, next_role, previous_is_admin, next_is_admin
+    ) values
+      (
+        '18181818-0000-4000-8000-000000000004',
+        'database-harness', 'update', 'test-020:consumed-reference',
+        null, 'administrator', false, true
+      ),
+      (
+        '18181818-0000-4000-8000-000000000004',
+        'database-harness', 'update', 'test-020:consumed-reference',
+        null, 'administrator', false, true
+      );
+    raise exception 'An approval reference was consumed twice for one target.';
+  exception
+    when unique_violation then null;
+  end;
+end;
+$test$;
 
 create or replace function pg_temp.assert_count(
   observed bigint,

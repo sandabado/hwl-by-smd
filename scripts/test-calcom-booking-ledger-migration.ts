@@ -13,6 +13,9 @@ function compact(value: string) {
 const migration = compact(
   source("supabase/migrations/016_calcom_booking_ledger.sql")
 )
+const compatibilityMigration = compact(
+  source("supabase/migrations/019_calcom_native_payload_compatibility.sql")
+)
 const databaseHarness = compact(
   source("scripts/test-calcom-booking-ledger-database.sql")
 )
@@ -88,7 +91,68 @@ test("migration 016 retains only the approved scheduling projection", () => {
   )
 })
 
-test("the migration 016 database harness is transactional and covers lifecycle boundaries", () => {
+test("migration 019 accepts only documented native Cal omissions", () => {
+  assert.match(
+    compatibilityMigration,
+    /create or replace function public\.ingest_calcom_booking_event/
+  )
+  assert.match(
+    compatibilityMigration,
+    /drop function if exists public\.ingest_calcom_booking_event/
+  )
+  assert.match(
+    compatibilityMigration,
+    /p_cal_ical_sequence is null and p_trigger_event <> 'BOOKING_REJECTED'/
+  )
+  assert.doesNotMatch(
+    compatibilityMigration,
+    /p_cal_ical_sequence is null[^;]+BOOKING_RESCHEDULED/
+  )
+  assert.match(
+    compatibilityMigration,
+    /sequence_is_inferred := p_cal_ical_sequence is null/
+  )
+  assert.match(
+    compatibilityMigration,
+    /effective_ical_sequence := greatest\( current_booking\.details_ical_sequence, current_booking\.booking_state_ical_sequence \)/
+  )
+  assert.match(
+    compatibilityMigration,
+    /\(p_event_created_at, booking_rank\) > \( current_booking\.booking_state_event_at, current_booking\.booking_state_rank \)/
+  )
+  assert.match(
+    compatibilityMigration,
+    /p_provider_price_was_null boolean default false/
+  )
+  assert.match(compatibilityMigration, /unverified_null_price_cancellation/)
+  assert.match(
+    compatibilityMigration,
+    /prior_events\.trigger_event <> 'BOOKING_CANCELLED' and prior_events\.processing_outcome <> 'manual_review'/
+  )
+  assert.match(
+    compatibilityMigration,
+    /ical_uid_backfill_wins := current_booking\.cal_ical_uid is null and p_cal_ical_uid is not null/
+  )
+  assert.match(
+    compatibilityMigration,
+    /current_booking\.cal_ical_uid is not null and p_cal_ical_uid is not null and current_booking\.cal_ical_uid <> p_cal_ical_uid/
+  )
+  assert.doesNotMatch(
+    compatibilityMigration,
+    /p_previous_cal_booking_uid = p_cal_booking_uid or p_cal_ical_uid is null/
+  )
+  assert.match(
+    compatibilityMigration,
+    /grant execute on function public\.ingest_calcom_booking_event\(.*?\) to service_role/
+  )
+  assert.doesNotMatch(compatibilityMigration, /create table public\./)
+  assert.doesNotMatch(
+    compatibilityMigration,
+    /add column [^;]*(?:price|payment_intent|stripe_payment)/i
+  )
+})
+
+test("the booking-ledger database harness is transactional and covers lifecycle boundaries", () => {
   assert.match(databaseHarness, /^\\set ON_ERROR_STOP on/)
   assert.match(databaseHarness, /\bbegin;/)
   assert.match(databaseHarness, /rollback;$/)
@@ -102,6 +166,9 @@ test("the migration 016 database harness is transactional and covers lifecycle b
     "confirmed member claim",
     "append-only evidence",
     "deployment namespace",
+    "native payload omissions",
+    "null cancellation",
+    "inverse delivery",
   ]) {
     assert.match(databaseHarness, new RegExp(expectedProof, "i"))
   }

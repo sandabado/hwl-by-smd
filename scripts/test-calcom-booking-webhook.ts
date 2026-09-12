@@ -163,6 +163,103 @@ test("Cal.com webhook versions and booking triggers are explicit", async (t) => 
   }
 })
 
+test("Cal.com native terminal and reschedule payload omissions stay narrow", async (t) => {
+  await t.test("accepts Cal's null price on a cancellation only", () => {
+    const result = parseFixture({
+      payload: { price: null, status: "CANCELLED" },
+      trigger: "BOOKING_CANCELLED",
+    })
+
+    assert.equal(result.ok, true)
+    if (!result.ok) return
+
+    assert.equal(result.event.bookingStatus, "cancelled")
+    assert.equal(result.event.currency, "usd")
+    assert.equal(result.event.providerPriceWasNull, true)
+    assert.equal("price" in result.event, false)
+    assert.equal("paymentStatus" in result.event, false)
+  })
+
+  await t.test(
+    "accepts BOOKING_REJECTED without optional iCal identity metadata",
+    () => {
+      const result = parseFixture({
+        payload: {
+          iCalSequence: undefined,
+          iCalUID: undefined,
+          status: "REJECTED",
+        },
+        trigger: "BOOKING_REJECTED",
+      })
+
+      assert.equal(result.ok, true)
+      if (!result.ok) return
+
+      assert.equal(result.event.calIcalSequence, null)
+      assert.equal(result.event.calIcalUid, null)
+    }
+  )
+
+  await t.test("accepts a reschedule without iCalUID only", () => {
+    const result = parseFixture({
+      payload: { iCalUID: undefined },
+      trigger: "BOOKING_RESCHEDULED",
+    })
+
+    assert.equal(result.ok, true)
+    if (!result.ok) return
+
+    assert.equal(result.event.calIcalSequence, 1)
+    assert.equal(result.event.calIcalUid, null)
+  })
+
+  for (const trigger of [
+    "BOOKING_REQUESTED",
+    "BOOKING_CREATED",
+    "BOOKING_RESCHEDULED",
+    "BOOKING_CANCELLED",
+  ] as const) {
+    await t.test(`still requires iCalSequence for ${trigger}`, () => {
+      assert.deepEqual(
+        parseFixture({ payload: { iCalSequence: undefined }, trigger }),
+        { ok: false, reason: "invalid_payload" }
+      )
+    })
+  }
+
+  for (const trigger of ["BOOKING_REJECTED", "BOOKING_RESCHEDULED"] as const) {
+    await t.test(`rejects malformed explicit sequence for ${trigger}`, () => {
+      assert.deepEqual(
+        parseFixture({ payload: { iCalSequence: "0" }, trigger }),
+        { ok: false, reason: "invalid_payload" }
+      )
+    })
+  }
+
+  for (const trigger of [
+    "BOOKING_CREATED",
+    "BOOKING_REJECTED",
+    "BOOKING_RESCHEDULED",
+  ] as const) {
+    await t.test(`does not generalize null price to ${trigger}`, () => {
+      assert.deepEqual(parseFixture({ payload: { price: null }, trigger }), {
+        ok: false,
+        reason: "invalid_payload",
+      })
+    })
+  }
+
+  await t.test("positive cancellation price remains a payment mismatch", () => {
+    assert.deepEqual(
+      parseFixture({
+        payload: { price: 1, status: "CANCELLED" },
+        trigger: "BOOKING_CANCELLED",
+      }),
+      { ok: false, reason: "payment_mismatch" }
+    )
+  })
+})
+
 test("Cal.com webhook accepts only the canonical organizer and exact service", async (t) => {
   await t.test(
     "normalizes the exact service without retaining extra fields",
@@ -245,6 +342,7 @@ test("Cal.com webhook accepts free scheduling only", async (t) => {
   assert.equal(result.ok, true)
   if (result.ok) {
     assert.equal(result.event.currency, "usd")
+    assert.equal(result.event.providerPriceWasNull, false)
     assert.equal("paymentStatus" in result.event, false)
     assert.equal("stripePaymentIntentId" in result.event, false)
   }

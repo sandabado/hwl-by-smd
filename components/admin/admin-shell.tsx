@@ -271,6 +271,16 @@ export function getAdminShellContext(
     }
   }
 
+  if (routeMatches(pathname, "/admin/settings/access")) {
+    return {
+      badge: "Restricted role handoff",
+      banner: `This one-time ${environmentLabel} control changes only Shannon’s administrator role after rechecking the exact human actor, owner-approved deployment, and database audit boundary.`,
+      environmentLabel,
+      mode: "live-write",
+      modeLabel: "Settings · Audited handoff",
+    }
+  }
+
   if (routeMatches(pathname, "/admin/settings")) {
     return {
       badge: "Operational configuration",

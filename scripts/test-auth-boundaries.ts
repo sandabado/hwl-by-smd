@@ -1,8 +1,36 @@
 import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
 import { test } from "node:test"
 
 import { AUTH_LINK_FAILURE, loginAuthFeedback } from "../lib/auth-feedback.ts"
 import { safeInternalPath } from "../lib/safe-path.ts"
+
+function source(path: string) {
+  return readFileSync(new URL(`../${path}`, import.meta.url), "utf8")
+}
+
+test("password recovery has dedicated route metadata", () => {
+  const layout = source("app/reset-password/layout.tsx")
+
+  assert.match(layout, /title: "Reset Password \| HWL by SMD"/)
+  assert.match(
+    layout,
+    /description:\s*\n?\s*"Request a secure password reset link for your HWL by SMD account\."/
+  )
+})
+
+test("account creation presents its existing password rule before submission", () => {
+  const form = source("components/auth/login-form.tsx")
+
+  assert.match(form, /if \(password\.length < 8\)/)
+  assert.match(form, /minLength=\{8\}/)
+  assert.match(
+    form,
+    /aria-describedby=\{\s*mode === "signup"\s*\? "signup-password-guidance"\s*: undefined\s*\}/
+  )
+  assert.match(form, /id="signup-password-guidance"/)
+  assert.match(form, />\s*Use at least 8 characters\.\s*<\/span>/)
+})
 
 test("login auth feedback accepts only stable error codes", async (t) => {
   for (const input of [

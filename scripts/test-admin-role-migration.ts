@@ -12,6 +12,10 @@ function compact(value: string) {
 
 const migrationSource = source("supabase/migrations/018_admin_roles.sql")
 const migration = compact(migrationSource)
+const handoffReferenceMigrationSource = source(
+  "supabase/migrations/020_admin_handoff_reference_uniqueness.sql"
+)
+const handoffReferenceMigration = compact(handoffReferenceMigrationSource)
 const databaseHarness = compact(source("scripts/test-admin-role-database.sql"))
 const inquiryOperations = compact(source("docs/inquiry-privacy-operations.md"))
 const adminAudit = compact(
@@ -208,6 +212,21 @@ test("the authenticated role-change RPC is narrow, optimistic, and actor-preserv
   )
 })
 
+test("migration 020 makes each target approval reference durably one-time", () => {
+  assert.match(handoffReferenceMigration, /\bbegin;/)
+  assert.match(handoffReferenceMigration, /set local lock_timeout = '5s'/)
+  assert.match(
+    handoffReferenceMigration,
+    /create unique index admin_role_change_audit_target_reference_once_idx on public\.admin_role_change_audit \(target_user_id, change_reference\)/
+  )
+  assert.match(handoffReferenceMigration, /commit;$/)
+  assert.doesNotMatch(handoffReferenceMigrationSource, /@[a-z0-9.-]+/i)
+  assert.doesNotMatch(
+    handoffReferenceMigration,
+    /\bgrant\s+(?:all|select|insert|update|delete|execute)\b|\bcreate\s+policy\b/i
+  )
+})
+
 test("super-admin detection does not bypass migration 017 practitioner isolation", () => {
   const currentRoleFunction = migration.match(
     /create or replace function public\.current_admin_role\(\)(.*?)\$function\$;/
@@ -285,6 +304,7 @@ test("the migration 018 database harness is isolated and covers security invaria
     "every role audit row satisfies role-state invariants",
     "Role audit update",
     "Role audit deletion",
+    "approval reference was consumed twice for one target",
   ]) {
     assert.match(databaseHarness, new RegExp(expectedProof, "i"))
   }

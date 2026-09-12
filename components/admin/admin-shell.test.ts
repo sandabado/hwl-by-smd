@@ -316,6 +316,16 @@ test("route authority is live only where the connected source supports it", () =
   assert.equal(settings.badge, "Operational configuration")
   assert.equal(settings.modeLabel, "Settings · Read only")
 
+  const handoff = shell.getAdminShellContext(
+    "/admin/settings/access",
+    "supabase",
+    "production"
+  )
+  assert.equal(handoff.mode, "live-write")
+  assert.equal(handoff.badge, "Restricted role handoff")
+  assert.equal(handoff.modeLabel, "Settings · Audited handoff")
+  assert.match(handoff.banner, /one-time Production control/i)
+
   assert.equal(
     shell.getAdminShellContext("/admin/revenue", "supabase", "production").mode,
     "sample"

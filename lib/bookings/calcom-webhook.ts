@@ -29,12 +29,13 @@ export type CalcomBookingEvent = Readonly<{
   calBookingId: number | null
   calBookingUid: string
   calEventTypeId: number
-  calIcalSequence: number
+  calIcalSequence: number | null
   calIcalUid: string | null
   calStatus: string
   currency: string
   durationMinutes: number
   eventDigest: string
+  providerPriceWasNull: boolean
   providerCreatedAt: string
   requiresConfirmation: boolean | null
   rescheduleUid: string | null
@@ -196,6 +197,9 @@ export function parseCalcomBookingWebhook(
   const startAt = readIsoDate(payload.startTime)
   const endAt = readIsoDate(payload.endTime)
   const calStatus = readString(payload.status, 80)?.toUpperCase()
+  const providerPriceWasNull = payload.price === null
+  const priceIsNullCancellation =
+    trigger === "BOOKING_CANCELLED" && providerPriceWasNull
   const priceMinor = readInteger(payload.price, { allowZero: true })
   const currency = readString(payload.currency, 12)?.toLowerCase()
   const attendees = Array.isArray(payload.attendees) ? payload.attendees : null
@@ -203,10 +207,12 @@ export function parseCalcomBookingWebhook(
     typeof payload.requiresConfirmation === "boolean"
       ? payload.requiresConfirmation
       : null
-  const calIcalSequence =
+  const calIcalSequenceIsAbsent =
     payload.iCalSequence === null || payload.iCalSequence === undefined
-      ? null
-      : readInteger(payload.iCalSequence, { allowZero: true })
+  const allowsMissingIcalSequence = trigger === "BOOKING_REJECTED"
+  const calIcalSequence = calIcalSequenceIsAbsent
+    ? null
+    : readInteger(payload.iCalSequence, { allowZero: true })
 
   if (
     !providerCreatedAt ||
@@ -218,7 +224,7 @@ export function parseCalcomBookingWebhook(
     !startAt ||
     !endAt ||
     !calStatus ||
-    priceMinor === null ||
+    (priceMinor === null && !priceIsNullCancellation) ||
     !currency ||
     !/^[a-z]{3}$/.test(currency) ||
     !attendees ||
@@ -226,7 +232,8 @@ export function parseCalcomBookingWebhook(
     (payload.requiresConfirmation !== null &&
       payload.requiresConfirmation !== undefined &&
       requiresConfirmation === null) ||
-    calIcalSequence === null ||
+    (!calIcalSequenceIsAbsent && calIcalSequence === null) ||
+    (calIcalSequenceIsAbsent && !allowsMissingIcalSequence) ||
     Date.parse(endAt) <= Date.parse(startAt)
   ) {
     return { ok: false, reason: "invalid_payload" }
@@ -261,7 +268,13 @@ export function parseCalcomBookingWebhook(
 
   // Cal.com is scheduling authority only. Every website booking must remain
   // free at booking time; post-service payment is a separate Stripe workflow.
-  if (priceMinor !== 0 || currency !== service.payment.currency) {
+  // Cal's native cancellation payload may replace the already-verified zero
+  // price with null. Accept that exact terminal shape only; every bookable or
+  // non-cancellation event must still carry an explicit numeric zero.
+  if (
+    (!priceIsNullCancellation && priceMinor !== 0) ||
+    currency !== service.payment.currency
+  ) {
     return { ok: false, reason: "payment_mismatch" }
   }
 
@@ -296,6 +309,7 @@ export function parseCalcomBookingWebhook(
       durationMinutes,
       endAt,
       eventDigest: createHash("sha256").update(rawBody).digest("hex"),
+      providerPriceWasNull,
       providerCreatedAt,
       requiresConfirmation,
       rescheduleUid,

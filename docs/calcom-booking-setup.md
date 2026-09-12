@@ -1,6 +1,6 @@
 # Cal.com booking launch setup
 
-Last revised: September 10, 2026
+Last revised: September 12, 2026
 
 ## Current provider state
 
@@ -111,6 +111,50 @@ reviewed completion action and Stripe invoice/payment-link workflow pass an
 end-to-end test, Shannon must create and send the post-appointment payment
 request manually. Cal.com confirmation does not create or send a Stripe payment
 link.
+
+## Booking-history webhook boundary
+
+Public scheduling and synchronized HWL booking history are separate gates. The
+history ledger stays disabled until migrations `016` and `019` are applied to
+the selected Supabase target and a signed lifecycle canary passes against the
+exact deployed candidate.
+
+Configure one user-level webhook for the canonical `hwlbysmd` account:
+
+- Subscriber URL: the deployed candidate's public HTTPS
+  `/api/calcom/webhook` route. Cal.com cannot deliver to localhost or a private
+  IP. If the candidate is protected, use a dedicated Cal-only automation bypass
+  credential; never reuse a Stripe or administrator bypass.
+- Triggers: `BOOKING_REQUESTED`, `BOOKING_CREATED`, `BOOKING_RESCHEDULED`,
+  `BOOKING_CANCELLED`, and `BOOKING_REJECTED` only.
+- Payload: Cal.com's native/default payload with no custom payload template.
+- Version: one of the versions explicitly supported by the application. Record
+  and verify the exact selected version during the canary.
+- Signature: Cal's `x-cal-signature-256` HMAC must match the raw request body and
+  the target's unique `CALCOM_WEBHOOK_SECRET`. Enable
+  `CALCOM_BOOKING_LEDGER_READY=true` only in that same target after its database
+  migration is verified.
+
+Cal sometimes sends `price: null` on a cancellation after the original free
+appointment was already established. The application forwards that null-price
+provenance but accepts it only when the same booking identity already has a
+signed, accepted non-cancellation receipt that passed the numeric-zero boundary;
+a first-seen null-price cancellation is retained for manual review and creates
+no booking row. Native rejection payloads may omit `iCalSequence`/`iCalUID`, and
+a reschedule may omit `iCalUID` but must retain an explicit sequence. Bookable
+events must still carry an exact numeric zero and `usd`; any positive price or
+wrong currency fails closed. When a rejection sequence is absent, the ledger
+retains the last trusted explicit sequence and uses the signed provider event
+timestamp for ordering, so an older omission cannot override newer booking
+state. Payload-digest replay protection remains unchanged.
+
+The activation canary must cover request, confirmation, reschedule,
+cancellation, and (when feasible) rejection. Verify one canonical booking,
+preserved old/new UID aliases, one immutable receipt per unique payload,
+idempotent exact replay, the expected terminal state, the correct deployment
+namespace, and zero `manual_review` outcomes. On any failure, disable the Cal
+webhook first, restore `CALCOM_BOOKING_LEDGER_READY=false`, and redeploy while
+preserving the ledger evidence for diagnosis.
 
 ## Catalog boundaries retained on the website
 

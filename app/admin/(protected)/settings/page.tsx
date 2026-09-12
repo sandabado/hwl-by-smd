@@ -1,3 +1,4 @@
+import Link from "next/link"
 import type { LucideIcon } from "lucide-react"
 import {
   CalendarClock,
@@ -8,6 +9,7 @@ import {
   ExternalLink,
   Globe2,
   Mail,
+  ShieldPlus,
   ServerCog,
   ShieldCheck,
   Video,
@@ -20,6 +22,10 @@ import {
   StatusPill,
 } from "@/components/admin/admin-ui"
 import { requireAdmin } from "@/lib/admin-auth"
+import {
+  getShannonAdminHandoffConfig,
+  isShannonAdminHandoffOperator,
+} from "@/lib/admin-role-handoff"
 import { getCalcomPublicEventTypes } from "@/lib/calcom"
 import {
   getCanonicalSiteUrl,
@@ -183,7 +189,17 @@ function GateRow({
 }
 
 export default async function AdminSettingsPage() {
-  await requireAdmin()
+  const access = await requireAdmin()
+  const handoffConfig =
+    access.source === "supabase" && access.role === "super_admin"
+      ? getShannonAdminHandoffConfig()
+      : null
+  const handoffAvailable = Boolean(
+    handoffConfig &&
+    access.source === "supabase" &&
+    access.role === "super_admin" &&
+    isShannonAdminHandoffOperator(access, handoffConfig)
+  )
 
   const calcom = await getCalcomPublicEventTypes()
   const deploymentTarget = getDeploymentTargetBoundary(process.env)
@@ -259,7 +275,17 @@ export default async function AdminSettingsPage() {
         description="A read-only view of the environment boundaries and provider handoffs behind HWL. It never displays credentials and does not pretend to edit provider settings."
         eyebrow="Operational truth"
         title="Settings"
-      />
+      >
+        {handoffAvailable && (
+          <Link
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#cfc7ba] bg-white/55 px-4 text-xs font-medium text-[#4e5b51] transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#273029]"
+            href="/admin/settings/access"
+          >
+            <ShieldPlus className="size-3.5" aria-hidden="true" />
+            Administrator handoff
+          </Link>
+        )}
+      </AdminPageHeader>
 
       <AdminPanel className="mt-8 border-[#cfc5b7] bg-[#273029] text-white">
         <div className="flex items-start gap-4">

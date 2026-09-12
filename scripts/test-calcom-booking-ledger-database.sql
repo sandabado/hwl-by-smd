@@ -1,8 +1,8 @@
 \set ON_ERROR_STOP on
 
--- Run only after migration 016 in an isolated local or owner-approved staging
--- database. Every fixture and assertion is enclosed in this transaction and
--- the script always rolls back.
+-- Run only after migrations 016 and 019 in an isolated local or owner-approved
+-- staging database. Every fixture and assertion is enclosed in this
+-- transaction and the script always rolls back.
 
 begin;
 
@@ -29,6 +29,7 @@ create or replace function pg_temp.ingest_booking(
   p_requires_confirmation boolean default true,
   p_booking_status text default 'requested',
   p_cal_status text default 'PENDING',
+  p_provider_price_was_null boolean default false,
   p_deployment_target text default 'preview'
 )
 returns table (booking_record_id uuid, outcome text)
@@ -59,7 +60,8 @@ as $function$
     p_requires_confirmation => p_requires_confirmation,
     p_booking_status => p_booking_status,
     p_cal_status => p_cal_status,
-    p_currency => 'usd'
+    p_currency => 'usd',
+    p_provider_price_was_null => p_provider_price_was_null
   );
 $function$;
 
@@ -116,7 +118,7 @@ begin
       )
       or has_function_privilege(
         runtime_role,
-        'public.ingest_calcom_booking_event(text,text,text,text,text,timestamptz,text,text,bigint,bigint,text,integer,text,text,integer,text,text,text,timestamptz,timestamptz,boolean,text,text,text)',
+        'public.ingest_calcom_booking_event(text,text,text,text,text,timestamptz,text,text,bigint,bigint,text,integer,text,text,integer,text,text,text,timestamptz,timestamptz,boolean,text,text,text,boolean)',
         'EXECUTE'
       )
     ) then
@@ -130,10 +132,16 @@ begin
     'EXECUTE'
   ) or not has_function_privilege(
     'service_role',
-    'public.ingest_calcom_booking_event(text,text,text,text,text,timestamptz,text,text,bigint,bigint,text,integer,text,text,integer,text,text,text,timestamptz,timestamptz,boolean,text,text,text)',
+    'public.ingest_calcom_booking_event(text,text,text,text,text,timestamptz,text,text,bigint,bigint,text,integer,text,text,integer,text,text,text,timestamptz,timestamptz,boolean,text,text,text,boolean)',
     'EXECUTE'
   ) then
     raise exception 'service_role is missing a booking-ledger RPC grant.';
+  end if;
+
+  if to_regprocedure(
+    'public.ingest_calcom_booking_event(text,text,text,text,text,timestamptz,text,text,bigint,bigint,text,integer,text,text,integer,text,text,text,timestamptz,timestamptz,boolean,text,text,text)'
+  ) is not null then
+    raise exception 'The superseded booking-ledger RPC overload still exists.';
   end if;
 end;
 $test$;
@@ -299,6 +307,397 @@ begin
     ) <> 'immutable_identity_mismatch'
     or (select count(*) from public.booking_records) <> 1 then
     raise exception 'An immutable identity mismatch bypassed manual review.';
+  end if;
+end;
+$test$;
+
+-- Native payload omissions must preserve identity, ordering, and idempotency.
+-- Cal may omit iCalUID on a reschedule and may omit both iCalSequence and
+-- iCalUID on a rejection. Only a rejection may use provider time without
+-- lowering the last trusted sequence, and an older rejection remains stale.
+do $test$
+declare
+  original_record_id uuid;
+  observed_record_id uuid;
+  observed_outcome text;
+begin
+  select result.booking_record_id, result.outcome
+  into original_record_id, observed_outcome
+  from pg_temp.ingest_booking(
+    p_digest => repeat('2', 64),
+    p_trigger => 'BOOKING_CREATED',
+    p_event_at => timestamptz '2026-09-09 19:00:00+00',
+    p_uid => 'booking-native-original',
+    p_booking_id => 7101,
+    p_event_type_id => 9101,
+    p_ical_uid => 'booking-native-series@example.invalid',
+    p_ical_sequence => 4,
+    p_booking_status => 'confirmed',
+    p_cal_status => 'ACCEPTED'
+  ) as result;
+
+  if original_record_id is null or observed_outcome <> 'applied' then
+    raise exception 'The native-payload baseline booking was not applied.';
+  end if;
+
+  select result.booking_record_id, result.outcome
+  into observed_record_id, observed_outcome
+  from pg_temp.ingest_booking(
+    p_digest => repeat('3', 64),
+    p_trigger => 'BOOKING_RESCHEDULED',
+    p_event_at => timestamptz '2026-09-09 19:01:00+00',
+    p_uid => 'booking-native-rescheduled',
+    p_previous_uid => 'booking-native-original',
+    p_booking_id => 7102,
+    p_event_type_id => 9101,
+    p_ical_uid => null,
+    p_ical_sequence => 5,
+    p_start_at => timestamptz '2026-10-01 20:00:00+00',
+    p_end_at => timestamptz '2026-10-01 21:00:00+00',
+    p_booking_status => 'confirmed',
+    p_cal_status => 'ACCEPTED'
+  ) as result;
+
+  if observed_record_id is distinct from original_record_id
+    or observed_outcome <> 'applied'
+    or not exists (
+      select 1
+      from public.booking_records
+      where id = original_record_id
+        and current_cal_booking_uid = 'booking-native-rescheduled'
+        and cal_ical_uid = 'booking-native-series@example.invalid'
+        and cal_ical_sequence = 5
+        and details_ical_sequence = 5
+        and booking_state_ical_sequence = 5
+    )
+    or (
+      select count(*)
+      from public.calcom_booking_aliases
+      where booking_record_id = original_record_id
+        and (
+          (
+            cal_booking_uid = 'booking-native-original'
+            and cal_booking_id = 7101
+          )
+          or (
+            cal_booking_uid = 'booking-native-rescheduled'
+            and cal_booking_id = 7102
+          )
+        )
+    ) <> 2 then
+    raise exception 'A native reschedule omission lost identity or ordering.';
+  end if;
+
+  -- Exact replay keeps the first receipt and does not add evidence rows.
+  select result.booking_record_id, result.outcome
+  into observed_record_id, observed_outcome
+  from pg_temp.ingest_booking(
+    p_digest => repeat('3', 64),
+    p_trigger => 'BOOKING_RESCHEDULED',
+    p_event_at => timestamptz '2026-09-09 19:01:00+00',
+    p_uid => 'booking-native-rescheduled',
+    p_previous_uid => 'booking-native-original',
+    p_booking_id => 7102,
+    p_event_type_id => 9101,
+    p_ical_uid => null,
+    p_ical_sequence => 5,
+    p_start_at => timestamptz '2026-10-01 20:00:00+00',
+    p_end_at => timestamptz '2026-10-01 21:00:00+00',
+    p_booking_status => 'confirmed',
+    p_cal_status => 'ACCEPTED'
+  ) as result;
+
+  if observed_record_id is distinct from original_record_id
+    or observed_outcome <> 'applied'
+    or (
+      select count(*)
+      from public.calcom_webhook_events
+      where deployment_target = 'preview'
+        and payload_digest = repeat('3', 64)
+    ) <> 1 then
+    raise exception 'A native omission replay was not idempotent.';
+  end if;
+
+  -- A reschedule without a provider sequence is outside the accepted boundary.
+  begin
+    perform result.booking_record_id
+    from pg_temp.ingest_booking(
+      p_digest => repeat('8', 64),
+      p_trigger => 'BOOKING_RESCHEDULED',
+      p_event_at => timestamptz '2026-09-09 19:01:30+00',
+      p_uid => 'booking-native-rescheduled-again',
+      p_previous_uid => 'booking-native-rescheduled',
+      p_booking_id => 7103,
+      p_event_type_id => 9101,
+      p_ical_uid => null,
+      p_ical_sequence => null,
+      p_start_at => timestamptz '2026-10-01 22:00:00+00',
+      p_end_at => timestamptz '2026-10-01 23:00:00+00',
+      p_booking_status => 'confirmed',
+      p_cal_status => 'ACCEPTED'
+    ) as result;
+
+    raise exception 'A reschedule without iCalSequence was accepted.';
+  exception
+    when others then
+      if sqlerrm <> 'Invalid Cal.com booking event boundary.' then
+        raise;
+      end if;
+  end;
+
+  -- An older rejection with no provider sequence cannot override newer state.
+  select result.booking_record_id, result.outcome
+  into observed_record_id, observed_outcome
+  from pg_temp.ingest_booking(
+    p_digest => repeat('4', 64),
+    p_trigger => 'BOOKING_REJECTED',
+    p_event_at => timestamptz '2026-09-09 18:59:00+00',
+    p_uid => 'booking-native-rescheduled',
+    p_booking_id => 7102,
+    p_event_type_id => 9101,
+    p_ical_uid => null,
+    p_ical_sequence => null,
+    p_start_at => timestamptz '2026-10-01 20:00:00+00',
+    p_end_at => timestamptz '2026-10-01 21:00:00+00',
+    p_booking_status => 'rejected',
+    p_cal_status => 'REJECTED'
+  ) as result;
+
+  if observed_record_id is distinct from original_record_id
+    or observed_outcome <> 'ignored_stale'
+    or (
+      select booking_status
+      from public.booking_records
+      where id = original_record_id
+    ) <> 'confirmed' then
+    raise exception 'An older inferred rejection overrode newer booking state.';
+  end if;
+
+  -- A newer rejection applies but retains the trusted explicit sequence.
+  select result.booking_record_id, result.outcome
+  into observed_record_id, observed_outcome
+  from pg_temp.ingest_booking(
+    p_digest => repeat('5', 64),
+    p_trigger => 'BOOKING_REJECTED',
+    p_event_at => timestamptz '2026-09-09 19:02:00+00',
+    p_uid => 'booking-native-rescheduled',
+    p_booking_id => 7102,
+    p_event_type_id => 9101,
+    p_ical_uid => null,
+    p_ical_sequence => null,
+    p_start_at => timestamptz '2026-10-01 20:00:00+00',
+    p_end_at => timestamptz '2026-10-01 21:00:00+00',
+    p_booking_status => 'rejected',
+    p_cal_status => 'REJECTED'
+  ) as result;
+
+  if observed_record_id is distinct from original_record_id
+    or observed_outcome <> 'applied'
+    or not exists (
+      select 1
+      from public.booking_records
+      where id = original_record_id
+        and booking_status = 'rejected'
+        and cal_ical_sequence = 5
+        and booking_state_ical_sequence = 5
+    ) then
+    raise exception 'A newer inferred rejection was not safely applied.';
+  end if;
+end;
+$test$;
+
+-- A null cancellation is not itself proof that Cal scheduling was free. It may
+-- mutate only a booking with earlier accepted non-cancellation evidence; a
+-- first-seen null cancellation is retained for review without creating a row.
+do $test$
+declare
+  free_record_id uuid;
+  observed_record_id uuid;
+  observed_outcome text;
+begin
+  select result.booking_record_id, result.outcome
+  into observed_record_id, observed_outcome
+  from pg_temp.ingest_booking(
+    p_digest => repeat('6', 64),
+    p_trigger => 'BOOKING_CANCELLED',
+    p_event_at => timestamptz '2026-09-09 20:00:00+00',
+    p_uid => 'booking-null-cancellation-unverified',
+    p_booking_id => 7201,
+    p_event_type_id => 9201,
+    p_ical_uid => 'booking-null-unverified@example.invalid',
+    p_ical_sequence => 1,
+    p_booking_status => 'cancelled',
+    p_cal_status => 'CANCELLED',
+    p_provider_price_was_null => true
+  ) as result;
+
+  if observed_record_id is not null
+    or observed_outcome <> 'manual_review'
+    or exists (
+      select 1
+      from public.booking_records
+      where deployment_target = 'preview'
+        and current_cal_booking_uid = 'booking-null-cancellation-unverified'
+    )
+    or not exists (
+      select 1
+      from public.calcom_webhook_events
+      where deployment_target = 'preview'
+        and payload_digest = repeat('6', 64)
+        and booking_record_id is null
+        and processing_outcome = 'manual_review'
+        and review_reason = 'unverified_null_price_cancellation'
+    ) then
+    raise exception 'A first-seen null cancellation bypassed manual review.';
+  end if;
+
+  select result.booking_record_id, result.outcome
+  into free_record_id, observed_outcome
+  from pg_temp.ingest_booking(
+    p_digest => repeat('7', 64),
+    p_trigger => 'BOOKING_CREATED',
+    p_event_at => timestamptz '2026-09-09 20:10:00+00',
+    p_uid => 'booking-null-cancellation-verified',
+    p_booking_id => 7301,
+    p_event_type_id => 9301,
+    p_ical_uid => 'booking-null-verified@example.invalid',
+    p_ical_sequence => 0,
+    p_booking_status => 'confirmed',
+    p_cal_status => 'ACCEPTED'
+  ) as result;
+
+  if free_record_id is null or observed_outcome <> 'applied' then
+    raise exception 'The verified free-booking baseline was not applied.';
+  end if;
+
+  select result.booking_record_id, result.outcome
+  into observed_record_id, observed_outcome
+  from pg_temp.ingest_booking(
+    p_digest => repeat('9', 64),
+    p_trigger => 'BOOKING_CANCELLED',
+    p_event_at => timestamptz '2026-09-09 20:11:00+00',
+    p_uid => 'booking-null-cancellation-verified',
+    p_booking_id => 7301,
+    p_event_type_id => 9301,
+    p_ical_uid => 'booking-null-verified@example.invalid',
+    p_ical_sequence => 1,
+    p_booking_status => 'cancelled',
+    p_cal_status => 'CANCELLED',
+    p_provider_price_was_null => true
+  ) as result;
+
+  if observed_record_id is distinct from free_record_id
+    or observed_outcome <> 'applied'
+    or not exists (
+      select 1
+      from public.booking_records
+      where id = free_record_id
+        and booking_status = 'cancelled'
+    ) then
+    raise exception 'A null cancellation with prior free evidence was rejected.';
+  end if;
+end;
+$test$;
+
+-- If rejection arrives first without iCal identity, an older Created delivery
+-- may backfill only the missing stable iCal UID. It must not reopen the rejected
+-- booking or replace any non-null identity.
+do $test$
+declare
+  rejected_record_id uuid;
+  observed_record_id uuid;
+  observed_outcome text;
+begin
+  select result.booking_record_id, result.outcome
+  into rejected_record_id, observed_outcome
+  from pg_temp.ingest_booking(
+    p_digest => repeat('0', 64),
+    p_trigger => 'BOOKING_REJECTED',
+    p_event_at => timestamptz '2026-09-09 21:01:00+00',
+    p_uid => 'booking-rejection-first',
+    p_booking_id => 7401,
+    p_event_type_id => 9401,
+    p_ical_uid => null,
+    p_ical_sequence => null,
+    p_booking_status => 'rejected',
+    p_cal_status => 'REJECTED'
+  ) as result;
+
+  if rejected_record_id is null
+    or observed_outcome <> 'applied'
+    or not exists (
+      select 1
+      from public.booking_records
+      where id = rejected_record_id
+        and cal_ical_uid is null
+        and booking_status = 'rejected'
+    ) then
+    raise exception 'The rejection-first baseline was not applied.';
+  end if;
+
+  select result.booking_record_id, result.outcome
+  into observed_record_id, observed_outcome
+  from pg_temp.ingest_booking(
+    p_digest => repeat('0', 63) || '1',
+    p_trigger => 'BOOKING_CREATED',
+    p_event_at => timestamptz '2026-09-09 21:00:00+00',
+    p_uid => 'booking-rejection-first',
+    p_booking_id => 7401,
+    p_event_type_id => 9401,
+    p_ical_uid => 'booking-rejection-first@example.invalid',
+    p_ical_sequence => 0,
+    p_booking_status => 'confirmed',
+    p_cal_status => 'ACCEPTED'
+  ) as result;
+
+  if observed_record_id is distinct from rejected_record_id
+    or observed_outcome <> 'applied'
+    or not exists (
+      select 1
+      from public.booking_records
+      where id = rejected_record_id
+        and cal_ical_uid = 'booking-rejection-first@example.invalid'
+        and booking_status = 'rejected'
+        and details_event_at = timestamptz '2026-09-09 21:01:00+00'
+        and booking_state_event_at = timestamptz '2026-09-09 21:01:00+00'
+  ) then
+    raise exception 'An inverse delivery did not perform a null-only iCal UID backfill.';
+  end if;
+
+  select result.booking_record_id, result.outcome
+  into observed_record_id, observed_outcome
+  from pg_temp.ingest_booking(
+    p_digest => repeat('0', 63) || '2',
+    p_trigger => 'BOOKING_CREATED',
+    p_event_at => timestamptz '2026-09-09 21:02:00+00',
+    p_uid => 'booking-rejection-first',
+    p_booking_id => 7401,
+    p_event_type_id => 9401,
+    p_ical_uid => 'conflicting-series@example.invalid',
+    p_ical_sequence => 1,
+    p_booking_status => 'confirmed',
+    p_cal_status => 'ACCEPTED'
+  ) as result;
+
+  if observed_record_id is distinct from rejected_record_id
+    or observed_outcome <> 'manual_review'
+    or not exists (
+      select 1
+      from public.booking_records
+      where id = rejected_record_id
+        and cal_ical_uid = 'booking-rejection-first@example.invalid'
+        and booking_status = 'rejected'
+    )
+    or not exists (
+      select 1
+      from public.calcom_webhook_events
+      where deployment_target = 'preview'
+        and payload_digest = repeat('0', 63) || '2'
+        and booking_record_id = rejected_record_id
+        and processing_outcome = 'manual_review'
+        and review_reason = 'immutable_identity_mismatch'
+    ) then
+    raise exception 'A non-null iCal UID was overwritten after inverse delivery.';
   end if;
 end;
 $test$;

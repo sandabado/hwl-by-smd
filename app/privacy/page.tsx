@@ -39,7 +39,7 @@ const sections: LegalSection[] = [
   {
     title: "Service providers",
     body: [
-      "Supabase supports account authentication, application data, booking and inquiry records, and protected LIFT media. Stripe processes the one-time LIFT purchase and any payment Shannon arranges after a completed appointment. Cal.com processes appointment scheduling details and its booking messages. Resend delivers transactional account, purchase, inquiry, and other service email sent directly by this site. The hosting provider processes ordinary technical requests needed to serve and secure the site.",
+      "Supabase supports account authentication, application data, booking and inquiry records, and protected LIFT media. Stripe processes the one-time LIFT purchase, sends configured purchase receipts, and processes any payment Shannon arranges after a completed appointment. Cal.com processes appointment scheduling details and its booking messages. Resend transports transactional account email sent through Supabase and inquiry or other service email sent directly by this site. The hosting provider processes ordinary technical requests needed to serve and secure the site.",
       "Website inquiry content is stored in the restricted private inbox before any optional email alert is attempted. The Resend alert contains an inquiry identifier, source, and protected inbox link—not the visitor’s submitted contact details or message.",
       "Each provider processes information under its own terms and privacy practices. HWL by SMD limits provider use to the functions needed to operate the current service.",
     ],
@@ -87,7 +87,7 @@ export default function Page() {
   return (
     <LegalPage
       eyebrow="Privacy"
-      effectiveDate="September 11, 2026"
+      effectiveDate="September 12, 2026"
       introduction="How account, purchase, booking, inquiry, and support information is handled."
       sections={sections}
       title="Privacy with intention."

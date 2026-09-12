@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** September 11, 2026
+**Updated:** September 12, 2026
 
 **Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
 Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
@@ -16,14 +16,41 @@ status for the current release decision.
 
 | Surface              | Current authority                                                                                                                                           | Status                                                                                                                                                                                                                 |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Local candidate      | `checkpoint/platform-overhaul-2026-08-20` at committed base `d1f3f49`, plus the uncommitted September 10–11 UX and launch-truth pass                        | Full lint, TypeScript, SEO, repository boundary suites, Next.js 16.3.4 Webpack build, and production dependency audit pass. The working tree is intentionally dirty and cannot be tied to an immutable deployment yet. |
-| Preview              | `preview.hwlbysmd.com` remains historical deployment evidence until the current working tree is committed and deployed by fresh owner approval              | Do not treat the mutable alias or September 9 sandbox purchase as proof of the new UX candidate.                                                                                                                       |
-| Production           | Last independently recorded authority is `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i`, commit `6a260bcfa7c752562be264d1a077013fc8ff9f4d`, with commerce closed        | Production does not contain the current local UX pass. No alias change or Production mutation is authorized by this packet.                                                                                            |
-| Booking              | All 11 Cal.com services exposed live dates and times. One zero-payment QA request was created and later appeared Rejected, leaving no active QA appointment | Confirm → reschedule → cancel and both mailbox receipts remain unproved. The temporary organizer email `wholebodymastery@pm.me` is an owner-accepted follow-up; the target remains `shannon@hwlbysmd.com`.             |
-| Booking history      | Cal.com has no configured webhook and HWL booking-ledger readiness remains disabled                                                                         | My Account/Admin cannot promise synchronized lifecycle history yet.                                                                                                                                                    |
-| LIFT commerce        | One $11.11 video + PDF product, one cart shelf, strict checkout/webhook code, and prior sandbox fulfillment evidence exist                                  | The exact current candidate still needs its own approved sandbox purchase and entitlement canary. Production sales remain closed.                                                                                      |
-| Contact and retreats | The current local candidate uses a direct email path while durable inquiry collection is closed                                                             | Verify mail links on Preview; do not advertise the database form until its full path is proven.                                                                                                                        |
-| Release authority    | No current-candidate commit, branch push, Preview deployment, Production promotion, or `main` update has been approved                                      | Next release step is a reviewed checkpoint commit and exact-SHA Preview, each under fresh owner approval.                                                                                                              |
+| Local candidate      | Clean `checkpoint/platform-overhaul-2026-08-20` at exact SHA `45b864c862df6ef43083c3d12f2b59785283d88e`, synchronized with its remote before this dated documentation correction | All 520 repository cases, lint, TypeScript, SEO for 21 pages, `git diff --check`, and the Next.js 16.3.4 Webpack production build pass. The documentation and CI corrections made after that verification are local until separately approved. |
+| Preview              | READY deployment `dpl_DhAiuL4EMEZ3K3Rc7UK7Ctjt5Jim`, exact SHA `45b864c862df6ef43083c3d12f2b59785283d88e`, assigned to protected `preview.hwlbysmd.com` | The homepage and booking route render, all eleven services remain discoverable, and an Intuitive Tarot calendar currently exposes live times. This exact SHA still lacks a fresh end-to-end sandbox receipt and fulfillment canary. |
+| Production           | Public aliases remain on independently recorded deployment `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i`, commit `6a260bcfa7c752562be264d1a077013fc8ff9f4d`, with commerce closed | No exact-`45b864c` Production deployment, alias reassignment, or sales opening is authorized. |
+| Booking              | All 11 Cal.com services expose live dates and times with manual confirmation and no Cal payment                                                             | Cal still shows one Primary and one Unverified account email. Complete the pending `shannon@hwlbysmd.com` verification before relying on the private admin API identity.                                               |
+| Booking history      | Cal.com still shows “Create your first webhook”; HWL booking-ledger readiness remains disabled                                                               | Public scheduling works, but My Account/Admin cannot promise synchronized lifecycle history until the signed webhook and request → confirm → reschedule → cancel canary pass.                                 |
+| LIFT commerce        | One active $11.11 video + PDF product, strict checkout/webhook code, deterministic Stripe receipts, private media, and prior sandbox fulfillment evidence exist | The exact current candidate still needs a fresh approved sandbox purchase; Production still needs the owner-approved live $11.11 canary. Public sales remain closed.                                                  |
+| Contact and retreats | Preview renders the durable inquiry path; recent Resend records show inquiry alerts to `shannon@hwlbysmd.com` as Delivered                                   | Human inbox handling remains unproved. Public Production inquiry collection stays closed until a monitored destination and end-to-end receipt are verified.                                                           |
+| Release authority    | The owner approved only exact SHA `45b864c862df6ef43083c3d12f2b59785283d88e` for the checkpoint branch and Vercel Preview                                   | `main`, Production, public domains, provider roles, and open sales remain outside the current authorization.                                                                                                          |
+
+## September 12 Exact-SHA Preview and Launch-Gate Recheck
+
+- GitHub and the clean local checkpoint matched exact SHA
+  `45b864c862df6ef43083c3d12f2b59785283d88e`; `main` remained unchanged.
+  Vercel independently reports that SHA as the latest READY branch Preview and
+  assigns `preview.hwlbysmd.com` to it.
+- Fresh local verification passed all 520 repository cases, lint, TypeScript,
+  SEO for 21 pages, and the 63-route Next.js 16.3.4 Webpack production build.
+  The first parallel TypeScript invocation raced the build-generated `.next`
+  types; the required sequential post-build invocation passed cleanly.
+- The protected Preview homepage exposes LIFT in both the navigation and hero.
+  Its booking route renders the Cal.com month selector and live Intuitive Tarot
+  times in the visitor's timezone without taking payment.
+- Cal.com still has zero webhooks. Its account UI still presents one Primary
+  email and one Unverified email, so the pending Shannon identity change is not
+  complete. Booking can operate publicly, but Den/Admin lifecycle history is
+  not yet connected.
+- Production Supabase still shows both approved administrator identities as
+  unconfirmed and never signed in. Their profiles remain ordinary members.
+  Resend shows Shannon's latest account confirmation Delivered and Ghosthand's
+  confirmation Bounced; `ghosthand.studio` requires working human mail routing
+  before it can be the recovery destination or initial super administrator.
+- The next controlled sequence is: human email confirmations; audited role
+  bootstrap; signed Cal webhook and lifecycle canary; exact-SHA alias-free,
+  sales-closed Production deployment; one owner-approved live $11.11 purchase;
+  and only then a separately approved public alias and sales opening.
 
 ## September 10 Booking, Brand, and Email Polish — Local Working Tree
 

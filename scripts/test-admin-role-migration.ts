@@ -310,6 +310,19 @@ test("operator documentation keeps bootstrap manual, role-aware, and unprovision
     /hwl\.admin_change_reference.*?REPLACE_WITH_NONSECRET_APPROVAL_REFERENCE/
   )
   assert.match(inquiryOperations, /for update of profile, auth_user/)
+  const bootstrapAudit = inquiryOperations.indexOf(
+    "from public.admin_role_change_audit"
+  )
+  const bootstrapRollback = inquiryOperations.indexOf(
+    "rollback;",
+    bootstrapAudit
+  )
+  assert.ok(bootstrapAudit >= 0)
+  assert.ok(bootstrapRollback > bootstrapAudit)
+  assert.match(
+    inquiryOperations,
+    /Before `ROLLBACK`.*?audit query each to return exactly one row.*?After `ROLLBACK`.*?neither the role change nor its rehearsal audit row persisted/
+  )
   assert.match(inquiryOperations, /signedInSupabase\.rpc\("change_admin_role"/)
   assert.match(
     inquiryOperations,

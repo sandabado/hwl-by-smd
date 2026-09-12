@@ -60,6 +60,9 @@ jobs:
       - name: Test authentication feedback and redirect boundaries
         run: npm run test:auth
 
+      - name: Test transactional email branding and contracts
+        run: npm run test:email
+
       - name: Test admin navigation, client scope, and legacy-route truthfulness
         run: npm run test:admin
 

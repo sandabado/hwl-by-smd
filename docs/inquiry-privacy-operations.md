@@ -213,16 +213,35 @@ sequence:
        'REPLACE_WITH_EXACT_CURRENT_ROLE'
    returning profile.id, profile.email, profile.admin_role, profile.is_admin;
 
+   select
+     target_user_id,
+     actor_user_id,
+     operation,
+     change_reference,
+     previous_role,
+     next_role,
+     previous_is_admin,
+     next_is_admin
+   from public.admin_role_change_audit
+   where target_user_id = 'REPLACE_WITH_VERIFIED_AUTH_USER_UUID'::uuid
+     and change_reference = 'REPLACE_WITH_NONSECRET_APPROVAL_REFERENCE'
+     and operation = 'update'
+     and next_role = 'super_admin'
+     and next_is_admin is true;
+
    rollback;
    ```
 
-6. Require both the locked identity query and rehearsal update to return exactly
-   one row with
-   `admin_role='super_admin'` and `is_admin=true`. Verify a corresponding
-   `admin_role_change_audit` row carries the same target UUID and approval
-   reference. Repeat with `COMMIT` only after the owner reviews the evidence and
-   explicitly authorizes this bootstrap. If any predicate returns zero rows or
-   the evidence is ambiguous, stop.
+6. Before `ROLLBACK`, require the locked identity query, rehearsal update, and
+   audit query each to return exactly one row. The updated profile must have
+   `admin_role='super_admin'` and `is_admin=true`; the transactional audit row
+   must carry the same target UUID and approval reference. After `ROLLBACK`,
+   re-query the profile and audit table and verify that neither the role change
+   nor its rehearsal audit row persisted. Repeat with a fresh approval reference
+   and `COMMIT` only after the owner reviews the rehearsal evidence and
+   explicitly authorizes the committed bootstrap. Then verify the committed
+   profile and its durable audit row again. If any predicate returns zero rows
+   or the evidence is ambiguous, stop.
 7. The current candidate intentionally has no generic role editor. Through a
    separately reviewed invocation using that confirmed super administrator's
    Supabase session—not an owner SQL editor or service-role request—call the

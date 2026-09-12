@@ -120,7 +120,7 @@ export default async function AdminClientsPage() {
               note={
                 directory.bookingHistoryAvailable
                   ? "Cal.com ledger records"
-                  : "Booking ledger unavailable"
+                  : "Cal.com sync inactive"
               }
               tone="#8b6c79"
               value={

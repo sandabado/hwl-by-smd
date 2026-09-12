@@ -8,6 +8,7 @@ import {
   buildAdminClientTimeline,
   getAdminClientDetail,
   getAdminClientDirectory,
+  isAdminClientBookingHistoryReady,
 } from "../lib/admin/client-directory.ts"
 
 const CLIENT_ID = "4f3d86c6-4da6-4ef6-8929-d66d11a9443c"
@@ -108,6 +109,7 @@ function dependencies(
   overrides: Partial<AdminClientDirectoryDependencies> = {}
 ): AdminClientDirectoryDependencies {
   return {
+    bookingHistoryReady: () => true,
     readRows: async () => ({ ...rows, status: "ready" }),
     requireAdmin: async () => ({
       email: "admin@ghosthand.studio",
@@ -175,6 +177,69 @@ test("runtime relationship history is scoped to the signed-in practitioner", () 
   )
 })
 
+test("Cal booking history requires the exact launch gate", () => {
+  assert.equal(
+    isAdminClientBookingHistoryReady({
+      CALCOM_BOOKING_LEDGER_READY: "true",
+    }),
+    true
+  )
+  for (const value of [undefined, "false", "TRUE", "1"]) {
+    assert.equal(
+      isAdminClientBookingHistoryReady({
+        CALCOM_BOOKING_LEDGER_READY: value,
+      }),
+      false
+    )
+  }
+})
+
+test("closed Cal ledger hides successful booking reads without hiding client commerce", async () => {
+  const closedDependencies = dependencies({
+    bookingHistoryReady: () => false,
+  })
+
+  const directory = await getAdminClientDirectory(closedDependencies)
+  assert.equal(directory.status, "ready")
+  if (directory.status !== "ready") return
+  assert.equal(directory.bookingHistoryAvailable, false)
+  assert.equal(directory.clients[0]?.bookingCount, null)
+  assert.equal(directory.clients[0]?.purchaseCount, 1)
+  assert.equal(directory.clients[0]?.checkoutCount, 1)
+
+  const detail = await getAdminClientDetail(CLIENT_ID, closedDependencies)
+  assert.equal(detail.status, "ready")
+  if (detail.status !== "ready") return
+  assert.equal(detail.detail.bookings, null)
+  assert.equal(detail.detail.purchases.length, 1)
+  assert.equal(detail.detail.checkouts.length, 1)
+  assert.equal(
+    buildAdminClientTimeline(detail.detail).some(
+      (event) => event.kind === "booking"
+    ),
+    false
+  )
+})
+
+test("open Cal ledger preserves linked booking counts, detail, and timeline", async () => {
+  const directory = await getAdminClientDirectory(dependencies())
+  assert.equal(directory.status, "ready")
+  if (directory.status !== "ready") return
+  assert.equal(directory.bookingHistoryAvailable, true)
+  assert.equal(directory.clients[0]?.bookingCount, 1)
+
+  const detail = await getAdminClientDetail(CLIENT_ID, dependencies())
+  assert.equal(detail.status, "ready")
+  if (detail.status !== "ready") return
+  assert.equal(detail.detail.bookings?.[0]?.id, "booking-record")
+  assert.equal(
+    buildAdminClientTimeline(detail.detail).some(
+      (event) => event.kind === "booking"
+    ),
+    true
+  )
+})
+
 test("directory exposes a narrow aggregate DTO and honest optional availability", async () => {
   let readOptions: unknown
   const result = await getAdminClientDirectory(
@@ -191,6 +256,7 @@ test("directory exposes a narrow aggregate DTO and honest optional availability"
   )
 
   assert.deepEqual(readOptions, {
+    bookingHistoryReady: true,
     clientId: null,
     practitionerId: PRACTITIONER_ID,
   })
@@ -228,6 +294,7 @@ test("client detail keeps only linked histories and strips provider identifiers"
   )
 
   assert.deepEqual(readOptions, {
+    bookingHistoryReady: true,
     clientId: CLIENT_ID,
     practitionerId: PRACTITIONER_ID,
   })
@@ -249,6 +316,7 @@ test("client detail keeps only linked histories and strips provider identifiers"
     "startAt",
     "timeZone",
   ])
+  assert.equal(result.detail.client.bookingCount, 1)
   assert.deepEqual(result.detail.progress, {
     completedCount: 1,
     lastActivityAt: "2026-09-08T21:00:00.000Z",

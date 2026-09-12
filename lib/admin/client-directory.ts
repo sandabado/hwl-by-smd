@@ -68,11 +68,13 @@ type AdminClientRowsResult =
   | ({ status: "ready" } & AdminClientRawRows)
 
 type AdminClientReadOptions = {
+  bookingHistoryReady: boolean
   clientId: string | null
   practitionerId: string
 }
 
 export type AdminClientDirectoryDependencies = {
+  bookingHistoryReady: () => boolean
   readRows: (options: AdminClientReadOptions) => Promise<AdminClientRowsResult>
   requireAdmin: typeof requireAdmin
 }
@@ -237,7 +239,14 @@ function getCommerceScope(): CommerceScope | null {
     : null
 }
 
+export function isAdminClientBookingHistoryReady(
+  env: Readonly<Record<string, string | undefined>> = process.env
+) {
+  return env.CALCOM_BOOKING_LEDGER_READY === "true"
+}
+
 async function readRows({
+  bookingHistoryReady,
   clientId,
   practitionerId,
 }: AdminClientReadOptions): Promise<AdminClientRowsResult> {
@@ -280,7 +289,9 @@ async function readRows({
 
   if (userIds.length === 0) {
     return {
-      bookings: { rows: [], status: "ready" },
+      bookings: bookingHistoryReady
+        ? { rows: [], status: "ready" }
+        : { status: "unavailable" },
       checkouts: [],
       conversations: { rows: [], status: "ready" },
       profiles,
@@ -290,6 +301,18 @@ async function readRows({
       status: "ready",
     }
   }
+
+  const bookingQuery = bookingHistoryReady
+    ? admin
+        .from("booking_records")
+        .select(
+          "id, user_id, service_title, attendee_timezone, start_at, end_at, booking_status"
+        )
+        .in("user_id", userIds)
+        .eq("deployment_target", scope.deploymentTarget)
+        .eq("calcom_username", CALCOM_USERNAME)
+        .order("start_at", { ascending: false })
+    : Promise.resolve(null)
 
   const [
     purchaseResult,
@@ -316,15 +339,7 @@ async function readRows({
       .eq("stripe_account_id", scope.accountId)
       .eq("stripe_livemode", scope.livemode)
       .order("created_at", { ascending: false }),
-    admin
-      .from("booking_records")
-      .select(
-        "id, user_id, service_title, attendee_timezone, start_at, end_at, booking_status"
-      )
-      .in("user_id", userIds)
-      .eq("deployment_target", scope.deploymentTarget)
-      .eq("calcom_username", CALCOM_USERNAME)
-      .order("start_at", { ascending: false }),
+    bookingQuery,
     admin
       .from("relationships")
       .select("id, member_id")
@@ -350,12 +365,14 @@ async function readRows({
     return { status: "unavailable" }
   }
 
-  const bookings: OptionalRows = bookingResult.error
+  const bookings: OptionalRows = !bookingResult
+    ? { status: "unavailable" }
+    : bookingResult.error
     ? { status: "unavailable" }
     : Array.isArray(bookingResult.data)
       ? { rows: bookingResult.data, status: "ready" }
       : { status: "unavailable" }
-  if (bookingResult.error && !isSchemaUnavailable(bookingResult.error)) {
+  if (bookingResult?.error && !isSchemaUnavailable(bookingResult.error)) {
     console.error("[admin/clients] Booking history read failed.", {
       code: bookingResult.error.code,
     })
@@ -424,6 +441,7 @@ async function readRows({
 }
 
 const runtimeDependencies: AdminClientDirectoryDependencies = {
+  bookingHistoryReady: isAdminClientBookingHistoryReady,
   readRows,
   requireAdmin,
 }
@@ -831,12 +849,19 @@ export async function getAdminClientDirectory(
     return { status: "local_preview" }
   }
 
+  const bookingHistoryReady = dependencies.bookingHistoryReady()
   const result = await dependencies.readRows({
+    bookingHistoryReady,
     clientId: null,
     practitionerId: access.userId,
   })
   if (result.status !== "ready") return result
-  const data = assemble(result)
+  const data = assemble({
+    ...result,
+    bookings: bookingHistoryReady
+      ? result.bookings
+      : { status: "unavailable" },
+  })
   if (!data) return { status: "unavailable" }
 
   return {
@@ -858,12 +883,19 @@ export async function getAdminClientDetail(
     return { status: "local_preview" }
   }
 
+  const bookingHistoryReady = dependencies.bookingHistoryReady()
   const result = await dependencies.readRows({
+    bookingHistoryReady,
     clientId,
     practitionerId: access.userId,
   })
   if (result.status !== "ready") return result
-  const data = assemble(result)
+  const data = assemble({
+    ...result,
+    bookings: bookingHistoryReady
+      ? result.bookings
+      : { status: "unavailable" },
+  })
   if (!data) return { status: "unavailable" }
   const profile = data.profiles[0]
   if (!profile) return { status: "not_found" }

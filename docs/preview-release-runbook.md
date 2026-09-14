@@ -11,7 +11,48 @@ apex-to-www redirect. The custom Preview is now configured, TLS-valid, assigned
 only to the checkpoint branch, and protected by Vercel SSO. Preserve existing
 mail-forwarding records and the exact verified Resend sending records.
 
-## September 13 Current Authority Snapshot
+## September 14 Current Authority Snapshot
+
+- The synchronized checkpoint branch and protected Preview use exact commit
+  `f12656c5238667d6df71d8d123070a85539ea633`. Vercel deployment
+  `dpl_BUrYS7iK2XfkUdAqdMhaGEaTssZQ` is READY/Preview and owns
+  `preview.hwlbysmd.com`; GitHub Actions run `34851069600` passed. `main`, public
+  Production aliases, live Stripe, and sales were not changed.
+- Exact Preview HTTP and browser postflight checks now pass: `/index` returns
+  exact
+  query-preserving `308` redirects to `/`; raw `/` HTML has the canonical empty
+  root and route-tree Flight segments; both the stable alias and immutable
+  deployment hydrate the home surface without console errors or horizontal
+  overflow. The September 13 React 418 hold is cleared only for this artifact.
+- Preview remains deliberately sales-closed. Its Stripe sandbox Product and
+  one-time $11.11 Price are active, the persistent Preview webhook subscribes
+  to the exact four required events, and private staging media remains present.
+  The latest completed sandbox purchase predates `f12656c`, so the current
+  artifact still needs an owner-approved purchase, signed webhook,
+  fulfillment/access, replay, refund, dispute, and recovery canary.
+- Public Cal booking exposes all 11 manual-confirmation services with Cal
+  payments disabled. Staging migrations 001–020 are present, but the exact
+  Preview has neither `CALCOM_API_KEY` nor `CALCOM_WEBHOOK_SECRET`, its Cal
+  ledger endpoint is disabled, the account still displays an Unverified email,
+  and Cal has no webhook. Do not claim synchronized booking history until the
+  signed request → confirmation → reschedule → cancellation lifecycle passes.
+- Inquiry collection renders open in Preview and historical database-first plus
+  Resend delivery evidence exists, but `f12656c` has no successful labeled
+  inquiry submission. The local Resend credential fails provider validation;
+  this does not prove the opaque deployed Preview credential is invalid.
+- Four configuration names have both branch and general Preview definitions:
+  `COMMERCE_SALES_READY`, `CONTACT_TO_EMAIL`, `LIFT_PDF_STORAGE_PATH`, and
+  `LIFT_VIDEO_STORAGE_PATH`. The branch values currently win; reconcile the
+  duplicates before deriving any Production configuration from Preview.
+- A local, uncommitted hosted-root verifier repair now understands the pinned
+  React Flight stream's coalesced, split, hint, and byte-length-framed rows. Its
+  41 targeted cases, the 82-case Preview-release suite, TypeScript, lint,
+  formatting, and captured exact-Preview HTML audit pass. It has not been
+  committed, pushed, or deployed and therefore needs fresh scope approval.
+
+## September 13 Historical Authority Snapshot
+
+This section is retained as dated evidence. It is not current release authority.
 
 - `preview.hwlbysmd.com` remains protected and resolves to READY/STAGED
   deployment `dpl_3eUKiEGs53CSw893CZmrN1McA2PU`, exact checkpoint
@@ -188,9 +229,11 @@ Production, and do not reuse local webhook, cron, or inquiry secrets.
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — modern staging publishable key
 - `SUPABASE_SERVICE_ROLE_KEY` — modern staging server secret
 
-The service secret must remain server-only. Migrations 012–014 are
-owner-approved, ledger-applied in order, and fingerprint-verified; preserve
-that ledger and do not reapply or repair it to prepare a later Preview.
+The service secret must remain server-only. The staging ledger currently lists
+migrations 001–020. Migrations 012–014 are owner-approved, ledger-applied in
+order, and fingerprint-verified; the presence of 015–020 in the ledger is not by
+itself fingerprint proof. Preserve the ledger and do not reapply or repair it to
+prepare a later Preview.
 
 Supabase Auth must separately use production-capable custom SMTP from the
 verified HWL sender domain. The project URL allowlist must include the exact
@@ -329,10 +372,14 @@ mutable alias for immutable deployment identity.
 
 ## Hosted Preview verification order
 
-The current checkpoint has established the ledger/assets, custom hostname,
-complete branch configuration, protected READY deployment, and open-sandbox
-environment shape represented by the setup phase below. Preserve and reverify
-them after any new checkpoint; signed/provider/human E2E remains pending.
+Exact `f12656c` has immutable Preview identity plus closed-state, raw-root, and
+fresh-browser evidence. Stripe and Preview inquiry provider proof belongs to
+historical `d28be30`; a separate isolated Production inquiry canary is also
+recorded in the launch packet. Fresh `f12656c` sandbox and inquiry canaries plus
+the signed Cal lifecycle remain pending. Four duplicate Preview variable
+definitions must be reconciled before Preview configuration can inform
+Production. Preserve and reverify every candidate-scoped result after a new
+checkpoint.
 
 1. Obtain owner approval for migrations 012–014, the branch-scoped Preview
    variables, custom hostname, a dedicated Vercel automation-bypass secret,

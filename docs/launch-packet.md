@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** September 13, 2026
+**Updated:** September 14, 2026
 
 **Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
 Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
@@ -9,10 +9,82 @@ custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
 
-## Current authority snapshot — read this first
+## Current authority snapshot — September 14
 
-All dated sections below remain evidence history. This table is the controlling
-status for the current release decision.
+- **Source and CI:** checkpoint commit
+  `f12656c5238667d6df71d8d123070a85539ea633` is cleanly synchronized with
+  `origin/checkpoint/platform-overhaul-2026-08-20`. GitHub Actions run
+  `34851069600` passed every lint, type, SEO, policy, dependency, and production
+  compile step. Local and remote `main` remain
+  `a6902607f42a3c66506758d4886fb4a2d61d99e2`.
+- **Exact Preview:** Vercel deployment
+  `dpl_BUrYS7iK2XfkUdAqdMhaGEaTssZQ` is READY, target Preview, and carries exact
+  Git metadata for `f12656c`. Both `preview.hwlbysmd.com` and the automatic
+  checkpoint-branch hostname resolve to that deployment. A second alias check
+  after the HTTP and browser canaries returned the same deployment.
+- **Hosted root and browser:** authenticated requests returned `200 text/html`
+  for `/`, exact `308 Location: /` for `/index`, and exact query preservation.
+  The captured HTML has canonical empty root and first-route Flight segments,
+  the home-only header and page markers, no breadcrumb or non-home effects, and
+  the inert hydration marker. Fresh browsers on both the stable alias and
+  immutable deployment reached `data-hwl-hydrated="true"`, the Production
+  canonical URL, equal document/viewport widths, and zero warning or error
+  records. The earlier React 418 Preview hold is therefore cleared for this
+  exact artifact.
+- **Fail-closed application boundaries:** `/login` returns 200; anonymous
+  `/account` redirects to its preserved login destination; anonymous LIFT video
+  returns 401; anonymous LIFT PDF redirects to login; a valid-origin LIFT
+  checkout returns the deliberate closed-sales 503; an unsigned Stripe webhook
+  returns 400; and the disabled Cal ledger webhook returns 503. These are safe
+  release-boundary canaries, not provider transaction proof.
+- **LIFT commerce:** the exact `f12656c` Preview is closed. A read-only provider
+  audit found the canonical Stripe sandbox's active $11.11 Product and Price,
+  enabled four-event Preview webhook, and both private staging media objects.
+  The prior exact `d28be30` sandbox purchase, signed fulfillment, entitlement,
+  and private media evidence remains historical provider proof. A fresh
+  exact-artifact sandbox transaction and the separately owner-approved live
+  $11.11 Production canary remain required before public sales open.
+- **Booking:** the exact Preview currently renders the published Intuitive
+  Tarot Cal embed with manual confirmation, post-appointment payment, five live
+  Pacific-time choices on September 27, and no browser warning/error. Cal's
+  public API exposes 11 visible, manual-confirmation event types with Cal
+  payments disabled. The staging migration ledger contains 001–020, but the
+  exact Preview has neither Cal credential name and its ledger endpoint remains
+  disabled. Cal's authenticated profile still displays one Primary and one
+  Unverified email; the Webhooks page still says “Create your first webhook.”
+  Three API-key records are visible, but no secret or provider mutation was
+  performed. The signed booking ledger and full request → confirmation →
+  reschedule → cancel history therefore remain unproved.
+- **Inquiries:** the exact Preview interface renders inquiry collection as open.
+  Prior exact-`d28be30` Preview and isolated Production evidence proves
+  database-first persistence plus Resend provider delivery. No new inquiry was
+  submitted from `f12656c`; its deployed Preview key is opaque while the local
+  Resend credential currently fails provider validation. Provider Delivered
+  remains distinct from human inbox opening.
+- **Production:** `hwlbysmd.com` and `www.hwlbysmd.com` still resolve to public
+  deployment `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i`, exact commit
+  `6a260bcfa7c752562be264d1a077013fc8ff9f4d`, with commerce closed. The new
+  Preview was not promoted. Production, public aliases, live Stripe, Cal
+  provider changes, inquiry opening, sales opening, and `main` remain separate
+  owner-controlled gates.
+- **Local verifier follow-up:** the protected-origin CLI could not use its
+  one-shot bypass because `.env.preview.local` is absent. Authenticated Vercel
+  HTTP capture exposed a parser false negative: real Next.js 16.3.4 coalesces a
+  byte-length-prefixed Flight text record before record 0. A two-file local,
+  uncommitted repair now follows Flight record boundaries. All 41 verifier cases
+  pass, including split pushes, multibyte length framing, false row decoys, and
+  malformed-input rejection; the captured exact Preview HTML now passes every
+  root audit. This follow-up has not been pushed or deployed.
+- **Preview configuration hygiene:** four scoped names have both branch and
+  general Preview definitions (`COMMERCE_SALES_READY`, `CONTACT_TO_EMAIL`, and
+  the two LIFT content paths). The branch values currently win. Reconcile those
+  duplicates before using Preview configuration as the source for a Production
+  candidate.
+
+## Superseded September 13 authority snapshot — historical
+
+All dated sections below remain evidence history. The September 14 snapshot
+above is controlling; this table is historical only.
 
 | Surface              | Current authority                                                                                                                                                                                                                        | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

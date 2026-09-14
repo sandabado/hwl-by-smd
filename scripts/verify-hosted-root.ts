@@ -168,6 +168,16 @@ function parseHtmlStartTag(source: string): HtmlStartTag | null {
   return { attributes, name: (match[1] ?? "").toLowerCase() }
 }
 
+function isReviewedInlineFlightScriptTag(source: string) {
+  // Match the exact classic-inline form Next emits, with only its optional CSP
+  // nonce. Checking raw syntax also rejects slash-adjacent attributes that the
+  // HTML tokenizer recognizes but the lightweight general attribute scanner
+  // could otherwise overlook (for example `<script/type=...>`).
+  return /^<script(?:\s+nonce\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?\s*>$/i.test(
+    source
+  )
+}
+
 function findHtmlClosingTagStart(
   lowercaseHtml: string,
   name: string,
@@ -185,7 +195,68 @@ function findHtmlClosingTagStart(
   return -1
 }
 
+function findMatchingTemplateClosingTagStart(
+  html: string,
+  lowercaseHtml: string,
+  start: number
+) {
+  let cursor = start
+  let depth = 1
+
+  while (cursor < html.length) {
+    const tagStart = html.indexOf("<", cursor)
+    if (tagStart === -1) return -1
+
+    if (html.startsWith("<!--", tagStart)) {
+      const commentEnd = html.indexOf("-->", tagStart + 4)
+      if (commentEnd === -1) return -1
+      cursor = commentEnd + 3
+      continue
+    }
+
+    const tagEnd = findHtmlTagEnd(html, tagStart + 1)
+    if (tagEnd === -1) return -1
+    const tagSource = html.slice(tagStart, tagEnd + 1)
+
+    if (/^<\/template(?:\s[^>]*)?>$/i.test(tagSource)) {
+      depth -= 1
+      if (depth === 0) return tagStart
+      cursor = tagEnd + 1
+      continue
+    }
+
+    const tag = parseHtmlStartTag(tagSource)
+    if (!tag) {
+      cursor = tagEnd + 1
+      continue
+    }
+    if (tag.name === "plaintext") return -1
+    if (tag.name === "template") {
+      depth += 1
+      cursor = tagEnd + 1
+      continue
+    }
+    if (INERT_MARKUP_CONTAINERS.has(tag.name)) {
+      const closingStart = findHtmlClosingTagStart(
+        lowercaseHtml,
+        tag.name,
+        tagEnd + 1
+      )
+      if (closingStart === -1) return -1
+      const closingEnd = findHtmlTagEnd(html, closingStart + 2)
+      if (closingEnd === -1) return -1
+      cursor = closingEnd + 1
+      continue
+    }
+
+    cursor = tagEnd + 1
+  }
+
+  return -1
+}
+
 function scanHtmlDocument(html: string) {
+  let hasUnsupportedFlightScript = false
   const scriptBodies: string[] = []
   const tags: HtmlStartTag[] = []
   const lowercaseHtml = html.toLowerCase()
@@ -203,7 +274,8 @@ function scanHtmlDocument(html: string) {
 
     const tagEnd = findHtmlTagEnd(html, tagStart + 1)
     if (tagEnd === -1) break
-    const tag = parseHtmlStartTag(html.slice(tagStart, tagEnd + 1))
+    const tagSource = html.slice(tagStart, tagEnd + 1)
+    const tag = parseHtmlStartTag(tagSource)
     if (!tag) {
       cursor = tagEnd + 1
       continue
@@ -215,17 +287,25 @@ function scanHtmlDocument(html: string) {
     }
 
     if (INERT_MARKUP_CONTAINERS.has(tag.name)) {
-      const closingStart = findHtmlClosingTagStart(
-        lowercaseHtml,
-        tag.name,
-        tagEnd + 1
-      )
+      const closingStart =
+        tag.name === "template"
+          ? findMatchingTemplateClosingTagStart(html, lowercaseHtml, tagEnd + 1)
+          : findHtmlClosingTagStart(lowercaseHtml, tag.name, tagEnd + 1)
       if (closingStart === -1) {
         cursor = html.length
         continue
       }
-      if (tag.name === "script") {
+      if (tag.name === "script" && isReviewedInlineFlightScriptTag(tagSource)) {
         scriptBodies.push(html.slice(tagEnd + 1, closingStart))
+      } else if (
+        tag.name === "script" &&
+        html.slice(tagEnd + 1, closingStart).includes("__next_f")
+      ) {
+        // Only Next's attribute-free (optionally nonce-bearing) inline scripts
+        // are part of the reviewed transport. A classic executable script can
+        // also carry attributes such as id or type="text/javascript"; silently
+        // dropping one that references the Flight queue could hide a mutation.
+        hasUnsupportedFlightScript = true
       }
       const closingEnd = findHtmlTagEnd(html, closingStart + 2)
       cursor = closingEnd === -1 ? html.length : closingEnd + 1
@@ -236,17 +316,20 @@ function scanHtmlDocument(html: string) {
     cursor = tagEnd + 1
   }
 
-  return { scriptBodies, tags }
+  return { hasUnsupportedFlightScript, scriptBodies, tags }
 }
 
 function extractInlineScriptBodies(html: string) {
-  return scanHtmlDocument(html).scriptBodies
+  const { hasUnsupportedFlightScript, scriptBodies } = scanHtmlDocument(html)
+  return hasUnsupportedFlightScript ? null : scriptBodies
 }
 
 function findJsonNextFlightPushes(script: string) {
-  const calls: unknown[][] = []
-  const callName = "self.__next_f.push"
+  const calls: { initializes: boolean; value: unknown[] }[] = []
+  const initializerCallName = "(self.__next_f=self.__next_f||[]).push"
+  const callNames = [initializerCallName, "self.__next_f.push"]
   let cursor = 0
+  let instructionBoundary = 0
   let state: JavaScriptLexState = "normal"
 
   while (cursor < script.length) {
@@ -296,22 +379,38 @@ function findJsonNextFlightPushes(script: string) {
       continue
     }
 
-    if (!script.startsWith(callName, cursor)) {
+    const callName = callNames.find((candidate) =>
+      script.startsWith(candidate, cursor)
+    )
+    if (!callName) {
       cursor += 1
       continue
     }
 
+    // Next's inlined Flight scripts are a direct top-level sequence of these
+    // calls. Do not treat instructions hidden in branches, functions, or other
+    // executable wrappers as data the browser necessarily delivered.
+    const instructionSeparator = script.slice(instructionBoundary, cursor)
+    if (!/^[\s;]*$/.test(instructionSeparator)) return null
+    if (
+      calls.length > 0 &&
+      !instructionSeparator.includes(";") &&
+      !/[\n\r\u2028\u2029]/.test(instructionSeparator)
+    ) {
+      // Two call expressions cannot be adjacent (or space-separated) in valid
+      // JavaScript. A semicolon or line terminator is required between them.
+      return null
+    }
+
     const previousCharacter = script[cursor - 1]
     if (previousCharacter && /[\w$.]/.test(previousCharacter)) {
-      cursor += callName.length
-      continue
+      return null
     }
 
     let openParenthesis = cursor + callName.length
     while (/\s/.test(script[openParenthesis] ?? "")) openParenthesis += 1
     if (script[openParenthesis] !== "(") {
-      cursor += callName.length
-      continue
+      return null
     }
 
     let nestedState: JavaScriptLexState = "normal"
@@ -375,78 +474,218 @@ function findJsonNextFlightPushes(script: string) {
       }
     }
 
-    if (depth !== 0) break
+    if (depth !== 0) return null
 
     const argument = script.slice(openParenthesis + 1, endParenthesis).trim()
     try {
       const parsed = JSON.parse(argument)
-      if (Array.isArray(parsed)) calls.push(parsed)
+      if (!Array.isArray(parsed)) return null
+      calls.push({
+        initializes: callName === initializerCallName,
+        value: parsed,
+      })
     } catch {
       // Next.js emits JSON-compatible push arguments. A lookalike JavaScript
-      // expression is not release evidence and is deliberately ignored.
+      // expression is not release evidence. If it can execute beside a valid
+      // stream, silently ignoring it could conceal a queue mutation.
+      return null
     }
     cursor = endParenthesis + 1
+    instructionBoundary = cursor
   }
+
+  if (calls.length > 0 && !/^[\s;]*$/.test(script.slice(instructionBoundary))) {
+    return null
+  }
+
+  // Bracket access, aliases, and template interpolation can execute without
+  // spelling either reviewed call form. Reject an unparsed direct reference
+  // rather than accepting canonical evidence from another script beside it.
+  if (calls.length === 0 && script.includes("__next_f")) return null
 
   return calls
 }
 
-function extractFirstJsonObject(input: string) {
-  let cursor = 0
-  while (/\s/.test(input[cursor] ?? "")) cursor += 1
-  if (input[cursor] !== "{") return null
+function advanceUtf8Bytes(input: string, start: number, byteLength: number) {
+  let cursor = start
+  let consumedBytes = 0
 
-  const start = cursor
-  let depth = 0
-  let inString = false
-  for (; cursor < input.length; cursor += 1) {
-    const character = input[cursor]
-    if (inString) {
-      if (character === "\\") {
-        cursor += 1
-      } else if (character === '"') {
-        inString = false
+  while (cursor < input.length && consumedBytes < byteLength) {
+    const codePoint = input.codePointAt(cursor)
+    if (codePoint === undefined) return null
+
+    const codePointBytes =
+      codePoint <= 0x7f
+        ? 1
+        : codePoint <= 0x7ff
+          ? 2
+          : codePoint <= 0xffff
+            ? 3
+            : 4
+    if (consumedBytes + codePointBytes > byteLength) return null
+
+    consumedBytes += codePointBytes
+    cursor += codePoint > 0xffff ? 2 : 1
+  }
+
+  return consumedBytes === byteLength ? cursor : null
+}
+
+const LENGTH_PREFIXED_FLIGHT_TAGS = new Set([
+  "T",
+  "A",
+  "O",
+  "o",
+  "b",
+  "U",
+  "S",
+  "s",
+  "L",
+  "l",
+  "G",
+  "g",
+  "M",
+  "m",
+  "V",
+])
+
+function decodeFlightRecordId(recordId: string) {
+  let decoded = 0
+
+  // React's Flight client accumulates record IDs with 32-bit bitwise shifts.
+  // Preserve those semantics so aliases such as `00` and the overflowing
+  // `100000000` cannot hide a prior resolution of numeric record 0.
+  for (const character of recordId) {
+    const code = character.charCodeAt(0)
+    const nibble = code > 96 ? code - 87 : code - 48
+    decoded = (decoded << 4) | nibble
+  }
+
+  return decoded
+}
+
+function findRootFlightRows(payload: string) {
+  const rows: string[] = []
+  let rootRecordCount = 0
+  let cursor = 0
+
+  while (cursor < payload.length) {
+    const colon = payload.indexOf(":", cursor)
+    if (colon === -1) return null
+    const recordId = payload.slice(cursor, colon)
+    // Hint rows such as `:HL[...]` intentionally have an empty record ID.
+    if (!/^[0-9a-f]*$/.test(recordId)) return null
+    const valueStart = colon + 1
+    const tag = payload[valueStart]
+    // React initializes its numeric row ID accumulator to zero. An empty ID is
+    // therefore record 0 unless it is Next's reviewed empty-ID H hint form.
+    // Fail closed on every other empty-ID row instead of letting it resolve or
+    // mutate root state before a later canonical `0:` row.
+    if (!recordId && tag !== "H") return null
+    if (recordId && decodeFlightRecordId(recordId) === 0) {
+      rootRecordCount += 1
+    }
+
+    if (tag && LENGTH_PREFIXED_FLIGHT_TAGS.has(tag)) {
+      const comma = payload.indexOf(",", valueStart + 1)
+      if (comma === -1) return null
+      const lengthText = payload.slice(valueStart + 1, comma)
+      if (!/^[0-9a-f]+$/.test(lengthText)) return null
+      const byteLength = Number.parseInt(lengthText, 16)
+      if (!Number.isSafeInteger(byteLength)) return null
+      const nextRecord = advanceUtf8Bytes(payload, comma + 1, byteLength)
+      if (nextRecord === null) return null
+      cursor = nextRecord
+      continue
+    }
+
+    const newline = payload.indexOf("\n", valueStart)
+    // React buffers ordinary rows until their LF delimiter arrives. Closing
+    // the stream does not turn an unterminated final fragment into a row.
+    if (newline === -1) return null
+    if (recordId === "0" && payload[valueStart] === "{") {
+      rows.push(payload.slice(valueStart, newline))
+    }
+    cursor = newline + 1
+  }
+
+  return { rootRecordCount, rows }
+}
+
+function collectOrderedFlightPayload(html: string) {
+  const payloads: string[] = []
+  let bootstrapped = false
+  let previousPayloadEnd: number | null = null
+  const scriptBodies = extractInlineScriptBodies(html)
+  if (scriptBodies === null) return null
+
+  for (const script of scriptBodies) {
+    const instructions = findJsonNextFlightPushes(script)
+    if (instructions === null) return null
+    for (const { initializes, value: call } of instructions) {
+      const [channel, payload] = call
+      if (channel === 0) {
+        // Next emits exactly one [0]. A repeated bootstrap can either discard
+        // buffered chunks or leave already-enqueued bytes intact depending on
+        // client timing, so static release evidence must reject that ambiguity.
+        if (!initializes || bootstrapped || call.length !== 1) return null
+        bootstrapped = true
+      } else if (channel === 1) {
+        // Next throws rather than accepting data before its bootstrap.
+        if (initializes || !bootstrapped) return null
+        if (typeof payload !== "string") return null
+        if (payload.length > 0) {
+          const firstCodeUnit = payload.charCodeAt(0)
+          // Next TextEncodes each channel-1 push independently. Joining raw
+          // JavaScript strings first would combine a high/low surrogate pair
+          // split across pushes into one code point and change the byte stream.
+          if (
+            previousPayloadEnd !== null &&
+            previousPayloadEnd >= 0xd800 &&
+            previousPayloadEnd <= 0xdbff &&
+            firstCodeUnit >= 0xdc00 &&
+            firstCodeUnit <= 0xdfff
+          ) {
+            return null
+          }
+          previousPayloadEnd = payload.charCodeAt(payload.length - 1)
+        }
+        payloads.push(payload)
+      } else if (channel === 3) {
+        // Binary Flight chunks are not currently emitted by this root. Do not
+        // discard their bytes and risk treating a continuation as a new row.
+        return null
+      } else if (initializes) {
+        return null
       }
-      continue
-    }
-    if (character === '"') {
-      inString = true
-      continue
-    }
-    if (character === "{") depth += 1
-    if (character === "}") {
-      depth -= 1
-      if (depth === 0) return input.slice(start, cursor + 1)
     }
   }
 
-  return null
+  return bootstrapped ? payloads.join("") : null
 }
 
 function extractNextFlightBootstraps(html: string) {
   const bootstraps: Record<string, unknown>[] = []
+  const payload = collectOrderedFlightPayload(html)
+  if (payload === null) return bootstraps
+  const result = findRootFlightRows(payload)
+  // A valid root stream resolves record 0 exactly once. Accepting a later
+  // duplicate could hide the first value React actually resolves.
+  if (!result || result.rootRecordCount !== 1 || result.rows.length !== 1) {
+    return bootstraps
+  }
 
-  for (const script of extractInlineScriptBodies(html)) {
-    for (const call of findJsonNextFlightPushes(script)) {
-      const [channel, payload] = call
-      if (
-        channel !== 1 ||
-        typeof payload !== "string" ||
-        !payload.startsWith("0:")
-      ) {
-        continue
+  // Channel-1 pushes are chunks of one ordered Flight byte stream, not
+  // independent rows. Parsing the complete row also rejects a valid-looking
+  // object followed by trailing data that React itself would reject.
+  for (const row of result.rows) {
+    try {
+      const parsed = JSON.parse(row)
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        bootstraps.push(parsed as Record<string, unknown>)
       }
-
-      const objectText = extractFirstJsonObject(payload.slice(2))
-      if (!objectText) continue
-      try {
-        const parsed = JSON.parse(objectText)
-        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-          bootstraps.push(parsed as Record<string, unknown>)
-        }
-      } catch {
-        // Malformed bootstrap data is treated as missing by the exact checks.
-      }
+    } catch {
+      return []
     }
   }
 

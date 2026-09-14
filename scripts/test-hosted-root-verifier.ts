@@ -33,7 +33,8 @@ const CANONICAL_HOME_HTML = String.raw`<!doctype html>
         </div>
       </main>
     </div>
-    <script>self.__next_f.push([1,"0:{\"P\":null,\"c\":[\"\",\"\"],\"q\":\"\",\"i\":false,\"f\":[[[\"\",{\"children\":[\"__PAGE__\",{}]}]]]}"])</script>
+    <script>(self.__next_f=self.__next_f||[]).push([0])</script>
+    <script>self.__next_f.push([1,"0:{\"P\":null,\"c\":[\"\",\"\"],\"q\":\"\",\"i\":false,\"f\":[[[\"\",{\"children\":[\"__PAGE__\",{}]}]]]}\n"])</script>
   </body>
 </html>`
 
@@ -52,9 +53,86 @@ const INDEX_POISONED_HOME_HTML = String.raw`<!doctype html>
         </div>
       </main>
     </div>
-    <script>self.__next_f.push([1,"0:{\"P\":null,\"c\":[\"\",\"index\"],\"q\":\"\",\"i\":false,\"f\":[[[\"index\",{\"children\":[\"__PAGE__\",{}]}]]]}"])</script>
+    <script>(self.__next_f=self.__next_f||[]).push([0])</script>
+    <script>self.__next_f.push([1,"0:{\"P\":null,\"c\":[\"\",\"index\"],\"q\":\"\",\"i\":false,\"f\":[[[\"index\",{\"children\":[\"__PAGE__\",{}]}]]]}\n"])</script>
   </body>
 </html>`
+
+const CANONICAL_FLIGHT_BOOTSTRAP = JSON.stringify({
+  P: null,
+  c: ["", ""],
+  f: [[["", { children: ["__PAGE__", {}] }]]],
+  i: false,
+  q: "",
+})
+const INDEX_POISONED_FLIGHT_BOOTSTRAP = JSON.stringify({
+  P: null,
+  c: ["", "index"],
+  f: [[["index", { children: ["__PAGE__", {}] }]]],
+  i: false,
+  q: "",
+})
+const CANONICAL_ROOT_ROW = `0:${CANONICAL_FLIGHT_BOOTSTRAP}`
+const INDEX_POISONED_ROOT_ROW = `0:${INDEX_POISONED_FLIGHT_BOOTSTRAP}`
+
+type FlightInstruction = readonly unknown[]
+
+function withFlightInstructions(
+  source: string,
+  instructions: readonly FlightInstruction[]
+) {
+  const scripts = instructions
+    .map(
+      (instruction, index) =>
+        `<script>${
+          index === 0 && instruction[0] === 0
+            ? "(self.__next_f=self.__next_f||[]).push"
+            : "self.__next_f.push"
+        }(${JSON.stringify(instruction)})</script>`
+    )
+    .join("")
+
+  return source.replace(
+    /<script>\(self\.__next_f=self\.__next_f\|\|\[\]\)\.push\(\[0\]\)<\/script>\s*<script>self\.__next_f\.push\([\s\S]*?<\/script>/,
+    scripts
+  )
+}
+
+function withFlightPayloads(source: string, payloads: readonly string[]) {
+  return withFlightInstructions(source, [
+    [0],
+    ...payloads.map((payload) => [1, payload]),
+  ])
+}
+
+const COALESCED_CANONICAL_HOME_HTML = withFlightPayloads(CANONICAL_HOME_HTML, [
+  `1:I[7121,[],"LoadingBoundaryProvider"]\n2:"$Sreact.fragment"\n${CANONICAL_ROOT_ROW}\n`,
+])
+const COALESCED_INDEX_POISONED_HOME_HTML = withFlightPayloads(
+  INDEX_POISONED_HOME_HTML,
+  [
+    `1:I[7121,[],"LoadingBoundaryProvider"]\n2:"$Sreact.fragment"\n${INDEX_POISONED_ROOT_ROW}\n`,
+  ]
+)
+
+const PREFIX_TEXT_RECORD = JSON.stringify({
+  "@context": "https://schema.org",
+  canonicalDecoy: CANONICAL_ROOT_ROW,
+  copy: "A luminous multibyte ritual ✨",
+  poisonedDecoy: INDEX_POISONED_ROOT_ROW,
+})
+const PREFIX_TEXT_RECORD_LENGTH = new TextEncoder()
+  .encode(PREFIX_TEXT_RECORD)
+  .byteLength.toString(16)
+const LENGTH_PREFIXED_STREAM = `1:I[7121,[],"LoadingBoundaryProvider"]\n:HL["/_next/static/css/app.css","style"]\n3:T${PREFIX_TEXT_RECORD_LENGTH},${PREFIX_TEXT_RECORD}${CANONICAL_ROOT_ROW}\n`
+const LENGTH_PREFIXED_CANONICAL_HOME_HTML = withFlightPayloads(
+  CANONICAL_HOME_HTML,
+  [LENGTH_PREFIXED_STREAM]
+)
+const LENGTH_PREFIXED_DECOY_ONLY_HOME_HTML = withFlightPayloads(
+  CANONICAL_HOME_HTML,
+  [`3:T${PREFIX_TEXT_RECORD_LENGTH},${PREFIX_TEXT_RECORD}`]
+)
 
 type FetchCall = {
   headers: Headers
@@ -114,6 +192,14 @@ function failures(checks: ReturnType<typeof auditRootHtml>) {
   return checks.filter(({ status }) => status === "fail")
 }
 
+function assertMissingFlightBootstrap(html: string) {
+  assert.deepEqual(extractRootFlightSegments(html), [])
+  assert.deepEqual(extractFirstFlightRouteSegments(html), [])
+  const failedNames = failures(auditRootHtml(html)).map(({ name }) => name)
+  assert.ok(failedNames.includes("Root Flight state is canonical"))
+  assert.ok(failedNames.includes("Root Flight route tree is canonical"))
+}
+
 test("a canonical hosted root passes the complete read-only contract", async () => {
   const calls: FetchCall[] = []
   const result = await verifyHostedRoot({
@@ -166,6 +252,201 @@ test("raw Flight parsers distinguish the canonical and poisoned states", () => {
   ])
 })
 
+test("nonce-bearing inline Flight instructions remain executable evidence", () => {
+  const nonceHtml = CANONICAL_HOME_HTML.replaceAll(
+    "<script>",
+    '<script nonce="fixture-nonce">'
+  )
+
+  assert.deepEqual(extractRootFlightSegments(nonceHtml), [""])
+  assert.deepEqual(extractFirstFlightRouteSegments(nonceHtml), [""])
+})
+
+test("Flight extraction accepts a newline-delimited root record after earlier channel-1 records", () => {
+  assert.deepEqual(extractRootFlightSegments(COALESCED_CANONICAL_HOME_HTML), [
+    "",
+  ])
+  assert.deepEqual(
+    extractFirstFlightRouteSegments(COALESCED_CANONICAL_HOME_HTML),
+    [""]
+  )
+  assert.deepEqual(
+    extractRootFlightSegments(COALESCED_INDEX_POISONED_HOME_HTML),
+    ["index"]
+  )
+  assert.deepEqual(
+    extractFirstFlightRouteSegments(COALESCED_INDEX_POISONED_HOME_HTML),
+    ["index"]
+  )
+  assert.equal(failures(auditRootHtml(COALESCED_CANONICAL_HOME_HTML)).length, 0)
+})
+
+test("Flight extraction advances past byte-length-prefixed text before the root record", () => {
+  assert.deepEqual(
+    extractRootFlightSegments(LENGTH_PREFIXED_CANONICAL_HOME_HTML),
+    [""]
+  )
+  assert.deepEqual(
+    extractFirstFlightRouteSegments(LENGTH_PREFIXED_CANONICAL_HOME_HTML),
+    [""]
+  )
+  assert.equal(
+    failures(auditRootHtml(LENGTH_PREFIXED_CANONICAL_HOME_HTML)).length,
+    0
+  )
+  assertMissingFlightBootstrap(LENGTH_PREFIXED_DECOY_ONLY_HOME_HTML)
+})
+
+test("Flight extraction preserves framing across split channel-1 pushes", () => {
+  const headerSplit = LENGTH_PREFIXED_STREAM.indexOf("T") + 1
+  const textSplit = LENGTH_PREFIXED_STREAM.indexOf("✨")
+  const rootStart = LENGTH_PREFIXED_STREAM.lastIndexOf(CANONICAL_ROOT_ROW)
+  const rootSplit = rootStart + 24
+  const splitHtml = withFlightPayloads(CANONICAL_HOME_HTML, [
+    LENGTH_PREFIXED_STREAM.slice(0, headerSplit),
+    LENGTH_PREFIXED_STREAM.slice(headerSplit, textSplit),
+    LENGTH_PREFIXED_STREAM.slice(textSplit, rootSplit),
+    LENGTH_PREFIXED_STREAM.slice(rootSplit),
+  ])
+
+  assert.deepEqual(extractRootFlightSegments(splitHtml), [""])
+  assert.deepEqual(extractFirstFlightRouteSegments(splitHtml), [""])
+  assert.equal(failures(auditRootHtml(splitHtml)).length, 0)
+
+  const astralText = "😀"
+  const astralStream = `3:T4,${astralText}${CANONICAL_ROOT_ROW}\n`
+  assert.deepEqual(
+    extractRootFlightSegments(
+      withFlightPayloads(CANONICAL_HOME_HTML, [astralStream])
+    ),
+    [""]
+  )
+  const surrogateBoundary = astralStream.indexOf(astralText) + 1
+  assertMissingFlightBootstrap(
+    withFlightPayloads(CANONICAL_HOME_HTML, [
+      astralStream.slice(0, surrogateBoundary),
+      astralStream.slice(surrogateBoundary),
+    ])
+  )
+})
+
+test("ordinary Flight rows require an LF terminator", () => {
+  assertMissingFlightBootstrap(
+    withFlightPayloads(CANONICAL_HOME_HTML, [CANONICAL_ROOT_ROW])
+  )
+  const split = Math.floor(CANONICAL_ROOT_ROW.length / 2)
+  assertMissingFlightBootstrap(
+    withFlightPayloads(CANONICAL_HOME_HTML, [
+      CANONICAL_ROOT_ROW.slice(0, split),
+      CANONICAL_ROOT_ROW.slice(split),
+    ])
+  )
+})
+
+test("Flight data requires exactly one ordered bootstrap", () => {
+  const canonicalPayload = `${CANONICAL_ROOT_ROW}\n`
+  const poisonedPayload = `${INDEX_POISONED_ROOT_ROW}\n`
+
+  const invalidInstructions: readonly (readonly FlightInstruction[])[] = [
+    [[1, canonicalPayload]],
+    [[1, canonicalPayload], [0], [1, canonicalPayload]],
+    [
+      [2, { form: "state" }],
+      [1, canonicalPayload],
+    ],
+    [
+      [0, "extra"],
+      [1, canonicalPayload],
+    ],
+    [[0], [0], [1, canonicalPayload]],
+    [[0], [1, canonicalPayload], [0]],
+    [[0], [1, poisonedPayload], [0], [1, canonicalPayload]],
+  ]
+
+  for (const instructions of invalidInstructions) {
+    assertMissingFlightBootstrap(
+      withFlightInstructions(CANONICAL_HOME_HTML, instructions)
+    )
+  }
+
+  assertMissingFlightBootstrap(
+    CANONICAL_HOME_HTML.replace(
+      "(self.__next_f=self.__next_f||[]).push([0])",
+      "self.__next_f.push([0])"
+    )
+  )
+})
+
+test("malformed and mis-sized length-prefixed rows fail closed", () => {
+  const body = "prefix"
+  const length = new TextEncoder().encode(body).byteLength
+  const malformedStreams = [
+    `z:${CANONICAL_FLIGHT_BOOTSTRAP}\n${CANONICAL_ROOT_ROW}\n`,
+    `3:T${length.toString(16)}${body}${CANONICAL_ROOT_ROW}\n`,
+    `3:Tnot-hex,${body}${CANONICAL_ROOT_ROW}\n`,
+    `3:Tffffffffffffffff,${body}${CANONICAL_ROOT_ROW}\n`,
+    `3:T${(length + 20).toString(16)},${body}`,
+    `3:T${(length - 1).toString(16)},${body}${CANONICAL_ROOT_ROW}\n`,
+    `3:T${(length + 1).toString(16)},${body}${CANONICAL_ROOT_ROW}\n`,
+  ]
+
+  for (const stream of malformedStreams) {
+    assertMissingFlightBootstrap(
+      withFlightPayloads(CANONICAL_HOME_HTML, [stream])
+    )
+  }
+})
+
+test("record zero must be a complete JSON row with no trailing data", () => {
+  for (const suffix of ["garbage", INDEX_POISONED_FLIGHT_BOOTSTRAP]) {
+    assertMissingFlightBootstrap(
+      withFlightPayloads(CANONICAL_HOME_HTML, [
+        `${CANONICAL_ROOT_ROW}${suffix}\n`,
+      ])
+    )
+  }
+})
+
+test("Flight extraction requires exactly one record-zero row", () => {
+  const incompleteRoot = `0:${JSON.stringify({ P: null })}`
+  for (const payload of [
+    `${incompleteRoot}\n${CANONICAL_ROOT_ROW}\n`,
+    `0:null\n${CANONICAL_ROOT_ROW}\n`,
+    `00:null\n${CANONICAL_ROOT_ROW}\n`,
+    `000:null\n${CANONICAL_ROOT_ROW}\n`,
+    `100000000:null\n${CANONICAL_ROOT_ROW}\n`,
+    `:${CANONICAL_FLIGHT_BOOTSTRAP}\n${CANONICAL_ROOT_ROW}\n`,
+    `0:T4,null${CANONICAL_ROOT_ROW}\n`,
+    `${CANONICAL_ROOT_ROW}\n${INDEX_POISONED_ROOT_ROW}\n`,
+    `${CANONICAL_ROOT_ROW}\n${CANONICAL_ROOT_ROW}\n`,
+  ]) {
+    assertMissingFlightBootstrap(
+      withFlightPayloads(CANONICAL_HOME_HTML, [payload])
+    )
+  }
+
+  for (const aliasedRootId of ["00", "000", "100000000"]) {
+    assertMissingFlightBootstrap(
+      withFlightPayloads(CANONICAL_HOME_HTML, [
+        `${aliasedRootId}:${CANONICAL_FLIGHT_BOOTSTRAP}\n`,
+      ])
+    )
+  }
+})
+
+test("nonzero record IDs and escaped record text cannot impersonate record zero", () => {
+  const ordinaryRow = `1:${JSON.stringify(`copy\\n${CANONICAL_ROOT_ROW}`)}\n`
+  for (const payload of [
+    `10:${CANONICAL_FLIGHT_BOOTSTRAP}\n`,
+    `a0:${CANONICAL_FLIGHT_BOOTSTRAP}\n`,
+    ordinaryRow,
+  ]) {
+    assertMissingFlightBootstrap(
+      withFlightPayloads(CANONICAL_HOME_HTML, [payload])
+    )
+  }
+})
+
 test("Flight extraction accepts only the executed channel-1 record-0 bootstrap", () => {
   const arbitraryJson = CANONICAL_HOME_HTML.replace(
     /<script>self\.__next_f\.push\([\s\S]*?<\/script>/,
@@ -179,6 +460,11 @@ test("Flight extraction accepts only the executed channel-1 record-0 bootstrap",
     "<script>self.__next_f.push",
     "<template><script>self.__next_f.push"
   ).replace("</script>", "</script></template>")
+  const nestedTemplateBootstrap = CANONICAL_HOME_HTML.replace(
+    /<script>\(self\.__next_f=self\.__next_f\|\|\[\]\)\.push\(\[0\]\)<\/script>\s*<script>self\.__next_f\.push\([\s\S]*?<\/script>/,
+    (flightScripts) =>
+      `<template><template></template>${flightScripts}</template>`
+  )
   const stringLookalike = CANONICAL_HOME_HTML.replace(
     "self.__next_f.push",
     'const ignored = "self.__next_f.push"; ignored'
@@ -191,14 +477,100 @@ test("Flight extraction accepts only the executed channel-1 record-0 bootstrap",
     'self.__next_f.push([1,"0:',
     'self.__next_f.push([1,"1:'
   )
+  const inertType = CANONICAL_HOME_HTML.replace(
+    "<script>(self.__next_f=self.__next_f||[]).push([0])</script>",
+    '<script type="application/json">(self.__next_f=self.__next_f||[]).push([0])</script>'
+  )
+  const externalSource = CANONICAL_HOME_HTML.replace(
+    "<script>(self.__next_f=self.__next_f||[]).push([0])</script>",
+    '<script src="/ignored.js">(self.__next_f=self.__next_f||[]).push([0])</script>'
+  )
+  const slashAdjacentInertType = CANONICAL_HOME_HTML.replace(
+    "<script>(self.__next_f=self.__next_f||[]).push([0])</script>",
+    '<script/type="application/json">(self.__next_f=self.__next_f||[]).push([0])</script>'
+  )
+  const slashAdjacentSource = CANONICAL_HOME_HTML.replace(
+    "<script>(self.__next_f=self.__next_f||[]).push([0])</script>",
+    '<script/src="/ignored.js">(self.__next_f=self.__next_f||[]).push([0])</script>'
+  )
+  const adjacentNonceAndInertType = CANONICAL_HOME_HTML.replace(
+    "<script>(self.__next_f=self.__next_f||[]).push([0])</script>",
+    '<script nonce="fixture"type="application/json">(self.__next_f=self.__next_f||[]).push([0])</script>'
+  )
+  const noModule = CANONICAL_HOME_HTML.replace(
+    "<script>(self.__next_f=self.__next_f||[]).push([0])</script>",
+    "<script nomodule>(self.__next_f=self.__next_f||[]).push([0])</script>"
+  )
+  const legacyLanguage = CANONICAL_HOME_HTML.replace(
+    "<script>(self.__next_f=self.__next_f||[]).push([0])</script>",
+    '<script language="vbscript">(self.__next_f=self.__next_f||[]).push([0])</script>'
+  )
+  const deadBranch = CANONICAL_HOME_HTML.replace(
+    "(self.__next_f=self.__next_f||[]).push([0])",
+    "if (false) { (self.__next_f=self.__next_f||[]).push([0]) }"
+  )
+  const additionalWrappedCall = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    "<script>if (true) { self.__next_f.push([0]) }</script></body>"
+  )
+  const additionalPrefixedCall = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    "<script>window.self.__next_f.push([0])</script></body>"
+  )
+  const additionalMalformedCall = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    "<script>self.__next_f.push(notJson)</script></body>"
+  )
+  const additionalIdScriptCall = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    '<script id="flight">self.__next_f.push([0])</script></body>'
+  )
+  const additionalClassicTypeCall = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    '<script type="text/javascript">self.__next_f.push([0])</script></body>'
+  )
+  const additionalBracketCall = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    '<script>self["__next_f"].push([0])</script></body>'
+  )
+  const additionalTemplateCall = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    "<script>`${self.__next_f.push([0])}`</script></body>"
+  )
+  const adjacentCalls = CANONICAL_HOME_HTML.replace(
+    "</script>\n    <script>self.__next_f.push",
+    "self.__next_f.push"
+  )
+  const spaceSeparatedCalls = CANONICAL_HOME_HTML.replace(
+    "</script>\n    <script>self.__next_f.push",
+    " self.__next_f.push"
+  )
 
   for (const invalidBootstrap of [
     arbitraryJson,
     commentedBootstrap,
     templatedBootstrap,
+    nestedTemplateBootstrap,
     stringLookalike,
     wrongChannel,
     wrongRecord,
+    inertType,
+    externalSource,
+    slashAdjacentInertType,
+    slashAdjacentSource,
+    adjacentNonceAndInertType,
+    noModule,
+    legacyLanguage,
+    deadBranch,
+    additionalWrappedCall,
+    additionalPrefixedCall,
+    additionalMalformedCall,
+    additionalIdScriptCall,
+    additionalClassicTypeCall,
+    additionalBracketCall,
+    additionalTemplateCall,
+    adjacentCalls,
+    spaceSeparatedCalls,
   ]) {
     assert.deepEqual(extractRootFlightSegments(invalidBootstrap), [])
     assert.deepEqual(extractFirstFlightRouteSegments(invalidBootstrap), [])
@@ -207,6 +579,15 @@ test("Flight extraction accepts only the executed channel-1 record-0 bootstrap",
     )
     assert.ok(failedNames.includes("Root Flight state is canonical"))
     assert.ok(failedNames.includes("Root Flight route tree is canonical"))
+  }
+
+  for (const validSeparator of [";", "\n"]) {
+    const combinedCalls = CANONICAL_HOME_HTML.replace(
+      "</script>\n    <script>self.__next_f.push",
+      `${validSeparator}self.__next_f.push`
+    )
+    assert.deepEqual(extractRootFlightSegments(combinedCalls), [""])
+    assert.deepEqual(extractFirstFlightRouteSegments(combinedCalls), [""])
   }
 })
 

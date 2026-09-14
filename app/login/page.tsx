@@ -2,11 +2,13 @@ import type { Metadata } from "next"
 
 import { LoginForm } from "@/components/auth/login-form"
 import { loginAuthFeedback } from "@/lib/auth-feedback"
+import { PRIVATE_ROUTE_ROBOTS } from "@/lib/private-route-metadata"
 import { safeInternalPath } from "@/lib/safe-path"
 
 export const metadata: Metadata = {
   title: "Sign In | HWL by SMD",
   description: "Sign in to your private HWL by SMD ritual library.",
+  robots: PRIVATE_ROUTE_ROBOTS,
 }
 
 export default async function LoginPage({

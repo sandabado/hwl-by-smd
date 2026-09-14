@@ -279,7 +279,7 @@ export default async function AdminBookingsPage() {
               },
               {
                 detail:
-                  "After the session, send the appropriate Stripe invoice or payment link. This handoff is manual for launch.",
+                  "After the session, create and send a customer-specific Stripe invoice. This handoff is manual for launch.",
                 title: "Collect payment afterward",
               },
             ].map(({ detail, title }, index) => (
@@ -432,9 +432,9 @@ export default async function AdminBookingsPage() {
             </p>
             <p className="mt-1 max-w-3xl text-xs leading-5 text-[#59645b]">
               A booking can be confirmed without payment. Shannon completes the
-              session, then sends a Stripe invoice or payment link. Automatic
-              post-session billing and a unified client payment history are not
-              active yet.
+              session, then sends a customer-specific Stripe invoice. Stripe
+              emails the hosted payment page; automatic completion-triggered
+              billing and a unified client payment history are not active yet.
             </p>
           </div>
         </div>

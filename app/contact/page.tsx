@@ -55,14 +55,25 @@ export default async function ContactPage({
             <div className="mt-8">
               <ContactForm
                 fields={[
-                  { label: "Name", name: "name", required: true },
                   {
+                    autoComplete: "name",
+                    label: "Name",
+                    name: "name",
+                    required: true,
+                  },
+                  {
+                    autoComplete: "email",
                     label: "Email",
                     name: "email",
                     required: true,
                     type: "email",
                   },
-                  { label: "Phone", name: "phone", type: "tel" },
+                  {
+                    autoComplete: "tel",
+                    label: "Phone",
+                    name: "phone",
+                    type: "tel",
+                  },
                   { label: "Subject", name: "subject" },
                 ]}
                 source="contact-page"

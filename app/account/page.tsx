@@ -225,7 +225,7 @@ export default async function AccountPage() {
                 variant="link"
                 className="mt-2 px-0 text-[var(--primary)]"
               >
-                <Link href="/store">Browse the store</Link>
+                <Link href="/beauty/lift">Discover LIFT</Link>
               </Button>
             </div>
           )}

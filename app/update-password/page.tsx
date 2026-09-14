@@ -3,6 +3,7 @@ import Link from "next/link"
 
 import { UpdatePasswordForm } from "@/components/auth/update-password-form"
 import { Button } from "@/components/ui/button"
+import { PRIVATE_ROUTE_ROBOTS } from "@/lib/private-route-metadata"
 import { createClient } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
@@ -10,6 +11,7 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Choose a New Password | HWL by SMD",
   description: "Securely choose a new password for your HWL by SMD account.",
+  robots: PRIVATE_ROUTE_ROBOTS,
 }
 
 async function hasAuthenticatedUser() {

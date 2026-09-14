@@ -1,15 +1,12 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
+import {
+  requiresSupabaseSession,
+  supabaseLoginUrl,
+} from "@/lib/auth-route-policy"
+import { isDemoAdminEnabled } from "@/lib/demo-admin"
 import { isSupabaseConfigured, publicEnv } from "@/lib/env"
-
-const protectedPrefixes = [
-  "/the-den",
-  "/library",
-  "/course",
-  "/lesson",
-  "/account",
-]
 
 const deferredConnectionPaths = new Set([
   "/den/connection",
@@ -52,18 +49,12 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data } = await supabase.auth.getClaims()
-  const isProtected = protectedPrefixes.some((prefix) =>
-    request.nextUrl.pathname.startsWith(prefix)
-  )
+  const isProtected = requiresSupabaseSession(request.nextUrl.pathname, {
+    demoAdminEnabled: isDemoAdminEnabled(),
+  })
 
   if (!data?.claims && isProtected) {
-    const loginUrl = request.nextUrl.clone()
-    loginUrl.pathname = "/login"
-    loginUrl.searchParams.set(
-      "redirectTo",
-      `${request.nextUrl.pathname}${request.nextUrl.search}`
-    )
-    return NextResponse.redirect(loginUrl)
+    return NextResponse.redirect(supabaseLoginUrl(request.nextUrl))
   }
 
   return response

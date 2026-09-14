@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** September 12, 2026
+**Updated:** September 13, 2026
 
 **Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
 Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
@@ -14,16 +14,118 @@ historical `howlbysmd.com` observations are not new-domain verification.
 All dated sections below remain evidence history. This table is the controlling
 status for the current release decision.
 
-| Surface              | Current authority                                                                                                                                                      | Status                                                                                                                                                                                                                                                                                                                                                        |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Local candidate      | Pushed parent `1039e0e2d6c58f2f4eba19036bf03f9c736227b5` plus the current uncommitted Cal, administrator-handoff, and password-recovery hardening                      | All 572 repository cases, lint, TypeScript, SEO for 21 pages, `git diff --check`, the 63-route Next.js 16.3.4 Webpack production build, and all three transactional PostgreSQL harnesses pass. This is not a releasable SHA until it is reviewed and committed under a fresh exact-scope approval.                                                            |
-| Preview              | READY deployment `dpl_9Qh7PD4p8SgmtrF3Q3N7TMtRQZfe` at pushed checkpoint `1039e0e2d6c58f2f4eba19036bf03f9c736227b5`, protected at `preview.hwlbysmd.com`               | Vercel independently reports the exact checkpoint SHA and branch. The homepage and booking route render, all eleven services remain discoverable, and an Intuitive Tarot calendar exposes live times. The newer local hardening below is not present in Preview. The Preview candidate still lacks a fresh end-to-end sandbox receipt and fulfillment canary. |
-| Production           | Public aliases remain on independently recorded deployment `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i`, commit `6a260bcfa7c752562be264d1a077013fc8ff9f4d`, with commerce closed | No deployment of the newer local hardening, alias reassignment, or sales opening is authorized.                                                                                                                                                                                                                                                               |
-| Booking              | All 11 Cal.com services expose live dates and times with manual confirmation and no Cal payment                                                                        | Cal still shows one Primary and one Unverified account email. Complete the pending `shannon@hwlbysmd.com` verification before relying on the private admin API identity.                                                                                                                                                                                      |
-| Booking history      | Cal.com still shows “Create your first webhook”; HWL booking-ledger readiness remains disabled                                                                         | Native Cal lifecycle compatibility and signed-ledger handling now pass locally, including real transactional SQL tests. They are not hosted until migrations 019 and the matching app SHA are separately approved, deployed, and canaried.                                                                                                                    |
-| LIFT commerce        | One active $11.11 video + PDF product, strict checkout/webhook code, deterministic Stripe receipts, private media, and prior sandbox fulfillment evidence exist        | The exact current candidate still needs a fresh approved sandbox purchase; Production still needs the owner-approved live $11.11 canary. Public sales remain closed.                                                                                                                                                                                          |
-| Contact and retreats | Preview renders the durable inquiry path; recent Resend records show inquiry alerts to `shannon@hwlbysmd.com` as Delivered                                             | Human inbox handling remains unproved. Public Production inquiry collection stays closed until a monitored destination and end-to-end receipt are verified.                                                                                                                                                                                                   |
-| Release authority    | The owner approved pushed checkpoint `1039e0e2d6c58f2f4eba19036bf03f9c736227b5` for the checkpoint branch and Vercel Preview only                                      | The newer uncommitted local hardening, `main`, Production, public domains, hosted migrations, provider roles, and open sales remain outside the current authorization.                                                                                                                                                                                        |
+| Surface              | Current authority                                                                                                                                                                                                                        | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local candidate      | Exact pushed base and tracking ref `d28be30b9eff32e5f74784fb63f827407e70e9f1` plus the current 36-path uncommitted auth, private-indexing, LIFT-recovery, form, routing, hydration, Admin-API inventory, and release-preflight hardening | All 652 in-process repository cases pass: Auth 142, Admin 55, Booking 135, Commerce 150, Inquiries 21, Accessibility 8, Email 3, Preview policy, hosted-root, Admin-API inventory, and routing 72, Relationships 3, and Launch environment 63. Full ESLint, TypeScript, SEO for 21 pages, changed-file formatting, `git diff --check`, added-line credential-shape review, a zero-vulnerability production dependency audit, and the 63-page Next.js 16.3.4 Webpack production build pass. This is not an immutable candidate until committed under fresh exact-scope approval. |
+| Preview              | Protected READY/STAGED deployment `dpl_3eUKiEGs53CSw893CZmrN1McA2PU` at exact checkpoint `d28be30b9eff32e5f74784fb63f827407e70e9f1`, attached to `preview.hwlbysmd.com`                                                                  | Vercel independently reports the exact SHA, branch, deployment, and alias. The public booking embed exposes live Intuitive Tarot dates and times. The exact SHA has recorded sandbox purchase, fulfillment, LIFT-access, and labeled-inquiry evidence with Preview sales reclosed afterward. A fresh authenticated homepage browser still records React hydration error 418; the same optimized local build is clean, so public promotion remains held for a closed hosted canary.                                                                                              |
+| Production           | Public aliases remain on independently recorded deployment `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i`, commit `6a260bcfa7c752562be264d1a077013fc8ff9f4d`, with commerce closed                                                                   | No deployment of the local hardening, alias reassignment, or sales opening is authorized.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Booking              | All 11 Cal.com services are published with manual confirmation, post-appointment payment, and no Cal payment                                                                                                                             | The Preview Intuitive Tarot embed currently exposes five Pacific-time openings on September 27. Cal still shows one Primary and one Unverified account email. Complete the pending `shannon@hwlbysmd.com` verification before installing or relying on the restricted private API identity.                                                                                                                                                                                                                                                                                     |
+| Booking history      | Cal.com still shows no configured webhook; HWL booking-ledger readiness remains disabled                                                                                                                                                 | Native Cal lifecycle compatibility and signed-ledger handling pass locally, including the transactional SQL harness. Migrations 019–020, the restricted Cal credential, signed webhook, and request → confirm → reschedule → cancel canary are not hosted or verified. Fresh Vercel name-only inventories confirm that neither Preview nor Production has `CALCOM_API_KEY` or `CALCOM_WEBHOOK_SECRET`.                                                                                                                                                                          |
+| Service payments     | Bookings take no payment; the admin UI supports a manually prepared, customer-specific Stripe Invoice handoff                                                                                                                            | Completion-triggered invoice creation, automatic payment email, and authoritative Den service-payment history are not implemented. Manual post-appointment invoicing is the only launch-ready workflow unless a separate automation scope is approved and canaried.                                                                                                                                                                                                                                                                                                             |
+| LIFT commerce        | One $11.11 video + PDF product, strict checkout/webhook code, deterministic receipts, private media, and exact-`d28be30` sandbox fulfillment evidence exist                                                                              | Preview sales were reclosed after the passing sandbox canary. Production still needs an exact closed-candidate verification and a separately owner-approved live $11.11 purchase before public sales may open.                                                                                                                                                                                                                                                                                                                                                                  |
+| Contact and retreats | Exact-`d28be30` Preview inquiry storage and Resend delivery evidence exist for a labeled test                                                                                                                                            | Provider delivery is not proof that Shannon opened the message. Public Production inquiry collection stays closed until its Production destination and database-first path receive a fresh end-to-end canary.                                                                                                                                                                                                                                                                                                                                                                   |
+| Release authority    | The checkpoint branch remains at `d28be30b9eff32e5f74784fb63f827407e70e9f1`; the current fix-forward set is local and uncommitted                                                                                                        | No fresh approval yet names a commit for the current local set. `main`, Production, public domains, hosted migrations, provider identities, live Stripe, and open sales remain outside current authority.                                                                                                                                                                                                                                                                                                                                                                       |
+
+## September 13 Local Fix-Forward and Hosted Read-Only Recheck
+
+- **Administrator deep links:** hosted `/admin` descendants now enter the
+  signed-out gate in Proxy while `/admin/login` and `/admin/api/**` remain
+  excluded. An optimized local request to
+  `/admin/clients?view=active` returned HTTP 307 to
+  `/login?redirectTo=%2Fadmin%2Fclients%3Fview%3Dactive`, preserving the exact
+  intended destination. The local development-only demo administrator remains
+  intentionally available only when its existing gates pass.
+- **Private search boundaries:** account, Den, library, course, lesson,
+  checkout, login, reset-password, and update-password route families now
+  share an enforced `noindex, nofollow` policy. The existing administrator
+  policy remains in place. Rendered optimized auth pages emitted the expected
+  robots directive.
+- **Calm recovery and form details:** invalid checkout and empty-account
+  recovery return to canonical LIFT instead of the general Store. Contact and
+  newsletter fields expose the intended browser autocomplete semantics.
+  Preview release policy now requires booking, commerce, email, inquiry, and
+  accessibility suites in both package scripts and CI.
+- **Local proof:** all 652 in-process cases pass. SEO validation reports 21
+  pages, 21 metadata records, and 7 long-form documents. The final production
+  build compiled 63 pages. A fresh 1280-pixel optimized homepage had equal
+  document and viewport widths, the Production canonical link, the home header,
+  no breadcrumb or non-home effects, a completed hydration sentinel, and no
+  console records. A browser request to `/index` preserved its query while
+  reaching `/` with the same clean state.
+- **Hosted Preview proof:** Vercel reports protected deployment
+  `dpl_3eUKiEGs53CSw893CZmrN1McA2PU` READY/STAGED in `iad1`, from exact
+  checkpoint `d28be30b9eff32e5f74784fb63f827407e70e9f1` on
+  `checkpoint/platform-overhaul-2026-08-20`. A newer Dependabot Preview exists
+  only on its automatic branch alias and has not displaced
+  `preview.hwlbysmd.com`. The booking page loaded the canonical Intuitive Tarot
+  Cal embed, manual-confirmation policy, and five current time choices without
+  an application console error.
+- **Public Production proof:** both canonical domains still resolve to READY
+  Production deployment `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i`, exact checkpoint
+  `6a260bcfa7c752562be264d1a077013fc8ff9f4d`; the apex remains a verified 308
+  redirect to `www`. A newer READY but alias-free Production candidate at
+  `403fc5f4346809a4fe7710318e79c84394264e8d` owns no public hostname and is not
+  the release source. Production exposes 26 scoped configuration names with
+  the required Stripe, Supabase, Resend, storage, and closed-release families;
+  the legacy public Supabase anon variable is absent, while the Cal API key,
+  Cal webhook secret, and optional captions path are absent. Public canaries
+  returned 200 for `/` and `/login`, 401 for anonymous LIFT video, 307 to login
+  for anonymous LIFT PDF, intentional closed-sales 503 for a valid-origin
+  checkout, 400 for an unsigned Stripe webhook, and disabled-ledger 503 for an
+  unsigned Cal webhook. These prove fail-closed application behavior, not live
+  provider credential validity or end-to-end delivery.
+- **Hydration hold:** fresh authenticated Preview and public Production
+  homepage browsers both record React error 418 with the mismatch classified at
+  `HTML`. Local development and the optimized local production build remain
+  clean. Vercel build and retained runtime records show no server-side error,
+  but the static cached homepage does not produce function logs that can prove
+  client hydration. On both hosted deployments, `/index` and `/` return HTTP
+  200 as byte-identical root artifacts with `x-matched-path: /`; their Flight
+  router state names `index`, and the raw root HTML contains the non-home
+  effects, header, and `Index` breadcrumb. The browser at `/` computes the home
+  branch and regenerates it, explaining the post-error home-looking UI. A clean
+  exact-SHA build names the empty root segment. The local candidate now
+  redirects `/index` to `/` before filesystem and ISR resolution, with
+  regression coverage, a stable semantic home-header marker, and a nonvisual
+  post-hydration sentinel. The operator-only hosted-root verifier requires an
+  exact 308, query preservation, bounded `200 text/html`, canonical root Flight
+  state, and raw home-only markup; its credential can be sent only to the exact
+  protected Preview origin. Do not add `suppressHydrationWarning`; require that
+  HTTP gate plus a fresh-cache browser with the completed sentinel and zero
+  React 418 before public alias promotion.
+- **Read-only journey proof:** the optimized local booking page exposes all 11
+  services at once, groups them under three named regions, and opens one clear
+  in-card continuation to the dedicated date-and-time step. The existing exact-
+  `d28be30` Preview rendered Shannon's live Intuitive Tarot calendar with five
+  Pacific-time choices on September 27 and no horizontal overflow. The public
+  Cal page independently rendered the same availability. Local in-app embedding
+  reached the intentional external-Cal fallback while the public event and
+  hosted Preview embed remained healthy; no appointment was submitted.
+- **Commerce and private-area proof:** LIFT presents one $11.11 video-and-PDF
+  offer. Adding it opens the named cart dialog with one-time-purchase copy,
+  exact subtotal and total, delivery/access terms, legal links, and a disabled
+  closed-sales checkout action; the test cart was restored empty afterward.
+  The Den exposes only Library, Book a Session, and Manage Account shortcuts.
+  Account metadata rendered `noindex, nofollow`. The administrator dashboard,
+  Bookings, Clients, individual client history, Money, Inquiries, and Client
+  messages rendered successfully in a read-only local session and state their
+  provider/ledger gaps instead of inventing synchronized history.
+- **Release-test hardening:** the hosted-root verifier now requires the exact
+  `text/html` MIME essence, exact raw redirect Locations, executable Next Flight
+  channel-1/record-0 bootstrap state, exact live-markup attributes, and the raw
+  hydration sentinel. Comments, script/style strings, arbitrary JSON, inert
+  markup, and lookalike attributes cannot satisfy it. A recursive TypeScript-
+  AST inventory now covers Next's documented `route.ts` and `route.js`
+  conventions, fails closed on every other `route.*` lookalike, and fails Auth
+  and Preview policy if any Admin API handler is added or loses its reviewed
+  HTTP-method, applicable authentication, origin/CSRF, guard-result,
+  session-result value-flow, returned-dispatch, or guard-order contract. Adversarial
+  fixtures reject ignored, inverted, conditional, displaced, non-terminating,
+  nested, or indirectly returned guard/dispatch calls. This is a fail-closed
+  source-policy check, not a claim of complete authorization proof.
+- **Boundary preserved:** this pass made no commit, push, deployment, hosted
+  migration, provider setting, domain, alias, payment, inquiry, account, role,
+  calendar, or sales-state mutation.
 
 ## September 12 Read-Only Hosted-State Recheck
 

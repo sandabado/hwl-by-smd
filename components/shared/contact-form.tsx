@@ -13,6 +13,7 @@ import { SITE_CONFIG } from "@/lib/constants"
 import { isInquiryCollectionReady } from "@/lib/inquiries/readiness"
 
 type ContactField = {
+  autoComplete?: string
   label: string
   name: string
   required?: boolean
@@ -100,6 +101,7 @@ export function ContactForm({
             )}
           </span>
           <input
+            autoComplete={field.autoComplete}
             className="min-h-11 rounded-md border border-[var(--border)] bg-[var(--background)] px-3 text-[var(--foreground)] outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
             name={field.name}
             placeholder={field.placeholder}

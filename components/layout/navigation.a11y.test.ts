@@ -87,6 +87,10 @@ test("global navigation keeps landmarks, current state, and named utility contro
   assert.match(mobileNav, /aria-label="Mobile main"/)
   assert.match(mobileNav, /aria-label="Open navigation menu"/)
   assert.match(header, /aria-label="HWL by SMD home"/)
+  assert.match(
+    header,
+    /data-site-header-variant=\{isHome \? "home" : "interior"\}/
+  )
   assert.match(auth, /aria-label=\{mobile \? undefined : ACCOUNT_NAV_LABEL\}/)
   assert.match(booking, /aria-controls="site-booking-sheet"/)
   assert.match(booking, /aria-expanded=\{isOpen\}/)
@@ -96,6 +100,17 @@ test("global navigation keeps landmarks, current state, and named utility contro
   assert.match(cart, /aria-haspopup="dialog"/)
   assert.match(layout, /<SkipLink \/>/)
   assert.match(layout, /id="main-content"/)
+})
+
+test("the app shell exposes a nonvisual post-hydration canary", () => {
+  const sentinel = source("components/layout/hydration-sentinel.tsx")
+  const layout = source("app/layout.tsx")
+
+  assert.match(sentinel, /data-hwl-hydration-sentinel=""/)
+  assert.match(sentinel, /setAttribute\("data-hwl-hydrated", "true"\)/)
+  assert.match(sentinel, /aria-hidden="true"/)
+  assert.match(sentinel, /hidden/)
+  assert.match(layout, /<HydrationSentinel \/>/)
 })
 
 test("persistent header actions retain generous pointer targets", () => {

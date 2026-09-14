@@ -74,6 +74,7 @@ export function NewsletterForm() {
         Email address
       </label>
       <input
+        autoComplete="email"
         className="min-h-11 flex-1 rounded-full border border-[var(--border)] bg-white/70 px-5 text-sm outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20"
         id="journal-email"
         name="email"

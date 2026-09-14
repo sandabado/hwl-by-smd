@@ -3,13 +3,10 @@ import type { Metadata } from "next"
 import { PRIVATE_ROUTE_ROBOTS } from "@/lib/private-route-metadata"
 
 export const metadata: Metadata = {
-  title: "Reset Password | HWL by SMD",
-  description:
-    "Request a secure password reset link for your HWL by SMD account.",
   robots: PRIVATE_ROUTE_ROBOTS,
 }
 
-export default function ResetPasswordLayout({
+export default function CheckoutLayout({
   children,
 }: Readonly<{
   children: React.ReactNode

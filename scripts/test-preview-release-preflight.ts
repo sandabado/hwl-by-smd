@@ -14,8 +14,13 @@ import {
 function repositoryFixture(): PreviewRepositoryFiles {
   return {
     ci: `
+      - run: npm run test:accessibility
       - run: npm run test:admin
       - run: npm run test:auth
+      - run: npm run test:booking
+      - run: npm run test:commerce
+      - run: npm run test:email
+      - run: npm run test:inquiries
       - run: npm run test:launch-env
       - run: npm run test:preview-release
       - run: npm run test:relationships
@@ -63,11 +68,19 @@ MUX_PRIVATE_KEY=
           "node scripts/preflight-preview-release.ts --repository-only --require-upstream-sync",
         "preflight:preview:repository":
           "node scripts/preflight-preview-release.ts --repository-only",
+        "verify:hosted-root": "node scripts/verify-hosted-root.ts",
+        "test:accessibility": "node --test accessibility.test.ts",
         "test:admin": "node --test scripts/test-admin-client-directory.ts",
-        "test:auth": "node --test scripts/test-auth-boundaries.ts",
+        "test:auth":
+          "node --test scripts/test-admin-api-security-inventory.ts scripts/test-auth-boundaries.ts",
+        "test:booking": "node --test scripts/test-booking-boundaries.ts",
+        "test:commerce": "node --test scripts/test-commerce-boundaries.ts",
+        "test:email": "node --test scripts/test-email-branding.ts",
+        "test:hosted-root": "node --test scripts/test-hosted-root-verifier.ts",
+        "test:inquiries": "node --test scripts/test-inquiry-boundaries.ts",
         "test:launch-env": "node scripts/test-launch-env.ts",
         "test:preview-release":
-          "node --test scripts/test-preview-release-preflight.ts",
+          "node --test scripts/test-admin-api-security-inventory.ts scripts/test-hosted-root-verifier.ts scripts/test-preview-release-preflight.ts scripts/test-routing-policy.ts",
         "test:relationships":
           "node --test scripts/test-relationship-practitioner-boundary-migration.ts",
       },
@@ -243,6 +256,95 @@ test("missing Auth boundary coverage fails Preview policy", () => {
   assert.ok(
     failuresForFixture.some((item) => item.name === "CI Preview coverage")
   )
+})
+
+test("every launch-critical suite is required in package scripts and CI", () => {
+  const launchCriticalSuites = [
+    "accessibility",
+    "booking",
+    "commerce",
+    "email",
+    "inquiries",
+  ]
+
+  for (const suite of launchCriticalSuites) {
+    const scriptName = `test:${suite}`
+    const command = `npm run ${scriptName}`
+
+    const packageFixture = repositoryFixture()
+    const parsed = JSON.parse(packageFixture.packageJson) as {
+      scripts: Record<string, string>
+    }
+    delete parsed.scripts[scriptName]
+    packageFixture.packageJson = JSON.stringify(parsed)
+
+    const scriptFailure = failures(
+      auditPreviewRepositoryFiles(packageFixture)
+    ).find((item) => item.name === "Preview scripts")
+    assert.match(scriptFailure?.detail ?? "", new RegExp(scriptName))
+
+    const ciFixture = repositoryFixture()
+    ciFixture.ci = ciFixture.ci.replace(`- run: ${command}`, "")
+
+    const ciFailure = failures(auditPreviewRepositoryFiles(ciFixture)).find(
+      (item) => item.name === "CI Preview coverage"
+    )
+    assert.match(ciFailure?.detail ?? "", new RegExp(command))
+  }
+})
+
+test("the hosted root operator gate is installed without adding a live CI fetch", () => {
+  for (const scriptName of ["test:hosted-root", "verify:hosted-root"]) {
+    const fixture = repositoryFixture()
+    const parsed = JSON.parse(fixture.packageJson) as {
+      scripts: Record<string, string>
+    }
+    delete parsed.scripts[scriptName]
+    fixture.packageJson = JSON.stringify(parsed)
+
+    const scriptFailure = failures(auditPreviewRepositoryFiles(fixture)).find(
+      (item) => item.name === "Preview scripts"
+    )
+    assert.match(scriptFailure?.detail ?? "", new RegExp(scriptName))
+  }
+
+  assert.doesNotMatch(repositoryFixture().ci, /npm run verify:hosted-root/)
+})
+
+test("CI Preview policy cannot silently drop hosted-root unit coverage", () => {
+  const fixture = repositoryFixture()
+  const parsed = JSON.parse(fixture.packageJson) as {
+    scripts: Record<string, string>
+  }
+  parsed.scripts["test:preview-release"] =
+    "node --test scripts/test-preview-release-preflight.ts"
+  fixture.packageJson = JSON.stringify(parsed)
+
+  assert.ok(
+    failures(auditPreviewRepositoryFiles(fixture)).some(
+      (item) => item.name === "Hosted root offline coverage"
+    )
+  )
+})
+
+test("Auth and CI Preview policy cannot silently drop the Admin API inventory", () => {
+  for (const scriptName of ["test:auth", "test:preview-release"]) {
+    const fixture = repositoryFixture()
+    const parsed = JSON.parse(fixture.packageJson) as {
+      scripts: Record<string, string>
+    }
+    parsed.scripts[scriptName] = parsed.scripts[scriptName].replace(
+      "scripts/test-admin-api-security-inventory.ts",
+      ""
+    )
+    fixture.packageJson = JSON.stringify(parsed)
+
+    assert.ok(
+      failures(auditPreviewRepositoryFiles(fixture)).some(
+        (item) => item.name === "Admin API security inventory"
+      )
+    )
+  }
 })
 
 test("wrong reconciliation cron fails", () => {

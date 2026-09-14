@@ -32,6 +32,7 @@ export function Header() {
 
   return (
     <header
+      data-site-header-variant={isHome ? "home" : "interior"}
       className={cn(
         "top-0 z-50 max-h-[72px] border-b transition-[height,background-color,box-shadow,backdrop-filter] duration-300",
         isHome

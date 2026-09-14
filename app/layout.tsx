@@ -7,6 +7,7 @@ import { CartProvider } from "@/components/cart/cart-provider"
 import { CartSheet } from "@/components/cart/cart-sheet"
 import { Footer } from "@/components/layout/footer"
 import { Header } from "@/components/layout/header"
+import { HydrationSentinel } from "@/components/layout/hydration-sentinel"
 import { SiteBreadcrumbs } from "@/components/layout/site-breadcrumbs"
 import { SiteEffects } from "@/components/layout/site-effects"
 import { SkipLink } from "@/components/layout/skip-link"
@@ -68,6 +69,7 @@ export default function RootLayout({
             <BookingShelfProvider>
               <div className="flex min-h-screen flex-col" data-app-shell="">
                 <SkipLink />
+                <HydrationSentinel />
                 <SiteEffects />
                 <Header />
                 <SiteBreadcrumbs />

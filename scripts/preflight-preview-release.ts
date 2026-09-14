@@ -246,11 +246,18 @@ export function auditPreviewRepositoryFiles(
       "preflight:preview",
       "preflight:preview:post-push",
       "preflight:preview:repository",
+      "test:accessibility",
       "test:admin",
       "test:auth",
+      "test:booking",
+      "test:commerce",
+      "test:email",
+      "test:hosted-root",
+      "test:inquiries",
       "test:launch-env",
       "test:preview-release",
       "test:relationships",
+      "verify:hosted-root",
     ]
     const missingScripts = requiredScripts.filter(
       (name) => typeof scriptMap[name] !== "string"
@@ -260,12 +267,47 @@ export function auditPreviewRepositoryFiles(
         ? check(
             "pass",
             "Preview scripts",
-            "repository and environment Preview preflights are installed"
+            "repository, environment, hosted-root, and launch-critical Preview checks are installed"
           )
         : check(
             "fail",
             "Preview scripts",
             `missing package scripts: ${missingScripts.join(", ")}`
+          )
+    )
+
+    const previewRelease =
+      typeof scriptMap["test:preview-release"] === "string"
+        ? scriptMap["test:preview-release"]
+        : ""
+    const auth =
+      typeof scriptMap["test:auth"] === "string" ? scriptMap["test:auth"] : ""
+    const adminApiInventoryTest = "scripts/test-admin-api-security-inventory.ts"
+    checks.push(
+      previewRelease.includes(adminApiInventoryTest) &&
+        auth.includes(adminApiInventoryTest)
+        ? check(
+            "pass",
+            "Admin API security inventory",
+            "the reviewed Admin API route inventory runs in both Auth and CI Preview policy suites"
+          )
+        : check(
+            "fail",
+            "Admin API security inventory",
+            `${adminApiInventoryTest} must run in both test:auth and test:preview-release`
+          )
+    )
+    checks.push(
+      previewRelease.includes("scripts/test-hosted-root-verifier.ts")
+        ? check(
+            "pass",
+            "Hosted root offline coverage",
+            "the deterministic hosted-root verifier suite runs inside the CI Preview policy command"
+          )
+        : check(
+            "fail",
+            "Hosted root offline coverage",
+            "test:preview-release must include scripts/test-hosted-root-verifier.ts"
           )
     )
   }
@@ -296,8 +338,13 @@ export function auditPreviewRepositoryFiles(
   )
 
   const requiredCiCommands = [
+    "npm run test:accessibility",
     "npm run test:admin",
     "npm run test:auth",
+    "npm run test:booking",
+    "npm run test:commerce",
+    "npm run test:email",
+    "npm run test:inquiries",
     "npm run test:launch-env",
     "npm run test:preview-release",
     "npm run test:relationships",
@@ -311,7 +358,7 @@ export function auditPreviewRepositoryFiles(
       ? check(
           "pass",
           "CI Preview coverage",
-          "CI exercises Auth boundaries, environment fixtures, Preview repository policy, and the provider-free build"
+          "CI exercises booking, inquiry, accessibility, email, commerce, Auth, environment, Preview policy, and provider-free build boundaries"
         )
       : check(
           "fail",

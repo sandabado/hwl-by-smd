@@ -60,8 +60,11 @@ test("booking invoice handoff is scoped to the expected Stripe account and mode"
   assert.match(page, /getExpectedStripeAccountId/)
   assert.match(page, /getExpectedStripeLivemode/)
   assert.match(page, /getStripeDashboardBaseUrl/)
+  assert.match(page, /customer-specific Stripe invoice/)
+  assert.match(page, /automatic completion-triggered/)
   assert.doesNotMatch(
     page,
     /const STRIPE_INVOICES_URL = "https:\/\/dashboard\.stripe\.com\/invoices"/
   )
+  assert.doesNotMatch(page, /invoice or payment link/)
 })

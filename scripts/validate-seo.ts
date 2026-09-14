@@ -7,6 +7,7 @@ import {
   isCanonicalHomepageLiftFeatureDestination,
 } from "../lib/homepage-feature.ts"
 import { LOCATION_PAGES } from "../lib/location-pages.ts"
+import { PRIVATE_ROUTE_ROBOTS } from "../lib/private-route-metadata.ts"
 import { seoJournalArticleList } from "../lib/seo-journal-articles.ts"
 
 const projectRoot = process.cwd()
@@ -53,6 +54,19 @@ const coreMetadataSources = [
   ["/contact", "app/contact/page.tsx"],
   ["/privacy", "app/privacy/page.tsx"],
   ["/terms", "app/terms/page.tsx"],
+] as const
+
+const privateMetadataSources = [
+  ["/login", "app/login/page.tsx"],
+  ["/reset-password", "app/reset-password/layout.tsx"],
+  ["/update-password", "app/update-password/page.tsx"],
+  ["/account/*", "app/account/layout.tsx"],
+  ["/the-den/*", "app/the-den/layout.tsx"],
+  ["/den/*", "app/den/layout.tsx"],
+  ["/library/*", "app/library/layout.tsx"],
+  ["/course/*", "app/course/layout.tsx"],
+  ["/lesson/*", "app/lesson/layout.tsx"],
+  ["/checkout/*", "app/checkout/layout.tsx"],
 ] as const
 
 type MetadataRecord = {
@@ -151,6 +165,24 @@ function similarity(left: string, right: string) {
 }
 
 const errors: string[] = []
+
+if (
+  PRIVATE_ROUTE_ROBOTS.index !== false ||
+  PRIVATE_ROUTE_ROBOTS.follow !== false
+) {
+  errors.push("Private route metadata must remain noindex, nofollow")
+}
+
+for (const [route, source] of privateMetadataSources) {
+  try {
+    const contents = readFileSync(resolve(projectRoot, source), "utf8")
+    if (!/robots:\s*PRIVATE_ROUTE_ROBOTS/.test(contents)) {
+      errors.push(`${route}: ${source} does not apply private robots metadata`)
+    }
+  } catch {
+    errors.push(`${route}: missing private metadata source ${source}`)
+  }
+}
 
 const liftPageSource = readFileSync(
   resolve(projectRoot, "app/lift/page.tsx"),

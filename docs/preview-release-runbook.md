@@ -11,10 +11,41 @@ apex-to-www redirect. The custom Preview is now configured, TLS-valid, assigned
 only to the checkpoint branch, and protected by Vercel SSO. Preserve existing
 mail-forwarding records and the exact verified Resend sending records.
 
-## September 9 current authority snapshot
+## September 13 Current Authority Snapshot
 
-This section supersedes the historical September 5 status below. Keep the
-older section as an audit trail; do not use it as current release evidence.
+- `preview.hwlbysmd.com` remains protected and resolves to READY/STAGED
+  deployment `dpl_3eUKiEGs53CSw893CZmrN1McA2PU`, exact checkpoint
+  `d28be30b9eff32e5f74784fb63f827407e70e9f1`. A newer Dependabot deployment
+  owns only its automatic branch alias and is not a release candidate.
+- Exact Preview and public Production `/index` and `/` currently return the
+  same cached root artifact within each deployment. Their Flight state names
+  `index`, so the server emits the non-home header, breadcrumb, and effects
+  before the client hydrates canonical `/`; fresh browsers record React error 418. The local fix redirects `/index` permanently before filesystem/ISR
+  resolution and has regression coverage. A fresh-cache closed Preview must
+  prove `/index` is 3xx, `/` has canonical root state, and browser hydration is
+  clean before any Production promotion.
+- Public Production remains READY at
+  `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i`, exact checkpoint
+  `6a260bcfa7c752562be264d1a077013fc8ff9f4d`, with sales, inquiries, and booking
+  history closed. Its fail-closed public canaries pass. The complete live-mode
+  configuration shape is present, but live Stripe connectivity, a signed
+  webhook, charge, entitlement, and delivery are not proven.
+- Public Cal booking remains available with manual confirmation and no payment.
+  The restricted Cal API key and webhook secret are absent from Production,
+  and the pending `shannon@hwlbysmd.com` account identity remains unverified.
+  Do not enable HWL booking history or run the signed lifecycle until those
+  gates are complete.
+- Service payment is a manual customer-specific Stripe Invoice after Shannon
+  confirms the appointment occurred and the final amount. The application does
+  not automate the invoice email or expose service-payment history in the Den.
+- The current fix-forward set is local and uncommitted. It grants no commit,
+  push, hosted migration, provider, Preview, Production, domain, alias, live
+  payment, or sales-opening authority.
+
+## September 9 Historical Authority Snapshot
+
+This section superseded the historical September 5 status below. Keep it as an
+audit trail; do not use it as current release evidence.
 
 - The read-oriented administrator runtime was committed and pushed only to
   `checkpoint/platform-overhaul-2026-08-20` at `450188fb9950`. Exact-SHA GitHub
@@ -240,6 +271,62 @@ secret in source, chat, screenshots, or a process command line. Verify the
 sanitized admin queue state and application logs. Production scheduling remains
 untested until a separately authorized Production smoke test.
 
+## Hosted root HTTP and hydration postflight
+
+The hosted root check is an operator-only post-deployment gate. Its unit tests
+run in CI, but CI must never fetch the protected Preview or receive a provider
+credential. First verify the immutable deployment and its approved SHA through
+authenticated Vercel deployment evidence. Then independently confirm that
+`preview.hwlbysmd.com` resolves to that exact deployment immediately before the
+HTTP check. Store the dedicated automation credential only in the ignored
+`.env.preview.local` file:
+
+```text
+VERCEL_AUTOMATION_BYPASS_SECRET=<dedicated Preview automation credential>
+```
+
+Then run:
+
+```bash
+npm run verify:hosted-root -- --origin https://preview.hwlbysmd.com
+```
+
+The verifier sends that credential only to the exact HWL Preview origin and
+never prints it. It reads only three first-party URLs, stops at the first broken
+boundary, caps HTML at 2 MiB, and requires:
+
+- exact `308` from `/index` to `/`;
+- a raw `Location: /` value and exact raw query-preserving Location on the
+  redirect canary (absolute or equivalent-looking spellings fail);
+- `200` from `/` with the exact `text/html` MIME essence;
+- the pinned Next.js channel-1, record-0 bootstrap root and route-tree Flight
+  segments to be empty;
+- the semantic home header plus homepage, hero-heading, and LIFT markers; and
+- the raw hydration-sentinel marker, with no breadcrumb or non-home
+  scroll-breath markup in raw server HTML.
+
+Vercel documents the automation bypass header and system environment variable
+at
+<https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-automation>.
+
+The custom-alias HTTP result is authoritative only when the independent
+alias-to-SHA checks immediately before and after it match the approved
+immutable deployment. Do not widen the bypass allowlist or send its credential
+to an automatic or immutable deployment URL. Establish immutable-deployment
+proof through authenticated Vercel metadata and, when browser proof is needed,
+an authenticated fresh browser session.
+
+The HTTP gate is server-response proof, not browser hydration proof. In a
+separate fresh extension-free browser context, attach console and page-error
+capture before navigating to the bare `/`, wait for
+`[data-hwl-hydration-sentinel][data-hwl-hydrated="true"]`, and require the final
+URL `/`, `data-site-header-variant="home"`, the Production canonical link, no
+breadcrumb or non-home effects, and zero React 418, hydration mismatch,
+first-party console error, or page error. Run the fresh browser check against
+the authenticated immutable deployment and the custom alias. Recheck the
+alias-to-SHA mapping afterward to close the race window; do not substitute a
+mutable alias for immutable deployment identity.
+
 ## Hosted Preview verification order
 
 The current checkpoint has established the ledger/assets, custom hostname,
@@ -262,7 +349,10 @@ them after any new checkpoint; signed/provider/human E2E remains pending.
    before deploying that commit.
 6. Deploy with closed sales. Assign `preview.hwlbysmd.com`, then prove the
    public application, inquiry fallback, booking fallback, protected routes,
-   unsigned webhook rejection, and cron authorization rejection.
+   unsigned webhook rejection, and cron authorization rejection. Require
+   `npm run verify:hosted-root` to pass, then require the hydrated sentinel,
+   home-only header/breadcrumb behavior, and zero React hydration errors in a
+   fresh extension-free browser.
 7. Create the persistent sandbox webhook and install only its Preview signing
    secret. Redeploy closed, send a signed sandbox delivery, and verify its exact
    target/account/mode database receipt.
@@ -284,9 +374,10 @@ them after any new checkpoint; signed/provider/human E2E remains pending.
 
 ## Production gate
 
-Preview success is not Production approval. Do not create live Stripe objects,
-install live credentials, assign Production aliases, promote a deployment, or
-enable real money until the owner separately approves the Production Supabase
-boundary, live provider configuration, and final Preview evidence. Stripe live
-onboarding is currently 10% complete and must be finished and verified before
-live Product, Price, or webhook setup.
+Preview success is not Production approval. Do not assign Production aliases,
+promote a deployment, run a live charge, or enable real money until the owner
+separately approves the Production Supabase boundary, live provider
+configuration, and final Preview evidence. The live Stripe account and
+canonical $11.11 Product, Price, and webhook already exist; their presence is
+not proof of credential validity, signed delivery, entitlement, or a successful
+live purchase.

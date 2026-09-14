@@ -190,7 +190,7 @@ export default async function CheckoutSuccessPage({
                   ? "Sign in with the same email used for checkout so we can verify your private access."
                   : verificationUnavailable
                     ? "This page has not granted access or claimed that payment succeeded. Keep your Stripe receipt and contact Shannon so the purchase can be checked safely."
-                    : "No access was granted from this page. Return to the store or contact Shannon if you completed a payment."}
+                    : "No access was granted from this page. Return to LIFT or contact Shannon if you completed a payment."}
         </p>
         {paidPending ? (
           <PaidCheckoutReconciler sessionId={state.sessionId} />
@@ -247,7 +247,7 @@ export default async function CheckoutSuccessPage({
               asChild
               className="h-11 rounded-full bg-[var(--primary)] px-7 text-white"
             >
-              <Link href="/store">Return to Store</Link>
+              <Link href="/beauty/lift">Return to LIFT</Link>
             </Button>
           )}
           <Button asChild className="h-11 rounded-full px-7" variant="outline">

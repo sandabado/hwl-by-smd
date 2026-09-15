@@ -1,6 +1,12 @@
+import { createHash } from "node:crypto"
 import { resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { isIP } from "node:net"
+import {
+  html as parse5Html,
+  parse as parseHtml,
+  type DefaultTreeAdapterTypes,
+} from "parse5"
 
 export const HOSTED_ROOT_ORIGIN_ENV = "HOSTED_ROOT_ORIGIN"
 export const MAX_HOSTED_ROOT_HTML_BYTES = 2 * 1024 * 1024
@@ -111,8 +117,13 @@ export function createHostedRootHeaders({
 }
 
 type HtmlStartTag = {
+  ancestors: readonly HtmlStartTag[]
   attributes: Map<string, string | null>
+  hasExplicitEndTag: boolean
+  hasReviewedReactBoundary: boolean
   name: string
+  sourceEnd: number | null
+  sourceStart: number | null
 }
 
 type JavaScriptLexState =
@@ -131,197 +142,467 @@ const INERT_MARKUP_CONTAINERS = new Set([
   "xmp",
 ])
 
-function findHtmlTagEnd(html: string, start: number) {
-  let quote: '"' | "'" | null = null
+const ACTIVE_EMBEDDING_ELEMENTS = new Set([
+  "base",
+  "embed",
+  "frame",
+  "iframe",
+  "object",
+])
 
-  for (let cursor = start; cursor < html.length; cursor += 1) {
-    const character = html[cursor]
-    if (quote) {
-      if (character === quote) quote = null
-      continue
-    }
-    if (character === '"' || character === "'") {
-      quote = character
-      continue
-    }
-    if (character === ">") return cursor
-  }
+const ACTIVE_SVG_SMIL_ELEMENTS = new Set([
+  "animate",
+  "animatemotion",
+  "animatetransform",
+  "discard",
+  "set",
+])
 
-  return -1
+const EXECUTABLE_URL_ATTRIBUTES = new Set([
+  "action",
+  "formaction",
+  "href",
+  "src",
+  "xlink:href",
+])
+
+function isCommentNode(
+  node: DefaultTreeAdapterTypes.Node | undefined
+): node is DefaultTreeAdapterTypes.CommentNode {
+  return node?.nodeName === "#comment"
 }
 
-function parseHtmlStartTag(source: string): HtmlStartTag | null {
-  const match = source.match(/^<([a-z][a-z0-9:-]*)([\s\S]*?)\/?\s*>$/i)
-  if (!match) return null
+function hasReviewedReactBoundary(element: DefaultTreeAdapterTypes.Element) {
+  if (element.tagName.toLowerCase() !== "template") return false
+  const elementLocation = element.sourceCodeLocation
+  const elementStart = elementLocation?.startTag?.startOffset
+  const elementEnd = elementLocation?.endTag?.endOffset
+  if (elementStart === undefined || elementEnd === undefined) return false
+  const parent = element.parentNode
+  if (!parent || !("childNodes" in parent)) return false
 
-  const attributes = new Map<string, string | null>()
-  const attributeText = match[2] ?? ""
-  const attributePattern =
-    /(?:^|\s)([^\s"'<>\/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g
-
-  for (const attribute of attributeText.matchAll(attributePattern)) {
-    const name = (attribute[1] ?? "").toLowerCase()
-    if (!name || attributes.has(name)) continue
-    attributes.set(name, attribute[2] ?? attribute[3] ?? attribute[4] ?? null)
+  const siblings = parent.childNodes
+  const index = siblings.indexOf(element)
+  const opening = siblings[index - 1]
+  if (
+    !isCommentNode(opening) ||
+    opening.data !== "$?" ||
+    opening.sourceCodeLocation?.endOffset !== elementStart
+  ) {
+    return false
   }
 
-  return { attributes, name: (match[1] ?? "").toLowerCase() }
+  let nestedBoundaries = 0
+  for (const sibling of siblings.slice(index + 1)) {
+    if (!isCommentNode(sibling)) continue
+    if (sibling.data === "/$" || sibling.data === "/&") {
+      if (nestedBoundaries === 0) {
+        return (
+          sibling.data === "/$" &&
+          sibling.sourceCodeLocation !== null &&
+          sibling.sourceCodeLocation !== undefined &&
+          sibling.sourceCodeLocation.startOffset >= elementEnd
+        )
+      }
+      nestedBoundaries -= 1
+    } else if (["$", "$?", "$~", "$!", "&"].includes(sibling.data)) {
+      nestedBoundaries += 1
+    }
+  }
+
+  return false
 }
 
-function isReviewedInlineFlightScriptTag(source: string) {
-  // Match the exact classic-inline form Next emits, with only its optional CSP
-  // nonce. Checking raw syntax also rejects slash-adjacent attributes that the
-  // HTML tokenizer recognizes but the lightweight general attribute scanner
-  // could otherwise overlook (for example `<script/type=...>`).
-  return /^<script(?:\s+nonce\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?\s*>$/i.test(
-    source
+function toHtmlStartTag(
+  element: DefaultTreeAdapterTypes.Element,
+  ancestors: readonly HtmlStartTag[]
+) {
+  const sourceCodeLocation = element.sourceCodeLocation
+
+  return {
+    ancestors,
+    attributes: new Map(
+      element.attrs.map(({ name, value }) => [name.toLowerCase(), value])
+    ),
+    hasExplicitEndTag: sourceCodeLocation?.endTag !== undefined,
+    hasReviewedReactBoundary: hasReviewedReactBoundary(element),
+    name: element.tagName.toLowerCase(),
+    sourceEnd:
+      sourceCodeLocation?.endTag?.endOffset ??
+      sourceCodeLocation?.endOffset ??
+      null,
+    sourceStart:
+      sourceCodeLocation?.startTag?.startOffset ??
+      sourceCodeLocation?.startOffset ??
+      null,
+  } satisfies HtmlStartTag
+}
+
+function hasOnlyAttributes(tag: HtmlStartTag, allowed: ReadonlySet<string>) {
+  return [...tag.attributes.keys()].every((name) => allowed.has(name))
+}
+
+function isReviewedInlineFlightScriptTag(tag: HtmlStartTag) {
+  return (
+    tag.name === "script" &&
+    hasOnlyAttributes(tag, new Set(["nonce"])) &&
+    (!tag.attributes.has("nonce") ||
+      typeof tag.attributes.get("nonce") === "string")
   )
 }
 
-function findHtmlClosingTagStart(
-  lowercaseHtml: string,
-  name: string,
-  start: number
-) {
-  const prefix = `</${name}`
-  let cursor = lowercaseHtml.indexOf(prefix, start)
+// Next 16.3.4's root timing bootstrap.
+const REVIEWED_NEXT_TIMING_SCRIPT_SHA256 =
+  "ee6bb81f4e9fc030a39a7c71affc4d1f2b900baa4b4c7af83361388d7c39599b"
+// React 19.2.4's streamed-Suspense reveal bootstrap for this root. This exact
+// program moves the children of S:0 to the B:0 placeholder.
+const REVIEWED_REACT_REVEAL_SCRIPT_SHA256 =
+  "4009527b06902e2fcd3c2ce78c0652caf43bda1783d1577198d0c3919782c607"
 
-  while (cursor !== -1) {
-    const boundary = lowercaseHtml[cursor + prefix.length]
-    if (!boundary || /[\s/>]/.test(boundary)) return cursor
-    cursor = lowercaseHtml.indexOf(prefix, cursor + prefix.length)
-  }
+const REVIEWED_NEXT_RUNTIME_SCRIPT_SHA256 = new Set([
+  REVIEWED_NEXT_TIMING_SCRIPT_SHA256,
+  REVIEWED_REACT_REVEAL_SCRIPT_SHA256,
+])
 
-  return -1
+export const REVIEWED_NEXT_EXTERNAL_SCRIPT_SOURCES = [
+  "/_next/static/chunks/4bd1b696-93bf506b236d6248.js",
+  "/_next/static/chunks/3794-3679f1c05160977c.js",
+  "/_next/static/chunks/main-app-d601664cda3e88ab.js",
+  "/_next/static/chunks/44530001-78d9977d0e16ef0a.js",
+  "/_next/static/chunks/8500-f4d7bfbe7500f274.js",
+  "/_next/static/chunks/875-2dd0ff8986908486.js",
+  "/_next/static/chunks/8409-0049b4923afd3ae8.js",
+  "/_next/static/chunks/3146-197f68d67b173252.js",
+  "/_next/static/chunks/8437-977886ddbe77cb93.js",
+  "/_next/static/chunks/8954-2fe9e490e7785b71.js",
+  "/_next/static/chunks/4749-c5e5d9439ddd3afc.js",
+  "/_next/static/chunks/6541-e1aa21669a80a57f.js",
+  "/_next/static/chunks/app/layout-928de93dccfc5119.js",
+  "/_next/static/chunks/app/error-fabed4a4230b6e36.js",
+  "/_next/static/chunks/9670-235729f76b0767a5.js",
+  "/_next/static/chunks/1161-ae80ea21d03402d2.js",
+  "/_next/static/chunks/app/not-found-01ef9718fea3fe09.js",
+  "/_next/static/chunks/app/page-535693eedf285425.js",
+  "/_next/static/chunks/polyfills-42372ed130431b0a.js",
+  "/_next/static/chunks/webpack-d6025aca8d9fda69.js",
+] as const
+
+const REVIEWED_NEXT_EXTERNAL_SCRIPT_SOURCE_PATTERNS =
+  REVIEWED_NEXT_EXTERNAL_SCRIPT_SOURCES.map((source) => {
+    const match = source.match(/^(.*-)[0-9a-f]{16}(\.js)$/)
+    if (!match)
+      throw new Error(`Invalid reviewed Next script source: ${source}`)
+    return { prefix: match[1] ?? "", suffix: match[2] ?? "" }
+  })
+
+function matchesReviewedNextScriptSource(source: string, index?: number) {
+  const candidates =
+    index === undefined
+      ? REVIEWED_NEXT_EXTERNAL_SCRIPT_SOURCE_PATTERNS
+      : [REVIEWED_NEXT_EXTERNAL_SCRIPT_SOURCE_PATTERNS[index]]
+
+  return candidates.some(
+    (pattern) =>
+      pattern !== undefined &&
+      source.startsWith(pattern.prefix) &&
+      source.endsWith(pattern.suffix) &&
+      /^[0-9a-f]{16}$/.test(
+        source.slice(pattern.prefix.length, -pattern.suffix.length)
+      )
+  )
 }
 
-function findMatchingTemplateClosingTagStart(
-  html: string,
-  lowercaseHtml: string,
-  start: number
-) {
-  let cursor = start
-  let depth = 1
+function isReviewedNextRuntimeScript(script: string) {
+  const digest = createHash("sha256").update(script).digest("hex")
+  return REVIEWED_NEXT_RUNTIME_SCRIPT_SHA256.has(digest)
+}
 
-  while (cursor < html.length) {
-    const tagStart = html.indexOf("<", cursor)
-    if (tagStart === -1) return -1
+function isReviewedReactRevealScript(script: string) {
+  const digest = createHash("sha256").update(script).digest("hex")
+  return digest === REVIEWED_REACT_REVEAL_SCRIPT_SHA256
+}
 
-    if (html.startsWith("<!--", tagStart)) {
-      const commentEnd = html.indexOf("-->", tagStart + 4)
-      if (commentEnd === -1) return -1
-      cursor = commentEnd + 3
-      continue
-    }
+function isReviewedInertScriptTag(tag: HtmlStartTag) {
+  const type = tag.attributes.get("type")?.trim().toLowerCase()
 
-    const tagEnd = findHtmlTagEnd(html, tagStart + 1)
-    if (tagEnd === -1) return -1
-    const tagSource = html.slice(tagStart, tagEnd + 1)
+  // These MIME data blocks are not executed as JavaScript by the browser. Keep
+  // the allowlist deliberately narrow; an unknown or executable type remains
+  // release-blocking even when its text merely looks harmless.
+  return (
+    hasOnlyAttributes(tag, new Set(["id", "nonce", "type"])) &&
+    (type === "application/json" || type === "application/ld+json")
+  )
+}
 
-    if (/^<\/template(?:\s[^>]*)?>$/i.test(tagSource)) {
-      depth -= 1
-      if (depth === 0) return tagStart
-      cursor = tagEnd + 1
-      continue
-    }
+function isReviewedExternalNextScriptTag(tag: HtmlStartTag, body: string) {
+  if (tag.name !== "script" || body.trim()) return false
 
-    const tag = parseHtmlStartTag(tagSource)
-    if (!tag) {
-      cursor = tagEnd + 1
-      continue
-    }
-    if (tag.name === "plaintext") return -1
-    if (tag.name === "template") {
-      depth += 1
-      cursor = tagEnd + 1
-      continue
-    }
-    if (INERT_MARKUP_CONTAINERS.has(tag.name)) {
-      const closingStart = findHtmlClosingTagStart(
-        lowercaseHtml,
-        tag.name,
-        tagEnd + 1
-      )
-      if (closingStart === -1) return -1
-      const closingEnd = findHtmlTagEnd(html, closingStart + 2)
-      if (closingEnd === -1) return -1
-      cursor = closingEnd + 1
-      continue
-    }
-
-    cursor = tagEnd + 1
+  const source = tag.attributes.get("src")
+  if (
+    typeof source !== "string" ||
+    !matchesReviewedNextScriptSource(source) ||
+    !/^\/_next\/static\/chunks\/(?:[a-z0-9_.-]+\/)*[a-z0-9_.-]+\.js$/i.test(
+      source
+    ) ||
+    source.split("/").some((segment) => segment === "." || segment === "..")
+  ) {
+    return false
   }
 
-  return -1
+  const sourceIndex = REVIEWED_NEXT_EXTERNAL_SCRIPT_SOURCE_PATTERNS.findIndex(
+    (_, index) => matchesReviewedNextScriptSource(source, index)
+  )
+  const reviewedSource = REVIEWED_NEXT_EXTERNAL_SCRIPT_SOURCES[sourceIndex]
+  if (!reviewedSource) return false
+
+  const asyncValue = tag.attributes.get("async")
+  const noModuleValue = tag.attributes.get("nomodule")
+  const hasAsync = tag.attributes.has("async")
+  const hasNoModule = tag.attributes.has("nomodule")
+  const validBooleanValue = (value: string | null | undefined) => value === ""
+  if (
+    (hasAsync && !validBooleanValue(asyncValue)) ||
+    (hasNoModule && !validBooleanValue(noModuleValue))
+  ) {
+    return false
+  }
+
+  const id = tag.attributes.get("id")
+  if (reviewedSource.includes("/polyfills-")) {
+    return (
+      hasOnlyAttributes(tag, new Set(["nomodule", "nonce", "src"])) &&
+      hasNoModule &&
+      !hasAsync &&
+      !tag.attributes.has("id")
+    )
+  }
+  if (reviewedSource.includes("/webpack-")) {
+    return (
+      hasOnlyAttributes(tag, new Set(["async", "id", "nonce", "src"])) &&
+      hasAsync &&
+      !hasNoModule &&
+      id === "_R_"
+    )
+  }
+
+  return (
+    hasOnlyAttributes(tag, new Set(["async", "nonce", "src"])) &&
+    hasAsync &&
+    !hasNoModule &&
+    !tag.attributes.has("id")
+  )
+}
+
+function hasUnsupportedExecutableAttributes(tag: HtmlStartTag) {
+  const hasJavascriptUrl = [...tag.attributes].some(([name, value]) => {
+    if (!EXECUTABLE_URL_ATTRIBUTES.has(name) || typeof value !== "string") {
+      return false
+    }
+
+    // HTML parsing has already decoded character references. Removing ASCII
+    // controls and spaces makes this at least as strict as browser URL-scheme
+    // preprocessing and rejects obfuscated executable navigation schemes.
+    return value
+      .replace(/[\u0000-\u0020]+/g, "")
+      .toLowerCase()
+      .startsWith("javascript:")
+  })
+
+  return (
+    tag.attributes.has("srcdoc") ||
+    hasJavascriptUrl ||
+    [...tag.attributes.keys()].some((name) => name.startsWith("on")) ||
+    [tag.attributes.get("id"), tag.attributes.get("name")].some(
+      (value) => value === "__next_f"
+    )
+  )
+}
+
+function elementTextContent(element: DefaultTreeAdapterTypes.Element) {
+  return element.childNodes
+    .filter(
+      (child): child is DefaultTreeAdapterTypes.TextNode =>
+        child.nodeName === "#text"
+    )
+    .map((child) => child.value)
+    .join("")
+}
+
+function isElementNode(
+  node: DefaultTreeAdapterTypes.Node
+): node is DefaultTreeAdapterTypes.Element {
+  return "tagName" in node && "attrs" in node
 }
 
 function scanHtmlDocument(html: string) {
-  let hasUnsupportedFlightScript = false
-  const scriptBodies: string[] = []
+  let hasUnsupportedExecutableMarkup = false
+  const allElementTags: HtmlStartTag[] = []
+  const externalScripts: { source: string; tag: HtmlStartTag }[] = []
+  const inlineScripts: { body: string; tag: HtmlStartTag }[] = []
+  const liveTags: HtmlStartTag[] = []
   const tags: HtmlStartTag[] = []
-  const lowercaseHtml = html.toLowerCase()
-  let cursor = 0
+  const templates: HtmlStartTag[] = []
+  const document = parseHtml(html, {
+    scriptingEnabled: true,
+    sourceCodeLocationInfo: true,
+  })
+  const documentTypes = document.childNodes.filter(
+    (node): node is DefaultTreeAdapterTypes.DocumentType =>
+      node.nodeName === "#documentType"
+  )
+  const hasCanonicalDoctype =
+    document.mode === "no-quirks" &&
+    documentTypes.length === 1 &&
+    documentTypes[0]?.name.toLowerCase() === "html" &&
+    documentTypes[0].publicId === "" &&
+    documentTypes[0].systemId === ""
 
-  while (cursor < html.length) {
-    const tagStart = html.indexOf("<", cursor)
-    if (tagStart === -1) break
+  const visit = (
+    node: DefaultTreeAdapterTypes.Node,
+    insideForeignContent = false,
+    htmlAncestors: readonly HtmlStartTag[] = []
+  ) => {
+    if (isElementNode(node)) {
+      const tag = toHtmlStartTag(node, htmlAncestors)
+      allElementTags.push(tag)
+      const isHtmlElement = node.namespaceURI === parse5Html.NS.HTML
+      const isInsideForeignContent = insideForeignContent || !isHtmlElement
 
-    if (html.startsWith("<!--", tagStart)) {
-      const commentEnd = html.indexOf("-->", tagStart + 4)
-      cursor = commentEnd === -1 ? html.length : commentEnd + 3
-      continue
-    }
-
-    const tagEnd = findHtmlTagEnd(html, tagStart + 1)
-    if (tagEnd === -1) break
-    const tagSource = html.slice(tagStart, tagEnd + 1)
-    const tag = parseHtmlStartTag(tagSource)
-    if (!tag) {
-      cursor = tagEnd + 1
-      continue
-    }
-
-    if (tag.name === "plaintext") {
-      cursor = html.length
-      continue
-    }
-
-    if (INERT_MARKUP_CONTAINERS.has(tag.name)) {
-      const closingStart =
-        tag.name === "template"
-          ? findMatchingTemplateClosingTagStart(html, lowercaseHtml, tagEnd + 1)
-          : findHtmlClosingTagStart(lowercaseHtml, tag.name, tagEnd + 1)
-      if (closingStart === -1) {
-        cursor = html.length
-        continue
-      }
-      if (tag.name === "script" && isReviewedInlineFlightScriptTag(tagSource)) {
-        scriptBodies.push(html.slice(tagEnd + 1, closingStart))
-      } else if (
-        tag.name === "script" &&
-        html.slice(tagEnd + 1, closingStart).includes("__next_f")
+      if (
+        hasUnsupportedExecutableAttributes(tag) ||
+        ACTIVE_EMBEDDING_ELEMENTS.has(tag.name) ||
+        ACTIVE_SVG_SMIL_ELEMENTS.has(tag.name) ||
+        (tag.name === "meta" && tag.attributes.has("http-equiv"))
       ) {
-        // Only Next's attribute-free (optionally nonce-bearing) inline scripts
-        // are part of the reviewed transport. A classic executable script can
-        // also carry attributes such as id or type="text/javascript"; silently
-        // dropping one that references the Flight queue could hide a mutation.
-        hasUnsupportedFlightScript = true
+        hasUnsupportedExecutableMarkup = true
       }
-      const closingEnd = findHtmlTagEnd(html, closingStart + 2)
-      cursor = closingEnd === -1 ? html.length : closingEnd + 1
-      continue
+
+      if (tag.name === "script") {
+        const body = elementTextContent(node)
+        const hasExternalSource = tag.attributes.has("src")
+
+        if (tag.sourceStart === null || !tag.hasExplicitEndTag) {
+          hasUnsupportedExecutableMarkup = true
+        }
+
+        if (!isHtmlElement) {
+          // Script semantics vary across SVG and MathML integration points.
+          // The root contract has no foreign-namespace scripts, so reject them.
+          hasUnsupportedExecutableMarkup = true
+        } else if (hasExternalSource) {
+          if (!isReviewedExternalNextScriptTag(tag, body)) {
+            hasUnsupportedExecutableMarkup = true
+          } else {
+            externalScripts.push({
+              source: tag.attributes.get("src") as string,
+              tag,
+            })
+          }
+        } else if (isReviewedInlineFlightScriptTag(tag)) {
+          inlineScripts.push({ body, tag })
+        } else if (body.trim() && !isReviewedInertScriptTag(tag)) {
+          // Every executable inline HTML script must be either a canonical
+          // Flight instruction sequence or one of the pinned Next/React
+          // bootstraps checked below.
+          hasUnsupportedExecutableMarkup = true
+        }
+        return
+      }
+
+      const isHtmlTemplate = isHtmlElement && tag.name === "template"
+      if (isHtmlTemplate) {
+        if (
+          [...tag.attributes.keys()].some((name) =>
+            name.startsWith("shadowroot")
+          )
+        ) {
+          // Declarative Shadow DOM attaches template content during parsing;
+          // Chrome executes scripts within it. Ordinary HTML template content
+          // remains inert and is deliberately not traversed.
+          hasUnsupportedExecutableMarkup = true
+        }
+        // Keep the template element itself as structural evidence without
+        // traversing its inert contents. React's reviewed streamed-Suspense
+        // bootstrap uses the real B:0 template as its insertion boundary.
+        templates.push(tag)
+        return
+      }
+
+      if (!isHtmlElement && tag.name === "template") {
+        // A `template` token in foreign content is not an inert HTML template.
+        hasUnsupportedExecutableMarkup = true
+      }
+
+      // Negative evidence must cover the entire live DOM, including HTML
+      // integration points beneath SVG/MathML. Positive HWL identity markers
+      // remain restricted to ordinary HTML ancestry in `tags` below.
+      liveTags.push(tag)
+
+      if (!isInsideForeignContent && !INERT_MARKUP_CONTAINERS.has(tag.name)) {
+        tags.push(tag)
+      }
+
+      if ("childNodes" in node) {
+        const childHtmlAncestors = isInsideForeignContent
+          ? htmlAncestors
+          : [...htmlAncestors, tag]
+        for (const child of node.childNodes) {
+          visit(child, isInsideForeignContent, childHtmlAncestors)
+        }
+      }
+      return
     }
 
-    tags.push(tag)
-    cursor = tagEnd + 1
+    if ("childNodes" in node) {
+      for (const child of node.childNodes) {
+        visit(child, insideForeignContent, htmlAncestors)
+      }
+    }
   }
 
-  return { hasUnsupportedFlightScript, scriptBodies, tags }
+  visit(document)
+
+  const bySourceStart = (
+    left: { tag: HtmlStartTag },
+    right: { tag: HtmlStartTag }
+  ) => (left.tag.sourceStart as number) - (right.tag.sourceStart as number)
+  externalScripts.sort(bySourceStart)
+  inlineScripts.sort(bySourceStart)
+  const externalScriptSources = externalScripts.map(({ source }) => source)
+  const scriptBodies = inlineScripts.map(({ body }) => body)
+  const reviewedReactRevealScripts = inlineScripts
+    .filter(({ body }) => isReviewedReactRevealScript(body))
+    .map(({ tag }) => tag)
+
+  if (
+    externalScriptSources.length !==
+      REVIEWED_NEXT_EXTERNAL_SCRIPT_SOURCES.length ||
+    externalScriptSources.some(
+      (source, index) => !matchesReviewedNextScriptSource(source, index)
+    )
+  ) {
+    // The deployed root must reference the exact executable chunk inventory
+    // emitted by the reviewed candidate build, once each and in order. Only
+    // each chunk's build-environment-specific 16-hex content hash may vary.
+    hasUnsupportedExecutableMarkup = true
+  }
+
+  return {
+    allElementTags,
+    hasCanonicalDoctype,
+    hasUnsupportedExecutableMarkup,
+    liveTags,
+    reviewedReactRevealScripts,
+    scriptBodies,
+    tags,
+    templates,
+  }
 }
 
 function extractInlineScriptBodies(html: string) {
-  const { hasUnsupportedFlightScript, scriptBodies } = scanHtmlDocument(html)
-  return hasUnsupportedFlightScript ? null : scriptBodies
+  const { hasUnsupportedExecutableMarkup, scriptBodies } =
+    scanHtmlDocument(html)
+  return hasUnsupportedExecutableMarkup ? null : scriptBodies
 }
 
 function findJsonNextFlightPushes(script: string) {
@@ -498,11 +779,6 @@ function findJsonNextFlightPushes(script: string) {
     return null
   }
 
-  // Bracket access, aliases, and template interpolation can execute without
-  // spelling either reviewed call form. Reject an unparsed direct reference
-  // rather than accepting canonical evidence from another script beside it.
-  if (calls.length === 0 && script.includes("__next_f")) return null
-
   return calls
 }
 
@@ -577,13 +853,18 @@ function findRootFlightRows(payload: string) {
     if (!/^[0-9a-f]*$/.test(recordId)) return null
     const valueStart = colon + 1
     const tag = payload[valueStart]
-    // React initializes its numeric row ID accumulator to zero. An empty ID is
-    // therefore record 0 unless it is Next's reviewed empty-ID H hint form.
-    // Fail closed on every other empty-ID row instead of letting it resolve or
-    // mutate root state before a later canonical `0:` row.
-    if (!recordId && tag !== "H") return null
-    if (recordId && decodeFlightRecordId(recordId) === 0) {
+    const isEmptyIdHint = recordId === "" && tag === "H"
+    const isNumericRootRecord =
+      !isEmptyIdHint && decodeFlightRecordId(recordId) === 0
+
+    // React accumulates the hexadecimal record ID numerically with 32-bit
+    // shifts. `00`, overflow aliases such as `100000000`, and an empty
+    // untagged ID all address record 0 in the browser. Only the canonical `0`
+    // spelling is acceptable release evidence; otherwise an earlier alias
+    // could resolve or poison root before the later canonical row.
+    if (isNumericRootRecord) {
       rootRecordCount += 1
+      if (recordId !== "0") return null
     }
 
     if (tag && LENGTH_PREFIXED_FLIGHT_TAGS.has(tag)) {
@@ -603,7 +884,7 @@ function findRootFlightRows(payload: string) {
     // React buffers ordinary rows until their LF delimiter arrives. Closing
     // the stream does not turn an unterminated final fragment into a row.
     if (newline === -1) return null
-    if (recordId === "0" && payload[valueStart] === "{") {
+    if (isNumericRootRecord && payload[valueStart] === "{") {
       rows.push(payload.slice(valueStart, newline))
     }
     cursor = newline + 1
@@ -616,12 +897,28 @@ function collectOrderedFlightPayload(html: string) {
   const payloads: string[] = []
   let bootstrapped = false
   let previousPayloadEnd: number | null = null
+  const reviewedRuntimeDigests = new Set<string>()
   const scriptBodies = extractInlineScriptBodies(html)
   if (scriptBodies === null) return null
 
   for (const script of scriptBodies) {
     const instructions = findJsonNextFlightPushes(script)
     if (instructions === null) return null
+    if (instructions.length === 0) {
+      if (!script.trim()) continue
+      if (isReviewedNextRuntimeScript(script)) {
+        const digest = createHash("sha256").update(script).digest("hex")
+        if (reviewedRuntimeDigests.has(digest)) return null
+        reviewedRuntimeDigests.add(digest)
+        continue
+      }
+
+      // A nonempty classic inline program outside the two pinned Next/React
+      // runtime bootstraps is not part of the reviewed root transport. Reject
+      // it wholesale: static alias heuristics cannot safely establish that an
+      // arbitrary program will leave `self.__next_f` untouched.
+      return null
+    }
     for (const { initializes, value: call } of instructions) {
       const [channel, payload] = call
       if (channel === 0) {
@@ -655,7 +952,10 @@ function collectOrderedFlightPayload(html: string) {
         // Binary Flight chunks are not currently emitted by this root. Do not
         // discard their bytes and risk treating a continuation as a new row.
         return null
-      } else if (initializes) {
+      } else {
+        // Form-state and unknown instructions execute in Next's bootstrap but
+        // are outside this root verifier's reviewed transport. Never ignore a
+        // recognized push beside otherwise canonical evidence.
         return null
       }
     }
@@ -692,14 +992,57 @@ function extractNextFlightBootstraps(html: string) {
   return bootstraps
 }
 
+function isCanonicalRootBootstrapEnvelope(bootstrap: Record<string, unknown>) {
+  const allowedKeys = new Set([
+    "G",
+    "P",
+    "S",
+    "a",
+    "b",
+    "c",
+    "d",
+    "f",
+    "h",
+    "i",
+    "l",
+    "m",
+    "p",
+    "q",
+    "r",
+    "s",
+  ])
+  const optionalUndefinedReferences = ["a", "d", "l", "m", "p", "r", "s"]
+
+  return (
+    ["P", "c", "f", "i", "q"].every((key) => Object.hasOwn(bootstrap, key)) &&
+    Object.keys(bootstrap).every((key) => allowedKeys.has(key)) &&
+    bootstrap.P === null &&
+    bootstrap.i === false &&
+    bootstrap.q === "" &&
+    (!Object.hasOwn(bootstrap, "S") || bootstrap.S === true) &&
+    (!Object.hasOwn(bootstrap, "h") || bootstrap.h === null) &&
+    (!Object.hasOwn(bootstrap, "b") ||
+      (typeof bootstrap.b === "string" && bootstrap.b.length > 0)) &&
+    (!Object.hasOwn(bootstrap, "G") ||
+      (Array.isArray(bootstrap.G) &&
+        bootstrap.G.length === 2 &&
+        typeof bootstrap.G[0] === "string" &&
+        Array.isArray(bootstrap.G[1]))) &&
+    optionalUndefinedReferences.every(
+      (key) => !Object.hasOwn(bootstrap, key) || bootstrap[key] === "$undefined"
+    )
+  )
+}
+
 export function extractRootFlightSegments(html: string) {
   const segments = new Set<string>()
 
   for (const bootstrap of extractNextFlightBootstraps(html)) {
+    if (!isCanonicalRootBootstrapEnvelope(bootstrap)) return []
     const root = bootstrap.c
     if (
       Array.isArray(root) &&
-      root.length >= 2 &&
+      root.length === 2 &&
       root[0] === "" &&
       typeof root[1] === "string"
     ) {
@@ -711,39 +1054,147 @@ export function extractRootFlightSegments(html: string) {
 }
 
 export function extractFirstFlightRouteSegments(html: string) {
-  const segments = new Set<string>()
+  const segments: string[] = []
+
+  const collectRouteSegments = (initialRoute: unknown) => {
+    const routes = [{ depth: 0, value: initialRoute }]
+    let visited = 0
+
+    while (routes.length > 0) {
+      const route = routes.pop()
+      if (!route || route.depth > 64 || ++visited > 256) return false
+      if (
+        !Array.isArray(route.value) ||
+        route.value.length < 2 ||
+        route.value.length > 5
+      ) {
+        return false
+      }
+
+      const rawSegment = route.value[0]
+      let segment: string
+      if (typeof rawSegment === "string") {
+        segment = rawSegment
+      } else {
+        // The canonical static homepage has no dynamic segment tuple. An empty
+        // dynamic cache key could otherwise alias the root path.
+        return false
+      }
+
+      // This static root's canonical leaf is exactly `__PAGE__`. A suffixed
+      // page segment carries search state (or can impersonate another route)
+      // and is inconsistent with the separately pinned empty `q` value.
+      const isStaticRootPage = segment === "__PAGE__"
+      if (!isStaticRootPage) segments.push(segment)
+
+      const parallelRoutes = route.value[1]
+      if (
+        parallelRoutes === null ||
+        typeof parallelRoutes !== "object" ||
+        Array.isArray(parallelRoutes)
+      ) {
+        return false
+      }
+
+      const parallelRouteKeys = Object.keys(parallelRoutes)
+      if (
+        (isStaticRootPage && parallelRouteKeys.length !== 0) ||
+        (!isStaticRootPage &&
+          (parallelRouteKeys.length !== 1 ||
+            parallelRouteKeys[0] !== "children"))
+      ) {
+        // This application has no homepage parallel-route slots. Requiring the
+        // exact children-only spine prevents a second branch from hiding state
+        // that this release gate did not review.
+        return false
+      }
+
+      const refreshState = route.value[2]
+      if (
+        refreshState !== undefined &&
+        refreshState !== "$undefined" &&
+        refreshState !== null &&
+        (!Array.isArray(refreshState) ||
+          refreshState.length !== 2 ||
+          !refreshState.every((entry) => typeof entry === "string"))
+      ) {
+        return false
+      }
+
+      const refresh = route.value[3]
+      if (
+        refresh !== undefined &&
+        refresh !== "$undefined" &&
+        refresh !== null &&
+        refresh !== "refetch" &&
+        refresh !== "inside-shared-layout" &&
+        refresh !== "metadata-only"
+      ) {
+        return false
+      }
+
+      const prefetchHints = route.value[4]
+      if (
+        prefetchHints !== undefined &&
+        prefetchHints !== "$undefined" &&
+        (!Number.isSafeInteger(prefetchHints) || Number(prefetchHints) < 0)
+      ) {
+        return false
+      }
+
+      for (const child of Object.values(parallelRoutes)) {
+        routes.push({ depth: route.depth + 1, value: child })
+      }
+    }
+
+    return true
+  }
 
   for (const bootstrap of extractNextFlightBootstraps(html)) {
+    if (!isCanonicalRootBootstrapEnvelope(bootstrap)) return []
     const flight = bootstrap.f
     const firstRoute =
       Array.isArray(flight) &&
+      flight.length === 1 &&
       Array.isArray(flight[0]) &&
+      flight[0].length === 4 &&
       Array.isArray(flight[0][0])
         ? flight[0][0]
         : null
-    if (firstRoute && typeof firstRoute[0] === "string") {
-      segments.add(firstRoute[0])
-    }
+    if (!firstRoute || !collectRouteSegments(firstRoute)) return []
   }
 
-  return [...segments]
+  return segments
 }
 
-function extractMarkupStartTags(html: string) {
-  return scanHtmlDocument(html).tags
+function isDescendantOf(tag: HtmlStartTag, ancestor: HtmlStartTag) {
+  return tag.ancestors.includes(ancestor)
 }
 
-function hasExactAttribute(
-  tags: readonly HtmlStartTag[],
-  name: string,
-  value: string
-) {
-  return tags.some((tag) => tag.attributes.get(name) === value)
+function isExactRawHydrationSentinel(tag: HtmlStartTag) {
+  return (
+    tag.name === "span" &&
+    tag.hasExplicitEndTag &&
+    hasOnlyAttributes(
+      tag,
+      new Set(["aria-hidden", "data-hwl-hydration-sentinel", "hidden"])
+    ) &&
+    tag.attributes.get("aria-hidden") === "true" &&
+    tag.attributes.get("data-hwl-hydration-sentinel") === "" &&
+    tag.attributes.get("hidden") === ""
+  )
 }
 
 export function auditRootHtml(html: string) {
   const checks: HostedRootCheck[] = []
-  const tags = extractMarkupStartTags(html)
+  const {
+    allElementTags,
+    hasCanonicalDoctype,
+    liveTags,
+    reviewedReactRevealScripts,
+    tags,
+    templates,
+  } = scanHtmlDocument(html)
   const rootSegments = extractRootFlightSegments(html)
   const firstRouteSegments = extractFirstFlightRouteSegments(html)
   const hasIndexSegment = rootSegments.includes("index")
@@ -751,8 +1202,17 @@ export function auditRootHtml(html: string) {
     rootSegments.length > 0 && rootSegments.every((segment) => segment === "")
   const hasIndexRouteSegment = firstRouteSegments.includes("index")
   const hasCanonicalRouteSegments =
-    firstRouteSegments.length > 0 &&
-    firstRouteSegments.every((segment) => segment === "")
+    firstRouteSegments.length === 1 && firstRouteSegments[0] === ""
+
+  checks.push(
+    check(
+      hasCanonicalDoctype ? "pass" : "fail",
+      "Standards document mode",
+      hasCanonicalDoctype
+        ? "the raw root response has one canonical HTML doctype"
+        : "the raw root response is missing its canonical HTML doctype or enters a quirks mode"
+    )
+  )
 
   // These Flight checks intentionally remain release-blocking while Next.js is
   // pinned to 16.3.4. The root segment drives usePathname() during hydration;
@@ -787,7 +1247,10 @@ export function auditRootHtml(html: string) {
     )
   )
 
-  const hasAppShell = hasExactAttribute(tags, "data-app-shell", "")
+  const appShells = tags.filter(
+    (tag) => tag.name === "div" && tag.attributes.get("data-app-shell") === ""
+  )
+  const hasAppShell = appShells.length > 0
   checks.push(
     check(
       hasAppShell ? "pass" : "fail",
@@ -798,10 +1261,10 @@ export function auditRootHtml(html: string) {
     )
   )
 
-  const hasBreadcrumb = tags.some(
+  const hasBreadcrumb = liveTags.some(
     (tag) =>
       tag.name === "nav" &&
-      tag.attributes.get("aria-label")?.toLowerCase() === "breadcrumb"
+      tag.attributes.get("aria-label")?.trim().toLowerCase() === "breadcrumb"
   )
   checks.push(
     check(
@@ -813,14 +1276,14 @@ export function auditRootHtml(html: string) {
     )
   )
 
-  const hasScrollBreathClass = tags.some((tag) =>
+  const hasScrollBreathClass = liveTags.some((tag) =>
     (tag.attributes.get("class") ?? "")
-      .split(/\s+/)
+      .split(/[\t\n\f\r ]+/)
       .some((token) => token === "scroll-breath")
   )
   const hasNonHomeEffects =
     hasScrollBreathClass ||
-    tags.some((tag) => tag.attributes.has("data-scrolling"))
+    liveTags.some((tag) => tag.attributes.has("data-scrolling"))
   checks.push(
     check(
       hasNonHomeEffects ? "fail" : "pass",
@@ -831,11 +1294,21 @@ export function auditRootHtml(html: string) {
     )
   )
 
-  const hasHomeHeader = hasExactAttribute(
-    tags,
-    "data-site-header-variant",
-    "home"
+  const hasHomeHeader = tags.some(
+    (tag) =>
+      tag.name === "header" &&
+      tag.attributes.get("data-site-header-variant") === "home" &&
+      appShells.some((appShell) => isDescendantOf(tag, appShell))
   )
+
+  const rawHydrationSentinelMarkers = allElementTags.filter((tag) =>
+    tag.attributes.has("data-hwl-hydration-sentinel")
+  )
+  const exactRawHydrationSentinels = tags.filter(isExactRawHydrationSentinel)
+  const hasUniquePristineHydrationSentinel =
+    rawHydrationSentinelMarkers.length === 1 &&
+    exactRawHydrationSentinels.length === 1 &&
+    !allElementTags.some((tag) => tag.attributes.has("data-hwl-hydrated"))
   checks.push(
     check(
       hasHomeHeader ? "pass" : "fail",
@@ -846,11 +1319,102 @@ export function auditRootHtml(html: string) {
     )
   )
 
-  const hasHomepageMarkers = [
-    ["data-homepage", ""],
-    ["id", "home-hero-heading"],
-    ["data-home-hero-lift-cta", ""],
-  ].every(([name, value]) => hasExactAttribute(tags, name, value))
+  // Preserve parser-node identity through the whole witness chain. Matching
+  // independent attributes is insufficient: separate lookalike subtrees could
+  // otherwise satisfy each predicate without one coherent HWL home document.
+  const hasHomepageMarkers = appShells.some((appShell) => {
+    const hasHeaderInShell = tags.some(
+      (tag) =>
+        tag.name === "header" &&
+        tag.attributes.get("data-site-header-variant") === "home" &&
+        isDescendantOf(tag, appShell)
+    )
+    const hasSentinelInShell =
+      hasUniquePristineHydrationSentinel &&
+      exactRawHydrationSentinels[0] !== undefined &&
+      isDescendantOf(exactRawHydrationSentinels[0], appShell)
+
+    const hasDirectHomepage = tags.some(
+      (homepage) =>
+        homepage.name === "div" &&
+        homepage.attributes.get("data-homepage") === "" &&
+        isDescendantOf(homepage, appShell) &&
+        tags.some(
+          (tag) =>
+            tag.name === "h1" &&
+            tag.attributes.get("id") === "home-hero-heading" &&
+            isDescendantOf(tag, homepage)
+        ) &&
+        tags.some(
+          (tag) =>
+            tag.name === "a" &&
+            tag.attributes.get("data-home-hero-lift-cta") === "" &&
+            tag.attributes.get("href") === "/beauty/lift" &&
+            isDescendantOf(tag, homepage)
+        )
+    )
+    const suspenseBoundaries = templates.filter(
+      (tag) =>
+        tag.name === "template" &&
+        tag.attributes.get("id") === "B:0" &&
+        isDescendantOf(tag, appShell)
+    )
+    const suspenseSources = tags.filter(
+      (tag) =>
+        tag.name === "div" &&
+        tag.attributes.get("id") === "S:0" &&
+        tag.attributes.get("hidden") === ""
+    )
+    const suspenseBoundary = suspenseBoundaries[0]
+    const suspenseSource = suspenseSources[0]
+    const revealScript = reviewedReactRevealScripts[0]
+    const body = suspenseSource?.ancestors.at(-1)
+    const hasReviewedSuspenseHomepage =
+      suspenseBoundaries.length === 1 &&
+      suspenseSources.length === 1 &&
+      allElementTags.filter((tag) => tag.attributes.get("id") === "B:0")
+        .length === 1 &&
+      allElementTags.filter((tag) => tag.attributes.get("id") === "S:0")
+        .length === 1 &&
+      suspenseBoundary?.hasReviewedReactBoundary === true &&
+      suspenseBoundary.hasExplicitEndTag &&
+      suspenseSource?.hasExplicitEndTag === true &&
+      reviewedReactRevealScripts.length === 1 &&
+      body?.name === "body" &&
+      revealScript?.ancestors.at(-1) === body &&
+      suspenseBoundary.sourceEnd !== null &&
+      suspenseSource.sourceStart !== null &&
+      suspenseSource.sourceEnd !== null &&
+      revealScript.sourceStart !== null &&
+      suspenseBoundary.sourceEnd < suspenseSource.sourceStart &&
+      suspenseSource.sourceEnd <= revealScript.sourceStart &&
+      tags.some(
+        (homepage) =>
+          homepage.name === "div" &&
+          homepage.attributes.get("data-homepage") === "" &&
+          isDescendantOf(homepage, suspenseSource as HtmlStartTag) &&
+          tags.some(
+            (tag) =>
+              tag.name === "h1" &&
+              tag.attributes.get("id") === "home-hero-heading" &&
+              isDescendantOf(tag, homepage)
+          ) &&
+          tags.some(
+            (tag) =>
+              tag.name === "a" &&
+              tag.attributes.get("data-home-hero-lift-cta") === "" &&
+              tag.attributes.get("href") === "/beauty/lift" &&
+              isDescendantOf(tag, homepage)
+          )
+      )
+
+    return (
+      hasHeaderInShell &&
+      hasSentinelInShell &&
+      ((hasDirectHomepage && reviewedReactRevealScripts.length === 0) ||
+        hasReviewedSuspenseHomepage)
+    )
+  })
   checks.push(
     check(
       hasHomepageMarkers ? "pass" : "fail",
@@ -861,11 +1425,12 @@ export function auditRootHtml(html: string) {
     )
   )
 
-  const hasHydrationSentinel = hasExactAttribute(
-    tags,
-    "data-hwl-hydration-sentinel",
-    ""
-  )
+  const hasHydrationSentinel =
+    hasUniquePristineHydrationSentinel &&
+    exactRawHydrationSentinels[0] !== undefined &&
+    appShells.some((appShell) =>
+      isDescendantOf(exactRawHydrationSentinels[0] as HtmlStartTag, appShell)
+    )
   checks.push(
     check(
       hasHydrationSentinel ? "pass" : "fail",

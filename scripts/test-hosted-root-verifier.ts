@@ -12,6 +12,7 @@ import {
   parseHostedRootOrigin,
   PROTECTED_PREVIEW_ORIGIN,
   readBoundedHtml,
+  REVIEWED_NEXT_EXTERNAL_SCRIPT_SOURCES,
   ROOT_CANARY_QUERY,
   runHostedRootCli,
   verifyHostedRoot,
@@ -20,12 +21,28 @@ import {
 const ORIGIN = "https://preview.example.com"
 const BYPASS_SECRET = "fixture-bypass-secret-never-print"
 
+const REVIEWED_NEXT_TIMING_SCRIPT =
+  "requestAnimationFrame(function(){$RT=performance.now()});"
+const REVIEWED_REACT_REVEAL_SCRIPT = String.raw`$RB=[];$RV=function(a){$RT=performance.now();for(var b=0;b<a.length;b+=2){var c=a[b],e=a[b+1];null!==e.parentNode&&e.parentNode.removeChild(e);var f=c.parentNode;if(f){var g=c.previousSibling,h=0;do{if(c&&8===c.nodeType){var d=c.data;if("/$"===d||"/&"===d)if(0===h)break;else h--;else"$"!==d&&"$?"!==d&&"$~"!==d&&"$!"!==d&&"&"!==d||h++}d=c.nextSibling;f.removeChild(c);c=d}while(c);for(;e.firstChild;)f.insertBefore(e.firstChild,c);g.data="$";g._reactRetry&&requestAnimationFrame(g._reactRetry)}}a.length=0};
+$RC=function(a,b){if(b=document.getElementById(b))(a=document.getElementById(a))?(a.previousSibling.data="$~",$RB.push(a,b),2===$RB.length&&("number"!==typeof $RT?requestAnimationFrame($RV.bind(null,$RB)):(a=performance.now(),setTimeout($RV.bind(null,$RB),2300>a&&2E3<a?2300-a:$RT+300-a)))):b.parentNode.removeChild(b)};$RC("B:0","S:0")`
+
+const REVIEWED_NEXT_EXTERNAL_SCRIPT_MARKUP =
+  REVIEWED_NEXT_EXTERNAL_SCRIPT_SOURCES.map((source) => {
+    if (source.includes("/polyfills-")) {
+      return `<script src="${source}" nomodule=""></script>`
+    }
+    if (source.includes("/webpack-")) {
+      return `<script src="${source}" id="_R_" async=""></script>`
+    }
+    return `<script src="${source}" async=""></script>`
+  }).join("\n    ")
+
 const CANONICAL_HOME_HTML = String.raw`<!doctype html>
 <html lang="en">
   <body>
     <div data-app-shell="">
       <header class="top-0 fixed inset-x-0" data-site-header-variant="home"></header>
-      <span data-hwl-hydration-sentinel=""></span>
+      <span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>
       <main>
         <div data-homepage="">
           <h1 id="home-hero-heading">Come back to your whole body.</h1>
@@ -33,10 +50,17 @@ const CANONICAL_HOME_HTML = String.raw`<!doctype html>
         </div>
       </main>
     </div>
+    ${REVIEWED_NEXT_EXTERNAL_SCRIPT_MARKUP}
     <script>(self.__next_f=self.__next_f||[]).push([0])</script>
-    <script>self.__next_f.push([1,"0:{\"P\":null,\"c\":[\"\",\"\"],\"q\":\"\",\"i\":false,\"f\":[[[\"\",{\"children\":[\"__PAGE__\",{}]}]]]}\n"])</script>
+    <script>self.__next_f.push([1,"0:{\"P\":null,\"c\":[\"\",\"\"],\"q\":\"\",\"i\":false,\"f\":[[[\"\",{\"children\":[\"__PAGE__\",{}]}],null,null,false]]}\n"])</script>
   </body>
 </html>`
+
+const CANONICAL_HOME_WITH_REVIEWED_RUNTIME_HTML = CANONICAL_HOME_HTML.replace(
+  "    <script>(self.__next_f=self.__next_f||[]).push([0])</script>",
+  `    <script>${REVIEWED_NEXT_TIMING_SCRIPT}</script>
+    <script>(self.__next_f=self.__next_f||[]).push([0])</script>`
+)
 
 const INDEX_POISONED_HOME_HTML = String.raw`<!doctype html>
 <html lang="en">
@@ -44,7 +68,7 @@ const INDEX_POISONED_HOME_HTML = String.raw`<!doctype html>
     <div data-app-shell="">
       <div class="scroll-breath" data-scrolling="false"></div>
       <header class="top-0 sticky"></header>
-      <span data-hwl-hydration-sentinel=""></span>
+      <span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>
       <nav aria-label="Breadcrumb"><span>Index</span></nav>
       <main>
         <div data-homepage="">
@@ -53,22 +77,28 @@ const INDEX_POISONED_HOME_HTML = String.raw`<!doctype html>
         </div>
       </main>
     </div>
+    ${REVIEWED_NEXT_EXTERNAL_SCRIPT_MARKUP}
     <script>(self.__next_f=self.__next_f||[]).push([0])</script>
-    <script>self.__next_f.push([1,"0:{\"P\":null,\"c\":[\"\",\"index\"],\"q\":\"\",\"i\":false,\"f\":[[[\"index\",{\"children\":[\"__PAGE__\",{}]}]]]}\n"])</script>
+    <script>self.__next_f.push([1,"0:{\"P\":null,\"c\":[\"\",\"index\"],\"q\":\"\",\"i\":false,\"f\":[[[\"index\",{\"children\":[\"__PAGE__\",{}]}],null,null,false]]}\n"])</script>
   </body>
 </html>`
+
+const NESTED_INDEX_POISONED_HOME_HTML = CANONICAL_HOME_HTML.replace(
+  String.raw`\"children\":[\"__PAGE__\",{}]`,
+  String.raw`\"children\":[\"index\",{}]`
+)
 
 const CANONICAL_FLIGHT_BOOTSTRAP = JSON.stringify({
   P: null,
   c: ["", ""],
-  f: [[["", { children: ["__PAGE__", {}] }]]],
+  f: [[["", { children: ["__PAGE__", {}] }], null, null, false]],
   i: false,
   q: "",
 })
 const INDEX_POISONED_FLIGHT_BOOTSTRAP = JSON.stringify({
   P: null,
   c: ["", "index"],
-  f: [[["index", { children: ["__PAGE__", {}] }]]],
+  f: [[["index", { children: ["__PAGE__", {}] }], null, null, false]],
   i: false,
   q: "",
 })
@@ -200,6 +230,10 @@ function assertMissingFlightBootstrap(html: string) {
   assert.ok(failedNames.includes("Root Flight route tree is canonical"))
 }
 
+function withMarkupBeforeBodyEnd(source: string, markup: string) {
+  return source.replace("</body>", `${markup}</body>`)
+}
+
 test("a canonical hosted root passes the complete read-only contract", async () => {
   const calls: FetchCall[] = []
   const result = await verifyHostedRoot({
@@ -250,6 +284,182 @@ test("raw Flight parsers distinguish the canonical and poisoned states", () => {
   assert.deepEqual(extractFirstFlightRouteSegments(INDEX_POISONED_HOME_HTML), [
     "index",
   ])
+  assert.deepEqual(
+    extractFirstFlightRouteSegments(NESTED_INDEX_POISONED_HOME_HTML),
+    []
+  )
+  assert.ok(
+    failures(auditRootHtml(NESTED_INDEX_POISONED_HOME_HTML)).some(
+      ({ name }) => name === "Root Flight route tree is canonical"
+    )
+  )
+})
+
+test("the pinned Next inline runtime bootstrap remains reviewed evidence", () => {
+  assert.deepEqual(
+    extractRootFlightSegments(CANONICAL_HOME_WITH_REVIEWED_RUNTIME_HTML),
+    [""]
+  )
+  assert.deepEqual(
+    extractFirstFlightRouteSegments(CANONICAL_HOME_WITH_REVIEWED_RUNTIME_HTML),
+    [""]
+  )
+  assert.equal(
+    failures(auditRootHtml(CANONICAL_HOME_WITH_REVIEWED_RUNTIME_HTML)).length,
+    0
+  )
+
+  const duplicatedTimingRuntime =
+    CANONICAL_HOME_WITH_REVIEWED_RUNTIME_HTML.replace(
+      `<script>${REVIEWED_NEXT_TIMING_SCRIPT}</script>`,
+      `<script>${REVIEWED_NEXT_TIMING_SCRIPT}</script><script>${REVIEWED_NEXT_TIMING_SCRIPT}</script>`
+    )
+  assert.deepEqual(extractRootFlightSegments(duplicatedTimingRuntime), [])
+})
+
+test("HTML parsing follows browser whitespace and comment boundaries", () => {
+  const nonBreakingSpace = "\u00a0"
+  const malformedFlightTags = CANONICAL_HOME_HTML.replaceAll(
+    "<script>",
+    `<script${nonBreakingSpace}nonce=x>`
+  )
+  const executableTypeDecoy = withMarkupBeforeBodyEnd(
+    CANONICAL_HOME_HTML,
+    `<script id="x"${nonBreakingSpace}type="application/json">self.unreviewedInlineProgramRan=true</script>`
+  )
+  const executableSourceDecoy = withMarkupBeforeBodyEnd(
+    CANONICAL_HOME_HTML,
+    `<script type="text/javascript"${nonBreakingSpace}src>self.unreviewedInlineProgramRan=true</script>`
+  )
+  const abruptlyClosedComment = CANONICAL_HOME_HTML.replace(
+    "<body>",
+    "<body><!--comment--!><script>self.unreviewedInlineProgramRan=true</script>-->"
+  )
+
+  for (const html of [
+    malformedFlightTags,
+    executableTypeDecoy,
+    executableSourceDecoy,
+    abruptlyClosedComment,
+  ]) {
+    assertMissingFlightBootstrap(html)
+  }
+})
+
+test("the root requires one canonical standards-mode HTML doctype", () => {
+  const missingDoctype = CANONICAL_HOME_HTML.replace("<!doctype html>\n", "")
+  const legacyDoctype = CANONICAL_HOME_HTML.replace(
+    "<!doctype html>",
+    '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">'
+  )
+
+  for (const html of [missingDoctype, legacyDoctype]) {
+    assert.ok(
+      failures(auditRootHtml(html)).some(
+        ({ name }) => name === "Standards document mode"
+      )
+    )
+  }
+})
+
+test("foreign-content and declarative templates cannot hide executable scripts", () => {
+  for (const markup of [
+    "<svg><template><script>self.unreviewedInlineProgramRan=true</script></template></svg>",
+    "<svg><title><script>self.unreviewedInlineProgramRan=true</script></title></svg>",
+    "<svg><style><script>self.unreviewedInlineProgramRan=true</script></style></svg>",
+    '<template shadowrootmode="open"><script>self.unreviewedInlineProgramRan=true</script></template>',
+  ]) {
+    assertMissingFlightBootstrap(
+      withMarkupBeforeBodyEnd(CANONICAL_HOME_HTML, markup)
+    )
+  }
+})
+
+test("active embedding and inline event handlers fail the root contract", () => {
+  for (const markup of [
+    '<iframe srcdoc="&lt;script>parent.unreviewedInlineProgramRan=true&lt;/script>"></iframe>',
+    '<svg onload="self.unreviewedInlineProgramRan=true"></svg>',
+    '<base href="https://example.invalid/">',
+    '<meta http-equiv="refresh" content="0;url=https://example.invalid/">',
+    '<object data="https://example.invalid/"></object>',
+    '<embed src="https://example.invalid/">',
+  ]) {
+    assertMissingFlightBootstrap(
+      withMarkupBeforeBodyEnd(CANONICAL_HOME_HTML, markup)
+    )
+  }
+})
+
+test("DOM named properties cannot clobber the Next Flight queue", () => {
+  for (const markup of [
+    '<form id="__next_f"></form>',
+    '<img id="__next_f" src="data:,">',
+    '<a name="__next_f"></a>',
+  ]) {
+    assertMissingFlightBootstrap(
+      CANONICAL_HOME_HTML.replace("<body>", `<body>${markup}`)
+    )
+  }
+})
+
+test("only the reviewed same-origin Next chunk script shapes are accepted", () => {
+  const alternateEnvironmentBuild =
+    REVIEWED_NEXT_EXTERNAL_SCRIPT_SOURCES.reduce(
+      (html, source, index) =>
+        html.replace(
+          source,
+          source.replace(
+            /[0-9a-f]{16}\.js$/,
+            `${index.toString(16).padStart(16, "0")}.js`
+          )
+        ),
+      CANONICAL_HOME_HTML
+    )
+
+  for (const html of [CANONICAL_HOME_HTML, alternateEnvironmentBuild]) {
+    assert.deepEqual(extractRootFlightSegments(html), [""])
+    assert.deepEqual(extractFirstFlightRouteSegments(html), [""])
+    assert.equal(failures(auditRootHtml(html)).length, 0)
+  }
+})
+
+test("unreviewed external script sources, bodies, and attributes fail closed", () => {
+  for (const markup of [
+    '<script src="data:text/javascript,self.unreviewedInlineProgramRan=true" async=""></script>',
+    '<script src="https://example.invalid/poison.js" async=""></script>',
+    '<script src="//example.invalid/poison.js" async=""></script>',
+    '<script src="/_next/static/chunks/../poison.js" async=""></script>',
+    '<script src="/_next/static/chunks/app/page.js?poison=1" async=""></script>',
+    '<script src="/_next/static/chunks/app/page.js" async="">self.unreviewedInlineProgramRan=true</script>',
+    '<script src="/_next/static/chunks/app/page.js" async="" onload="self.unreviewedInlineProgramRan=true"></script>',
+    '<script src="/_next/static/chunks/app/page.js" async="" integrity="fixture"></script>',
+    '<script src="/_next/static/chunks/app/page.js" async="" id="unexpected"></script>',
+    '<script src="/_next/static/chunks/unreviewed.js" async=""></script>',
+    '<script src="/_next/static/chunks/app/page.js"></script>',
+    '<script src="/_next/static/chunks/app/page.js" async="" nomodule=""></script>',
+  ]) {
+    assertMissingFlightBootstrap(
+      withMarkupBeforeBodyEnd(CANONICAL_HOME_HTML, markup)
+    )
+  }
+
+  for (const html of [
+    CANONICAL_HOME_HTML.replaceAll(
+      ' async=""></script>',
+      ' nomodule=""></script>'
+    ),
+    CANONICAL_HOME_HTML.replace(
+      'polyfills-42372ed130431b0a.js" nomodule=""',
+      'polyfills-42372ed130431b0a.js" async=""'
+    ),
+    CANONICAL_HOME_HTML.replace(' id="_R_" async=""', ' async=""'),
+    CANONICAL_HOME_HTML.replace(
+      ' async=""></script>',
+      ' id="_R_" async=""></script>'
+    ),
+  ]) {
+    assertMissingFlightBootstrap(html)
+  }
 })
 
 test("nonce-bearing inline Flight instructions remain executable evidence", () => {
@@ -375,6 +585,25 @@ test("Flight data requires exactly one ordered bootstrap", () => {
       "self.__next_f.push([0])"
     )
   )
+
+  const bootstrapScript = CANONICAL_HOME_HTML.match(
+    /<script>\(self\.__next_f=self\.__next_f\|\|\[\]\)\.push\(\[0\]\)<\/script>/
+  )?.[0]
+  const payloadScript = CANONICAL_HOME_HTML.match(
+    /<script>self\.__next_f\.push\(\[1,[\s\S]*?<\/script>/
+  )?.[0]
+  assert.ok(bootstrapScript)
+  assert.ok(payloadScript)
+  const fosterParentedWrongOrder = CANONICAL_HOME_HTML.replace(
+    bootstrapScript,
+    ""
+  )
+    .replace(payloadScript, "")
+    .replace(
+      "<body>",
+      `<body><table>${payloadScript}<div>${bootstrapScript}</div></table>`
+    )
+  assertMissingFlightBootstrap(fosterParentedWrongOrder)
 })
 
 test("malformed and mis-sized length-prefixed rows fail closed", () => {
@@ -430,6 +659,24 @@ test("Flight extraction requires exactly one record-zero row", () => {
       withFlightPayloads(CANONICAL_HOME_HTML, [
         `${aliasedRootId}:${CANONICAL_FLIGHT_BOOTSTRAP}\n`,
       ])
+    )
+
+    for (const payload of [
+      `${aliasedRootId}:${INDEX_POISONED_FLIGHT_BOOTSTRAP}\n${CANONICAL_ROOT_ROW}\n`,
+      `${CANONICAL_ROOT_ROW}\n${aliasedRootId}:${INDEX_POISONED_FLIGHT_BOOTSTRAP}\n`,
+    ]) {
+      assertMissingFlightBootstrap(
+        withFlightPayloads(CANONICAL_HOME_HTML, [payload])
+      )
+    }
+  }
+
+  for (const payload of [
+    `:${INDEX_POISONED_FLIGHT_BOOTSTRAP}\n${CANONICAL_ROOT_ROW}\n`,
+    `${CANONICAL_ROOT_ROW}\n:${INDEX_POISONED_FLIGHT_BOOTSTRAP}\n`,
+  ]) {
+    assertMissingFlightBootstrap(
+      withFlightPayloads(CANONICAL_HOME_HTML, [payload])
     )
   }
 })
@@ -521,6 +768,18 @@ test("Flight extraction accepts only the executed channel-1 record-0 bootstrap",
     "</body>",
     "<script>self.__next_f.push(notJson)</script></body>"
   )
+  const additionalFormStateCall = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    '<script>self.__next_f.push([2,{"state":"unreviewed"}])</script></body>'
+  )
+  const additionalUnknownChannelCall = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    "<script>self.__next_f.push([4])</script></body>"
+  )
+  const additionalEmptyCall = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    "<script>self.__next_f.push([])</script></body>"
+  )
   const additionalIdScriptCall = CANONICAL_HOME_HTML.replace(
     "</body>",
     '<script id="flight">self.__next_f.push([0])</script></body>'
@@ -536,6 +795,48 @@ test("Flight extraction accepts only the executed channel-1 record-0 bootstrap",
   const additionalTemplateCall = CANONICAL_HOME_HTML.replace(
     "</body>",
     "<script>`${self.__next_f.push([0])}`</script></body>"
+  )
+  const additionalUnreviewedQueue = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    '<script>self["unrelatedQueue"].push([1])</script></body>'
+  )
+  const additionalExecutableInertCopies = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    `<script>
+      const stringCopy = 'self["__ne"+"xt_f"].push([1])';
+      // self["__ne"+"xt_f"].push([1])
+      /* globalThis["__next"+"_f"].push([1]) */
+      const templateCopy = \`this["__next"+"_f"].push([1])\`;
+    </script></body>`
+  )
+  const poisonedInstruction = JSON.stringify([
+    1,
+    `${INDEX_POISONED_ROOT_ROW}\n`,
+  ])
+  const computedPoisonScripts = [
+    `self["__next"+"_f"].push(${poisonedInstruction})`,
+    `const q=self['__ne'+'xt_f'];q.push(${poisonedInstruction})`,
+    `self[("__next_"+"f")].push.call(self.__next_f,${poisonedInstruction})`,
+    `self["__next"+"_f"].push?.(${poisonedInstruction})`,
+    `this["__next"+"_f"].push(${poisonedInstruction})`,
+    `self["__ne"/* split */+"xt_f"].push(${poisonedInstruction})`,
+    String.raw`self["__ne\u0078t_f"].push(${poisonedInstruction})`,
+    `window["__next"+"_f"].push(${poisonedInstruction})`,
+    `globalThis["__ne"+"xt_f"]["push"](${poisonedInstruction})`,
+    `top["__next"+"_f"].push(${poisonedInstruction})`,
+    `const g=self;g["__next"+"_f"].push(${poisonedInstruction})`,
+    `Reflect.get(self,"__next_f").push(${poisonedInstruction})`,
+    `\`${"${"}self["__next"+"_f"].push(${poisonedInstruction})}\``,
+  ]
+  const computedPoisonCalls = computedPoisonScripts.map((poisonScript) =>
+    CANONICAL_HOME_HTML.replace(
+      "<script>self.__next_f.push",
+      `<script>${poisonScript}</script>\n    <script>self.__next_f.push`
+    )
+  )
+  const attributeBearingComputedPoison = CANONICAL_HOME_HTML.replace(
+    "<script>self.__next_f.push",
+    `<script id="flight-poison">${computedPoisonScripts[0]}</script>\n    <script>self.__next_f.push`
   )
   const adjacentCalls = CANONICAL_HOME_HTML.replace(
     "</script>\n    <script>self.__next_f.push",
@@ -565,10 +866,17 @@ test("Flight extraction accepts only the executed channel-1 record-0 bootstrap",
     additionalWrappedCall,
     additionalPrefixedCall,
     additionalMalformedCall,
+    additionalFormStateCall,
+    additionalUnknownChannelCall,
+    additionalEmptyCall,
     additionalIdScriptCall,
     additionalClassicTypeCall,
     additionalBracketCall,
     additionalTemplateCall,
+    additionalUnreviewedQueue,
+    additionalExecutableInertCopies,
+    ...computedPoisonCalls,
+    attributeBearingComputedPoison,
     adjacentCalls,
     spaceSeparatedCalls,
   ]) {
@@ -589,6 +897,28 @@ test("Flight extraction accepts only the executed channel-1 record-0 bootstrap",
     assert.deepEqual(extractRootFlightSegments(combinedCalls), [""])
     assert.deepEqual(extractFirstFlightRouteSegments(combinedCalls), [""])
   }
+
+  const inertDataReferences = CANONICAL_HOME_HTML.replace(
+    "</body>",
+    `<script id="inert-copies" type="application/json">
+      {"string":"self[\\"__ne\\"+\\"xt_f\\"].push([1])","comment":"/* self.__next_f */","template":"\u0060this[__next_f]\u0060"}
+    </script></body>`
+  )
+  assert.deepEqual(extractRootFlightSegments(inertDataReferences), [""])
+  assert.deepEqual(extractFirstFlightRouteSegments(inertDataReferences), [""])
+
+  const inertPayloadReference = withFlightPayloads(CANONICAL_HOME_HTML, [
+    `0:${JSON.stringify({
+      G: ["fixture", ['self["__ne"+"xt_f"].push([1])']],
+      P: null,
+      c: ["", ""],
+      f: [[["", { children: ["__PAGE__", {}] }], null, null, false]],
+      i: false,
+      q: "",
+    })}\n`,
+  ])
+  assert.deepEqual(extractRootFlightSegments(inertPayloadReference), [""])
+  assert.deepEqual(extractFirstFlightRouteSegments(inertPayloadReference), [""])
 })
 
 test("unexpected non-index Flight segments also fail exact canonical checks", () => {
@@ -602,6 +932,131 @@ test("unexpected non-index Flight segments also fail exact canonical checks", ()
 
   assert.ok(failedNames.includes("Root Flight state is canonical"))
   assert.ok(failedNames.includes("Root Flight route tree is canonical"))
+})
+
+test("the root Flight segment array must have exactly the canonical two entries", () => {
+  const extraRootSegment = CANONICAL_HOME_HTML.replace(
+    String.raw`\"c\":[\"\",\"\"]`,
+    String.raw`\"c\":[\"\",\"\",\"index\"]`
+  )
+
+  assert.deepEqual(extractRootFlightSegments(extraRootSegment), [])
+  assert.ok(
+    failures(auditRootHtml(extraRootSegment)).some(
+      ({ name }) => name === "Root Flight state is canonical"
+    )
+  )
+})
+
+test("the root Flight router state rejects trailing top-level entries", () => {
+  const trailingFlightEntry = withFlightPayloads(CANONICAL_HOME_HTML, [
+    `0:${JSON.stringify({
+      P: null,
+      c: ["", ""],
+      f: [[["", { children: ["__PAGE__", {}] }], null, null, false], null],
+      i: false,
+      q: "",
+    })}\n`,
+  ])
+
+  assert.deepEqual(extractRootFlightSegments(trailingFlightEntry), [""])
+  assert.deepEqual(extractFirstFlightRouteSegments(trailingFlightEntry), [])
+  assert.ok(
+    failures(auditRootHtml(trailingFlightEntry)).some(
+      ({ name }) => name === "Root Flight route tree is canonical"
+    )
+  )
+
+  const poisonedInitialSearch = withFlightPayloads(CANONICAL_HOME_HTML, [
+    `0:${JSON.stringify({
+      P: null,
+      c: ["", ""],
+      f: [[["", { children: ["__PAGE__", {}] }], null, null, false]],
+      i: false,
+      q: "?poison",
+    })}\n`,
+  ])
+  assert.deepEqual(extractRootFlightSegments(poisonedInitialSearch), [])
+  assert.deepEqual(extractFirstFlightRouteSegments(poisonedInitialSearch), [])
+
+  const prefixedFlightPath = withFlightPayloads(CANONICAL_HOME_HTML, [
+    `0:${JSON.stringify({
+      P: null,
+      c: ["", ""],
+      f: [
+        [
+          ["", { children: ["__PAGE__", {}] }],
+          ["index", { children: ["__PAGE__", {}] }],
+          null,
+          null,
+          false,
+        ],
+      ],
+      i: false,
+      q: "",
+    })}\n`,
+  ])
+  assert.deepEqual(extractFirstFlightRouteSegments(prefixedFlightPath), [])
+
+  const dynamicRootAlias = withFlightPayloads(CANONICAL_HOME_HTML, [
+    `0:${JSON.stringify({
+      P: null,
+      c: ["", ""],
+      f: [
+        [
+          [["slug", "", "d", null], { children: ["__PAGE__", {}] }],
+          null,
+          null,
+          false,
+        ],
+      ],
+      i: false,
+      q: "",
+    })}\n`,
+  ])
+  assert.deepEqual(extractFirstFlightRouteSegments(dynamicRootAlias), [])
+
+  const extraParallelRoute = withFlightPayloads(CANONICAL_HOME_HTML, [
+    `0:${JSON.stringify({
+      P: null,
+      c: ["", ""],
+      f: [
+        [
+          [
+            "",
+            {
+              children: ["__PAGE__", {}],
+              copy: ["__PAGE__", {}],
+            },
+          ],
+          null,
+          null,
+          false,
+        ],
+      ],
+      i: false,
+      q: "",
+    })}\n`,
+  ])
+  assert.deepEqual(extractFirstFlightRouteSegments(extraParallelRoute), [])
+
+  for (const pageAlias of ["__PAGE__index", '__PAGE__?{"query":"value"}']) {
+    const aliasedPageLeaf = withFlightPayloads(CANONICAL_HOME_HTML, [
+      `0:${JSON.stringify({
+        P: null,
+        c: ["", ""],
+        f: [[["", { children: [pageAlias, {}] }], null, null, false]],
+        i: false,
+        q: "",
+      })}\n`,
+    ])
+    assert.deepEqual(extractFirstFlightRouteSegments(aliasedPageLeaf), [])
+    assert.ok(
+      failures(auditRootHtml(aliasedPageLeaf)).some(
+        ({ name }) => name === "Root Flight route tree is canonical"
+      )
+    )
+  }
 })
 
 test("homepage identity markers are required without relying on copy", () => {
@@ -619,7 +1074,7 @@ test("homepage identity markers are required without relying on copy", () => {
 
 test("raw hydration sentinel markup is required", () => {
   const missingSentinel = CANONICAL_HOME_HTML.replace(
-    '      <span data-hwl-hydration-sentinel=""></span>\n',
+    '      <span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>\n',
     ""
   )
 
@@ -628,6 +1083,29 @@ test("raw hydration sentinel markup is required", () => {
       ({ name }) => name === "Hydration sentinel marker"
     )
   )
+
+  const unclosedSentinel = CANONICAL_HOME_HTML.replace("</span>", "")
+  assert.ok(
+    failures(auditRootHtml(unclosedSentinel)).some(
+      ({ name }) => name === "Hydration sentinel marker"
+    )
+  )
+
+  const prehydratedSentinel = CANONICAL_HOME_HTML.replace(
+    'data-hwl-hydration-sentinel="" hidden=""',
+    'data-hwl-hydration-sentinel="" data-hwl-hydrated="true" hidden=""'
+  )
+  const duplicatedSentinel = CANONICAL_HOME_HTML.replace(
+    '      <span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>',
+    '      <span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span><span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>'
+  )
+  for (const invalidSentinel of [prehydratedSentinel, duplicatedSentinel]) {
+    assert.ok(
+      failures(auditRootHtml(invalidSentinel)).some(
+        ({ name }) => name === "Hydration sentinel marker"
+      )
+    )
+  }
 })
 
 test("lookalike attributes and script or style strings are not markup evidence", () => {
@@ -664,6 +1142,295 @@ test("lookalike attributes and script or style strings are not markup evidence",
   assert.ok(failedNames.includes("Homepage header state"))
   assert.ok(failedNames.includes("Homepage identity markers"))
   assert.ok(failedNames.includes("Hydration sentinel marker"))
+})
+
+test("foreign-content marker attributes are not homepage evidence", () => {
+  const withoutRealMarkers = CANONICAL_HOME_HTML.replace(
+    'data-app-shell=""',
+    'data-app-shell-copy=""'
+  )
+    .replace(
+      'data-site-header-variant="home"',
+      'data-site-header-variant-copy="home"'
+    )
+    .replace(
+      'data-hwl-hydration-sentinel=""',
+      'data-hwl-hydration-sentinel-copy=""'
+    )
+    .replace('data-homepage=""', 'data-homepage-copy=""')
+    .replace('id="home-hero-heading"', 'id="home-hero-heading-copy"')
+    .replace('data-home-hero-lift-cta=""', 'data-home-hero-lift-cta-copy=""')
+  const foreignMarkers = `<svg>
+    <g data-app-shell="" data-site-header-variant="home" data-hwl-hydration-sentinel="" data-homepage="" id="home-hero-heading" data-home-hero-lift-cta=""></g>
+    <foreignObject><div data-app-shell="" data-site-header-variant="home" data-hwl-hydration-sentinel="" data-homepage="" id="home-hero-heading" data-home-hero-lift-cta=""></div></foreignObject>
+  </svg>`
+  const failedNames = failures(
+    auditRootHtml(withMarkupBeforeBodyEnd(withoutRealMarkers, foreignMarkers))
+  ).map(({ name }) => name)
+
+  assert.ok(failedNames.includes("Homepage app shell"))
+  assert.ok(failedNames.includes("Homepage header state"))
+  assert.ok(failedNames.includes("Homepage identity markers"))
+  assert.ok(failedNames.includes("Hydration sentinel marker"))
+})
+
+test("foreign integration points cannot hide non-home negative evidence", () => {
+  const foreignBreadcrumb = withMarkupBeforeBodyEnd(
+    CANONICAL_HOME_HTML,
+    '<svg><foreignObject><nav aria-label="Breadcrumb"></nav></foreignObject></svg>'
+  )
+  const foreignEffects = withMarkupBeforeBodyEnd(
+    CANONICAL_HOME_HTML,
+    '<svg><foreignObject><div class="scroll-breath" data-scrolling=""></div></foreignObject></svg>'
+  )
+
+  assert.ok(
+    failures(auditRootHtml(foreignBreadcrumb)).some(
+      ({ name }) => name === "Homepage breadcrumb state"
+    )
+  )
+  assert.ok(
+    failures(auditRootHtml(foreignEffects)).some(
+      ({ name }) => name === "Homepage ambient effects state"
+    )
+  )
+})
+
+test("homepage identity markers require their exact semantic elements", () => {
+  const wrongRoles = CANONICAL_HOME_HTML.replace(
+    '<div data-app-shell="">',
+    '<section data-app-shell="">'
+  )
+    .replace(
+      '<header class="top-0 fixed inset-x-0" data-site-header-variant="home"></header>',
+      '<div class="top-0 fixed inset-x-0" data-site-header-variant="home"></div>'
+    )
+    .replace(
+      '<span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>',
+      '<div aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></div>'
+    )
+    .replace('<div data-homepage="">', '<section data-homepage="">')
+    .replace(
+      '<h1 id="home-hero-heading">Come back to your whole body.</h1>',
+      '<h2 id="home-hero-heading">Come back to your whole body.</h2>'
+    )
+    .replace(
+      '<a data-home-hero-lift-cta="" href="/beauty/lift">Meet LIFT</a>',
+      '<span data-home-hero-lift-cta="">Meet LIFT</span>'
+    )
+  const failedNames = failures(auditRootHtml(wrongRoles)).map(
+    ({ name }) => name
+  )
+
+  assert.ok(failedNames.includes("Homepage app shell"))
+  assert.ok(failedNames.includes("Homepage header state"))
+  assert.ok(failedNames.includes("Homepage identity markers"))
+  assert.ok(failedNames.includes("Hydration sentinel marker"))
+})
+
+test("homepage identity markers require their expected ancestry", () => {
+  const detachedMarkers = CANONICAL_HOME_HTML.replace(
+    '<header class="top-0 fixed inset-x-0" data-site-header-variant="home"></header>',
+    ""
+  )
+    .replace(
+      '<span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>',
+      ""
+    )
+    .replace('<div data-homepage="">', "<div>")
+    .replace('id="home-hero-heading"', 'id="home-hero-heading-copy"')
+    .replace('data-home-hero-lift-cta=""', 'data-home-hero-lift-cta-copy=""')
+  const semanticButDetached = `<header data-site-header-variant="home"></header>
+    <span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>
+    <div data-homepage=""></div>
+    <h1 id="home-hero-heading"></h1>
+    <a data-home-hero-lift-cta="" href="/beauty/lift"></a>`
+  const failedNames = failures(
+    auditRootHtml(withMarkupBeforeBodyEnd(detachedMarkers, semanticButDetached))
+  ).map(({ name }) => name)
+
+  assert.ok(failedNames.includes("Homepage header state"))
+  assert.ok(failedNames.includes("Homepage identity markers"))
+  assert.ok(failedNames.includes("Hydration sentinel marker"))
+})
+
+test("homepage identity markers require one coherent app-shell subtree", () => {
+  const withoutRealIdentity = CANONICAL_HOME_HTML.replace(
+    'data-site-header-variant="home"',
+    'data-site-header-variant-copy="home"'
+  )
+    .replace(
+      'data-hwl-hydration-sentinel=""',
+      'data-hwl-hydration-sentinel-copy=""'
+    )
+    .replace('data-homepage=""', 'data-homepage-copy=""')
+    .replace('id="home-hero-heading"', 'id="home-hero-heading-copy"')
+    .replace('data-home-hero-lift-cta=""', 'data-home-hero-lift-cta-copy=""')
+  const splitWitnesses = `<div data-app-shell=""></div>
+    <span data-app-shell="">
+      <header data-site-header-variant="home"></header>
+      <span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>
+      <div data-homepage="">
+        <h1 id="home-hero-heading"></h1>
+        <a data-home-hero-lift-cta="" href="/beauty/lift"></a>
+      </div>
+    </span>`
+  const failedNames = failures(
+    auditRootHtml(withMarkupBeforeBodyEnd(withoutRealIdentity, splitWitnesses))
+  ).map(({ name }) => name)
+
+  assert.ok(failedNames.includes("Homepage identity markers"))
+})
+
+test("reviewed streamed-Suspense home markers retain one coherent witness", () => {
+  const directHomepage = `      <main>
+        <div data-homepage="">
+          <h1 id="home-hero-heading">Come back to your whole body.</h1>
+          <a data-home-hero-lift-cta="" href="/beauty/lift">Meet LIFT</a>
+        </div>
+      </main>`
+  const streamedHomepage = `      <main><!--$?--><template id="B:0"></template><span>Loading</span><!--/$--></main>`
+  const hiddenHomepage = `    <div hidden="" id="S:0">
+      <div data-homepage="">
+        <h1 id="home-hero-heading">Come back to your whole body.</h1>
+        <a data-home-hero-lift-cta="" href="/beauty/lift">Meet LIFT</a>
+      </div>
+    </div>`
+  const streamed = CANONICAL_HOME_HTML.replace(
+    directHomepage,
+    streamedHomepage
+  ).replace(
+    "    <script>(self.__next_f=self.__next_f||[]).push([0])</script>",
+    `${hiddenHomepage}
+    <script>${REVIEWED_REACT_REVEAL_SCRIPT}</script>
+    <script>(self.__next_f=self.__next_f||[]).push([0])</script>`
+  )
+
+  assert.deepEqual(failures(auditRootHtml(streamed)), [])
+
+  const brokenBoundary = streamed.replace('id="S:0"', 'id="S:1"')
+  assert.ok(
+    failures(auditRootHtml(brokenBoundary)).some(
+      ({ name }) => name === "Homepage identity markers"
+    )
+  )
+
+  for (const malformedBoundary of [
+    streamed.replace("<!--$?-->", ""),
+    streamed.replace("<!--$?-->", "<!--$-->"),
+    streamed.replace("<!--/$-->", ""),
+  ]) {
+    assert.ok(
+      failures(auditRootHtml(malformedBoundary)).some(
+        ({ name }) => name === "Homepage identity markers"
+      )
+    )
+  }
+
+  const revealScript = `<script>${REVIEWED_REACT_REVEAL_SCRIPT}</script>`
+  const earlyReveal = streamed
+    .replace(revealScript, "")
+    .replace("<body>", `<body>${revealScript}`)
+  const revealBeforeSource = streamed
+    .replace(revealScript, "")
+    .replace("<!--/$-->", `<!--/$-->${revealScript}`)
+  const fosterParentedEarlyReveal = streamed.replace(
+    `${hiddenHomepage}
+    ${revealScript}`,
+    `<table>${revealScript}${hiddenHomepage}</table>`
+  )
+  const revealInsideSource = streamed
+    .replace(revealScript, "")
+    .replace(
+      "    </div>\n    <script>(self.__next_f",
+      `      ${revealScript}\n    </div>\n    <script>(self.__next_f`
+    )
+  for (const wrongOrder of [
+    earlyReveal,
+    revealBeforeSource,
+    fosterParentedEarlyReveal,
+    revealInsideSource,
+  ]) {
+    assert.ok(
+      failures(auditRootHtml(wrongOrder)).some(
+        ({ name }) => name === "Homepage identity markers"
+      )
+    )
+  }
+})
+
+test("streamed-Suspense boundary IDs reject cross-kind and foreign decoys", () => {
+  const directHomepage = `      <main>
+        <div data-homepage="">
+          <h1 id="home-hero-heading">Come back to your whole body.</h1>
+          <a data-home-hero-lift-cta="" href="/beauty/lift">Meet LIFT</a>
+        </div>
+      </main>`
+  const hiddenHomepage = `    <div hidden="" id="S:0">
+      <div data-homepage="">
+        <h1 id="home-hero-heading">Come back to your whole body.</h1>
+        <a data-home-hero-lift-cta="" href="/beauty/lift">Meet LIFT</a>
+      </div>
+    </div>`
+  const streamed = CANONICAL_HOME_HTML.replace(
+    directHomepage,
+    '      <main><!--$?--><template id="B:0"></template><span>Loading</span><!--/$--></main>'
+  ).replace(
+    "    <script>(self.__next_f=self.__next_f||[]).push([0])</script>",
+    `${hiddenHomepage}
+    <script>${REVIEWED_REACT_REVEAL_SCRIPT}</script>
+    <script>(self.__next_f=self.__next_f||[]).push([0])</script>`
+  )
+  const decoys = [
+    '<div id="B:0"></div>',
+    '<template id="S:0"></template>',
+    '<svg><g id="B:0"></g></svg>',
+    '<svg><g id="S:0"></g></svg>',
+    '<script id="B:0" type="application/json">{}</script>',
+  ]
+
+  for (const decoy of decoys) {
+    const withDecoy = streamed.replace("<body>", `<body>${decoy}`)
+    assert.ok(
+      failures(auditRootHtml(withDecoy)).some(
+        ({ name }) => name === "Homepage identity markers"
+      ),
+      decoy
+    )
+  }
+})
+
+test("executable URL schemes cannot hide in activation attributes", () => {
+  const executableMarkup = [
+    '<a href="javascript:self.PWNED=true">go</a>',
+    '<form action="JaVaScRiPt:self.PWNED=true"><button>go</button></form>',
+    '<button formaction="\tjava\nscript:self.PWNED=true">go</button>',
+    '<a href="&#x6a;avascript:self.PWNED=true">go</a>',
+    '<svg><a id="x"><set attributeName="href" to="javascript:self.PWNED=true"></set></a></svg>',
+  ]
+
+  for (const markup of executableMarkup) {
+    assert.notDeepEqual(
+      failures(
+        auditRootHtml(withMarkupBeforeBodyEnd(CANONICAL_HOME_HTML, markup))
+      ),
+      [],
+      markup
+    )
+  }
+})
+
+test("breadcrumb labels use browser-equivalent trimmed matching", () => {
+  const withBreadcrumb = withMarkupBeforeBodyEnd(
+    CANONICAL_HOME_HTML,
+    '<nav aria-label=" Breadcrumb "></nav>'
+  )
+
+  assert.ok(
+    failures(auditRootHtml(withBreadcrumb)).some(
+      ({ name }) => name === "Homepage breadcrumb state"
+    )
+  )
 })
 
 test("script and style strings cannot create false breadcrumb or effects failures", () => {

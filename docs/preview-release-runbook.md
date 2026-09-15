@@ -1,54 +1,160 @@
-# HWL Preview Release Runbook
+# HWL Launch Runbook
 
-This runbook prepares one isolated, test-money-only Vercel Preview. It grants
+This end-to-end launch runbook begins with one isolated, test-money-only Vercel
+Preview and proceeds through separately gated Production verification. It grants
 no authority to push, deploy, change provider configuration, assign a domain,
-or promote Production. Every provider or hosted-state step below requires
-direct owner approval first.
+charge live money, or promote Production. Every provider or hosted-state step
+below requires direct owner approval first.
 
 The owner changed the launch domain to `hwlbysmd.com` on September 4, 2026.
 Production canonicals use `https://www.hwlbysmd.com`, matching Vercel's existing
 apex-to-www redirect. The custom Preview is now configured, TLS-valid, assigned
-only to the checkpoint branch, and protected by Vercel SSO. Preserve existing
-mail-forwarding records and the exact verified Resend sending records.
+only to the checkpoint branch, and protected by Vercel SSO. Preserve the
+current Proton inbound-mail records and exact verified Resend sending records;
+do not recreate the superseded root-mail forwarding configuration.
 
 ## September 14 Current Authority Snapshot
 
 - The synchronized checkpoint branch and protected Preview use exact commit
-  `f12656c5238667d6df71d8d123070a85539ea633`. Vercel deployment
-  `dpl_BUrYS7iK2XfkUdAqdMhaGEaTssZQ` is READY/Preview and owns
-  `preview.hwlbysmd.com`; GitHub Actions run `34851069600` passed. `main`, public
+  `828bd43a0ddb59f7bdb2301cb761f59aeacb517a`. Vercel deployment
+  `dpl_3jU7MS43zTFcJ7wr9nYpoghQna8S` is READY/Preview and owns
+  `preview.hwlbysmd.com`; GitHub Actions run `34860826873` passed. `main`, public
   Production aliases, live Stripe, and sales were not changed.
-- Exact Preview HTTP and browser postflight checks now pass: `/index` returns
-  exact
-  query-preserving `308` redirects to `/`; raw `/` HTML has the canonical empty
-  root and route-tree Flight segments; both the stable alias and immutable
-  deployment hydrate the home surface without console errors or horizontal
-  overflow. The September 13 React 418 hold is cleared only for this artifact.
-- Preview remains deliberately sales-closed. Its Stripe sandbox Product and
-  one-time $11.11 Price are active, the persistent Preview webhook subscribes
-  to the exact four required events, and private staging media remains present.
-  The latest completed sandbox purchase predates `f12656c`, so the current
-  artifact still needs an owner-approved purchase, signed webhook,
+- Public aliases still resolve to older READY deployment
+  `dpl_HMtiyuJNF5unFUY9K6uWkiWZ4y4i`, exact commit
+  `6a260bcfa7c752562be264d1a077013fc8ff9f4d`, with commerce and inquiry
+  collection closed. The exact `828bd43` Preview has not been promoted.
+- A fresh local verification passes the production build, ESLint, TypeScript,
+  changed-file formatting, dependency-tree and tracked-secret checks, all 63
+  static pages, SEO for 21 pages and seven long-form documents, and 741/741
+  launch assertions. The only local environment failure is the stale local
+  Resend credential; this does not establish the validity of the opaque
+  deployed Preview credential.
+- The exact-`828bd43` Preview passed the then-current HTTP and browser
+  postflight: `/index` returned an exact query-preserving `308` redirect to `/`;
+  the immutable raw `/` response returned `200 text/html` with 118,679 bytes;
+  and the hosted-root audit passed all 9 checks. A fresh browser rendered the complete home application
+  tree and the Cal selector hydrated with five Pacific-time choices on September 27. Browser warning/error logs were empty for the app and Cal views, and the
+  exact-deployment Vercel warning/error log scan returned no records.
+  Desktop and 390-pixel mobile checks also found no horizontal overflow,
+  preserved the accessible navigation and all 11 visible services, and kept
+  the contact form fully labelled. No transaction or form was submitted.
+- Preview remains deliberately sales-closed. The last verified read-only
+  provider/storage audit found an active Stripe sandbox Product and one-time
+  $11.11 Price, a persistent Preview webhook subscribed to the exact four
+  required events, and both private staging media objects. Treat these as
+  last-verified provider/storage state, not fresh exact-artifact fulfillment
+  proof. No Stripe session or event postdates the September 14 deployment, so
+  the current artifact still needs an owner-approved purchase, signed webhook,
   fulfillment/access, replay, refund, dispute, and recovery canary.
-- Public Cal booking exposes all 11 manual-confirmation services with Cal
-  payments disabled. Staging migrations 001–020 are present, but the exact
-  Preview has neither `CALCOM_API_KEY` nor `CALCOM_WEBHOOK_SECRET`, its Cal
-  ledger endpoint is disabled, the account still displays an Unverified email,
-  and Cal has no webhook. Do not claim synchronized booking history until the
-  signed request → confirmation → reschedule → cancellation lifecycle passes.
+- Public Cal booking exposes all 11 zero-price, manual-confirmation services
+  with seats disabled, 48-hour notice, 60-minute buffers, and
+  reschedule/cancellation enabled. Fresh unauthenticated Cal public-API queries
+  return real availability for every service through October 14. A separate
+  authenticated staging Supabase read shows migrations 001–020, the
+  migration-019 RPC contract, and a booking-ledger aggregate baseline of zero
+  records, aliases, webhook receipts, and manual-review events. These are
+  different evidence modalities; neither proves signed Cal-to-HWL ingestion.
+  Production is current only through migration 018, so migrations 019 and 020
+  are a hard gate before any Production Cal-ledger activation. Cal's
+  authenticated profile now shows `shannon@hwlbysmd.com` as the sole Primary
+  email. Neither Preview nor Production has `CALCOM_API_KEY` or
+  `CALCOM_WEBHOOK_SECRET`, and the Preview ledger endpoint is disabled. Do not
+  claim synchronized booking history until the signed request → confirmation →
+  reschedule → cancellation lifecycle passes.
 - Inquiry collection renders open in Preview and historical database-first plus
-  Resend delivery evidence exists, but `f12656c` has no successful labeled
-  inquiry submission. The local Resend credential fails provider validation;
-  this does not prove the opaque deployed Preview credential is invalid.
+  Resend delivery evidence exists, but it belongs to two distinct artifacts:
+  one labeled test on exact Preview `d28be30`, and a separate labeled test on an
+  isolated Production deployment. Neither is proof for current public
+  Production, and `828bd43` has no successful labeled inquiry submission. The
+  local Resend credential fails provider validation; this does not prove the
+  opaque deployed Preview credential is invalid. Three older staging inquiries
+  for the designated QA email are retained with
+  `received`/`accepted` state, so the new canary must be identified by its exact
+  generated submission ID and Stage 2 label.
+- The designated Stage 2 identity `accounts@wholebody.earth` exists in staging
+  Auth, is email-confirmed, and has previously signed in. The read-only check
+  created no account mutation or login link. It already owns the active
+  September 11 Preview LIFT purchase. The linked sandbox Session and $11.11
+  charge are paid, undisputed, and unrefunded, so a fresh same-account checkout
+  requires explicit approval to fully refund the historical sandbox charge,
+  verify signed revocation, and then repurchase. Otherwise use a new confirmed
+  QA identity approved by the owner.
+- Proton's two inbound MX records, SPF, and three DKIM selectors are live for
+  `hwlbysmd.com`, and the verified Resend sending records remain present.
+  Authoritative DNS, Cloudflare, and Google now return exactly one `_dmarc` TXT
+  record, `v=DMARC1; p=quarantine`, so the conflicting-policy gate is closed.
+  Run one labeled Resend-to-Proton receipt canary before calling end-to-end
+  mail delivery complete.
+  The Production invitations for `shannon@hwlbysmd.com` and
+  `admin@ghosthand.studio` remain unconfirmed; neither identity is a proven
+  signed-in administrator.
+- The canonical live Stripe account has an active LIFT Product, one-time $11.11
+  Price, and four-event Production webhook, but still has zero live
+  transactions. No signed live webhook, entitlement, or private-media
+  fulfillment proof exists; live object presence is configuration evidence
+  only.
 - Four configuration names have both branch and general Preview definitions:
   `COMMERCE_SALES_READY`, `CONTACT_TO_EMAIL`, `LIFT_PDF_STORAGE_PATH`, and
-  `LIFT_VIDEO_STORAGE_PATH`. The branch values currently win; reconcile the
-  duplicates before deriving any Production configuration from Preview.
-- A local, uncommitted hosted-root verifier repair now understands the pinned
-  React Flight stream's coalesced, split, hint, and byte-length-framed rows. Its
-  41 targeted cases, the 82-case Preview-release suite, TypeScript, lint,
-  formatting, and captured exact-Preview HTML audit pass. It has not been
-  committed, pushed, or deployed and therefore needs fresh scope approval.
+  `LIFT_VIDEO_STORAGE_PATH`. A secret-safe pull confirmed that every general
+  value is byte-for-byte identical to its effective checkpoint value. Once the
+  owner authorizes the mutation, remove only the four general Preview copies and
+  retain the isolated checkpoint definitions; no provider change has been made.
+- Exact `828bd43` remains the last synchronized and deployed Preview artifact,
+  and its immutable root passed the earlier 9-check hosted-root audit. A
+  stricter local verifier follow-up now rejects numeric record-zero aliases and
+  unsupported Flight push channels, pins the two expected Next/React runtime
+  inline bodies, parses markup with the standards-compliant `parse5` browser
+  grammar, and rejects unreviewed inline handlers, active embeds,
+  foreign/declarative-template execution, and external scripts outside the
+  ordered same-origin Next-chunk inventory. Its targeted suite passes 60/60 and
+  the Preview-release suite passes 101/101. That hardening is still uncommitted in two
+  scripts, two dependency-manifest files, and these two reconciled documents, so
+  it is neither part of `828bd43` nor deployed. A newly approved checkpoint SHA
+  must repeat the exact-artifact HTTP and browser proof before promotion.
+
+### Pending Production migration gate
+
+Production is missing migrations 019 and 020. Their reviewed hashes are:
+
+```text
+019  504d83b41cd385d62af3eed8b4845d8ae0ee85cb9065b646260d11daaa8e93fd
+020  7294172e47a0d20aa000054efaa2a2b1b5833f534b2a9e4deeef92573f01dbb3
+```
+
+Before a separately approved Production apply:
+
+The September 14 read-only Production preflight already confirms migration 018,
+an absent migration-020 index, zero rows in each of the four booking/audit
+tables, zero duplicate target/reference pairs, and the exact pre-019 contract:
+one 24-argument, zero-default, service-role-only `SECURITY DEFINER` ingestion RPC
+with an empty `search_path` and the original four-value review constraint. The
+published LIFT course and all seven lessons are present. The private
+`member-content` bucket exists with zero policies and a 50 MB object limit, but
+it contains no files; both canonical LIFT assets remain a separate approved
+Production upload-and-verification gate.
+
+1. Keep the Cal booking ledger, Cal webhook, and administrator handoff disabled.
+2. Confirm migration 018 exists and the migration-020 index does not.
+3. Confirm `calcom_webhook_events` has low/zero traffic and record its row count.
+4. Require this preflight to return no rows:
+
+   ```sql
+   select target_user_id, change_reference, count(*)
+   from public.admin_role_change_audit
+   group by target_user_id, change_reference
+   having count(*) > 1;
+   ```
+
+5. Apply 019, verify the single 25-argument service-role RPC and widened review
+   constraint, then apply 020 and verify the exact unique-index definition.
+6. If either file fails before commit, rely on its transaction rollback. If 019
+   commits and 020 later fails, keep both features disabled, retain every audit
+   row, and fix forward. Do not restore the obsolete Cal RPC or delete audit
+   evidence.
+
+This review authorizes nothing by itself. Production remains unchanged until
+the owner approves these exact files and scope.
 
 ## September 13 Historical Authority Snapshot
 
@@ -297,9 +403,10 @@ requires owner approval.
 - `CRON_SECRET` — a separate unique random value of at least 32 characters
 - `CALCOM_PROFILE_URL=https://cal.com/hwlbysmd`
 
-The corrected canonical PDF has been visually reviewed and byte-verified with
-the video in private staging storage. Preserve those exact objects. Neither the
-PDF nor video belongs in Git or the Vercel deployment bundle.
+The last verified storage audit found the visually reviewed canonical PDF and
+byte-verified video in private staging storage. Preserve those exact objects,
+but do not treat the dated storage result as a fresh fulfillment canary. Neither
+the PDF nor video belongs in Git or the Vercel deployment bundle.
 
 ## Vercel Preview facts and manual recovery test
 
@@ -370,54 +477,141 @@ the authenticated immutable deployment and the custom alias. Recheck the
 alias-to-SHA mapping afterward to close the race window; do not substitute a
 mutable alias for immutable deployment identity.
 
-## Hosted Preview verification order
+The raw verifier checks the ordered logical Next chunk references and their
+script attributes, but it does not fetch or hash those external chunk bytes and
+does not prove CSP enforcement or JavaScript execution. The mandatory fresh
+browser hydration, console/page-error, and first-party network checks provide
+that separate execution evidence; neither gate substitutes for the other.
 
-Exact `f12656c` has immutable Preview identity plus closed-state, raw-root, and
-fresh-browser evidence. Stripe and Preview inquiry provider proof belongs to
-historical `d28be30`; a separate isolated Production inquiry canary is also
-recorded in the launch packet. Fresh `f12656c` sandbox and inquiry canaries plus
-the signed Cal lifecycle remain pending. Four duplicate Preview variable
-definitions must be reconciled before Preview configuration can inform
-Production. Preserve and reverify every candidate-scoped result after a new
-checkpoint.
+## Current release verification order
 
-1. Obtain owner approval for migrations 012–014, the branch-scoped Preview
-   variables, custom hostname, a dedicated Vercel automation-bypass secret,
-   the persistent Stripe sandbox webhook, and Cal.com publication settings.
-2. Apply and fingerprint-verify the hosted migrations.
-3. Upload and verify the corrected PDF alongside the already reviewed private
-   video; verify anonymous denial.
-4. Prepare an immutable checkpoint commit on the named branch. Run the offline
-   pre-push repository preflight, full tests including `npm run test:auth`,
-   production build, dependency audits, secret scan, and `git diff --check`.
-5. Push only the checkpoint branch after owner authorization. Never push or
-   merge `main` as part of Preview preparation. Then run
-   `npm run preflight:preview:post-push` and require exact synchronization
-   before deploying that commit.
-6. Deploy with closed sales. Assign `preview.hwlbysmd.com`, then prove the
-   public application, inquiry fallback, booking fallback, protected routes,
-   unsigned webhook rejection, and cron authorization rejection. Require
-   `npm run verify:hosted-root` to pass, then require the hydrated sentinel,
-   home-only header/breadcrumb behavior, and zero React hydration errors in a
-   fresh extension-free browser.
-7. Create the persistent sandbox webhook and install only its Preview signing
-   secret. Redeploy closed, send a signed sandbox delivery, and verify its exact
-   target/account/mode database receipt.
-8. With owner approval, set `COMMERCE_SALES_READY=true` only in this Preview,
-   redeploy, and run purchase, signed webhook, redirect reconciliation,
-   entitlement, video, PDF, duplicate delivery, refund, dispute, and manual
-   scheduled-recovery checks.
-9. Publish the approved Cal.com pilot and verify the full date/time selector,
-   confirmation flow, deliberate conflict suppression, the FIREBIRDS destination
-   write, timezone, organizer/attendee human email receipt, mobile keyboard
-   access, and fallback behavior.
-10. Submit a real Preview inquiry and verify database receipt first, Resend
-    notification second, duplicate/idempotency behavior, and admin visibility.
-11. Restore `COMMERCE_SALES_READY=false` if any provider, entitlement, inquiry,
-    booking, or isolation check fails.
-12. Record the exact deployment ID, commit, hostname, sanitized provider IDs,
-    HTTP results, database evidence, browser evidence, and remaining gaps in the
-    launch packet.
+The original Preview bootstrap—staging migrations, initial private-media upload,
+the custom Preview hostname, Stripe sandbox objects, and publication of the 11
+Cal services—is historical completed setup and must not be repeated as if it
+were current work. Exact `828bd43` remains the last pinned Preview, but the
+six-file verifier, dependency, and documentation follow-up is local and
+uncommitted. Begin
+from that delta and reprove every artifact-scoped result after its SHA changes.
+
+1. Finish the six-file local candidate on top of `828bd43`. Require the 60/60
+   hosted-root verifier suite, 101/101 Preview-release suite, complete launch test
+   set, TypeScript, ESLint, changed-file formatting, production build,
+   dependency and tracked-secret checks, and `git diff --check` to pass.
+2. After the owner approves the exact diff, commit and push only
+   `checkpoint/platform-overhaul-2026-08-20`; never push or merge `main`. Wait
+   for exact-SHA CI, then deploy that exact SHA to Preview with commerce closed.
+3. Pin the new deployment ID and SHA. Run the hardened hosted-root verifier only
+   against `preview.hwlbysmd.com`, bracketed by alias-to-SHA checks. Establish
+   immutable-deployment identity with authenticated Vercel metadata, then run
+   fresh desktop/mobile hydration and console checks against both the
+   authenticated immutable deployment and stable alias, plus route coverage,
+   protected-route denial, and a second alias-to-SHA check. Clean up the four
+   value-identical general Preview variables only with separate owner approval.
+4. With explicit transactional approval, run exact-SHA Preview canaries: one
+   sandbox $11.11 LIFT purchase using an approved clean identity (or an approved
+   refund/revocation of the historical QA purchase), signed Stripe webhook,
+   durable order and entitlement, PDF/video delivery, wrong-user denial,
+   duplicate suppression, refund/dispute behavior, and recovery. Reclose
+   Preview sales immediately afterward.
+5. Reconfirm that DNS still exposes exactly one `_dmarc` TXT value,
+   `v=DMARC1; p=quarantine`, before the mail canary. Submit one exact-SHA labeled
+   Preview inquiry and prove its new database row, Resend receipt, Proton mailbox
+   receipt, replay behavior, and Admin visibility; do not reuse the historical
+   `d28be30` or isolated Production inquiry evidence.
+6. Before Cal activation, replace the one currently shared
+   `CALCOM_BOOKING_LEDGER_READY` Vercel record with isolated Preview and
+   Production records and set both to `false`. With provider approval, install
+   the restricted Cal API key and signed Preview webhook from the verified
+   Shannon account, then enable only the exact Preview target for the canary.
+   Run one request → Shannon confirmation → reschedule → cancellation lifecycle,
+   proving released availability, organizer/attendee email, webhook receipts,
+   aliases, booking history, and no Cal payment. Keep both targets disabled if
+   any stage fails: first disable or remove the failed Preview webhook so Cal
+   cannot continue retrying a deliberately closed endpoint, then return the
+   Preview ledger to `false`, redeploy it closed, and verify both the provider's
+   active-webhook inventory and the disabled endpoint response. Production must
+   remain `false` throughout.
+7. With separate Production-migration approval and both dependent features
+   disabled, apply migrations 019 and 020 to Production using the recorded
+   preflights and hashes. Verify the 25-argument service-role RPC, review
+   constraint, unique index, ledger entries, privileges, and post-apply row
+   counts; fix forward without deleting audit evidence if post-commit recovery
+   is needed.
+8. Verify Production directly rather than carrying forward staging assumptions.
+   With separate upload approval, place the canonical 6,036,808-byte PDF and
+   46,514,399-byte MP4 into their exact private `member-content` paths, then
+   verify their bytes, hashes, signed delivery, and anonymous denial. Also verify
+   modern Supabase credentials, live Stripe account/Product/Price/webhook
+   identity, Resend sender and recipient, and the intended Production Cal
+   identity before installing its still-missing private integration. Both
+   approved administrator identities must accept, sign in, and receive their
+   exact roles before administrator operations are called live.
+9. Build an alias-free Production candidate from the exact tested SHA with all
+   five controls pinned closed:
+   `COMMERCE_SALES_READY=false`,
+   `NEXT_PUBLIC_INQUIRY_COLLECTION_READY=false`,
+   `CALCOM_BOOKING_LEDGER_READY=false`,
+   `ADMIN_CLIENT_MESSAGING_READY=false`, and
+   `ADMIN_SHANNON_HANDOFF_MODE=disabled`. Verify environment shape, hosted root
+   and hydration, routes, Auth/Admin boundaries, closed checkout and inquiry
+   responses, signed provider webhook reachability, booking display,
+   private-media denial, and warning/error logs. This candidate—not Preview—is
+   the source of truth for Production configuration.
+10. With separate provider approval, provision the restricted Production Cal
+    key and a dedicated signing secret while the alias-free Production ledger
+    remains `false`. Verify their presence without exposing values. Then enable
+    only the Production ledger and redeploy the same source SHA alias-free.
+    After that new immutable deployment URL exists, create or retarget the Cal
+    webhook—using the same signing secret—to that exact enabled endpoint and
+    verify one signed delivery before the lifecycle. Run one request → Shannon
+    confirmation → reschedule → cancellation lifecycle and require signed
+    webhook rows, canonical aliases and history, released availability,
+    organizer and attendee delivery, and no Cal payment. If any stage fails,
+    disable the webhook and ledger and redeploy the same SHA closed; retain the
+    enabled artifact only after the entire lifecycle passes.
+11. Only after owner approval, keep the Cal webhook on the proven immutable
+    endpoint while moving `hwlbysmd.com` and `www.hwlbysmd.com` to that exact
+    closed, lifecycle-proven candidate. Reprove both aliases before retargeting
+    the webhook to the public endpoint, then verify one signed public delivery
+    and repeat the public booking and fail-closed canaries. If bookings cannot
+    remain safely routed to the immutable endpoint throughout cutover, pause
+    new booking submissions for the transition. Keep sales, inquiry, messaging,
+    and handoff controls closed. If a post-retarget check fails, first restore
+    and verify the webhook on the proven immutable endpoint—or pause new
+    bookings if restoration cannot be proven—then roll the aliases back to the
+    prior closed deployment.
+12. Inquiry collection requires its own approved artifact transition because
+    `NEXT_PUBLIC_INQUIRY_COLLECTION_READY` is embedded at build time. Build the
+    same source SHA with that control set to `true`; preserve the already-proven
+    Production Cal-ledger state while keeping commerce, messaging, and handoff
+    closed, and prove the alias-free artifact first. With separate alias and
+    submission approval, temporarily assign the public aliases and submit one
+    labeled database-first inquiry. Require the exact Supabase row, Resend
+    delivery, Proton mailbox receipt, replay behavior, and Admin visibility.
+    Retain the inquiry-open artifact only if every check passes. On failure,
+    first disable or protect the inquiry-open immutable deployment so it cannot
+    accept another submission, then restore the public aliases to the
+    already-proven closed candidate and preserve the failed canary evidence.
+    Before leaving recovery, prove `POST /api/contact` is closed on both the
+    public aliases and the failed immutable artifact.
+13. A separate live-money and sales-open approval is required for the LIFT
+    transition. Create and verify the same-source-SHA Production artifact with
+    commerce open while inquiry state remains at its last separately proven
+    value and messaging, handoff, and Cal-ledger controls remain unchanged.
+    After an approved public-alias transition, make one $11.11 purchase and
+    verify the live charge, signed webhook, Supabase order, entitlement, video
+    range playback, PDF, receipt email, replay, and recovery behavior. Keep full
+    refund/revocation and dispute semantics proven by sandbox and signed-fixture
+    coverage; an optional live full refund requires its own explicit approval,
+    and a deliberate live dispute is not a launch canary. Leave sales open only
+    on complete success. On failure, first disable or protect the commerce-open
+    immutable deployment so it cannot create another Checkout Session; then
+    expire every incomplete live canary Session and restore the public aliases
+    to the last proven closed artifact. Reconcile any completed charge, order,
+    and entitlement under the canary's separately approved remediation
+    decision. Before leaving recovery, prove that neither the public aliases nor
+    the failed immutable artifact can create a new Checkout Session and that
+    Stripe, Supabase, and customer access agree on the final canary state.
 
 ## Production gate
 

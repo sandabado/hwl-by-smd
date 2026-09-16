@@ -29,7 +29,7 @@ export function createAdminClient() {
   return harness().createAdminClient();
 }
 export async function createClient() {
-  return null;
+  return harness().createClient();
 }
 `
 
@@ -136,6 +136,10 @@ export async function revokeDisputedCharge(...args) {
 export async function resolve(specifier, context, nextResolve) {
   const parentUrl = context.parentURL ?? ""
   const fromCheckoutRoute = parentUrl.endsWith("/app/api/checkout/route.ts")
+  const fromAccessModule = parentUrl.endsWith("/lib/access.ts")
+  const fromMemberMediaRoute =
+    parentUrl.endsWith("/app/api/download/lift/route.ts") ||
+    parentUrl.endsWith("/app/api/video/lift/route.ts")
   const fromWebhookRoute = parentUrl.endsWith(
     "/app/api/stripe/webhook/route.ts"
   )
@@ -147,12 +151,18 @@ export async function resolve(specifier, context, nextResolve) {
     return moduleSource(environmentStub)
   }
   if (
-    (fromCheckoutRoute || fromWebhookRoute) &&
+    (fromAccessModule ||
+      fromCheckoutRoute ||
+      fromMemberMediaRoute ||
+      fromWebhookRoute) &&
     specifier === "@/lib/supabase/server"
   ) {
     return moduleSource(supabaseStub)
   }
-  if ((fromCheckoutRoute || fromWebhookRoute) && specifier === "@/lib/stripe") {
+  if (
+    (fromAccessModule || fromCheckoutRoute || fromWebhookRoute) &&
+    specifier === "@/lib/stripe"
+  ) {
     return moduleSource(stripeStub)
   }
   if (fromWebhookRoute && specifier === "@/lib/commerce/stripe-fulfillment") {

@@ -13,7 +13,88 @@ only to the checkpoint branch, and protected by Vercel SSO. Preserve the
 current Proton inbound-mail records and exact verified Resend sending records;
 do not recreate the superseded root-mail forwarding configuration.
 
-## September 14 Current Authority Snapshot
+## September 15 Current Authority Snapshot
+
+- The synchronized checkpoint and protected Preview now use exact commit
+  `d8136d8e45bc0517c7acc5d74bdf40392d11cf38`. GitHub Actions run
+  `34926525250` passed, and `main` remains untouched at
+  `a6902607f42a3c66506758d4886fb4a2d61d99e2`.
+- A newer local-only commerce-safety candidate now prevents a second LIFT
+  Checkout Session while an exact paid order is awaiting entitlement repair or
+  a disputed order remains under manual review. It adds migration 021, five
+  checkout-guard route regressions, and endpoint-level refund/dispute
+  media-denial coverage. Commerce is 158/158; TypeScript, ESLint,
+  `git diff --check`, a clean isolated local migration reset, and the
+  transaction-only commerce SQL harness pass. Nothing in this repair is
+  committed, pushed, hosted, or applied to staging/Production yet. Therefore
+  `d8136d8` remains valid Stage 3A/3B evidence but is no longer a promotable
+  final commerce artifact. A secret-safe scan of the 10-path candidate and both
+  full and production-only npm audits found no release blocker; the offline
+  repository preflight fails only because the reviewed candidate is not yet an
+  immutable commit.
+- Stage 3A is complete. Exact-commit Production-target deployment
+  `dpl_7SLd6LVGH6iKvAmEB4Qey9gTVwWu` at
+  `https://hwl-by-ez4u886bs-whole-body-earth.vercel.app` is READY / STAGED,
+  fully closed, protected, and has no custom HWL alias. Its build, all sitemap
+  routes, scoped Auth/private-media boundaries, fail-closed API canaries,
+  desktop browser pass, 390px browser pass, and error-log scan passed without a
+  transaction or provider-side write.
+- `hwlbysmd.com`, `www.hwlbysmd.com`, and `hwl-by-smd.vercel.app` remain on the
+  prior closed deployment `dpl_3jMM5JtmmeF5kH5emqQLvHV4UYZn`, exact commit
+  `403fc5f4346809a4fe7710318e79c84394264e8d`. No public alias or DNS record
+  moved during Stage 3A.
+- Production Supabase is applied and postflight-verified through migration 020.
+  The private Production LIFT PDF and MP4 are present at their canonical paths,
+  match the recorded hashes, and deny anonymous object access.
+- Production and branch-scoped Preview now have independent sensitive
+  `CALCOM_BOOKING_LEDGER_READY=false` records. Vercel still has no
+  `CALCOM_API_KEY` or `CALCOM_WEBHOOK_SECRET`, local `.env.local` has neither
+  credential, and authenticated Cal.com shows `Create your first webhook`.
+  The Cal profile confirms `shannon@hwlbysmd.com` as Primary. As displayed on
+  September 15, its three active keys are `HWL Preview Cal ledger — final
+2026-09-12` (expires in a month), `HWL Preview private read — checkpoint`
+  (expires in 24 days), and `hwlbysmd` (no expiration); their original secret
+  values are not present in checked application configuration. All 11 public,
+  zero-price, manual-confirmation services remain bookable through Cal.com.
+- Stage 3B is complete at the application/provider/database boundary. The
+  approved Preview canary completed request → Shannon confirmation → reschedule
+  → cancellation for `accounts@wholebody.earth`: one canonical booking, two
+  UID aliases, four applied signed lifecycle events, zero stale or manual-review
+  outcomes, released noon and 3 PM slots, and no Cal payment. One separately
+  labelled Preview inquiry persisted and Resend marked its Shannon alert
+  Delivered. Direct receipt inside Shannon's and the attendee's mailboxes was
+  not observable, so that human-side evidence remains open and must not be
+  inferred from provider delivery.
+- Stage 3B cleanup is complete. The temporary Cal webhook and API key, unique
+  signing secret, and dedicated Cal-only Vercel bypass were removed. Preview
+  was restored to `CALCOM_BOOKING_LEDGER_READY=false` and redeployed from the
+  same exact source as READY deployment
+  `dpl_GPUAyCsUtN6KEZXbgZZMpBCHrJSs` at
+  `https://hwl-by-3tkhjk85k-whole-body-earth.vercel.app`; the stable Preview
+  alias resolves to it. Its closed webhook returns `503 Booking history is not
+configured.`, public Cal slots still render, and checkout remains disabled.
+  The Preview-only `VERCEL_PREVIEW_FEEDBACK_ENABLED=0` repair remains in place.
+  Production, public aliases, live Stripe, sales, inquiry collection, and
+  `main` were not changed.
+- Before another provider canary, review and checkpoint the local paid-order
+  guard, rotate the dedicated Preview Stripe bypass exposed during a read-only
+  CLI response, apply migration 021 to staging before activating the matching
+  route code, and verify a new exact Preview with sales reclosed. Then, under
+  separate approval, preflight/apply migration 021 to Production before route
+  activation and build a new alias-free closed Production candidate from that
+  exact SHA. Production Cal may be installed and lifecycle-tested only on
+  that closed candidate. Require one canonical record, signed receipts,
+  released availability, both mailbox receipts, and no Cal payment. On failure,
+  remove the webhook first, restore the Production ledger to `false`, and
+  redeploy closed. Do not touch `main`, public aliases, live Stripe, sales, or
+  inquiry collection in that gate.
+
+The detailed evidence and latest blocker matrix live in
+[`launch-packet.md`](./launch-packet.md). The September 14 section below is
+retained unchanged as dated historical evidence and must not be used as current
+provider or deployment authority.
+
+## September 14 Historical Authority Snapshot
 
 - The synchronized checkpoint branch and protected Preview use exact commit
   `828bd43a0ddb59f7bdb2301cb761f59aeacb517a`. Vercel deployment
@@ -113,9 +194,14 @@ do not recreate the superseded root-mail forwarding configuration.
   it is neither part of `828bd43` nor deployed. A newly approved checkpoint SHA
   must repeat the exact-artifact HTTP and browser proof before promotion.
 
-### Pending Production migration gate
+### Completed September 15 Production migration gate — historical procedure
 
-Production is missing migrations 019 and 020. Their reviewed hashes are:
+Migrations 019 and 020 were applied in order to Production on September 15 and
+their postflight passed. The procedure below is retained only as the reviewed
+pre-apply record; do not execute it again.
+
+At the time of this September 14 procedure, Production was missing migrations
+019 and 020. Their reviewed hashes were:
 
 ```text
 019  504d83b41cd385d62af3eed8b4845d8ae0ee85cb9065b646260d11daaa8e93fd
@@ -483,15 +569,38 @@ does not prove CSP enforcement or JavaScript execution. The mandatory fresh
 browser hydration, console/page-error, and first-party network checks provide
 that separate execution evidence; neither gate substitutes for the other.
 
-## Current release verification order
+## Current continuation after Stage 3B
 
+1. Close the remaining non-mutating mailbox-evidence gap by confirming one Cal
+   lifecycle message in both the organizer and attendee mailboxes and the
+   labelled inquiry alert in Shannon's Proton inbox. Do not infer human receipt
+   from provider or database status.
+2. Review and checkpoint the local paid-order guard, rotate the exposed
+   Preview-only Stripe bypass, apply migration 021 to staging before activating
+   the matching route code, and verify a new exact Preview while commerce
+   remains closed.
+3. Only with separate approval, preflight/apply migration 021 to Production
+   before route activation, build a new alias-free closed Production candidate,
+   and provision restricted Production Cal credentials while public aliases
+   stay on the current closed artifact.
+4. With another explicit approval, enable only Production Cal on that new
+   candidate and repeat the signed lifecycle, including direct mailbox
+   evidence.
+5. Treat public alias cutover, Production inquiry opening/canary, one live LIFT
+   purchase, and the final sales-open decision as separate later gates.
+
+## Historical full release plan
+
+This ordered plan was authored before the September 15 authority snapshot.
+Steps 1–3, 7, and 9 are now completed historical procedure; step 8 is only
+partially complete because administrator acceptance and role handoff remain
+pending. Step 6 is the current next gate summarized above. Retain the remaining
+steps as release controls, but do not execute this section as though every
+numbered item were still pending.
 The original Preview bootstrap—staging migrations, initial private-media upload,
 the custom Preview hostname, Stripe sandbox objects, and publication of the 11
-Cal services—is historical completed setup and must not be repeated as if it
-were current work. Exact `828bd43` remains the last pinned Preview, but the
-six-file verifier, dependency, and documentation follow-up is local and
-uncommitted. Begin
-from that delta and reprove every artifact-scoped result after its SHA changes.
+Cal services—is also completed historical setup and must not be repeated as if
+it were current work.
 
 1. Finish the six-file local candidate on top of `828bd43`. Require the 60/60
    hosted-root verifier suite, 101/101 Preview-release suite, complete launch test

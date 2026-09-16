@@ -3,11 +3,17 @@
 begin;
 
 insert into auth.users (id, email, raw_user_meta_data)
-values (
-  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-  'commerce-isolation@example.invalid',
-  '{}'::jsonb
-);
+values
+  (
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'commerce-isolation@example.invalid',
+    '{}'::jsonb
+  ),
+  (
+    'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    'commerce-cancelled@example.invalid',
+    '{}'::jsonb
+  );
 
 do $assertions$
 declare
@@ -479,6 +485,156 @@ begin
     when unique_violation then null;
   end;
 
+  insert into public.checkout_orders (
+    user_id,
+    deployment_target,
+    product_type,
+    catalog_version,
+    checkout_attempt_id,
+    stripe_account_id,
+    stripe_livemode,
+    stripe_product_id,
+    stripe_price_id,
+    customer_email,
+    site_url,
+    stripe_checkout_session_id,
+    status,
+    expires_at
+  )
+  values (
+    'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    'preview',
+    'lift_guide',
+    'lift-complete-v2',
+    'paid-guard-attempt-0001',
+    'acct_paidGuard123',
+    false,
+    'prod_paidGuard123',
+    'price_paidGuard123',
+    'commerce-cancelled@example.invalid',
+    'https://preview.example.invalid',
+    'cs_test_paidGuard12345678',
+    'paid',
+    now() + interval '1 hour'
+  );
+
+  begin
+    insert into public.checkout_orders (
+      user_id,
+      deployment_target,
+      product_type,
+      catalog_version,
+      checkout_attempt_id,
+      stripe_account_id,
+      stripe_livemode,
+      stripe_product_id,
+      stripe_price_id,
+      customer_email,
+      site_url,
+      stripe_checkout_session_id,
+      status,
+      expires_at
+    )
+    values (
+      'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+      'preview',
+      'lift_guide',
+      'lift-complete-v2',
+      'paid-guard-attempt-0002',
+      'acct_paidGuard123',
+      false,
+      'prod_paidGuard123',
+      'price_paidGuard123',
+      'commerce-cancelled@example.invalid',
+      'https://preview.example.invalid',
+      'cs_test_paidGuardSecond1234',
+      'creating',
+      now() + interval '1 hour'
+    );
+    raise exception 'A second Checkout Session was accepted beside a paid order.';
+  exception
+    when unique_violation then null;
+  end;
+
+  update public.checkout_orders
+  set status = 'refunded'
+  where checkout_attempt_id = 'paid-guard-attempt-0001';
+
+  insert into public.checkout_orders (
+    user_id,
+    deployment_target,
+    product_type,
+    catalog_version,
+    checkout_attempt_id,
+    stripe_account_id,
+    stripe_livemode,
+    stripe_product_id,
+    stripe_price_id,
+    customer_email,
+    site_url,
+    stripe_checkout_session_id,
+    status,
+    expires_at
+  )
+  values (
+    'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    'preview',
+    'lift_guide',
+    'lift-complete-v2',
+    'paid-guard-attempt-0003',
+    'acct_paidGuard123',
+    false,
+    'prod_paidGuard123',
+    'price_paidGuard123',
+    'commerce-cancelled@example.invalid',
+    'https://preview.example.invalid',
+    'cs_test_paidGuardThird12345',
+    'creating',
+    now() + interval '1 hour'
+  );
+
+  update public.checkout_orders
+  set status = 'disputed'
+  where checkout_attempt_id = 'paid-guard-attempt-0003';
+
+  begin
+    insert into public.checkout_orders (
+      user_id,
+      deployment_target,
+      product_type,
+      catalog_version,
+      checkout_attempt_id,
+      stripe_account_id,
+      stripe_livemode,
+      stripe_product_id,
+      stripe_price_id,
+      customer_email,
+      site_url,
+      stripe_checkout_session_id,
+      status,
+      expires_at
+    )
+    values (
+      'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+      'preview',
+      'lift_guide',
+      'lift-complete-v2',
+      'paid-guard-attempt-0004',
+      'acct_paidGuard123',
+      false,
+      'prod_paidGuard123',
+      'price_paidGuard123',
+      'commerce-cancelled@example.invalid',
+      'https://preview.example.invalid',
+      'cs_test_paidGuardFourth1234',
+      'creating',
+      now() + interval '1 hour'
+    );
+    raise exception 'A second Checkout Session was accepted beside a disputed order.';
+  exception
+    when unique_violation then null;
+  end;
+
   select id into preview_order_id
   from public.checkout_orders
   where deployment_target = 'preview'
@@ -744,7 +900,7 @@ begin
     ),
     (
       cancelled_order_id,
-      'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
       'preview',
       'lift_guide',
       'lift-complete-v2',
@@ -794,7 +950,7 @@ begin
       'usd'
     ),
     (
-      'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      'dddddddd-dddd-4ddd-8ddd-dddddddddddd',
       'lift_guide',
       'cs_test_reconcileCancel12345678',
       'pi_reconcileCancel12345678',
@@ -1228,11 +1384,17 @@ begin
       and indexname = 'checkout_reconciliation_jobs_due_idx'
   ) or not exists (
     select 1
+    from pg_indexes
+    where schemaname = 'public'
+      and indexname = 'checkout_orders_one_unsettled_lift_per_namespace_idx'
+      and indexdef like '%status = ANY%creating%open%paid%disputed%'
+  ) or not exists (
+    select 1
     from pg_constraint
     where conname = 'checkout_orders_fulfillment_source_check'
       and pg_get_constraintdef(oid) like '%scheduled_reconciliation%'
   ) then
-    raise exception 'A required reconciliation namespace, index, or source invariant is missing.';
+    raise exception 'A required reconciliation namespace, paid-order guard, index, or source invariant is missing.';
   end if;
 end
 $reconciliation_assertions$;

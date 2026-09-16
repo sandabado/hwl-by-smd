@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** September 14, 2026
+**Updated:** September 15, 2026
 
 **Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
 Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
@@ -9,7 +9,222 @@ custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
 
-## Current authority snapshot — September 14
+## Current authority snapshot — September 15
+
+- **Source and CI:** checkpoint commit
+  `d8136d8e45bc0517c7acc5d74bdf40392d11cf38` is cleanly synchronized with
+  `origin/checkpoint/platform-overhaul-2026-08-20`. GitHub Actions run
+  `34926525250` passed all 19 substantive install, lint, type, SEO, launch,
+  Preview-policy, inquiry, booking, accessibility, Auth, email, Admin,
+  relationship, commerce, Production-audit, and build steps. Local and remote
+  `main` remain `a6902607f42a3c66506758d4886fb4a2d61d99e2`.
+- **Local commerce-safety candidate:** a read-only live-readiness review found a
+  duplicate-charge recovery window: a verified paid order could leave the
+  creating/open uniqueness boundary before a failed entitlement insert was
+  repaired. The local, uncommitted repair keeps creating, open, paid, and
+  disputed LIFT orders inside one exact user/deployment/account/mode boundary,
+  routes an exactly bound paid Session and PaymentIntent back to authenticated
+  reconciliation, and fails closed on malformed or inconsistent paid state.
+  Refunded orders leave the boundary for legitimate repurchase; disputed
+  orders remain suspended for manual review. New endpoint coverage also proves
+  refunded and disputed purchases cannot reach signed video or PDF storage.
+  Commerce tests now pass 158/158;
+  TypeScript, ESLint, and `git diff --check` pass. Migration
+  `021_checkout_paid_order_guard.sql` applied from a clean isolated local
+  Supabase reset, and the transaction-only commerce database harness passed.
+  The exact local migration-021 SHA-256 is
+  `c7b4467503cf162fdef27e83520852a417b35223150701ccab5debfd71b52290`.
+  Migration 021 has not been applied to staging or Production, and this local
+  fix has not been committed, pushed, or deployed. A secret-safe audit of all
+  10 changed/untracked paths found no credential, binary, generated-file, or
+  public-checkpoint hygiene blocker; both the full and production-only npm
+  audits report zero vulnerabilities. The repository-only Preview preflight
+  passes every code/configuration check and fails only its intentional clean
+  immutable-commit gate while these 10 paths remain uncommitted.
+- **Exact Preview:** Vercel deployment
+  `dpl_GPUAyCsUtN6KEZXbgZZMpBCHrJSs` is READY, target Preview, and carries
+  exact Git metadata for `d8136d8`. Its immutable hostname is
+  `https://hwl-by-3tkhjk85k-whole-body-earth.vercel.app`, and
+  `https://preview.hwlbysmd.com` resolves to the same artifact. This is the
+  final Stage 3B reclosed redeploy of the same reviewed source, not a worktree
+  upload.
+- **Hosted and browser verification:** the immutable root returned HTTP `200`
+  with `text/html` content and 118,679 bytes. The hosted-root verifier passed all 10 raw-HTML
+  checks and 14 total checks; `/index` and `/index` with a query returned exact,
+  query-preserving `308` redirects. All 23 sitemap routes returned `200`.
+  An earlier browser pass completed on both immutable and stable Preview
+  hostnames with the LIFT hero call to action present, the 11-service booking
+  catalog and Cal iframe rendered, the contact form fully labelled and open,
+  and no horizontal overflow at the observed desktop viewport. The later
+  exact-`d8136d8` closed Production candidate also completed fresh browser
+  hydration at 1280px and 390px for the homepage, LIFT, booking, and login. The
+  selected Intuitive Tarot Reading rendered its live Cal availability iframe,
+  the default booking page exposed all 11 service controls, and every observed
+  page remained free of horizontal overflow and browser warning/error. No
+  inquiry, booking, login, or payment was submitted in either browser pass.
+- **Preview toolbar repair:** the owner-approved branch-scoped
+  `VERCEL_PREVIEW_FEEDBACK_ENABLED=0` repair is deployed on exact `d8136d8`.
+  The earlier React hydration mismatch (`#418`) was isolated to Vercel's
+  injected `<vercel-live-feedback>` element; the application artifact was
+  already console-clean locally and on the closed Production candidate. The
+  Preview-only record remains in place and Production was not changed.
+- **Fail-closed boundaries:** exact Preview keeps commerce closed. The LIFT page
+  serializes `checkoutReady:false` and `OutOfStock`; GET checkout is `405`,
+  OPTIONS is `204`, anonymous video is `401`, and PDF/private member routes use
+  scoped Auth redirects. The public Production artifact is also closed.
+  Commerce tests pass 158/158 and launch-environment tests pass 63/63, including
+  exact Product/Price/mode/account drift rejection, signed raw-body webhooks,
+  idempotency, reconciliation, partial-refund retention, full-refund revocation,
+  and dispute suspension. A fresh post-Stage-3B local pass also completed
+  booking 135/135, commerce 158/158, inquiries 21/21, email 3/3,
+  launch-boundary 63/63, Preview-release 101/101, ESLint, TypeScript, SEO 21/21
+  with seven long-form documents, and a 63-page Production build.
+- **Cal identity and catalog:** the authenticated Cal account records
+  `shannon@hwlbysmd.com` as its Primary email with `emailVerified` timestamp
+  `2026-09-14T20:09:04.408Z`. Stale
+  `emailChangeWaitingForVerification` metadata still names that same address,
+  but the user record itself is verified. The public `verified:false` field is
+  therefore not an email-verification result. All 11 public services remain
+  visible, zero-price in Cal, and manual-confirmation. The authenticated
+  Webhooks page shows `Create your first webhook`, proving there is currently no
+  configured webhook. The API-key inventory contains three active keys:
+  `HWL Preview Cal ledger — final 2026-09-12` (expires in a month as displayed
+  September 15), `HWL Preview private read — checkpoint` (expires in 24 days as
+  displayed September 15), and `hwlbysmd` (no expiration).
+- **Cal application handoff:** Vercel still has no `CALCOM_API_KEY` or
+  `CALCOM_WEBHOOK_SECRET`. `CALCOM_BOOKING_LEDGER_READY` now has independent
+  persisted sensitive records for Production=`false` and branch-scoped
+  Preview=`false` on `checkpoint/platform-overhaul-2026-08-20`. Authenticated
+  Vercel CLI inventories verify both records, and the exact Production build
+  independently printed `CALCOM_BOOKING_LEDGER_READY=false`. The approved
+  Stage 3B canary temporarily enabled only branch-scoped Preview and completed
+  one Intuitive Tarot Reading request → Shannon confirmation → reschedule →
+  cancellation using `accounts@wholebody.earth`. Staging records exactly one
+  canonical booking, two old/new UID aliases, and four applied signed events
+  (`BOOKING_REQUESTED`, `BOOKING_CREATED`, `BOOKING_RESCHEDULED`, and
+  `BOOKING_CANCELLED`), with zero stale events, duplicates, or manual-review
+  outcomes. The original noon slot and rescheduled 3 PM slot both returned to
+  public availability; no Cal payment occurred. The temporary webhook, API
+  key, signing secret, and dedicated Cal-only Vercel bypass were removed, the
+  Preview flag was restored to `false`, and the reclosed endpoint returns
+  `503 Booking history is not configured.` Direct receipt of Cal's lifecycle
+  messages in both organizer and attendee inboxes remains unproved because
+  mailbox access was unavailable. Production Supabase is applied through
+  migration 020, but Production still has no Cal credential, webhook, or
+  signed lifecycle. The local `.env.local` also contains neither Cal
+  credential.
+- **Inquiry delivery:** exact Preview renders the database-first contact form.
+  Inquiry tests pass 21/21 and branded-email tests pass 3/3. Authenticated Resend
+  reports `hwlbysmd.com` Verified. The approved Stage 3B label produced exactly
+  one new Preview inquiry with `received` / notification `accepted` state and
+  a provider receipt. Resend records the matching alert from
+  `HWL by SMD <hello@hwlbysmd.com>` to `shannon@hwlbysmd.com` as Delivered,
+  with submitted details intentionally omitted. Provider Delivered does not
+  prove a human viewed the Proton inbox, so direct mailbox receipt remains the
+  only Preview inquiry evidence gap. Public Production inquiry collection is
+  still closed.
+- **Mail configuration:** Proton's two MX records, SPF, and three DKIM selectors
+  resolve; one DMARC record is live at `v=DMARC1; p=quarantine`. Resend's DKIM
+  and sending CNAMEs resolve, and its Preview, Production App, and Production
+  Auth SMTP keys are all restricted to Sending access. Resend Receiving remains
+  enabled with a stale SES MX presentation even though authoritative live MX
+  routes only to Proton. That does not block outbound mail, but it should be
+  disabled later under separate owner approval to remove configuration drift.
+- **Administrator identities:** Production Auth contains both requested users,
+  `admin@ghosthand.studio` and `shannon@hwlbysmd.com`. Authenticated user-detail
+  views show neither invitation is confirmed and neither account has ever
+  signed in. Matching `public.profiles` rows exist for both identities, but both
+  currently have `is_admin=false` and `admin_role=null`. Their intended
+  super-administrator and administrator assignments therefore remain absent and
+  unusable until each owner completes account confirmation and the separately
+  approved, audited role handoff succeeds.
+- **Production Supabase:** authenticated September 15 evidence shows the healthy
+  `qwprhsrwiihfllmgallr` project is applied through migration 020. Exact
+  migration 019 hash is
+  `504d83b41cd385d62af3eed8b4845d8ae0ee85cb9065b646260d11daaa8e93fd`;
+  exact migration 020 hash is
+  `7294172e47a0d20aa000054efaa2a2b1b5833f534b2a9e4deeef92573f01dbb3`.
+  The official linked CLI applied 019 then 020 and now reports no pending
+  migrations. Postflight verified the single 25-argument, one-default,
+  SECURITY DEFINER ingestion RPC; service-role-only execution; the widened
+  review-reason constraint; and the valid, ready two-column migration-020
+  unique index with its exact audit-reference comment. Booking records,
+  aliases, Cal webhook receipts, and Admin role-change audit rows remained
+  zero, and no duplicate approval references or payment columns were found.
+  The new LIFT paid-order guard is migration 021 and remains local-only pending
+  a separately approved hosted preflight and apply.
+- **Production LIFT media:** the earlier empty-bucket note was stale. The private
+  `member-content` bucket currently contains exactly
+  `lift/lift-guide.pdf` (6,036,808 bytes; local SHA-256
+  `652c3c6eb6e87a44d47e5326e4e3a385d3704596a19020bc75ae318c6c117ad6`)
+  and `lift/complete-lift-v1.mp4` (46,514,399 bytes; local SHA-256
+  `d3d3c7a390a4b8c199ae0970533c0c14ab4327ba7d3e53d7662c895d4860bf23`).
+  Remote ETags match the canonical local PDF and multipart video calculations,
+  and anonymous object requests return `400`. No Production upload is needed;
+  entitled signed delivery still requires the closed-candidate canary.
+- **Live Stripe:** authenticated dashboard evidence confirms canonical live
+  account `acct_1U9cEIPTLuM8Maxa`, active Product
+  `prod_VCotDELRoHDnox`, active one-time $11.11 USD Price
+  `price_1UCPFjPTLuM8MaxaTY48RO9e`, and active Production destination
+  `we_1UCPJEPTLuM8MaxawK9UgEHh` at
+  `https://www.hwlbysmd.com/api/stripe/webhook`. It listens to
+  `checkout.session.completed`, `checkout.session.expired`,
+  `charge.refunded`, and `charge.dispute.created`. The live transaction table
+  and this week's destination deliveries are both zero. Provider objects are
+  present, but launch readiness is not yet proven: the live Product and Price
+  metadata, restricted-key capabilities, and one signed live-money fulfillment
+  path still require direct verification. A read-only sandbox CLI response also
+  exposed the dedicated Preview Stripe protection-bypass credential in tool
+  output; rotate that Preview-only credential before another Preview Stripe
+  webhook exercise.
+- **Production and aliases:** a September 15 Vercel redeploy created READY
+  Production deployment `dpl_3jMM5JtmmeF5kH5emqQLvHV4UYZn` at
+  `https://hwl-by-77xufdqhf-whole-body-earth.vercel.app` and assigned
+  `hwlbysmd.com`, `www.hwlbysmd.com`, and `hwl-by-smd.vercel.app` to it. Vercel
+  provenance identifies this as a redeploy of
+  `dpl_BJTQT3e6W8vJDwdmKHz5vGsap6dM` at exact commit
+  `403fc5f4346809a4fe7710318e79c84394264e8d`, not the approved Stage 3A source
+  `d8136d8`. It is 13 commits newer than the former public `6a260bc` source but
+  eight commits behind `d8136d8`; public `/index` still returns `200`. Build
+  logs prove this public artifact remains fail-closed: sales and inquiry
+  collection are closed, Admin messaging is read-only, and Cal ledger/history
+  ingestion is disabled. External Cal booking links remain public. No live
+  transaction, open inquiry, DNS change, or `main` mutation was observed.
+- **Stage 3A closed Production candidate:** exact checkpoint
+  `d8136d8e45bc0517c7acc5d74bdf40392d11cf38` is READY / STAGED as
+  Production-target deployment `dpl_7SLd6LVGH6iKvAmEB4Qey9gTVwWu` at
+  `https://hwl-by-ez4u886bs-whole-body-earth.vercel.app`. Vercel metadata records
+  the exact Git SHA, `autoAssignCustomDomains=false`, and no custom aliases.
+  `hwlbysmd.com`, `www.hwlbysmd.com`, and `hwl-by-smd.vercel.app` remain on
+  `dpl_3jMM5JtmmeF5kH5emqQLvHV4UYZn`; `main` and both remote refs are unchanged.
+  The candidate build passed the closed Production launch preflight, SEO 21/21
+  with seven documents, TypeScript, compile, and all 63 generated pages. All 23
+  sitemap routes plus robots, sitemap, and login returned `200`; `/index` kept
+  its query through a `308`; scoped anonymous Auth redirects, video/captions
+  `401`, PDF login redirect, both cron `401`s, checkout `503`, contact `503`,
+  Cal webhook `503`, and unsigned Stripe webhook `400` all matched their
+  fail-closed contracts. The final error-log query was empty. These probes used
+  non-persisting bodies and created no Checkout Session, inquiry, booking,
+  webhook event, provider email, charge, authenticated session, or role change.
+  This artifact predates the local paid-order guard and is no longer eligible
+  for promotion without a new reviewed commit, migration-021 rollout, and
+  exact-artifact verification.
+- **Next exact gates:** first close the non-mutating mailbox evidence gap by
+  confirming at least one Stage 3B Cal lifecycle message in both
+  `shannon@hwlbysmd.com` and `accounts@wholebody.earth`, plus the labeled
+  inquiry alert in Shannon's Proton inbox. Next review the local commerce fix,
+  authorize its checkpoint-only commit/push, rotate the exposed Preview Stripe
+  bypass, apply migration 021 to staging **before** activating the matching
+  route code, and verify a new exact Preview while sales remain closed. After a
+  separately approved Production migration-021 preflight/apply—again before
+  route activation—build a new alias-free closed Production candidate from
+  that exact SHA. Production Cal installation/lifecycle, public alias cutover,
+  Production inquiry opening/canary, one signed $11.11 live LIFT purchase with
+  entitlement/media/replay proof, and the final sales-open decision remain
+  separate owner-approved gates. Never promote the older `d8136d8` candidate as
+  the final commerce artifact.
+
+## Superseded September 14 authority snapshot — historical
 
 - **Source and CI:** checkpoint commit
   `828bd43a0ddb59f7bdb2301cb761f59aeacb517a` is cleanly synchronized with

@@ -43,20 +43,21 @@ type CheckoutOrder = {
   id: string
   product_type: ProductId
   site_url: string
-  status: "creating" | "open"
+  status: "creating" | "open" | "paid" | "disputed"
   stripe_account_id: string
   stripe_checkout_session_id: string | null
   stripe_customer_id: string | null
   stripe_livemode: boolean
+  stripe_payment_intent_id: string | null
   stripe_price_id: string
   stripe_product_id: string
   user_id: string
 }
 
 const CHECKOUT_ORDER_FIELDS =
-  "catalog_version, checkout_attempt_id, customer_email, deployment_target, expires_at, id, product_type, site_url, status, stripe_account_id, stripe_checkout_session_id, stripe_customer_id, stripe_livemode, stripe_price_id, stripe_product_id, user_id"
+  "catalog_version, checkout_attempt_id, customer_email, deployment_target, expires_at, id, product_type, site_url, status, stripe_account_id, stripe_checkout_session_id, stripe_customer_id, stripe_livemode, stripe_payment_intent_id, stripe_price_id, stripe_product_id, user_id"
 
-async function findActiveCheckoutOrder(
+async function findBlockingCheckoutOrder(
   supabase: AdminClient,
   userId: string,
   productId: ProductId,
@@ -72,7 +73,7 @@ async function findActiveCheckoutOrder(
     .eq("deployment_target", deploymentTarget)
     .eq("stripe_account_id", stripeAccountId)
     .eq("stripe_livemode", stripeLivemode)
-    .in("status", ["creating", "open"])
+    .in("status", ["creating", "open", "paid", "disputed"])
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle<CheckoutOrder>()
@@ -514,7 +515,7 @@ export async function POST(request: Request) {
     userId: user.id,
   }
 
-  const initialOrderLookup = await findActiveCheckoutOrder(
+  const initialOrderLookup = await findBlockingCheckoutOrder(
     supabase,
     user.id,
     body.productId,
@@ -534,14 +535,16 @@ export async function POST(request: Request) {
 
   let order = initialOrderLookup.data
 
-  // A partial unique index permits only one creating/open order for this
-  // user/product/deployment/account/mode. If another device wins the insert
-  // race, re-read and reuse that server-owned order instead of creating a
-  // second Session.
+  // A partial unique index permits only one creating/open/paid/disputed order
+  // for this user/product/deployment/account/mode. Keeping a verified paid
+  // order inside that boundary prevents a second charge while entitlement
+  // reconciliation repairs a failed or delayed purchase write. If another
+  // device wins the insert race, re-read and reuse that server-owned order
+  // instead of creating a second Session.
   if (!order) {
     const reservation = await reserveCheckoutOrder(supabase, orderValues)
     if (reservation.error?.code === "23505") {
-      const concurrentOrder = await findActiveCheckoutOrder(
+      const concurrentOrder = await findBlockingCheckoutOrder(
         supabase,
         user.id,
         body.productId,
@@ -587,6 +590,29 @@ export async function POST(request: Request) {
             "An earlier checkout uses a different verified catalog. Contact Shannon before trying again.",
         },
         { status: 409 }
+      )
+    }
+
+    if (order.status === "disputed") {
+      return NextResponse.json(
+        {
+          error:
+            "This purchase is under review. Contact Shannon before trying another payment.",
+        },
+        { status: 409 }
+      )
+    }
+
+    if (
+      order.status === "paid" &&
+      (!order.stripe_checkout_session_id || !order.stripe_payment_intent_id)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Your payment is recorded and access is still being verified. Check your email and account before trying again.",
+        },
+        { status: 503 }
       )
     }
 
@@ -636,6 +662,27 @@ export async function POST(request: Request) {
         },
         { status: 503 }
       )
+    }
+
+    if (order.status === "paid") {
+      if (
+        session.status !== "complete" ||
+        session.payment_status !== "paid" ||
+        getPaymentIntentId(session.payment_intent) !==
+          order.stripe_payment_intent_id
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Your payment is recorded and access is still being verified. Check your email and account before trying again.",
+          },
+          { status: 503 }
+        )
+      }
+
+      return NextResponse.json({
+        url: `${siteUrl}/checkout/success?session_id=${encodeURIComponent(session.id)}`,
+      })
     }
 
     if (session.status === "expired") {

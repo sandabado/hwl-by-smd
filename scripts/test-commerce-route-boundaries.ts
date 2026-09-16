@@ -2,7 +2,10 @@ import assert from "node:assert/strict"
 import { after, test } from "node:test"
 
 import { POST as createCheckout } from "../app/api/checkout/route.ts"
+import { GET as downloadLiftGuide } from "../app/api/download/lift/route.ts"
 import { POST as receiveStripeWebhook } from "../app/api/stripe/webhook/route.ts"
+import { GET as streamLiftVideo } from "../app/api/video/lift/route.ts"
+import { getMemberAccess } from "../lib/access.ts"
 
 const HARNESS_KEY = "__hwlCommerceRouteHarness"
 const ACCOUNT_ID = "acct_route_fixture"
@@ -31,6 +34,7 @@ const originalEnvironment = Object.fromEntries(
 
 type CommerceRouteHarness = {
   createAdminClient: () => unknown
+  createClient: () => Promise<unknown>
   fulfillCompletedCheckout: (args: unknown) => Promise<unknown>
   getAuthenticatedUser: () => Promise<unknown>
   getCommerceDeploymentTarget: () =>
@@ -87,6 +91,7 @@ function baseHarness(
 ): CommerceRouteHarness {
   return {
     createAdminClient: () => null,
+    createClient: async () => null,
     fulfillCompletedCheckout: async () => ({ state: "fulfilled" }),
     getAuthenticatedUser: async () => null,
     getCommerceDeploymentTarget: () => "preview",
@@ -141,10 +146,71 @@ function createCheckoutCalls(): CheckoutCalls {
   }
 }
 
+function paidCheckoutOrder(
+  overrides: Record<string, unknown> = {}
+): Record<string, unknown> {
+  return {
+    catalog_version: "lift-complete-v2",
+    checkout_attempt_id: "checkout-attempt-paid-0001",
+    customer_email: USER_EMAIL,
+    deployment_target: "preview",
+    expires_at: new Date(Date.now() + 60 * 60 * 1_000).toISOString(),
+    id: "20000000-0000-4000-8000-000000000002",
+    product_type: "lift_guide",
+    site_url: SITE_URL,
+    status: "paid",
+    stripe_account_id: ACCOUNT_ID,
+    stripe_checkout_session_id: SESSION_ID,
+    stripe_customer_id: null,
+    stripe_livemode: false,
+    stripe_payment_intent_id: "pi_paid_route_fixture",
+    stripe_price_id: PRICE_ID,
+    stripe_product_id: PRODUCT_ID,
+    user_id: USER_ID,
+    ...overrides,
+  }
+}
+
+function completedSessionForOrder(order: Record<string, unknown>) {
+  return {
+    client_reference_id: order.user_id,
+    expires_at: Math.floor(Date.now() / 1_000) + 60 * 60,
+    id: SESSION_ID,
+    livemode: false,
+    metadata: {
+      application: "hwl-by-smd",
+      catalog_version: order.catalog_version,
+      checkout_attempt_id: order.checkout_attempt_id,
+      checkout_order_id: order.id,
+      deployment_target: order.deployment_target,
+      price_id: order.stripe_price_id,
+      product_type: order.product_type,
+      stripe_account_id: order.stripe_account_id,
+      stripe_mode: "test",
+      stripe_product_id: order.stripe_product_id,
+      user_id: order.user_id,
+    },
+    payment_intent: "pi_paid_route_fixture",
+    payment_status: "paid",
+    status: "complete",
+    url: null,
+  }
+}
+
 function createCheckoutAdminClient(
   calls: CheckoutCalls,
-  { stripeCustomerId = null }: { stripeCustomerId?: string | null } = {}
+  {
+    checkoutOrderLookups = [null],
+    reservationError = null,
+    stripeCustomerId = null,
+  }: {
+    checkoutOrderLookups?: Array<Record<string, unknown> | null>
+    reservationError?: { code?: string } | null
+    stripeCustomerId?: string | null
+  } = {}
 ) {
+  let checkoutOrderLookupIndex = 0
+
   return {
     from(table: string) {
       let inserted: Record<string, unknown> | null = null
@@ -190,7 +256,15 @@ function createCheckoutAdminClient(
           }
           if (table === "checkout_orders" && operation === "select") {
             calls.events.push("order_lookup")
-            return { data: null, error: null }
+            const lookup =
+              checkoutOrderLookups[
+                Math.min(
+                  checkoutOrderLookupIndex,
+                  checkoutOrderLookups.length - 1
+                )
+              ] ?? null
+            checkoutOrderLookupIndex += 1
+            return { data: lookup, error: null }
           }
           throw new Error(`Unexpected maybeSingle call for ${table}`)
         },
@@ -207,6 +281,9 @@ function createCheckoutAdminClient(
             !inserted
           ) {
             throw new Error(`Unexpected single call for ${table}`)
+          }
+          if (reservationError) {
+            return { data: null, error: reservationError }
           }
           return { data: inserted, error: null }
         },
@@ -239,7 +316,95 @@ function createCheckoutAdminClient(
   }
 }
 
-function createCheckoutStripe(calls: CheckoutCalls) {
+function createMemberAccessAdminClient(
+  purchaseStatus: "disputed" | "refunded",
+  calls: { storage: number }
+) {
+  return {
+    from(table: string) {
+      const query = {
+        eq() {
+          return query
+        },
+        in() {
+          return query
+        },
+        limit() {
+          return query
+        },
+        async maybeSingle() {
+          assert.equal(table, "memberships")
+          return { data: null, error: null }
+        },
+        order() {
+          return query
+        },
+        select() {
+          return query
+        },
+        then<TResult1 = unknown, TResult2 = never>(
+          onFulfilled?:
+            | ((value: {
+                data: Array<{
+                  amount_paid: number
+                  product_type: string
+                  purchased_at: string
+                  status: string
+                }>
+                error: null
+              }) => TResult1 | PromiseLike<TResult1>)
+            | null,
+          onRejected?:
+            ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
+        ) {
+          assert.equal(table, "purchases")
+          return Promise.resolve({
+            data: [
+              {
+                amount_paid: 11.11,
+                product_type: "lift_guide",
+                purchased_at: "2026-09-15T12:00:00.000Z",
+                status: purchaseStatus,
+              },
+            ],
+            error: null,
+          }).then(onFulfilled, onRejected)
+        },
+      }
+      return query
+    },
+    storage: {
+      from() {
+        calls.storage += 1
+        throw new Error("revoked access must stop before signed storage")
+      },
+    },
+  }
+}
+
+function createAuthenticatedSupabaseClient() {
+  return {
+    auth: {
+      async getUser() {
+        return {
+          data: {
+            user: {
+              email: USER_EMAIL,
+              id: USER_ID,
+            },
+          },
+        }
+      },
+    },
+  }
+}
+
+function createCheckoutStripe(
+  calls: CheckoutCalls,
+  {
+    retrievedSession = null,
+  }: { retrievedSession?: Record<string, unknown> | null } = {}
+) {
   return {
     checkout: {
       sessions: {
@@ -255,6 +420,7 @@ function createCheckoutStripe(calls: CheckoutCalls) {
         async retrieve(id: string) {
           calls.events.push("session_retrieve")
           assert.equal(id, SESSION_ID)
+          if (retrievedSession) return retrievedSession
           const params = calls.sessionCreateParams
           assert.ok(params)
           return {
@@ -656,6 +822,237 @@ test("commerce HTTP route boundaries are fail-closed and provider-free", async (
   )
 
   await t.test(
+    "a paid order without entitlement returns to reconciliation instead of charging twice",
+    async () => {
+      Reflect.set(process.env, "LIFT_PDF_STORAGE_PATH", "lift/lift-guide.pdf")
+      Reflect.set(
+        process.env,
+        "LIFT_VIDEO_STORAGE_PATH",
+        "lift/complete-lift-v1.mp4"
+      )
+      const calls = createCheckoutCalls()
+      const paidOrder = paidCheckoutOrder()
+      const database = createCheckoutAdminClient(calls, {
+        checkoutOrderLookups: [paidOrder],
+      })
+      const stripe = createCheckoutStripe(calls, {
+        retrievedSession: completedSessionForOrder(paidOrder),
+      })
+
+      setHarness(
+        baseHarness({
+          createAdminClient: () => database,
+          getAuthenticatedUser: async () => ({
+            id: USER_ID,
+            email: USER_EMAIL,
+          }),
+          getStripe: () => stripe,
+          isExpectedStripeAccount: async () => true,
+          isExpectedStripePrice: () => true,
+          isProductCheckoutReady: () => true,
+        })
+      )
+
+      const response = await createCheckout(checkoutRequest())
+      assert.equal(response.status, 200)
+      assert.deepEqual(await response.json(), {
+        url: `${SITE_URL}/checkout/success?session_id=${SESSION_ID}`,
+      })
+      assert.equal(calls.orderInserts.length, 0)
+      assert.equal(calls.orderUpdates.length, 0)
+      assert.equal(calls.sessionCreateParams, null)
+      assert.equal(
+        calls.events.filter((event) => event === "session_retrieve").length,
+        1
+      )
+    }
+  )
+
+  await t.test(
+    "a concurrent paid-order reservation winner cannot create a second Session",
+    async () => {
+      Reflect.set(process.env, "LIFT_PDF_STORAGE_PATH", "lift/lift-guide.pdf")
+      Reflect.set(
+        process.env,
+        "LIFT_VIDEO_STORAGE_PATH",
+        "lift/complete-lift-v1.mp4"
+      )
+      const calls = createCheckoutCalls()
+      const paidOrder = paidCheckoutOrder()
+      const database = createCheckoutAdminClient(calls, {
+        checkoutOrderLookups: [null, paidOrder],
+        reservationError: { code: "23505" },
+      })
+      const stripe = createCheckoutStripe(calls, {
+        retrievedSession: completedSessionForOrder(paidOrder),
+      })
+
+      setHarness(
+        baseHarness({
+          createAdminClient: () => database,
+          getAuthenticatedUser: async () => ({
+            id: USER_ID,
+            email: USER_EMAIL,
+          }),
+          getStripe: () => stripe,
+          isExpectedStripeAccount: async () => true,
+          isExpectedStripePrice: () => true,
+          isProductCheckoutReady: () => true,
+        })
+      )
+
+      const response = await createCheckout(checkoutRequest())
+      assert.equal(response.status, 200)
+      assert.deepEqual(await response.json(), {
+        url: `${SITE_URL}/checkout/success?session_id=${SESSION_ID}`,
+      })
+      assert.equal(calls.orderInserts.length, 1)
+      assert.equal(calls.orderUpdates.length, 0)
+      assert.equal(calls.sessionCreateParams, null)
+      assert.equal(
+        calls.events.filter((event) => event === "order_lookup").length,
+        2
+      )
+    }
+  )
+
+  await t.test(
+    "a malformed paid order fails closed before any new Session",
+    async () => {
+      Reflect.set(process.env, "LIFT_PDF_STORAGE_PATH", "lift/lift-guide.pdf")
+      Reflect.set(
+        process.env,
+        "LIFT_VIDEO_STORAGE_PATH",
+        "lift/complete-lift-v1.mp4"
+      )
+      const calls = createCheckoutCalls()
+      const database = createCheckoutAdminClient(calls, {
+        checkoutOrderLookups: [
+          paidCheckoutOrder({ stripe_checkout_session_id: null }),
+        ],
+      })
+      const stripe = createCheckoutStripe(calls)
+
+      setHarness(
+        baseHarness({
+          createAdminClient: () => database,
+          getAuthenticatedUser: async () => ({
+            id: USER_ID,
+            email: USER_EMAIL,
+          }),
+          getStripe: () => stripe,
+          isExpectedStripeAccount: async () => true,
+          isExpectedStripePrice: () => true,
+          isProductCheckoutReady: () => true,
+        })
+      )
+
+      const response = await createCheckout(checkoutRequest())
+      assert.equal(response.status, 503)
+      assert.match(
+        String((await response.json()).error),
+        /payment is recorded and access is still being verified/i
+      )
+      assert.equal(calls.orderInserts.length, 0)
+      assert.equal(calls.orderUpdates.length, 0)
+      assert.equal(calls.sessionCreateParams, null)
+      assert.equal(
+        calls.events.filter((event) => event === "session_retrieve").length,
+        0
+      )
+    }
+  )
+
+  await t.test(
+    "a paid order with inconsistent provider payment state fails closed",
+    async () => {
+      Reflect.set(process.env, "LIFT_PDF_STORAGE_PATH", "lift/lift-guide.pdf")
+      Reflect.set(
+        process.env,
+        "LIFT_VIDEO_STORAGE_PATH",
+        "lift/complete-lift-v1.mp4"
+      )
+      const calls = createCheckoutCalls()
+      const paidOrder = paidCheckoutOrder()
+      const database = createCheckoutAdminClient(calls, {
+        checkoutOrderLookups: [paidOrder],
+      })
+      const stripe = createCheckoutStripe(calls, {
+        retrievedSession: {
+          ...completedSessionForOrder(paidOrder),
+          payment_intent: "pi_wrong_route_fixture",
+        },
+      })
+
+      setHarness(
+        baseHarness({
+          createAdminClient: () => database,
+          getAuthenticatedUser: async () => ({
+            id: USER_ID,
+            email: USER_EMAIL,
+          }),
+          getStripe: () => stripe,
+          isExpectedStripeAccount: async () => true,
+          isExpectedStripePrice: () => true,
+          isProductCheckoutReady: () => true,
+        })
+      )
+
+      const response = await createCheckout(checkoutRequest())
+      assert.equal(response.status, 503)
+      assert.match(
+        String((await response.json()).error),
+        /payment is recorded and access is still being verified/i
+      )
+      assert.equal(calls.orderInserts.length, 0)
+      assert.equal(calls.orderUpdates.length, 0)
+      assert.equal(calls.sessionCreateParams, null)
+    }
+  )
+
+  await t.test(
+    "a disputed order remains suspended without opening another checkout",
+    async () => {
+      Reflect.set(process.env, "LIFT_PDF_STORAGE_PATH", "lift/lift-guide.pdf")
+      Reflect.set(
+        process.env,
+        "LIFT_VIDEO_STORAGE_PATH",
+        "lift/complete-lift-v1.mp4"
+      )
+      const calls = createCheckoutCalls()
+      const database = createCheckoutAdminClient(calls, {
+        checkoutOrderLookups: [paidCheckoutOrder({ status: "disputed" })],
+      })
+      const stripe = createCheckoutStripe(calls)
+
+      setHarness(
+        baseHarness({
+          createAdminClient: () => database,
+          getAuthenticatedUser: async () => ({
+            id: USER_ID,
+            email: USER_EMAIL,
+          }),
+          getStripe: () => stripe,
+          isExpectedStripeAccount: async () => true,
+          isExpectedStripePrice: () => true,
+          isProductCheckoutReady: () => true,
+        })
+      )
+
+      const response = await createCheckout(checkoutRequest())
+      assert.equal(response.status, 409)
+      assert.match(String((await response.json()).error), /under review/i)
+      assert.equal(calls.orderInserts.length, 0)
+      assert.equal(calls.orderUpdates.length, 0)
+      assert.equal(calls.sessionCreateParams, null)
+      assert.equal(
+        calls.events.filter((event) => event === "session_retrieve").length,
+        0
+      )
+    }
+  )
+
+  await t.test(
     "an existing Stripe customer still receives the signed-in account receipt",
     async () => {
       Reflect.set(process.env, "LIFT_PDF_STORAGE_PATH", "lift/lift-guide.pdf")
@@ -706,6 +1103,44 @@ test("commerce HTTP route boundaries are fail-closed and provider-free", async (
         options.idempotencyKey,
         `hwl:checkout:preview:${ACCOUNT_ID}:test:${String(order.id)}`
       )
+    }
+  )
+
+  await t.test(
+    "refunded and disputed purchases cannot reach signed LIFT media",
+    async (t) => {
+      for (const status of ["refunded", "disputed"] as const) {
+        await t.test(status, async () => {
+          const calls = { storage: 0 }
+          const database = createMemberAccessAdminClient(status, calls)
+
+          setHarness(
+            baseHarness({
+              createAdminClient: () => database,
+              createClient: async () => createAuthenticatedSupabaseClient(),
+            })
+          )
+
+          const access = await getMemberAccess(USER_ID)
+          assert.equal(access.canAccessLift, false)
+          assert.equal(access.canDownloadLift, false)
+          assert.equal(access.hasAnyPurchase, false)
+
+          const video = await streamLiftVideo()
+          assert.equal(video.status, 403)
+          assert.match(await video.text(), /does not have Complete LIFT access/)
+
+          const download = await downloadLiftGuide(
+            new Request(`${SITE_URL}/api/download/lift`)
+          )
+          assert.equal(download.status, 307)
+          assert.equal(
+            download.headers.get("location"),
+            `${SITE_URL}/beauty/lift?access=lift_guide_only`
+          )
+          assert.equal(calls.storage, 0)
+        })
+      }
     }
   )
 
@@ -896,7 +1331,9 @@ test("commerce HTTP route boundaries are fail-closed and provider-free", async (
           `${fixture.type} fails closed while service payments are inactive`,
           async () => {
             const calls = createWebhookCalls()
-            setHarness(webhookHarness(calls, stripeEvent(fixture.type, fixture.object)))
+            setHarness(
+              webhookHarness(calls, stripeEvent(fixture.type, fixture.object))
+            )
 
             const response = await receiveStripeWebhook(webhookRequest())
             assert.equal(response.status, 503)

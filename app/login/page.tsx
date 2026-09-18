@@ -27,7 +27,9 @@ export default async function LoginPage({
     errorCode: firstValue(params.error_code),
     legacyOrNormalizedError: firstValue(params.error),
   })
-  const redirectTo = safeInternalPath(firstValue(params.redirectTo), "/library")
+  const requestedRedirectTo = firstValue(params.redirectTo)
+  const safeRequestedRedirectTo = safeInternalPath(requestedRedirectTo, "")
+  const redirectTo = safeRequestedRedirectTo || "/library"
 
   return (
     <section className="member-atmosphere px-6 py-20 md:py-28">
@@ -46,7 +48,11 @@ export default async function LoginPage({
             and return to every practice you own.
           </p>
         </div>
-        <LoginForm feedback={feedback} redirectTo={redirectTo} />
+        <LoginForm
+          feedback={feedback}
+          redirectTo={redirectTo}
+          resolveAdminDestination={!safeRequestedRedirectTo}
+        />
       </div>
     </section>
   )

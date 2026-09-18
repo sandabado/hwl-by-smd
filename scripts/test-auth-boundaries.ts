@@ -27,7 +27,9 @@ test("password recovery clearly supports both first-time setup and later changes
   assert.match(page, /Set or change your password/)
   assert.match(page, /That reset link can&apos;t be used\./)
   assert.match(page, /use the newest message/)
-  assert.match(form, /\/update-password\?flow=recovery/)
+  assert.match(form, /new URL\("\/auth\/recovery", window\.location\.origin\)/)
+  assert.match(form, /redirectTo: recoveryUrl\.toString\(\)/)
+  assert.doesNotMatch(form, /\/auth\/callback/)
   assert.match(form, /Email My Secure Link/)
   assert.match(
     source("app/auth/recovery/confirm/page.tsx"),
@@ -53,6 +55,29 @@ test("account creation presents its existing password rule before submission", (
   )
   assert.match(form, /id="signup-password-guidance"/)
   assert.match(form, />\s*Use at least 8 characters\.\s*<\/span>/)
+})
+
+test("generic sign-in resolves the authenticated role before choosing a home", () => {
+  const page = source("app/login/page.tsx")
+  const form = source("components/auth/login-form.tsx")
+  const updatePasswordForm = source("components/auth/update-password-form.tsx")
+  const route = source("app/auth/post-login/route.ts")
+
+  assert.match(page, /resolveAdminDestination=\{!safeRequestedRedirectTo\}/)
+  assert.match(
+    form,
+    /resolveAdminDestination\s*\? `\/auth\/post-login\?next=\$\{encodeURIComponent\(redirectTo\)\}`\s*: redirectTo/
+  )
+  assert.match(form, /router\.replace\(authenticatedDestination\)/)
+  assert.match(
+    form,
+    /emailRedirectTo: `\$\{window\.location\.origin\}\/auth\/callback\?next=\$\{encodeURIComponent\(redirectTo\)\}`/
+  )
+  assert.match(
+    updatePasswordForm,
+    /\/auth\/post-login\?next=%2Faccount%3Fnotice%3Dpassword-updated/
+  )
+  assert.match(route, /return handlePostLogin\(request\)/)
 })
 
 test("login auth feedback accepts only stable error codes", async (t) => {

@@ -19,9 +19,11 @@ type LoginFeedback = {
 export function LoginForm({
   feedback,
   redirectTo,
+  resolveAdminDestination,
 }: {
   feedback: LoginFeedback | null
   redirectTo: string
+  resolveAdminDestination: boolean
 }) {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>("signin")
@@ -29,13 +31,16 @@ export function LoginForm({
   const [message, setMessage] = useState("")
   const [pending, setPending] = useState(false)
   const supabase = useMemo(() => createClient(), [])
+  const authenticatedDestination = resolveAdminDestination
+    ? `/auth/post-login?next=${encodeURIComponent(redirectTo)}`
+    : redirectTo
 
   useEffect(() => {
     if (!supabase) return
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) router.replace(redirectTo)
+      if (data.user) router.replace(authenticatedDestination)
     })
-  }, [redirectTo, router, supabase])
+  }, [authenticatedDestination, router, supabase])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -65,7 +70,7 @@ export function LoginForm({
           password,
         })
         if (signInError) throw signInError
-        router.replace(redirectTo)
+        router.replace(authenticatedDestination)
         router.refresh()
       } else {
         const { error: signUpError } = await supabase.auth.signUp({

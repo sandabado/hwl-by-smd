@@ -54,7 +54,9 @@ export function UpdatePasswordForm() {
         return
       }
 
-      router.replace("/account?notice=password-updated")
+      router.replace(
+        "/auth/post-login?next=%2Faccount%3Fnotice%3Dpassword-updated"
+      )
       router.refresh()
     } catch {
       setError(RECOVERY_ERROR)

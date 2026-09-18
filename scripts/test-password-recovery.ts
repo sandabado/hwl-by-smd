@@ -65,6 +65,25 @@ test("recovery entry stages but does not consume the emailed token", () => {
   assert.match(response.headers.get("set-cookie") ?? "", /SameSite=Lax/i)
 })
 
+test("recovery entry preserves an allowlisted alias-free candidate origin", () => {
+  const response = stagePasswordRecovery(
+    new Request(
+      "https://hwl-candidate.vercel.app/auth/recovery?token_hash=recovery-secret&type=recovery"
+    )
+  )
+
+  assert.equal(response.status, 303)
+  assert.equal(
+    response.headers.get("location"),
+    "https://hwl-candidate.vercel.app/auth/recovery/confirm"
+  )
+  assert.equal(
+    response.headers.get("location")?.includes("recovery-secret"),
+    false
+  )
+  assert.match(response.headers.get("set-cookie") ?? "", /hwl-recovery-token=/)
+})
+
 test("recovery entry rejects malformed or non-recovery links", () => {
   for (const url of [
     "https://www.hwlbysmd.com/auth/recovery?type=recovery",

@@ -26,13 +26,12 @@ export function ResetPasswordForm() {
     const email = String(formData.get("email") ?? "")
       .trim()
       .toLowerCase()
-    const callbackUrl = new URL("/auth/callback", window.location.origin)
-    callbackUrl.searchParams.set("next", "/update-password?flow=recovery")
+    const recoveryUrl = new URL("/auth/recovery", window.location.origin)
 
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
         email,
-        { redirectTo: callbackUrl.toString() }
+        { redirectTo: recoveryUrl.toString() }
       )
 
       if (resetError) {

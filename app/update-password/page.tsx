@@ -26,8 +26,15 @@ async function hasAuthenticatedUser() {
   }
 }
 
-export default async function UpdatePasswordPage() {
+export default async function UpdatePasswordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ flow?: string | string[] }>
+}) {
+  const params = await searchParams
   const authenticated = await hasAuthenticatedUser()
+  const flow = typeof params.flow === "string" ? params.flow : undefined
+  const changingFromAccount = flow === "account"
 
   return (
     <section className="member-atmosphere px-6 py-24">
@@ -35,11 +42,19 @@ export default async function UpdatePasswordPage() {
         {authenticated ? (
           <>
             <p className="text-xs tracking-[0.3em] text-[var(--accent)] uppercase">
-              A fresh beginning
+              {changingFromAccount
+                ? "Password & security"
+                : "A fresh beginning"}
             </p>
             <h1 className="mt-4 text-5xl font-medium text-[var(--primary)]">
-              Choose a new password
+              {changingFromAccount
+                ? "Change your password"
+                : "Choose your new password"}
             </h1>
+            <p className="mt-4 leading-relaxed text-[var(--muted-foreground)]">
+              Use at least 8 characters. Saving replaces the password currently
+              connected to this account.
+            </p>
             <UpdatePasswordForm />
           </>
         ) : (

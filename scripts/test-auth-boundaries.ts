@@ -19,6 +19,29 @@ test("password recovery has dedicated route metadata", () => {
   )
 })
 
+test("password recovery clearly supports both first-time setup and later changes", () => {
+  const page = source("app/reset-password/page.tsx")
+  const form = source("components/auth/reset-password-form.tsx")
+  const account = source("app/account/page.tsx")
+
+  assert.match(page, /Set or change your password/)
+  assert.match(page, /That reset link can&apos;t be used\./)
+  assert.match(page, /use the newest message/)
+  assert.match(form, /\/update-password\?flow=recovery/)
+  assert.match(form, /Email My Secure Link/)
+  assert.match(
+    source("app/auth/recovery/confirm/page.tsx"),
+    /Continue to Choose My Password/
+  )
+  assert.match(
+    source("app/auth/recovery/confirm/page.tsx"),
+    /action="\/auth\/recovery\/complete"/
+  )
+  assert.match(account, /Password &amp; security/)
+  assert.match(account, /href="\/update-password\?flow=account"/)
+  assert.match(account, /Change password/)
+})
+
 test("account creation presents its existing password rule before submission", () => {
   const form = source("components/auth/login-form.tsx")
 

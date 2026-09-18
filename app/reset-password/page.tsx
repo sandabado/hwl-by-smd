@@ -1,39 +1,18 @@
-"use client"
-
-import { useState, type FormEvent } from "react"
 import Link from "next/link"
 
-import { Button } from "@/components/ui/button"
-import { createClient } from "@/lib/supabase/client"
+import { ResetPasswordForm } from "@/components/auth/reset-password-form"
 
-export default function ResetPasswordPage() {
-  const [message, setMessage] = useState("")
-  const [error, setError] = useState("")
-  const [pending, setPending] = useState(false)
+function firstValue(value: string | string[] | undefined) {
+  return typeof value === "string" ? value : undefined
+}
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setError("")
-    const supabase = createClient()
-    if (!supabase) {
-      setError("The secure account connection has not been added yet.")
-      return
-    }
-
-    setPending(true)
-    const formData = new FormData(event.currentTarget)
-    const email = String(formData.get("email") ?? "")
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      email,
-      {
-        redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
-      }
-    )
-    setPending(false)
-
-    if (resetError) setError(resetError.message)
-    else setMessage("Check your email for a private reset link.")
-  }
+export default async function ResetPasswordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string | string[] }>
+}) {
+  const params = await searchParams
+  const linkFailed = firstValue(params.error) === "auth_link_failed"
 
   return (
     <section className="member-atmosphere px-6 py-24">
@@ -42,53 +21,31 @@ export default function ResetPasswordPage() {
           Account care
         </p>
         <h1 className="mt-4 text-5xl font-medium text-[var(--primary)]">
-          Reset your password
+          Set or change your password
         </h1>
         <p className="mt-4 leading-relaxed text-[var(--muted-foreground)]">
-          Enter your email and we&apos;ll send a secure link.
+          Enter the email for your HWL account. We&apos;ll send a private,
+          one-time link so you can create your first password or replace the
+          current one.
         </p>
-        <form
-          aria-busy={pending}
-          className="mt-8 space-y-4"
-          onSubmit={handleSubmit}
-        >
-          <label
-            className="block text-sm text-[var(--primary)]"
-            htmlFor="reset-email"
+        {linkFailed ? (
+          <div
+            className="mt-6 rounded-2xl border border-[#9c4b40]/25 bg-[#9c4b40]/8 p-4 text-sm leading-relaxed text-[var(--primary)]"
+            role="alert"
           >
-            Email address
-          </label>
-          <input
-            required
-            autoComplete="email"
-            id="reset-email"
-            name="email"
-            type="email"
-            className="h-12 w-full rounded-2xl border border-[var(--border)] bg-white/80 px-4 outline-none focus:border-[var(--accent)]"
-            placeholder="you@example.com"
-          />
-          {error && (
-            <p role="alert" className="text-sm text-[#9c4b40]">
-              {error}
+            <p className="font-medium">That reset link can&apos;t be used.</p>
+            <p className="mt-1 text-[var(--muted-foreground)]">
+              It may have expired or been replaced by a newer email. Send a
+              fresh link below and use the newest message.
             </p>
-          )}
-          {message && (
-            <p role="status" className="text-sm text-[#52694d]">
-              {message}
-            </p>
-          )}
-          <Button
-            className="h-12 w-full rounded-full bg-[var(--primary)] text-white"
-            disabled={pending}
-          >
-            {pending ? "Sending…" : "Send Reset Link"}
-          </Button>
-        </form>
+          </div>
+        ) : null}
+        <ResetPasswordForm />
         <Link
           className="mt-6 block text-center text-sm text-[var(--muted-foreground)] hover:underline"
           href="/login"
         >
-          Return to sign in
+          I already have a password — return to sign in
         </Link>
       </div>
     </section>

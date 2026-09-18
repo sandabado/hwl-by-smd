@@ -6,6 +6,7 @@ import {
   CalendarDays,
   Download,
   HeartHandshake,
+  KeyRound,
   ReceiptText,
 } from "lucide-react"
 
@@ -66,7 +67,13 @@ function bookingStatusLabel(status: string) {
   return status.replaceAll("_", " ")
 }
 
-export default async function AccountPage() {
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string | string[] }>
+}) {
+  const params = await searchParams
+  const passwordUpdated = params.notice === "password-updated"
   const { access, user } = await requireAccess("authenticated", "/account")
   const bookingLedgerReady = isCalcomBookingLedgerReady()
   const bookings = await getMemberBookings(user.id)
@@ -91,6 +98,16 @@ export default async function AccountPage() {
           Profile, sessions, purchases, and preferences.
         </p>
 
+        {passwordUpdated ? (
+          <p
+            className="mt-6 rounded-2xl border border-[#52694d]/20 bg-[#52694d]/8 px-5 py-4 text-sm leading-relaxed text-[#40523c]"
+            role="status"
+          >
+            Your password has been updated. You can use it the next time you
+            sign in.
+          </p>
+        ) : null}
+
         <div className="mt-12 grid gap-6 md:grid-cols-2">
           <article className="den-card rounded-[2rem] p-8">
             <h2 className="text-3xl text-[var(--primary)]">Profile</h2>
@@ -103,6 +120,30 @@ export default async function AccountPage() {
               </p>
             ) : null}
             <p className="mt-2 text-[var(--primary)]">{user.email}</p>
+            <div className="mt-7 border-t border-[var(--border)] pt-6">
+              <div className="flex items-center gap-2">
+                <KeyRound
+                  aria-hidden="true"
+                  className="size-4 text-[var(--accent)]"
+                />
+                <h3 className="font-medium text-[var(--primary)]">
+                  Password &amp; security
+                </h3>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                Create a new password whenever you need one.
+              </p>
+              <Button
+                asChild
+                className="mt-4 rounded-full"
+                size="sm"
+                variant="outline"
+              >
+                <Link href="/update-password?flow=account">
+                  Change password
+                </Link>
+              </Button>
+            </div>
           </article>
 
           <article className="den-card rounded-[2rem] p-8">

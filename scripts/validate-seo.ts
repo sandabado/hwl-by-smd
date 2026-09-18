@@ -60,6 +60,7 @@ const privateMetadataSources = [
   ["/login", "app/login/page.tsx"],
   ["/reset-password", "app/reset-password/layout.tsx"],
   ["/update-password", "app/update-password/page.tsx"],
+  ["/auth/recovery/confirm", "app/auth/recovery/confirm/page.tsx"],
   ["/account/*", "app/account/layout.tsx"],
   ["/the-den/*", "app/the-den/layout.tsx"],
   ["/den/*", "app/den/layout.tsx"],

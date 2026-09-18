@@ -31,7 +31,13 @@ function noStoreRedirect(url: URL) {
   return response
 }
 
-function failureRedirect(url: URL, redirectTo: string) {
+function failureRedirect(url: URL, redirectTo: string, isRecoveryFlow = false) {
+  if (isRecoveryFlow) {
+    const resetUrl = new URL("/reset-password", url.origin)
+    resetUrl.searchParams.set("error", "auth_link_failed")
+    return noStoreRedirect(resetUrl)
+  }
+
   const loginUrl = new URL("/login", url.origin)
   loginUrl.searchParams.set("error", "auth_link_failed")
   loginUrl.searchParams.set("redirectTo", redirectTo)
@@ -55,10 +61,13 @@ export async function handleAuthCallback(
     url.searchParams.get("next"),
     tokenHash && type === "invite" ? "/update-password" : "/library"
   )
+  const isRecoveryFlow = redirectTo === "/update-password?flow=recovery"
 
   try {
     const supabase = await dependencies.createClient()
-    if (!supabase) return failureRedirect(url, redirectTo)
+    if (!supabase) {
+      return failureRedirect(url, redirectTo, isRecoveryFlow)
+    }
 
     if (code) {
       const { error } = await supabase.auth.exchangeCodeForSession(code)
@@ -78,5 +87,5 @@ export async function handleAuthCallback(
     // Provider details stay server-side; users receive one stable error state.
   }
 
-  return failureRedirect(url, redirectTo)
+  return failureRedirect(url, redirectTo, isRecoveryFlow)
 }

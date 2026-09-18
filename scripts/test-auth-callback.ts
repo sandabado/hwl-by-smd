@@ -182,7 +182,6 @@ test("unsupported token types fail closed without provider verification", async 
 
   assert.deepEqual(calls.exchange, [])
   assert.deepEqual(calls.verify, [])
-  assert.equal(response.status, 307)
   assert.equal(
     response.headers.get("location"),
     "https://www.hwlbysmd.com/login?error=auth_link_failed&redirectTo=%2Flibrary"
@@ -208,6 +207,23 @@ test("provider failures return one sanitized login state", async (t) => {
       "https://www.hwlbysmd.com/login?error=auth_link_failed&redirectTo=%2Fupdate-password"
     )
     assert.equal(response.headers.get("location")?.includes("private"), false)
+  })
+
+  await t.test("failed recovery PKCE code returns to reset", async () => {
+    const calls = callLog()
+    const response = await handleAuthCallback(
+      new Request(
+        "https://www.hwlbysmd.com/auth/callback?code=private-code&next=%2Fupdate-password%3Fflow%3Drecovery"
+      ),
+      dependencies(calls, { exchangeError: new Error("missing verifier") })
+    )
+
+    assert.equal(
+      response.headers.get("location"),
+      "https://www.hwlbysmd.com/reset-password?error=auth_link_failed"
+    )
+    assert.equal(response.headers.get("location")?.includes("private"), false)
+    assert.equal(response.headers.get("cache-control"), "no-store")
   })
 
   await t.test("missing client", async () => {

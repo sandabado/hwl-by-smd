@@ -12,6 +12,8 @@ export const HOSTED_ROOT_ORIGIN_ENV = "HOSTED_ROOT_ORIGIN"
 export const MAX_HOSTED_ROOT_HTML_BYTES = 2 * 1024 * 1024
 export const PROTECTED_PREVIEW_ORIGIN = "https://preview.hwlbysmd.com"
 export const ROOT_CANARY_QUERY = "__hwl_root_canary=1"
+export const BROWSER_POST_HYDRATION_REQUIREMENT =
+  'Separate browser post-hydration verification remains required: require data-site-header-variant="home", data-hwl-hydrated="true", and zero React hydration errors.'
 
 type Environment = Readonly<Record<string, string | undefined>>
 
@@ -1294,12 +1296,21 @@ export function auditRootHtml(html: string) {
     )
   )
 
-  const hasHomeHeader = tags.some(
+  const rawHeaderVariantMarkers = allElementTags.filter((tag) =>
+    tag.attributes.has("data-site-header-variant")
+  )
+  const pendingRootHeaders = tags.filter(
     (tag) =>
       tag.name === "header" &&
-      tag.attributes.get("data-site-header-variant") === "home" &&
-      appShells.some((appShell) => isDescendantOf(tag, appShell))
+      tag.attributes.get("data-site-header-variant") === "pending"
   )
+  const pendingRootHeader = pendingRootHeaders[0]
+  const hasPendingRootHeader =
+    rawHeaderVariantMarkers.length === 1 &&
+    pendingRootHeaders.length === 1 &&
+    pendingRootHeader !== undefined &&
+    pendingRootHeader.hasExplicitEndTag &&
+    appShells.some((appShell) => isDescendantOf(pendingRootHeader, appShell))
 
   const rawHydrationSentinelMarkers = allElementTags.filter((tag) =>
     tag.attributes.has("data-hwl-hydration-sentinel")
@@ -1311,11 +1322,11 @@ export function auditRootHtml(html: string) {
     !allElementTags.some((tag) => tag.attributes.has("data-hwl-hydrated"))
   checks.push(
     check(
-      hasHomeHeader ? "pass" : "fail",
+      hasPendingRootHeader ? "pass" : "fail",
       "Homepage header state",
-      hasHomeHeader
-        ? "the raw homepage response renders the home header mode"
-        : "the raw homepage response does not render the home header mode"
+      hasPendingRootHeader
+        ? "the raw root renders one intentional pending header before hydration"
+        : "the raw root must render exactly one pending header inside the application shell"
     )
   )
 
@@ -1323,12 +1334,10 @@ export function auditRootHtml(html: string) {
   // independent attributes is insufficient: separate lookalike subtrees could
   // otherwise satisfy each predicate without one coherent HWL home document.
   const hasHomepageMarkers = appShells.some((appShell) => {
-    const hasHeaderInShell = tags.some(
-      (tag) =>
-        tag.name === "header" &&
-        tag.attributes.get("data-site-header-variant") === "home" &&
-        isDescendantOf(tag, appShell)
-    )
+    const hasHeaderInShell =
+      hasPendingRootHeader &&
+      pendingRootHeader !== undefined &&
+      isDescendantOf(pendingRootHeader, appShell)
     const hasSentinelInShell =
       hasUniquePristineHydrationSentinel &&
       exactRawHydrationSentinels[0] !== undefined &&
@@ -1420,8 +1429,8 @@ export function auditRootHtml(html: string) {
       hasHomepageMarkers ? "pass" : "fail",
       "Homepage identity markers",
       hasHomepageMarkers
-        ? "the raw response contains the homepage, hero heading, and LIFT CTA markers"
-        : "the raw response is missing a required homepage identity marker"
+        ? "the raw response contains one pending root header plus the homepage, hero heading, and LIFT CTA markers"
+        : "the raw response is missing a required pending-root homepage identity marker"
     )
   )
 
@@ -1764,6 +1773,7 @@ export async function runHostedRootCli(
       ? "Hosted root verification passed."
       : "Hosted root verification failed."
   )
+  stdout(BROWSER_POST_HYDRATION_REQUIREMENT)
 
   return result.ok ? 0 : 1
 }

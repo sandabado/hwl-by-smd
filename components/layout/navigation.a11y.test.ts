@@ -11,6 +11,13 @@ interface LoadedNavConfig {
   isCurrentPath: (pathname: string, href: string) => boolean
 }
 
+interface LoadedHydratedPathname {
+  resolveHydratedPathname: (
+    pathname: string,
+    committedPathname: string | null
+  ) => string | null
+}
+
 const navItems = [
   { label: "Beauty", href: "/beauty" },
   { label: "Body", href: "/yoga" },
@@ -52,6 +59,39 @@ function loadNavConfig(): LoadedNavConfig {
   return loaded as LoadedNavConfig
 }
 
+function loadHydratedPathname(): LoadedHydratedPathname {
+  const compiled = ts.transpileModule(
+    source("components/layout/use-hydrated-pathname.ts"),
+    {
+      compilerOptions: {
+        esModuleInterop: true,
+        module: ts.ModuleKind.CommonJS,
+        target: ts.ScriptTarget.ES2022,
+      },
+    }
+  ).outputText
+  const loadedModule: { exports: Partial<LoadedHydratedPathname> } = {
+    exports: {},
+  }
+
+  new Function("require", "module", "exports", compiled)(
+    (specifier: string) => {
+      if (specifier === "react") {
+        return { useEffect: () => undefined, useState: () => [null, () => {}] }
+      }
+      if (specifier === "next/navigation") {
+        return { usePathname: () => "/" }
+      }
+      throw new Error(`Unexpected hydrated pathname test import: ${specifier}`)
+    },
+    loadedModule,
+    loadedModule.exports
+  )
+
+  assert.equal(typeof loadedModule.exports.resolveHydratedPathname, "function")
+  return loadedModule.exports as LoadedHydratedPathname
+}
+
 test("navigation has one canonical action vocabulary", () => {
   const nav = loadNavConfig()
 
@@ -73,6 +113,31 @@ test("the most specific main navigation item owns aria-current", () => {
   assert.equal(nav.isCurrentPath("/booking", "/book"), false)
 })
 
+test("pathname-dependent shells keep a stable hydration fallback", () => {
+  const { resolveHydratedPathname } = loadHydratedPathname()
+
+  assert.equal(resolveHydratedPathname("/index", null), null)
+  assert.equal(resolveHydratedPathname("/", null), null)
+  assert.equal(resolveHydratedPathname("/", "/"), "/")
+  assert.equal(resolveHydratedPathname("/book", "/"), null)
+  assert.equal(resolveHydratedPathname("/book", "/book"), "/book")
+
+  const hook = source("components/layout/use-hydrated-pathname.ts")
+  const header = source("components/layout/header.tsx")
+  const effects = source("components/layout/site-effects.tsx")
+  const breadcrumbs = source("components/layout/site-breadcrumbs.tsx")
+
+  assert.match(hook, /useState<string \| null>\(\s*null\s*\)/)
+  assert.match(hook, /setCommittedPathname\(pathname\)/)
+  assert.match(header, /const pathname = useHydratedPathname\(\)/)
+  assert.match(header, /isPending \? "pending"/)
+  assert.match(effects, /if \(pathname === null\) return null/)
+  assert.match(breadcrumbs, /if \(pathname === null\) return null/)
+  assert.doesNotMatch(header, /isHomePath|usePathname/)
+  assert.doesNotMatch(effects, /isHomePath|usePathname/)
+  assert.doesNotMatch(breadcrumbs, /isHomePath|usePathname/)
+})
+
 test("global navigation keeps landmarks, current state, and named utility controls", () => {
   const mainNav = source("components/layout/main-nav.tsx")
   const mobileNav = source("components/layout/mobile-nav.tsx")
@@ -87,10 +152,7 @@ test("global navigation keeps landmarks, current state, and named utility contro
   assert.match(mobileNav, /aria-label="Mobile main"/)
   assert.match(mobileNav, /aria-label="Open navigation menu"/)
   assert.match(header, /aria-label="HWL by SMD home"/)
-  assert.match(
-    header,
-    /data-site-header-variant=\{isHome \? "home" : "interior"\}/
-  )
+  assert.match(header, /data-site-header-variant=\{headerVariant\}/)
   assert.match(auth, /aria-label=\{mobile \? undefined : ACCOUNT_NAV_LABEL\}/)
   assert.match(booking, /aria-controls="site-booking-sheet"/)
   assert.match(booking, /aria-expanded=\{isOpen\}/)

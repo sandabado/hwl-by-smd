@@ -1,6 +1,6 @@
 # HWL by SMD — Launch Packet
 
-**Updated:** September 15, 2026
+**Updated:** September 18, 2026
 
 **Canonical domain:** `hwlbysmd.com`, changed by the owner on September 4.
 Use `https://www.hwlbysmd.com` for website canonical URLs to match the existing
@@ -9,7 +9,90 @@ custom Preview, and `hello@hwlbysmd.com` for the configured Preview sender. This
 supersedes the old-domain setup instructions and approval request below;
 historical `howlbysmd.com` observations are not new-domain verification.
 
-## Current authority snapshot — September 15
+## Current authority snapshot — September 18, 2026
+
+This section is the only current release-authority summary in this packet. All
+later dated snapshots, "current" labels, recommendations, candidates, and
+provider observations are retained as historical evidence and are superseded
+where they conflict with this section. Documentation work is not a substitute
+for fresh hosted, browser, provider, or database proof.
+
+- **Source authority:** the committed checkpoint is
+  `307b365958ae8a06dc5a0ad733fe09b6f98d09c0` (`307b365`), synchronized with
+  `origin/checkpoint/platform-overhaul-2026-08-20`. GitHub Actions run
+  `35375655667` passed. The commit includes the scanner-safe password-recovery
+  flow, the migration-021 commerce guard from `16be334`, and the server-resolved
+  post-login handoff that sends verified administrators to `/admin` while
+  preserving fail-closed member routing. A separate seven-path hydration and
+  hosted-root-verifier candidate plus three operating documents sits on top of
+  that commit. These ten working-tree paths have not been committed, pushed, or
+  deployed.
+- **Scanner-safe recovery contract:** a recovery-token GET stages the token in
+  short-lived, HTTP-only, SameSite cookies and redirects to a token-free
+  confirmation page; it does not verify or consume the token. Only a deliberate
+  same-origin POST verifies the staged recovery token, clears the cookies, and
+  continues to password setup. Malformed, expired, cross-origin, or provider
+  failure paths fail closed to a sanitized reset state. This is committed code
+  and test coverage at `307b365`. The owner completed the private Preview
+  password/sign-in journey and confirmed that `admin@ghosthand.studio` reaches
+  the Admin Control Room; this is human canary evidence, not an automated
+  mailbox-delivery assertion.
+- **Exact hydration acceptance gate:** the uncommitted candidate intentionally
+  requires raw `/` HTML to contain exactly one
+  `data-site-header-variant="pending"` header inside the application shell and a
+  pristine, not-yet-hydrated sentinel. That raw-HTML pass must be followed by a
+  separate fresh-browser pass in which the same root becomes
+  `data-site-header-variant="home"`, the sentinel becomes
+  `data-hwl-hydrated="true"`, and React hydration errors remain zero. Raw
+  `pending` is expected pre-hydration state; it is never browser-home proof, and
+  either half failing blocks release acceptance.
+- **Database authority:** the authenticated Production Supabase migration
+  ledger is applied through the complete ordered set `001`–`021`. Older claims
+  that Production stops at `020` or that migration 021 is pending are
+  superseded. Schema presence alone does not prove a current hosted checkout,
+  webhook, reconciliation, refund, dispute, or entitlement journey.
+- **Current provider gates:** public sales and website inquiry collection remain
+  closed. The HWL Cal backend ledger also remains disabled: Vercel has no
+  `CALCOM_API_KEY` or `CALCOM_WEBHOOK_SECRET`, and Cal has no HWL lifecycle
+  webhook installed. Public Cal booking availability is a separate external
+  surface and does not prove application-ledger ingestion.
+- **Administrator authority:** the Production profile for
+  `admin@ghosthand.studio` now holds `super_admin`. Shannon's Production
+  administrator role remains pending. This supersedes older statements that
+  Ghosthand had no role or that both intended roles were absent. The owner has
+  now privately confirmed the exact-`307b365` Preview admin landing. This does
+  not complete Shannon's separately gated handoff.
+- **Exact committed Preview:** Vercel deployment
+  `dpl_GRPoMgxtsJSCKcPoWB5MtEXVyz72` is READY at
+  `https://hwl-by-fiptlsffh-whole-body-earth.vercel.app`; the stable
+  `https://preview.hwlbysmd.com` alias resolves to it. Its Git metadata matches
+  `307b365`, its recent error-log scan returned zero records, and its login plus
+  signed-out post-login HTTP/browser checks passed. It remains a Preview-target
+  artifact with test configuration and must not be promoted directly to
+  Production.
+- **Hydration working-tree evidence:** the undeployed local candidate returned
+  raw `data-site-header-variant="pending"` with a pristine hydration sentinel,
+  then rendered `data-site-header-variant="home"` and
+  `data-hwl-hydrated="true"` in separate desktop and 390-pixel browser checks.
+  Both viewports had meaningful content, no error overlay, no page errors, and
+  no horizontal overflow. This is local evidence only until the ten-path
+  candidate becomes an immutable hosted SHA.
+- **Hosted-proof boundary:** no hosted artifact is claimed for the combined
+  `307b365` plus the ten-path working-tree candidate. Earlier Preview,
+  Production-candidate, public-alias, transaction, and provider checks remain
+  useful dated evidence only. They cannot be promoted to exact-current proof.
+- **Next release gates:** review and checkpoint the ten-path candidate; obtain
+  fresh exact-SHA CI and immutable Preview identity; repeat the raw `pending`
+  and separate browser `home` hydration gates; preserve closed sales and
+  inquiries; then build an alias-free, closed Production-target artifact. Cal
+  credential/webhook installation, Shannon's role handoff, public alias
+  movement, live-money testing, and opening either public gate remain separate
+  owner-authorized operations.
+
+## Superseded September 15 authority snapshot — historical
+
+The following snapshot is preserved for audit history. Its source SHA,
+migration ceiling, administrator state, and next-step claims are not current.
 
 - **Source and CI:** checkpoint commit
   `d8136d8e45bc0517c7acc5d74bdf40392d11cf38` is cleanly synchronized with
@@ -374,7 +457,11 @@ historical `howlbysmd.com` observations are not new-domain verification.
   environment values, set both to `false`, and enable only the exact target
   under test.
 
-### Production migrations 019–020 readiness
+### Historical Production migrations 019–020 readiness
+
+This was the pre-apply record for migrations 019 and 020. Production is now
+applied through 021; do not treat the instructions in this subsection as a
+current migration plan.
 
 - `019_calcom_native_payload_compatibility.sql` has SHA-256
   `504d83b41cd385d62af3eed8b4845d8ae0ee85cb9065b646260d11daaa8e93fd`.
@@ -403,8 +490,8 @@ historical `howlbysmd.com` observations are not new-domain verification.
 
 ## Superseded September 13 authority snapshot — historical
 
-All dated sections below remain evidence history. The September 14 snapshot
-above is controlling; this table is historical only.
+All dated sections below remain evidence history. The September 18 snapshot at
+the top of this packet is controlling; this table is historical only.
 
 | Historical surface   | September 13 recorded authority                                                                                                                                                                                                          | Historical status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -649,11 +736,11 @@ Palm Springs, CA`, displays that location on its booking page, remains free
   passed. The local development server remains available at
   `http://localhost:3000`.
 
-## September 9 Security-Patched Preview Purchase — Current Candidate
+## September 9 Security-Patched Preview Purchase — Historical Candidate
 
-This section records the current checkpoint and supersedes older Preview
-deployment identifiers. It does not authorize a Production promotion or a
-`main` push.
+This section records the then-current September 9 checkpoint and is retained as
+historical Preview evidence. It does not supersede the September 18 snapshot or
+authorize a Production promotion or `main` push.
 
 - **Exact candidate:** checkpoint commit
   `4ea17b40af05f43a32b9a3fdac65f986151d2869` updates Next.js and
@@ -716,7 +803,7 @@ deployment identifiers. It does not authorize a Production promotion or a
   administrator activation, and Cal.com booking-history sync retain their
   separately documented gates.
 
-## September 9 Supabase Key-Retirement Revalidation — Current Authority
+## September 9 Supabase Key-Retirement Revalidation — Historical Authority
 
 This section supersedes older deployment identifiers and every older statement
 below that says the Production legacy Supabase API keys remain enabled.
@@ -752,7 +839,7 @@ below that says the Production legacy Supabase API keys remain enabled.
   `$11.11` purchase remain separate launch canaries because no authenticated
   Production buyer session was available during this non-mutating revalidation.
 
-## September 8 Supabase Production Key Cutover — Current Authority
+## September 8 Supabase Production Key Cutover — Historical Authority
 
 This section supersedes every older statement below that says the legacy
 Supabase `anon` or `service_role` keys remain enabled, that the canonical
@@ -798,7 +885,7 @@ Production has not been rebound to the modern Supabase keys.
   cutover. Public inquiries and Cal.com booking-history sync retain their
   separately documented gates. `main` was not pushed or merged.
 
-## September 7 Production Cutover — Current Authority
+## September 7 Production Cutover — Historical Authority
 
 This section supersedes every older current-deployment and current-readiness
 statement below. Historical observations remain available only as dated audit
@@ -855,7 +942,7 @@ evidence.
   gates do not prevent current Cal.com appointment requests or Shannon's
   launch-time manual post-appointment Stripe invoice/payment-link workflow.
 
-## September 7 Booking Model Correction — Current Authority
+## September 7 Booking Model Correction — Historical Authority
 
 This section supersedes every older **current-state** claim below that describes
 Wild Glow Express as a group, minimum-four, or inquiry-only service; describes
@@ -897,7 +984,7 @@ those checks ran.
   separate future lifecycle; launch uses Shannon's manual Stripe invoice or
   payment-link workflow after service.
 
-## September 7 Unified Commerce + Booking UX — Current Preview Candidate
+## September 7 Unified Commerce + Booking UX — Historical Preview Candidate
 
 - **Exact application code:** commit
   `cd52772b816a414c349ce63d258ebd80274f21a8` is clean, synchronized only on
@@ -947,11 +1034,10 @@ those checks ran.
   Production environment value, provider object, live payment, Cal booking,
   public inquiry state, or `main` branch was changed by this UX release.
 
-## September 7 Current Candidate — Launch Authority
+## September 7 Candidate — Historical Launch Authority
 
-This section is the current release truth. It supersedes conflicting deployment,
-environment-inventory, administrator, and readiness statements in the dated
-records below. Those records remain as historical evidence only.
+This section records the September 7 release truth. It is retained as historical
+evidence and does not supersede the September 18 authority snapshot.
 
 - **Exact application code and Preview:** application commit
   `d00a0b48a36a1aff7cd69bec0fb7ef60960666ae` is clean, pushed only on
@@ -1050,7 +1136,7 @@ sales open. Administrator invitation acceptance/elevation, monitored inquiry
 receipt, public inquiry opening, and legacy-key retirement remain separately
 controlled owner actions.
 
-## September 6 Checkpoint Preview Verification — Current Authority
+## September 6 Checkpoint Preview Verification — Historical Authority
 
 - **Exact code candidate:** commit
   `9c4ee8726c76dce5c38a4d83c2890cb8c4c72530` is pushed on
@@ -1082,8 +1168,8 @@ controlled owner actions.
 ## September 5 Launch Continuation — Superseded Snapshot
 
 The following section records the earlier `b7b9a59` candidate and remains
-useful historical evidence. The September 6 authority sections supersede it for
-the current checkpoint and deployment identity.
+useful historical evidence. The September 18 snapshot at the top of this packet
+supersedes it for current checkpoint and deployment identity.
 
 - **Checkpoint baseline and candidate:** exact commit
   `b7b9a593fac4cafcd078378ee5768f47de0e67cd` is pushed on
@@ -1380,7 +1466,7 @@ complete. The Stripe set is now complete; Resend remains the sole missing
 Preview variable. This pass did not touch a live Stripe key, take real money,
 push `main`, or promote anything to Production.
 
-## Status by Evidence Boundary
+## Historical Status by Evidence Boundary
 
 <!-- prettier-ignore -->
 | Boundary                        | Status                            | Authoritative evidence                                                                                                                                                                                                      |
@@ -1401,7 +1487,7 @@ push `main`, or promote anything to Production.
 Passing local compilation does not prove provider integration, a paid journey,
 or Production readiness. Each boundary above must be verified independently.
 
-## Implemented in the Current Working Tree
+## Historically Implemented Working-Tree Scope
 
 ### LIFT storefront and cart
 
@@ -2262,7 +2348,8 @@ evidence.
   profiles, and the exact configured Shannon contact address had no profile
   row. The then-required action was to name and verify an administrator and
   separately approve the narrow privilege change. This was superseded by the
-  September 5 temporary-admin verification recorded in Current state above.
+  September 5 temporary-admin verification recorded in later historical state
+  above.
 - The full isolated journey passed with email deliberately unconfigured: a
   valid request persisted first, notification audit became
   `not_configured/configuration_missing`, and the route returned HTTP 202 with
@@ -2442,7 +2529,15 @@ For the next Preview checkpoint:
 
 No direct push to `main` is authorized or required for this workflow.
 
-## Production and Live Payments — Pending
+## Superseded September 5 production plan — historical
+
+The Production/payments, approval, private-input, and launch-sequence sections
+through the historical recommendation below are retained only as the September
+5 plan. They are not a current checklist: Production is now at migrations
+`001`–`021`, Ghosthand already holds `super_admin`, and the September 18
+snapshot controls.
+
+### Historical Production and Live Payments Plan
 
 Production remains closed until all of the following are true:
 
@@ -2501,7 +2596,7 @@ LIFT Checkout route with truthful not-ready copy. Vercel reported no grouped
 runtime errors in the preceding seven days. This proves the old site is
 publicly reachable and sales are closed; it does not prove the new candidate.
 
-## Owner Approvals Still Needed
+### Historical Owner-Approval List
 
 The canonical HWLbySMD sandbox account, Product, and $11.11 Price identities
 were previously approved and read-verified. The current hardened application's
@@ -2560,7 +2655,7 @@ remain outstanding:
 9. **Git:** no `main` push is authorized. Any later request to merge or push
    `main` must be explicit.
 
-## Private Owner Inputs Still Needed
+### Historical Private-Input List
 
 Do not paste these values into this document, chat output, source files, or
 commit history.
@@ -2586,7 +2681,7 @@ commit history.
 - Shannon's cancellation, rescheduling, no-show, and late-arrival terms for the
   now-published Cal.com services.
 
-## Launch Sequence
+### Historical Launch Sequence
 
 1. Preserve the verified staging ledger 001–014, current no-op dry-run,
    commerce/inquiry/reconciliation schema boundaries, and byte-identical private
@@ -2623,7 +2718,7 @@ commit history.
    owner's explicit approval, then run a live smoke test and retain the
    fail-closed gate if any check is incomplete.
 
-## Current Recommendation
+### Superseded Historical Recommendation
 
 Keep `COMMERCE_SALES_READY=false` in Production. The protected checkpoint
 Preview is intentionally open only to Stripe sandbox testing. The product,
@@ -3210,7 +3305,7 @@ payment flow.
   former token; neither profile may receive `is_admin=true` until its exact
   Auth record is independently confirmed.
 
-## September 6 Cal Provider Confirmation and Safety Candidate — Current Authority
+## September 6 Cal Provider Confirmation and Safety Candidate — Historical Authority
 
 - A fresh Production browser read of
   `/book?service=intuitive-tarot-reading` rendered the live September 27
@@ -3252,7 +3347,7 @@ payment flow.
   open, the owner must name the commerce-alert recipient; missed-cron detection
   and alert acknowledgement remain separate operational follow-ups.
 
-## September 6 Isolated Closed-Sales Production Candidate — Current Deployment Evidence
+## September 6 Isolated Closed-Sales Production Candidate — Historical Deployment Evidence
 
 - Clean, upstream-synchronized checkpoint
   `f90f723b8a440d1ee1443d9b7ebf7374af34bdd9` was uploaded through the Vercel
@@ -3392,7 +3487,7 @@ payment flow.
   This closes browser-level mobile pointer activation without claiming a
   physical-device touch test.
 
-## September 6 Current-Checkpoint Closed-Sales Candidate Rebuild
+## September 6 Historical Checkpoint Closed-Sales Candidate Rebuild
 
 - Clean checkpoint `c226155814e2cf0012c702f4e796525cf81573b4` was uploaded
   as isolated Production-target deployment
@@ -3693,7 +3788,7 @@ payment flow.
   canary are required before activating canonical checkout. `main` is not part
   of this release.
 
-## September 10 Booking + Operations Candidate — Current Authority
+## September 10 Booking + Operations Candidate — Historical Authority
 
 This section supersedes earlier current-state statements about facial location,
 direct-service guest intake, catalog payment basis, canonical inquiry routing,

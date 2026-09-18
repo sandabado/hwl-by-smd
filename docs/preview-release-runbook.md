@@ -13,7 +13,71 @@ only to the checkpoint branch, and protected by Vercel SSO. Preserve the
 current Proton inbound-mail records and exact verified Resend sending records;
 do not recreate the superseded root-mail forwarding configuration.
 
-## September 15 Current Authority Snapshot
+## September 18, 2026 Current Authority Snapshot
+
+This is the controlling starting state for this runbook. Every older snapshot,
+"current continuation," candidate label, and provider observation below is
+historical when it conflicts with this section. The procedures remain safety
+controls, but their completion claims do not transfer to a newer candidate.
+
+- Committed source authority is
+  `307b365958ae8a06dc5a0ad733fe09b6f98d09c0` (`307b365`) on
+  `checkpoint/platform-overhaul-2026-08-20`, synchronized with its tracking
+  ref. GitHub Actions run `35375655667` passed. It contains the scanner-safe
+  recovery sequence and the server-resolved administrator post-login handoff.
+  The working tree also contains a separate seven-path hydration/verifier
+  candidate and three operating-document updates. These ten paths are
+  uncommitted, unpushed, and undeployed; do not select any prior hosted
+  deployment as proof for the combined tree.
+- `307b365` retains the scanner-safe recovery sequence: email-token GET stages
+  the token without verification, redirects to a token-free confirmation page,
+  and allows token verification only after a same-origin confirmation POST.
+  Short-lived HTTP-only cookies, a sanitized internal destination, no-store and
+  no-referrer responses, cookie clearing, and stable failure copy keep scanners,
+  cross-origin requests, expired links, and provider errors fail closed. The
+  owner's private Preview password/sign-in canary now proves the interactive
+  path and administrator landing; it does not prove automated mailbox receipt.
+- The hydration candidate deliberately splits acceptance into two exact gates.
+  Raw `/` must show exactly one in-shell
+  `data-site-header-variant="pending"` header and a pristine hydration sentinel.
+  A separate extension-free browser must then show
+  `data-site-header-variant="home"`,
+  `data-hwl-hydration-sentinel="" data-hwl-hydrated="true"`, and zero React
+  hydration errors. Never accept raw `pending` as a substitute for the browser
+  `home` state, or a browser screenshot as a substitute for raw Flight/HTML
+  verification.
+- Production Supabase is applied through the complete ordered migration ledger
+  `001`–`021`. Any lower section that stops Production at `020` or treats 021 as
+  pending is superseded. That ledger is schema evidence, not exact-candidate
+  hosted commerce proof.
+- Keep website sales and inquiry collection closed. The Cal backend ledger is
+  also closed: Vercel lacks `CALCOM_API_KEY` and `CALCOM_WEBHOOK_SECRET`, Cal has
+  no HWL lifecycle webhook, and public Cal booking availability does not prove
+  signed ingestion into HWL.
+- Production now records `admin@ghosthand.studio` as `super_admin`; Shannon's
+  administrator role is still pending. The owner privately confirmed that the
+  exact-`307b365` Preview now lands Ghosthand in the Admin Control Room. Do not
+  rerun the historical bootstrap. Shannon's handoff remains a separate,
+  explicitly authorized, audited role operation.
+- Exact committed Preview `dpl_GRPoMgxtsJSCKcPoWB5MtEXVyz72` is READY at
+  `https://hwl-by-fiptlsffh-whole-body-earth.vercel.app` and owns
+  `https://preview.hwlbysmd.com`. Its Git metadata matches `307b365`, and its
+  recent runtime-error scan returned zero records. It is a Preview/test build,
+  not a promotable Production artifact.
+- Local-only hydration evidence now passes both halves: raw HTML contains one
+  pending root header and a pristine sentinel; separate desktop and 390-pixel
+  browser checks render the home header and hydrated sentinel with no overlay,
+  page errors, or horizontal overflow. This remains working-tree evidence.
+- Next: review and checkpoint the ten-path candidate, obtain fresh exact-SHA
+  CI/deployment identity, repeat both hydration gates on that immutable Preview,
+  and build a separately approved alias-free closed Production target. Cal
+  installation, Shannon's role, public alias movement, Production inquiry
+  activation, live-money testing, and opening sales remain separate approvals.
+
+## September 15 Authority Snapshot — Superseded Historical Record
+
+The section below is retained as dated evidence. Its source SHA, migration
+ceiling, administrator state, and continuation plan are no longer current.
 
 - The synchronized checkpoint and protected Preview now use exact commit
   `d8136d8e45bc0517c7acc5d74bdf40392d11cf38`. GitHub Actions run
@@ -537,9 +601,12 @@ boundary, caps HTML at 2 MiB, and requires:
 - `200` from `/` with the exact `text/html` MIME essence;
 - the pinned Next.js channel-1, record-0 bootstrap root and route-tree Flight
   segments to be empty;
-- the semantic home header plus homepage, hero-heading, and LIFT markers; and
-- the raw hydration-sentinel marker, with no breadcrumb or non-home
-  scroll-breath markup in raw server HTML.
+- exactly one semantic header inside the application shell with
+  `data-site-header-variant="pending"`, plus the homepage, hero-heading, and
+  LIFT markers; and
+- one pristine raw hydration-sentinel marker, without
+  `data-hwl-hydrated="true"`, breadcrumb markup, or non-home scroll-breath
+  markup in raw server HTML.
 
 Vercel documents the automation bypass header and system environment variable
 at
@@ -569,7 +636,11 @@ does not prove CSP enforcement or JavaScript execution. The mandatory fresh
 browser hydration, console/page-error, and first-party network checks provide
 that separate execution evidence; neither gate substitutes for the other.
 
-## Current continuation after Stage 3B
+## Superseded September 15 continuation after Stage 3B — historical
+
+This list records the plan as it stood on September 15. Migration 021 and the
+Ghosthand bootstrap are now complete, so do not execute those steps as current
+instructions. Use the September 18 snapshot and its ordered next gates instead.
 
 1. Close the remaining non-mutating mailbox-evidence gap by confirming one Cal
    lifecycle message in both the organizer and attendee mailboxes and the
@@ -591,12 +662,9 @@ that separate execution evidence; neither gate substitutes for the other.
 
 ## Historical full release plan
 
-This ordered plan was authored before the September 15 authority snapshot.
-Steps 1–3, 7, and 9 are now completed historical procedure; step 8 is only
-partially complete because administrator acceptance and role handoff remain
-pending. Step 6 is the current next gate summarized above. Retain the remaining
-steps as release controls, but do not execute this section as though every
-numbered item were still pending.
+This plan predates the September 18 snapshot. No numbered step below is current
+authority; use it only for reusable safety controls. The Ghosthand bootstrap
+and Production migration 021 are complete; Shannon's role remains pending.
 The original Preview bootstrap—staging migrations, initial private-media upload,
 the custom Preview hostname, Stripe sandbox objects, and publication of the 11
 Cal services—is also completed historical setup and must not be repeated as if

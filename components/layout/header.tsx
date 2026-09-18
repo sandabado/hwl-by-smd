@@ -2,23 +2,25 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 
 import { AuthLinks } from "@/components/auth/auth-links"
 import { BookingTrigger } from "@/components/booking/booking-trigger"
 import { CartTrigger } from "@/components/cart/cart-trigger"
 import { MainNav } from "@/components/layout/main-nav"
 import { MobileNav } from "@/components/layout/mobile-nav"
+import { useHydratedPathname } from "@/components/layout/use-hydrated-pathname"
 import { cn } from "@/lib/utils"
 
 export function Header() {
-  const pathname = usePathname()
+  const pathname = useHydratedPathname()
   const [scrolled, setScrolled] = useState(false)
+  const isPending = pathname === null
   const isHome = pathname === "/"
-  const isAdmin = pathname.startsWith("/admin")
+  const isAdmin = pathname?.startsWith("/admin") ?? false
+  const headerVariant = isPending ? "pending" : isHome ? "home" : "interior"
 
   useEffect(() => {
-    if (isAdmin) return
+    if (isPending || isAdmin) return
 
     const onScroll = () => setScrolled(window.scrollY > 100)
 
@@ -26,13 +28,13 @@ export function Header() {
     window.addEventListener("scroll", onScroll, { passive: true })
 
     return () => window.removeEventListener("scroll", onScroll)
-  }, [isAdmin])
+  }, [isAdmin, isPending])
 
   if (isAdmin) return null
 
   return (
     <header
-      data-site-header-variant={isHome ? "home" : "interior"}
+      data-site-header-variant={headerVariant}
       className={cn(
         "top-0 z-50 max-h-[72px] border-b transition-[height,background-color,box-shadow,backdrop-filter] duration-300",
         isHome

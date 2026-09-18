@@ -3,6 +3,7 @@ import test from "node:test"
 
 import {
   auditRootHtml,
+  BROWSER_POST_HYDRATION_REQUIREMENT,
   createHostedRootHeaders,
   extractFirstFlightRouteSegments,
   extractRootFlightSegments,
@@ -41,7 +42,7 @@ const CANONICAL_HOME_HTML = String.raw`<!doctype html>
 <html lang="en">
   <body>
     <div data-app-shell="">
-      <header class="top-0 fixed inset-x-0" data-site-header-variant="home"></header>
+      <header class="top-0 sticky" data-site-header-variant="pending"></header>
       <span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>
       <main>
         <div data-homepage="">
@@ -62,26 +63,10 @@ const CANONICAL_HOME_WITH_REVIEWED_RUNTIME_HTML = CANONICAL_HOME_HTML.replace(
     <script>(self.__next_f=self.__next_f||[]).push([0])</script>`
 )
 
-const INDEX_POISONED_HOME_HTML = String.raw`<!doctype html>
-<html lang="en">
-  <body>
-    <div data-app-shell="">
-      <div class="scroll-breath" data-scrolling="false"></div>
-      <header class="top-0 sticky"></header>
-      <span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>
-      <nav aria-label="Breadcrumb"><span>Index</span></nav>
-      <main>
-        <div data-homepage="">
-          <h1 id="home-hero-heading">Come back to your whole body.</h1>
-          <a data-home-hero-lift-cta="" href="/beauty/lift">Meet LIFT</a>
-        </div>
-      </main>
-    </div>
-    ${REVIEWED_NEXT_EXTERNAL_SCRIPT_MARKUP}
-    <script>(self.__next_f=self.__next_f||[]).push([0])</script>
-    <script>self.__next_f.push([1,"0:{\"P\":null,\"c\":[\"\",\"index\"],\"q\":\"\",\"i\":false,\"f\":[[[\"index\",{\"children\":[\"__PAGE__\",{}]}],null,null,false]]}\n"])</script>
-  </body>
-</html>`
+const INDEX_POISONED_HOME_HTML = CANONICAL_HOME_HTML.replace(
+  String.raw`\"c\":[\"\",\"\"]`,
+  String.raw`\"c\":[\"\",\"index\"]`
+).replace(String.raw`\"f\":[[[\"\"`, String.raw`\"f\":[[[\"index\"`)
 
 const NESTED_INDEX_POISONED_HOME_HTML = CANONICAL_HOME_HTML.replace(
   String.raw`\"children\":[\"__PAGE__\",{}]`,
@@ -234,7 +219,7 @@ function withMarkupBeforeBodyEnd(source: string, markup: string) {
   return source.replace("</body>", `${markup}</body>`)
 }
 
-test("a canonical hosted root passes the complete read-only contract", async () => {
+test("a canonical pending hosted root passes the raw read-only contract", async () => {
   const calls: FetchCall[] = []
   const result = await verifyHostedRoot({
     environment: { VERCEL_AUTOMATION_BYPASS_SECRET: BYPASS_SECRET },
@@ -256,7 +241,54 @@ test("a canonical hosted root passes the complete read-only contract", async () 
   assert.doesNotMatch(JSON.stringify(result), new RegExp(BYPASS_SECRET))
 })
 
-test("the verifier rejects the observed root-as-index Flight and markup defect", async () => {
+test("raw root evidence accepts only one pending header in the application shell", () => {
+  assert.deepEqual(failures(auditRootHtml(CANONICAL_HOME_HTML)), [])
+
+  for (const variant of ["home", "interior", "unknown"]) {
+    const wrongVariant = CANONICAL_HOME_HTML.replace(
+      'data-site-header-variant="pending"',
+      `data-site-header-variant="${variant}"`
+    )
+    const failedNames = failures(auditRootHtml(wrongVariant)).map(
+      ({ name }) => name
+    )
+
+    assert.ok(failedNames.includes("Homepage header state"), variant)
+    assert.ok(failedNames.includes("Homepage identity markers"), variant)
+  }
+
+  const duplicatePendingHeader = CANONICAL_HOME_HTML.replace(
+    '<header class="top-0 sticky" data-site-header-variant="pending"></header>',
+    '<header class="top-0 sticky" data-site-header-variant="pending"></header><header data-site-header-variant="pending"></header>'
+  )
+  const duplicateFailedNames = failures(
+    auditRootHtml(duplicatePendingHeader)
+  ).map(({ name }) => name)
+  assert.ok(duplicateFailedNames.includes("Homepage header state"))
+  assert.ok(duplicateFailedNames.includes("Homepage identity markers"))
+
+  const unclosedPendingHeader = CANONICAL_HOME_HTML.replace("</header>", "")
+  const unclosedFailedNames = failures(
+    auditRootHtml(unclosedPendingHeader)
+  ).map(({ name }) => name)
+  assert.ok(unclosedFailedNames.includes("Homepage header state"))
+  assert.ok(unclosedFailedNames.includes("Homepage identity markers"))
+})
+
+test("raw pending state does not replace the separate browser hydration gate", () => {
+  assert.match(
+    BROWSER_POST_HYDRATION_REQUIREMENT,
+    /data-site-header-variant="home"/
+  )
+  assert.match(BROWSER_POST_HYDRATION_REQUIREMENT, /data-hwl-hydrated="true"/)
+  assert.match(
+    BROWSER_POST_HYDRATION_REQUIREMENT,
+    /zero React hydration errors/
+  )
+  assert.match(BROWSER_POST_HYDRATION_REQUIREMENT, /Separate browser/)
+})
+
+test("the verifier rejects root-as-index Flight through a neutral pending shell", async () => {
   const result = await verifyHostedRoot({
     environment: {},
     fetchImpl: fixtureFetch({ rootHtml: INDEX_POISONED_HOME_HTML }),
@@ -267,12 +299,11 @@ test("the verifier rejects the observed root-as-index Flight and markup defect",
     .map(({ name }) => name)
 
   assert.equal(result.ok, false)
-  assert.ok(failedNames.includes("Root Flight state excludes index"))
-  assert.ok(failedNames.includes("Root Flight state is canonical"))
-  assert.ok(failedNames.includes("Root Flight route tree is canonical"))
-  assert.ok(failedNames.includes("Homepage breadcrumb state"))
-  assert.ok(failedNames.includes("Homepage ambient effects state"))
-  assert.ok(failedNames.includes("Homepage header state"))
+  assert.deepEqual(failedNames, [
+    "Root Flight state excludes index",
+    "Root Flight state is canonical",
+    "Root Flight route tree is canonical",
+  ])
 })
 
 test("raw Flight parsers distinguish the canonical and poisoned states", () => {
@@ -1114,8 +1145,8 @@ test("lookalike attributes and script or style strings are not markup evidence",
     'data-app-shell-copy=""'
   )
     .replace(
-      'data-site-header-variant="home"',
-      'data-site-header-variant-copy="home"'
+      'data-site-header-variant="pending"',
+      'data-site-header-variant-copy="pending"'
     )
     .replace(
       'data-hwl-hydration-sentinel=""',
@@ -1127,11 +1158,11 @@ test("lookalike attributes and script or style strings are not markup evidence",
     .replace(
       "<body>",
       `<body>
-    <!-- <div data-app-shell="" data-homepage="" data-hwl-hydration-sentinel="" data-site-header-variant="home" id="home-hero-heading" data-home-hero-lift-cta=""></div> -->
-    <div title='<span data-app-shell="" data-homepage="" data-hwl-hydration-sentinel="" data-site-header-variant="home" id="home-hero-heading" data-home-hero-lift-cta=""></span>'></div>
-    <template><div data-app-shell="" data-homepage="" data-hwl-hydration-sentinel="" data-site-header-variant="home" id="home-hero-heading" data-home-hero-lift-cta=""></div></template>
-    <textarea><div data-app-shell="" data-homepage="" data-hwl-hydration-sentinel="" data-site-header-variant="home" id="home-hero-heading" data-home-hero-lift-cta=""></div></textarea>
-    <script>const markerCopy = '<div data-app-shell="" data-homepage="" data-hwl-hydration-sentinel="" data-site-header-variant="home" id="home-hero-heading" data-home-hero-lift-cta=""></div>';</script>
+    <!-- <div data-app-shell="" data-homepage="" data-hwl-hydration-sentinel="" data-site-header-variant="pending" id="home-hero-heading" data-home-hero-lift-cta=""></div> -->
+    <div title='<span data-app-shell="" data-homepage="" data-hwl-hydration-sentinel="" data-site-header-variant="pending" id="home-hero-heading" data-home-hero-lift-cta=""></span>'></div>
+    <template><div data-app-shell="" data-homepage="" data-hwl-hydration-sentinel="" data-site-header-variant="pending" id="home-hero-heading" data-home-hero-lift-cta=""></div></template>
+    <textarea><div data-app-shell="" data-homepage="" data-hwl-hydration-sentinel="" data-site-header-variant="pending" id="home-hero-heading" data-home-hero-lift-cta=""></div></textarea>
+    <script>const markerCopy = '<div data-app-shell="" data-homepage="" data-hwl-hydration-sentinel="" data-site-header-variant="pending" id="home-hero-heading" data-home-hero-lift-cta=""></div>';</script>
     <style>.marker-copy { content: '<div data-app-shell="" data-homepage=""></div>'; }</style>`
     )
   const failedNames = failures(auditRootHtml(lookalikeHtml)).map(
@@ -1150,8 +1181,8 @@ test("foreign-content marker attributes are not homepage evidence", () => {
     'data-app-shell-copy=""'
   )
     .replace(
-      'data-site-header-variant="home"',
-      'data-site-header-variant-copy="home"'
+      'data-site-header-variant="pending"',
+      'data-site-header-variant-copy="pending"'
     )
     .replace(
       'data-hwl-hydration-sentinel=""',
@@ -1161,8 +1192,8 @@ test("foreign-content marker attributes are not homepage evidence", () => {
     .replace('id="home-hero-heading"', 'id="home-hero-heading-copy"')
     .replace('data-home-hero-lift-cta=""', 'data-home-hero-lift-cta-copy=""')
   const foreignMarkers = `<svg>
-    <g data-app-shell="" data-site-header-variant="home" data-hwl-hydration-sentinel="" data-homepage="" id="home-hero-heading" data-home-hero-lift-cta=""></g>
-    <foreignObject><div data-app-shell="" data-site-header-variant="home" data-hwl-hydration-sentinel="" data-homepage="" id="home-hero-heading" data-home-hero-lift-cta=""></div></foreignObject>
+    <g data-app-shell="" data-site-header-variant="pending" data-hwl-hydration-sentinel="" data-homepage="" id="home-hero-heading" data-home-hero-lift-cta=""></g>
+    <foreignObject><div data-app-shell="" data-site-header-variant="pending" data-hwl-hydration-sentinel="" data-homepage="" id="home-hero-heading" data-home-hero-lift-cta=""></div></foreignObject>
   </svg>`
   const failedNames = failures(
     auditRootHtml(withMarkupBeforeBodyEnd(withoutRealMarkers, foreignMarkers))
@@ -1202,8 +1233,8 @@ test("homepage identity markers require their exact semantic elements", () => {
     '<section data-app-shell="">'
   )
     .replace(
-      '<header class="top-0 fixed inset-x-0" data-site-header-variant="home"></header>',
-      '<div class="top-0 fixed inset-x-0" data-site-header-variant="home"></div>'
+      '<header class="top-0 sticky" data-site-header-variant="pending"></header>',
+      '<div class="top-0 sticky" data-site-header-variant="pending"></div>'
     )
     .replace(
       '<span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>',
@@ -1230,7 +1261,7 @@ test("homepage identity markers require their exact semantic elements", () => {
 
 test("homepage identity markers require their expected ancestry", () => {
   const detachedMarkers = CANONICAL_HOME_HTML.replace(
-    '<header class="top-0 fixed inset-x-0" data-site-header-variant="home"></header>',
+    '<header class="top-0 sticky" data-site-header-variant="pending"></header>',
     ""
   )
     .replace(
@@ -1240,7 +1271,7 @@ test("homepage identity markers require their expected ancestry", () => {
     .replace('<div data-homepage="">', "<div>")
     .replace('id="home-hero-heading"', 'id="home-hero-heading-copy"')
     .replace('data-home-hero-lift-cta=""', 'data-home-hero-lift-cta-copy=""')
-  const semanticButDetached = `<header data-site-header-variant="home"></header>
+  const semanticButDetached = `<header data-site-header-variant="pending"></header>
     <span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>
     <div data-homepage=""></div>
     <h1 id="home-hero-heading"></h1>
@@ -1256,8 +1287,8 @@ test("homepage identity markers require their expected ancestry", () => {
 
 test("homepage identity markers require one coherent app-shell subtree", () => {
   const withoutRealIdentity = CANONICAL_HOME_HTML.replace(
-    'data-site-header-variant="home"',
-    'data-site-header-variant-copy="home"'
+    'data-site-header-variant="pending"',
+    'data-site-header-variant-copy="pending"'
   )
     .replace(
       'data-hwl-hydration-sentinel=""',
@@ -1268,7 +1299,7 @@ test("homepage identity markers require one coherent app-shell subtree", () => {
     .replace('data-home-hero-lift-cta=""', 'data-home-hero-lift-cta-copy=""')
   const splitWitnesses = `<div data-app-shell=""></div>
     <span data-app-shell="">
-      <header data-site-header-variant="home"></header>
+      <header data-site-header-variant="pending"></header>
       <span aria-hidden="true" data-hwl-hydration-sentinel="" hidden=""></span>
       <div data-homepage="">
         <h1 id="home-hero-heading"></h1>
@@ -1777,4 +1808,5 @@ test("CLI sends the official bypass header without printing its secret", async (
   )
   assert.doesNotMatch(output, new RegExp(BYPASS_SECRET))
   assert.match(output, /Hosted root verification passed/)
+  assert.ok(output.includes(BROWSER_POST_HYDRATION_REQUIREMENT))
 })

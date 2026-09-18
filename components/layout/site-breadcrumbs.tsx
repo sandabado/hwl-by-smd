@@ -1,7 +1,6 @@
 "use client"
 
-import { usePathname } from "next/navigation"
-
+import { useHydratedPathname } from "@/components/layout/use-hydrated-pathname"
 import {
   Breadcrumbs,
   type BreadcrumbItem,
@@ -65,7 +64,9 @@ function humanize(segment: string) {
 }
 
 export function SiteBreadcrumbs() {
-  const pathname = usePathname()
+  const pathname = useHydratedPathname()
+
+  if (pathname === null) return null
 
   if (
     pathname === "/" ||

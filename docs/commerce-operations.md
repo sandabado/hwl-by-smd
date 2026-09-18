@@ -1,5 +1,47 @@
 # Commerce Operations Runbook
 
+## Current authority snapshot — September 18, 2026
+
+This snapshot controls status; the lower sections remain the operating contract
+unless a dated deployment or readiness statement conflicts with this snapshot.
+No hosted or provider canary is claimed from this documentation refresh.
+
+- Committed source authority is
+  `307b365958ae8a06dc5a0ad733fe09b6f98d09c0` (`307b365`), synchronized with
+  the checkpoint remote and green in GitHub Actions run `35375655667`. It
+  includes the scanner-safe staged password-recovery flow, server-resolved
+  administrator post-login handoff, and the committed migration-021
+  payable-order guard from `16be334`. A separate seven-path hydration/verifier
+  candidate plus three operating documents is uncommitted, unpushed,
+  undeployed, and therefore not an immutable release candidate.
+- Recovery links now stage their token on GET without consuming it; only a
+  deliberate same-origin POST verifies the token and proceeds to password
+  setup. This committed code/test contract must not be described as fresh
+  hosted email-delivery or cross-browser evidence.
+- Exact-root acceptance for the hydration candidate is two-part: raw HTML must
+  contain one in-shell `data-site-header-variant="pending"` header and a
+  pristine sentinel; a separate fresh browser must then show
+  `data-site-header-variant="home"`, `data-hwl-hydrated="true"`, and zero React
+  hydration errors. Neither result substitutes for the other.
+- The authenticated Production Supabase ledger is applied through all
+  migrations `001`–`021`. In particular, 021 is no longer pending, but its
+  presence does not prove a current exact-candidate Checkout, webhook,
+  reconciliation, refund, dispute, or entitlement canary.
+- Website sales and inquiry collection remain closed. The Cal backend ledger is
+  also closed because Vercel has neither `CALCOM_API_KEY` nor
+  `CALCOM_WEBHOOK_SECRET`, and Cal has no HWL lifecycle webhook. Public Cal
+  availability is not ledger-ingestion evidence.
+- Production records `admin@ghosthand.studio` as `super_admin`; Shannon's
+  administrator role is still pending. Do not repeat the historical Ghosthand
+  bootstrap, and do not infer Shannon's handoff from the Ghosthand role.
+- Exact committed Preview `dpl_GRPoMgxtsJSCKcPoWB5MtEXVyz72` is READY and
+  matches `307b365`, but it is a Preview/test artifact and does not contain the
+  ten-path working-tree candidate. No prior Preview, Production candidate,
+  public alias, or transaction is proof for the combined tree. Keep commerce
+  fail closed
+  until a reviewed immutable SHA passes its own CI, raw-root, browser-hydration,
+  provider, database, and end-to-end commerce gates.
+
 ## Scope and operating posture
 
 This runbook covers the current HWL by SMD launch product only:
@@ -104,7 +146,7 @@ The expected one-time purchase sequence is:
 
 1. An authenticated user starts checkout from the application.
 2. The server validates same-origin, the authenticated user, the fixed product, the current Stripe account/mode, Price, Product, amount, currency, metadata, and media readiness.
-3. The server reserves a `checkout_orders` row and creates one Stripe Checkout Session.
+3. The server reserves a `checkout_orders` row and creates one Stripe Checkout Session. Migration 021 permits at most one payable-boundary LIFT order (`creating`, `open`, `paid`, or `disputed`) for the exact user, deployment target, Stripe account, and mode. Checkout must reuse or reconcile that bound state instead of opening a second Session; refunded orders leave the boundary for legitimate repurchase, while malformed or inconsistent paid state fails closed.
 4. Stripe redirects the customer back with the Session ID after payment.
 5. Stripe sends `checkout.session.completed` to the webhook independently of the browser redirect.
 6. The webhook performs authoritative provider retrieval and verification.
@@ -319,12 +361,14 @@ provider surfaces for financial/customer details; do not expand this RPC into
 a PII export.
 
 If a listed commerce column, queue, constraint, or RPC is absent, stop and
-verify the migration ledger and exact migration-012/migration-014 fingerprints.
-Do not adapt around schema drift or change schema/row state during verification.
+verify the migration ledger and exact migration-012, migration-014, and
+migration-021 fingerprints. Do not adapt around schema drift or change
+schema/row state during verification.
 
 ### Completed checkout pass criteria
 
 - Exactly one order is associated with the Session and has status `paid`, the matching PaymentIntent ID, and a non-null paired fulfillment source/time.
+- Exactly one payable-boundary order (`creating`, `open`, `paid`, or `disputed`) exists for the same user, product, deployment target, Stripe account, and mode; a refunded order is outside that boundary for a legitimate repurchase.
 - Exactly one current purchase for the owner/product/catalog/target/account/mode is `active`.
 - Stripe amount is `1111` cents, `purchases.amount_paid` is `11.11`, currency is `usd`, product type is `lift_guide`, and catalog is `lift-complete-v2`.
 - The application Session and PaymentIntent IDs agree with Stripe; the Stripe Charge belongs to that PaymentIntent and the expected account/mode.
@@ -438,14 +482,15 @@ Record:
 
 Do not store signing secrets, bearer tokens, raw card/payment details, full webhook payloads, or unnecessary customer PII in the evidence bundle.
 
-## Automated reconciliation: schema deployed, hosted worker rehearsal pending
+## Automated reconciliation: committed schema, current hosted rehearsal pending
 
-The current working tree implements the durable backstop, and migration 014 is
-applied to both hosted staging and the dedicated Production database. The exact
-Preview paid-checkout and signed-webhook fulfillment journey passes, but the
-deployed scheduled worker, lease/retry lifecycle, and Production recovery path
-have not been rehearsed end to end. Treat this as deployed recovery machinery,
-not yet as current hosted recovery evidence.
+The durable backstop is committed at `307b365`, and the authenticated
+Production ledger includes both migration 014 and the migration-021 payable
+order guard. Earlier exact-Preview paid-checkout and signed-webhook journeys are
+historical. The deployed scheduled worker, lease/retry lifecycle, and
+Production recovery path have not been re-established for the exact current
+source plus hydration candidate. Treat code and schema presence as recovery
+machinery, not as current hosted recovery evidence.
 
 The endpoint is:
 
@@ -498,15 +543,15 @@ need to be exercised. `alert_pending` alone does not notify anyone.
 Preview must validate sandbox checkout, webhook, authenticated fallback,
 scheduled report/repair/monitoring/terminal/manual-review flows, stale-token
 rejection, private admin visibility, and alert routing. Production commerce
-must remain closed until migration 014 is applied, `CRON_SECRET` is installed,
-the exact deployed schedule is observed, and the end-to-end rehearsal is
-retained with sanitized evidence.
+must remain closed until the exact deployed candidate verifies the complete
+`001`–`021` ledger, `CRON_SECRET` is installed, the deployed schedule is
+observed, and the end-to-end rehearsal is retained with sanitized evidence.
 
 ## Launch verification matrix
 
 ### Preview, sandbox account and staging data
 
-- [ ] Migrations 012–014 are applied in order and their ledger, constraints, RLS, grants, queue, lease CAS, and service-role-only RPCs are verified in the intended staging Supabase project.
+- [ ] The complete `001`–`021` staging ledger is verified, including migrations 012–014 and the migration-021 payable-order constraint, RLS, grants, queue, lease CAS, and service-role-only RPCs.
 - [ ] The Preview hostname, Supabase project, Stripe test account, and `livemode=false` form one coherent environment.
 - [ ] The public webhook endpoint is registered with its exact signing secret and the four exact events.
 - [ ] The fixed Price/Product/metadata and the canonical video/PDF assets pass server readiness checks.
@@ -534,7 +579,7 @@ Preview readiness does not authorize live keys, live mode, Production data, or P
 - [ ] Every Preview scenario above has passed with retained sanitized evidence.
 - [ ] Production Supabase, Stripe live account, live Price/Product, site origin, and webhook endpoint are independently identified and verified.
 - [ ] Production secrets are installed only in Production and are not copied from local or Preview.
-- [ ] Migration 014, the authenticated cron route, durable reconciliation, private admin visibility, human alert routing, and missed-cron monitoring are deployed, tested, and rehearsed in the exact Production namespace.
+- [ ] The complete `001`–`021` Production ledger is verified for the exact candidate; the authenticated cron route, durable reconciliation, migration-021 payable-order guard, private admin visibility, human alert routing, and missed-cron monitoring are deployed, tested, and rehearsed in that Production namespace.
 - [ ] The owner has accepted the Hobby daily recovery delay or a Pro 15-minute schedule has been installed and verified.
 - [ ] Refund, partial-refund, and dispute ownership/policies are approved.
 - [ ] Live webhook alerting and paid-without-fulfillment detection are active.
@@ -570,6 +615,7 @@ Never delete `stripe_events`, `checkout_orders`, `purchases`, or customer bindin
 - Success and `paid_pending` display: [`../app/checkout/success/page.tsx`](../app/checkout/success/page.tsx)
 - Commerce schema and state constraints: [`../supabase/migrations/012_commerce_launch_safety.sql`](../supabase/migrations/012_commerce_launch_safety.sql)
 - Durable reconciliation queue and RPCs: [`../supabase/migrations/014_commerce_reconciliation.sql`](../supabase/migrations/014_commerce_reconciliation.sql)
+- Payable-order uniqueness guard: [`../supabase/migrations/021_checkout_paid_order_guard.sql`](../supabase/migrations/021_checkout_paid_order_guard.sql)
 - Deployed cron schedule: [`../vercel.json`](../vercel.json)
 - Launch environment validator: [`../scripts/validate-launch-env.ts`](../scripts/validate-launch-env.ts)
 - Current launch evidence and gates: [`launch-packet.md`](launch-packet.md)

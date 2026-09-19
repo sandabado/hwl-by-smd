@@ -6,6 +6,10 @@ import {
   requireSuperAdminWithDependencies,
   type AdminAuthorizationDependencies,
 } from "../lib/admin-auth.ts"
+import {
+  getCurrentAdminRoleWithDependencies,
+  type CurrentAdminRoleDependencies,
+} from "../lib/current-admin-role.ts"
 
 const USER_ID = "2db86e10-4c97-45c3-a8b6-0ef074881091"
 
@@ -203,4 +207,87 @@ test("the super-admin guard accepts only an explicit hosted super-admin role", a
     source: "supabase",
     userId: USER_ID,
   })
+})
+
+test("optional administrator navigation recognizes both hosted tiers", async (t) => {
+  for (const role of ["administrator", "super_admin"] as const) {
+    await t.test(role, async () => {
+      const dependencies: CurrentAdminRoleDependencies = {
+        createClient: async () => ({
+          rpc: async (name) => {
+            assert.equal(name, "current_admin_role")
+            return { data: role, error: null }
+          },
+        }),
+      }
+
+      assert.equal(
+        await getCurrentAdminRoleWithDependencies(dependencies),
+        role
+      )
+    })
+  }
+})
+
+test("optional administrator navigation fails closed", async (t) => {
+  const cases: Array<{
+    name: string
+    dependencies: CurrentAdminRoleDependencies
+  }> = [
+    {
+      name: "missing client",
+      dependencies: { createClient: async () => null },
+    },
+    {
+      name: "ordinary member",
+      dependencies: {
+        createClient: async () => ({
+          rpc: async () => ({ data: null, error: null }),
+        }),
+      },
+    },
+    {
+      name: "unknown role",
+      dependencies: {
+        createClient: async () => ({
+          rpc: async () => ({ data: "owner", error: null }),
+        }),
+      },
+    },
+    {
+      name: "provider error",
+      dependencies: {
+        createClient: async () => ({
+          rpc: async () => ({ data: "super_admin", error: new Error("no") }),
+        }),
+      },
+    },
+    {
+      name: "provider RPC exception",
+      dependencies: {
+        createClient: async () => ({
+          rpc: async () => {
+            throw new Error("private provider detail")
+          },
+        }),
+      },
+    },
+    {
+      name: "provider exception",
+      dependencies: {
+        createClient: async () => {
+          throw new Error("private provider detail")
+        },
+      },
+    },
+  ]
+
+  for (const item of cases) {
+    await t.test(item.name, async () => {
+      assert.equal(
+        await getCurrentAdminRoleWithDependencies(item.dependencies),
+        null
+      )
+    })
+  }
 })

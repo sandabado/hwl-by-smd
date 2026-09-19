@@ -19,11 +19,9 @@ type LoginFeedback = {
 export function LoginForm({
   feedback,
   redirectTo,
-  resolveAdminDestination,
 }: {
   feedback: LoginFeedback | null
   redirectTo: string
-  resolveAdminDestination: boolean
 }) {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>("signin")
@@ -31,9 +29,7 @@ export function LoginForm({
   const [message, setMessage] = useState("")
   const [pending, setPending] = useState(false)
   const supabase = useMemo(() => createClient(), [])
-  const authenticatedDestination = resolveAdminDestination
-    ? `/auth/post-login?next=${encodeURIComponent(redirectTo)}`
-    : redirectTo
+  const authenticatedDestination = `/auth/post-login?next=${encodeURIComponent(redirectTo)}`
 
   useEffect(() => {
     if (!supabase) return

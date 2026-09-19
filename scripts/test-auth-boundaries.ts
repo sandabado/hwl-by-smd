@@ -57,21 +57,30 @@ test("account creation presents its existing password rule before submission", (
   assert.match(form, />\s*Use at least 8 characters\.\s*<\/span>/)
 })
 
-test("generic sign-in resolves the authenticated role before choosing a home", () => {
+test("every sign-in resolves the authenticated role before choosing a home", () => {
   const page = source("app/login/page.tsx")
   const form = source("components/auth/login-form.tsx")
+  const callback = source("lib/auth-callback.ts")
   const updatePasswordForm = source("components/auth/update-password-form.tsx")
   const route = source("app/auth/post-login/route.ts")
 
-  assert.match(page, /resolveAdminDestination=\{!safeRequestedRedirectTo\}/)
+  assert.doesNotMatch(page, /resolveAdminDestination/)
   assert.match(
     form,
-    /resolveAdminDestination\s*\? `\/auth\/post-login\?next=\$\{encodeURIComponent\(redirectTo\)\}`\s*: redirectTo/
+    /const authenticatedDestination = `\/auth\/post-login\?next=\$\{encodeURIComponent\(redirectTo\)\}`/
   )
   assert.match(form, /router\.replace\(authenticatedDestination\)/)
   assert.match(
     form,
     /emailRedirectTo: `\$\{window\.location\.origin\}\/auth\/callback\?next=\$\{encodeURIComponent\(redirectTo\)\}`/
+  )
+  assert.match(
+    callback,
+    /const postLoginUrl = new URL\("\/auth\/post-login", url\.origin\)/
+  )
+  assert.match(
+    callback,
+    /postLoginUrl\.searchParams\.set\("next", redirectTo\)/
   )
   assert.match(
     updatePasswordForm,

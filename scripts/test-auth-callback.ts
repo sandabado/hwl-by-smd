@@ -52,7 +52,7 @@ test("auth callback exchanges browser-initiated PKCE codes", async () => {
   assert.equal(response.status, 307)
   assert.equal(
     response.headers.get("location"),
-    "https://www.hwlbysmd.com/account"
+    "https://www.hwlbysmd.com/auth/post-login?next=%2Faccount"
   )
   assert.equal(response.headers.get("cache-control"), "no-store")
 })
@@ -127,7 +127,7 @@ test("auth callback verifies a magic link token hash on the server", async () =>
   assert.equal(response.status, 307)
   assert.equal(
     response.headers.get("location"),
-    "https://www.hwlbysmd.com/beauty/lift?cart=open"
+    "https://www.hwlbysmd.com/auth/post-login?next=%2Fbeauty%2Flift%3Fcart%3Dopen"
   )
   assert.equal(
     response.headers.get("location")?.includes("private-token"),
@@ -149,7 +149,7 @@ test("magic link callbacks reject external destinations", async () => {
   ])
   assert.equal(
     response.headers.get("location"),
-    "https://www.hwlbysmd.com/library"
+    "https://www.hwlbysmd.com/auth/post-login?next=%2Flibrary"
   )
 })
 
@@ -167,7 +167,37 @@ test("magic link callbacks reject paths that normalize cross-origin", async () =
   ])
   assert.equal(
     response.headers.get("location"),
-    "https://www.hwlbysmd.com/library"
+    "https://www.hwlbysmd.com/auth/post-login?next=%2Flibrary"
+  )
+})
+
+test("auth callbacks preserve transactional destinations through role resolution", async () => {
+  const calls = callLog()
+  const response = await handleAuthCallback(
+    new Request(
+      "https://www.hwlbysmd.com/auth/callback?code=safe-code&next=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_test_123"
+    ),
+    dependencies(calls)
+  )
+
+  assert.equal(
+    response.headers.get("location"),
+    "https://www.hwlbysmd.com/auth/post-login?next=%2Fcheckout%2Fsuccess%3Fsession_id%3Dcs_test_123"
+  )
+})
+
+test("successful recovery callbacks still reach password setup directly", async () => {
+  const calls = callLog()
+  const response = await handleAuthCallback(
+    new Request(
+      "https://www.hwlbysmd.com/auth/callback?code=safe-code&next=%2Fupdate-password%3Fflow%3Drecovery"
+    ),
+    dependencies(calls)
+  )
+
+  assert.equal(
+    response.headers.get("location"),
+    "https://www.hwlbysmd.com/update-password?flow=recovery"
   )
 })
 

@@ -549,6 +549,13 @@ export function AdminShell({
                 {context.badge}
               </span>
               <Link
+                aria-label="Open The Den"
+                className="inline-flex min-h-10 items-center rounded-full border border-[#d2cabd] bg-white/48 px-3.5 text-xs font-medium text-[#566158] transition hover:bg-white/70"
+                href="/the-den"
+              >
+                The Den
+              </Link>
+              <Link
                 aria-label="View public site"
                 className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#d2cabd] bg-white/48 px-3.5 text-xs font-medium text-[#566158] transition hover:bg-white/70"
                 href="/"

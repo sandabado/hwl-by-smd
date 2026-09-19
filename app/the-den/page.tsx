@@ -18,6 +18,7 @@ import {
   findNextMemberBooking,
   getMemberBookings,
 } from "@/lib/bookings/member-bookings"
+import { getCurrentAdminRole } from "@/lib/current-admin-role"
 import { getPublishedCourses } from "@/lib/member-content"
 
 export const dynamic = "force-dynamic"
@@ -44,10 +45,12 @@ function readableSessionDate(value: string, timeZone: string) {
 }
 
 export default async function TheDenPage() {
+  const adminRolePromise = getCurrentAdminRole()
   const { access, user } = await requireAccess("authenticated", "/the-den")
-  const [courses, bookings] = await Promise.all([
+  const [courses, bookings, adminRole] = await Promise.all([
     getPublishedCourses(),
     getMemberBookings(user.id),
+    adminRolePromise,
   ])
   const visibleCourses = courses.filter(
     (course) =>
@@ -89,7 +92,7 @@ export default async function TheDenPage() {
           is yours.
         </p>
 
-        <DenShortcuts />
+        <DenShortcuts showAdminCenter={Boolean(adminRole)} />
 
         <div className="mt-10 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
           <article className="relative overflow-hidden rounded-[2.25rem] bg-[var(--primary)] p-8 text-[var(--background)] shadow-[0_35px_90px_rgba(90,74,63,0.2)] md:p-12">

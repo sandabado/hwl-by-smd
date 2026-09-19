@@ -1,7 +1,10 @@
 import assert from "node:assert/strict"
 import { readFileSync } from "node:fs"
+import { createRequire } from "node:module"
 import test from "node:test"
 
+import { createElement, type ComponentType, type ReactNode } from "react"
+import { renderToStaticMarkup } from "react-dom/server"
 import ts from "typescript"
 
 interface LoadedNavConfig {
@@ -16,6 +19,11 @@ interface LoadedHydratedPathname {
     pathname: string,
     committedPathname: string | null
   ) => string | null
+}
+
+interface LoadedDenLinks {
+  BackToDenLink: ComponentType<{ showAdminCenter?: boolean }>
+  DenShortcuts: ComponentType<{ showAdminCenter?: boolean }>
 }
 
 const navItems = [
@@ -90,6 +98,54 @@ function loadHydratedPathname(): LoadedHydratedPathname {
 
   assert.equal(typeof loadedModule.exports.resolveHydratedPathname, "function")
   return loadedModule.exports as LoadedHydratedPathname
+}
+
+function loadDenLinks(): LoadedDenLinks {
+  const compiled = ts.transpileModule(
+    source("components/member/den-links.tsx"),
+    {
+      compilerOptions: {
+        esModuleInterop: true,
+        jsx: ts.JsxEmit.ReactJSX,
+        module: ts.ModuleKind.CommonJS,
+        target: ts.ScriptTarget.ES2022,
+      },
+    }
+  ).outputText
+  const loadedModule: { exports: Partial<LoadedDenLinks> } = { exports: {} }
+  const projectRequire = createRequire(import.meta.url)
+  const Icon = (props: Record<string, unknown>) => createElement("svg", props)
+  const Link = ({
+    children,
+    href,
+    ...props
+  }: {
+    children?: ReactNode
+    href: string
+  }) => createElement("a", { ...props, href }, children)
+
+  new Function("require", "module", "exports", compiled)(
+    (specifier: string) => {
+      if (specifier === "next/link") return Link
+      if (specifier === "lucide-react") {
+        return {
+          ArrowLeft: Icon,
+          ArrowUpRight: Icon,
+          BookOpenText: Icon,
+          CalendarHeart: Icon,
+          LayoutDashboard: Icon,
+          UserRound: Icon,
+        }
+      }
+      return projectRequire(specifier)
+    },
+    loadedModule,
+    loadedModule.exports
+  )
+
+  assert.ok(loadedModule.exports.DenShortcuts)
+  assert.ok(loadedModule.exports.BackToDenLink)
+  return loadedModule.exports as LoadedDenLinks
 }
 
 test("navigation has one canonical action vocabulary", () => {
@@ -190,9 +246,10 @@ test("persistent header actions retain generous pointer targets", () => {
   assert.match(cart, /"w-11 px-0"/)
 })
 
-test("the Den is one home with three clear shortcuts", () => {
+test("the Den keeps its member shortcuts and a role-gated Admin Center gateway", () => {
   const denLinks = source("components/member/den-links.tsx")
   const denPage = source("app/the-den/page.tsx")
+  const accountPage = source("app/account/page.tsx")
   const libraryPage = source("app/library/page.tsx")
 
   assert.match(denLinks, /aria-label="The Den shortcuts"/)
@@ -202,11 +259,40 @@ test("the Den is one home with three clear shortcuts", () => {
   assert.match(denLinks, /href: "\/library"/)
   assert.match(denLinks, /href: "\/book"/)
   assert.match(denLinks, /href: "\/account"/)
+  assert.match(denLinks, /showAdminCenter \? \(/)
+  assert.match(denLinks, /href="\/admin"/)
+  assert.match(denLinks, /Admin Center/)
   assert.doesNotMatch(denLinks, /usePathname|aria-current|Today|Sessions/)
   assert.match(denLinks, /min-h-11/)
   assert.match(denPage, /requireAccess\("authenticated", "\/the-den"\)/)
-  assert.match(denPage, /<DenShortcuts \/>/)
+  assert.match(
+    denPage,
+    /<DenShortcuts showAdminCenter=\{Boolean\(adminRole\)\} \/>/
+  )
+  assert.match(
+    accountPage,
+    /<BackToDenLink showAdminCenter=\{Boolean\(adminRole\)\} \/>/
+  )
   assert.match(libraryPage, /requireAccess\("authenticated", "\/library"\)/)
+})
+
+test("Admin Center links render only for a verified administrator role", () => {
+  const { BackToDenLink, DenShortcuts } = loadDenLinks()
+  const memberShortcuts = renderToStaticMarkup(createElement(DenShortcuts))
+  const adminShortcuts = renderToStaticMarkup(
+    createElement(DenShortcuts, { showAdminCenter: true })
+  )
+  const memberAccountNav = renderToStaticMarkup(createElement(BackToDenLink))
+  const adminAccountNav = renderToStaticMarkup(
+    createElement(BackToDenLink, { showAdminCenter: true })
+  )
+
+  assert.doesNotMatch(memberShortcuts, /href="\/admin"/)
+  assert.doesNotMatch(memberAccountNav, /href="\/admin"/)
+  assert.match(adminShortcuts, /href="\/admin"/)
+  assert.match(adminShortcuts, />Admin Center</)
+  assert.match(adminAccountNav, /href="\/admin"/)
+  assert.match(adminAccountNav, />Admin Center</)
 })
 
 test("the final cart action presents the complete purchase policy set", () => {

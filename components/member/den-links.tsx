@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   BookOpenText,
   CalendarHeart,
+  LayoutDashboard,
   UserRound,
 } from "lucide-react"
 
@@ -13,7 +14,11 @@ const shortcuts = [
   { href: "/account", icon: UserRound, label: "Manage Account" },
 ] as const
 
-export function DenShortcuts() {
+export function DenShortcuts({
+  showAdminCenter = false,
+}: {
+  showAdminCenter?: boolean
+}) {
   return (
     <nav
       aria-label="The Den shortcuts"
@@ -33,13 +38,33 @@ export function DenShortcuts() {
           />
         </Link>
       ))}
+      {showAdminCenter ? (
+        <Link
+          className="group inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[var(--primary)] underline-offset-4 hover:underline"
+          href="/admin"
+        >
+          <LayoutDashboard
+            aria-hidden="true"
+            className="size-4 text-[var(--accent)]"
+          />
+          Admin Center
+          <ArrowUpRight
+            aria-hidden="true"
+            className="size-3.5 opacity-55 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100"
+          />
+        </Link>
+      ) : null}
     </nav>
   )
 }
 
-export function BackToDenLink() {
+export function BackToDenLink({
+  showAdminCenter = false,
+}: {
+  showAdminCenter?: boolean
+}) {
   return (
-    <nav aria-label="Member area">
+    <nav aria-label="Member area" className="flex flex-wrap items-center gap-5">
       <Link
         className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[var(--primary)] underline-offset-4 hover:underline"
         href="/the-den"
@@ -47,6 +72,18 @@ export function BackToDenLink() {
         <ArrowLeft aria-hidden="true" className="size-4 text-[var(--accent)]" />
         Back to The Den
       </Link>
+      {showAdminCenter ? (
+        <Link
+          className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-[var(--primary)] underline-offset-4 hover:underline"
+          href="/admin"
+        >
+          <LayoutDashboard
+            aria-hidden="true"
+            className="size-4 text-[var(--accent)]"
+          />
+          Admin Center
+        </Link>
+      ) : null}
     </nav>
   )
 }

@@ -19,6 +19,7 @@ import {
   getMemberBookings,
   isCalcomBookingLedgerReady,
 } from "@/lib/bookings/member-bookings"
+import { getCurrentAdminRole } from "@/lib/current-admin-role"
 
 export const dynamic = "force-dynamic"
 
@@ -74,9 +75,13 @@ export default async function AccountPage({
 }) {
   const params = await searchParams
   const passwordUpdated = params.notice === "password-updated"
+  const adminRolePromise = getCurrentAdminRole()
   const { access, user } = await requireAccess("authenticated", "/account")
   const bookingLedgerReady = isCalcomBookingLedgerReady()
-  const bookings = await getMemberBookings(user.id)
+  const [bookings, adminRole] = await Promise.all([
+    getMemberBookings(user.id),
+    adminRolePromise,
+  ])
   const nextSession = findNextMemberBooking(bookings)
   const membership = access.membership
 
@@ -92,7 +97,7 @@ export default async function AccountPage({
               Your Account
             </h1>
           </div>
-          <BackToDenLink />
+          <BackToDenLink showAdminCenter={Boolean(adminRole)} />
         </div>
         <p className="mt-4 text-lg text-[var(--muted-foreground)]">
           Profile, sessions, purchases, and preferences.

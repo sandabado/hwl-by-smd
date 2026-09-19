@@ -156,6 +156,14 @@ test("the signed-in administrator tier is visible and human-readable", () => {
   assert.match(shellSource, /adminRole: AdminPrincipalRole/)
 })
 
+test("administrators can move directly between the Admin Center and The Den", () => {
+  const shellSource = source("components/admin/admin-shell.tsx")
+
+  assert.match(shellSource, /aria-label="Open The Den"/)
+  assert.match(shellSource, /href="\/the-den"/)
+  assert.match(shellSource, />\s*The Den\s*<\/Link>/)
+})
+
 test("route authority is live only where the connected source supports it", () => {
   const shell = loadAdminShell()
 

@@ -44,6 +44,21 @@ function failureRedirect(url: URL, redirectTo: string, isRecoveryFlow = false) {
   return noStoreRedirect(loginUrl)
 }
 
+function successRedirect(url: URL, redirectTo: string) {
+  const pathname = new URL(redirectTo, url.origin).pathname
+
+  // Invite and recovery links must reach the password form before any home
+  // routing occurs. Every other completed sign-in uses the same server-side
+  // role resolver as password authentication.
+  if (pathname === "/update-password") {
+    return noStoreRedirect(new URL(redirectTo, url.origin))
+  }
+
+  const postLoginUrl = new URL("/auth/post-login", url.origin)
+  postLoginUrl.searchParams.set("next", redirectTo)
+  return noStoreRedirect(postLoginUrl)
+}
+
 /**
  * Completes browser-initiated PKCE callbacks and server-verifiable email links.
  * Links generated outside the receiving browser cannot share its PKCE verifier,
@@ -72,7 +87,7 @@ export async function handleAuthCallback(
     if (code) {
       const { error } = await supabase.auth.exchangeCodeForSession(code)
       if (!error) {
-        return noStoreRedirect(new URL(redirectTo, url.origin))
+        return successRedirect(url, redirectTo)
       }
     } else if (tokenHash && type) {
       const { error } = await supabase.auth.verifyOtp({
@@ -80,7 +95,7 @@ export async function handleAuthCallback(
         type,
       })
       if (!error) {
-        return noStoreRedirect(new URL(redirectTo, url.origin))
+        return successRedirect(url, redirectTo)
       }
     }
   } catch {

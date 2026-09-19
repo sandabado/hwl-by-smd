@@ -48,11 +48,7 @@ export default async function LoginPage({
             and return to every practice you own.
           </p>
         </div>
-        <LoginForm
-          feedback={feedback}
-          redirectTo={redirectTo}
-          resolveAdminDestination={!safeRequestedRedirectTo}
-        />
+        <LoginForm feedback={feedback} redirectTo={redirectTo} />
       </div>
     </section>
   )

@@ -17,6 +17,11 @@ const stripeFixtureSecrets = {
   STRIPE_WEBHOOK_SECRET: "whsec_fixture_private_value",
 } as const
 
+const calcomFixtureSecrets = {
+  CALCOM_API_KEY: "cal_fixture_private_api_key_1234567890",
+  CALCOM_WEBHOOK_SECRET: "fixture-calcom-webhook-secret-32-characters",
+} as const
+
 const legacySupabaseFixtureSecrets = {
   NEXT_PUBLIC_SUPABASE_ANON_KEY:
     "eyJ_fixture_legacy_anon_key_must_never_be_accepted",
@@ -209,6 +214,7 @@ const fixtures: Fixture[] = [
     env: {
       ...previewFixture,
       CALCOM_BOOKING_LEDGER_READY: "true",
+      CALCOM_API_KEY: calcomFixtureSecrets.CALCOM_API_KEY,
     },
     expectedExit: 1,
     expectedText:
@@ -220,7 +226,45 @@ const fixtures: Fixture[] = [
     env: {
       ...previewFixture,
       CALCOM_BOOKING_LEDGER_READY: "true",
-      CALCOM_WEBHOOK_SECRET: "fixture-calcom-webhook-secret-32-characters",
+      CALCOM_WEBHOOK_SECRET: calcomFixtureSecrets.CALCOM_WEBHOOK_SECRET,
+    },
+    expectedExit: 1,
+    expectedText: "CALCOM_API_KEY: required when the booking ledger is enabled",
+    name: "enabled booking ledger without a Cal API key fails",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      CALCOM_API_KEY: "cal_your_api_key_placeholder",
+      CALCOM_BOOKING_LEDGER_READY: "true",
+      CALCOM_WEBHOOK_SECRET: calcomFixtureSecrets.CALCOM_WEBHOOK_SECRET,
+    },
+    expectedExit: 1,
+    expectedText:
+      "CALCOM_API_KEY: must be a plausible Cal.com API key beginning with cal_",
+    name: "enabled booking ledger rejects a placeholder Cal API key",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      CALCOM_API_KEY: "not-a-cal-api-key",
+      CALCOM_BOOKING_LEDGER_READY: "true",
+      CALCOM_WEBHOOK_SECRET: calcomFixtureSecrets.CALCOM_WEBHOOK_SECRET,
+    },
+    expectedExit: 1,
+    expectedText:
+      "CALCOM_API_KEY: must be a plausible Cal.com API key beginning with cal_",
+    name: "enabled booking ledger rejects a malformed Cal API key",
+  },
+  {
+    args: ["--target=preview", "--expect-sales=closed"],
+    env: {
+      ...previewFixture,
+      CALCOM_API_KEY: calcomFixtureSecrets.CALCOM_API_KEY,
+      CALCOM_BOOKING_LEDGER_READY: "true",
+      CALCOM_WEBHOOK_SECRET: calcomFixtureSecrets.CALCOM_WEBHOOK_SECRET,
     },
     expectedExit: 0,
     expectedText: "Booking history: enabled",
@@ -792,6 +836,7 @@ for (const fixture of fixtures) {
   for (const secret of [
     ...Object.values(sharedFixtureSecrets),
     ...Object.values(stripeFixtureSecrets),
+    ...Object.values(calcomFixtureSecrets),
     ...Object.values(legacySupabaseFixtureSecrets),
   ]) {
     if (combinedOutput.includes(secret)) {

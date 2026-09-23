@@ -11,6 +11,8 @@ const SALES_EXPECTATIONS = ["closed", "open"] as const
 
 type SalesExpectation = (typeof SALES_EXPECTATIONS)[number]
 const CANONICAL_CALCOM_PROFILE_URL = "https://cal.com/hwlbysmd"
+const CALCOM_API_KEY_PATTERN =
+  /^cal_(?!(?:your|placeholder|changeme|todo|example)(?:_|$))[A-Za-z0-9_-]{16,}$/i
 const SINGLE_EMAIL_PATTERN =
   /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$/
 
@@ -520,6 +522,15 @@ if (calcomProfile) {
 const bookingLedgerReady = process.env.CALCOM_BOOKING_LEDGER_READY
 if (bookingLedgerReady !== "true" && bookingLedgerReady !== "false") {
   errors.push("CALCOM_BOOKING_LEDGER_READY: must be exactly true or false")
+}
+const calcomApiKey = read("CALCOM_API_KEY")
+if (bookingLedgerReady === "true" && !calcomApiKey) {
+  errors.push("CALCOM_API_KEY: required when the booking ledger is enabled")
+}
+if (calcomApiKey && !CALCOM_API_KEY_PATTERN.test(calcomApiKey)) {
+  errors.push(
+    "CALCOM_API_KEY: must be a plausible Cal.com API key beginning with cal_"
+  )
 }
 const calcomWebhookSecret = read("CALCOM_WEBHOOK_SECRET")
 if (bookingLedgerReady === "true" && !calcomWebhookSecret) {

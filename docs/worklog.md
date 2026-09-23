@@ -149,3 +149,88 @@ happened and was verified.
    seven total, incl. decisions and worklog).
 4. Launch gates 1–5, 7, 8 (blocking) — all open; Gate 6 (captions) is
    post-launch follow-up, unscheduled.
+
+### 2026-09-23 ~16:10 PDT — Production schema verification (BLOCKED)
+
+- **Actor:** Codex
+- **Actions:** Checked the configured Supabase URL without printing secrets,
+  listed projects with the authenticated Supabase CLI, inventoried Production
+  Vercel variable names, attempted a guarded Production-only migration/schema
+  read, and reconciled the packet's historical migration statements.
+- **Result:** The repository `.env.local` targets staging
+  `lkxppynmdfzljuptauxf`; it was not used as Production evidence. The Supabase
+  CLI account can list Production `qwprhsrwiihfllmgallr` as
+  `ACTIVE_HEALTHY`, but `migration list` requires a database URL or password.
+  Vercel Production has Supabase URL/publishable/service-role variable names,
+  while this session receives encrypted/masked values and has no
+  `SUPABASE_DB_PASSWORD`, `DATABASE_URL`, or `POSTGRES_URL` by name. A clean
+  temp-directory pull did not yield a usable Production endpoint/key. A
+  Production-linked read-only CLI query stalled at `Initialising login role...`
+  and was interrupted before returning data; no migration or application-data
+  SQL was issued, and transient CLI setup cannot be ruled out. Migration ledger,
+  Production public-table inventory, and migrations 019–021 remain unverified.
+  `docs/schema-verification-kit.md` records the safe follow-up. The packet's
+  later text says Production is through 021 and labels the 018/019–020-pending
+  text historical, but that current claim could not be live-confirmed.
+- **Gates affected:** none moved; Production schema verification remains
+  blocked.
+- **Next:** Provide a securely injected, Production-scoped read-only Postgres
+  credential for `qwprhsrwiihfllmgallr`; rerun the catalog/ledger query set in
+  `docs/schema-verification-kit.md` after confirming the project ref.
+- **Evidence:** Supabase CLI project list; repository `.env.local` variable
+  names/target; Vercel Production environment-name inventory; CLI output
+  requiring `--db-url` or `--password`; read-only Management API attempt
+  stopped at login-role initialization; packet references in
+  `docs/launch-packet.md:398-417`, `:452-455`, `:615-616`, and `:2528-2529`.
+
+### 2026-09-23 ~16:12 PDT — Governance batch: worklog committed, validators merged, Production audited, navigation + runbook drafted
+
+- **Actor:** Codex
+- **Actions:** Consolidated the previously verified Production route/image/
+  Cal/store audit, repeated the hydration comparison on exact Preview SHA
+  `5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f`, reviewed the navigation and
+  operations-runbook drafts, and committed the two drafts.
+- **Result:** Worklog Rev 3 is commit `78d9c0e0dc75cbc7ecd4aec1cb00556c8662fb76`;
+  the Cal API-key validator change linked to ADR-002 is in
+  `5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f`, with 66 launch-boundary tests
+  passing. The prior Production audit recorded public routes HTTP 200, 11/11
+  images, real Cal slots, and Store fail-closed; it also recorded one homepage
+  React hydration error 418 and two historical fetch-failed events for
+  `/contact` and `/book` on September 19. Fresh-cache traversal of exact Preview
+  deployment `dpl_3cE9FZLnW1woGqDFaHyXT7NBDkZX` (SHA 5ed) reached the bottom,
+  loaded all 11 images, had no overflow, set the hydration sentinel, and
+  produced zero browser console errors. Production `403fc5f` reproduced one
+  React error 418 in the corresponding fresh homepage check. Navigation and
+  runbook drafts are commit `97344abf1a258a7ee3347f7843d1df349ecf1a13`.
+- **Gates affected:** Validator disposition CLOSED (committed); hydration
+  comparison PASS on exact Preview, FAIL reproduced on Production; no launch
+  gate or provider/database state changed.
+- **Next:** Keep the schema verification kit uncommitted pending a usable
+  Production read-only credential; continue implementation only on checkpoint.
+- **Evidence:** `78d9c0e0dc75cbc7ecd4aec1cb00556c8662fb76`,
+  `5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f`,
+  `97344abf1a258a7ee3347f7843d1df349ecf1a13`, exact Preview browser audit,
+  Production homepage browser audit, and the earlier dated Production audit.
+
+### 2026-09-23 ~16:13 PDT — Frozen release cut and ADR-008
+
+- **Actor:** Codex (branch/docs), Sandābādo (scope and release policy)
+- **Actions:** Created `release/1.0.0` directly from the audited checkpoint
+  SHA `5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f` without cherry-pick or amend;
+  added ADR-008, aligned the Gate 2/Production candidate references and
+  snapshot, and added the freeze rule to the runbook.
+- **Result:** `release/1.0.0` and `origin/release/1.0.0` remain exactly at
+  `5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f`. ADR-008 and the corrected
+  release-cut snapshot are in commit
+  `352e131d5d5e981baf03a0393519b7431a9d2118`. The navigation/runbook commit
+  `97344abf1a258a7ee3347f7843d1df349ecf1a13` and ADR-008 commit were pushed;
+  checkpoint origin is `352e131d5d5e981baf03a0393519b7431a9d2118`.
+- **Gates affected:** Gate 2 candidate is now the frozen release-branch head;
+  a release-branch change resets its exact-SHA canary. No canary passed or
+  launch gate closed by this documentation action.
+- **Next:** Keep new work on checkpoint; merge into release only after an
+  explicit decision naming the exact audited change. Production schema remains
+  blocked as recorded above.
+- **Evidence:** `git show-ref` / `git ls-remote` exact refs; commits
+  `97344abf1a258a7ee3347f7843d1df349ecf1a13` and
+  `352e131d5d5e981baf03a0393519b7431a9d2118`.

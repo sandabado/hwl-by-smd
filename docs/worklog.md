@@ -234,3 +234,25 @@ happened and was verified.
 - **Evidence:** `git show-ref` / `git ls-remote` exact refs; commits
   `97344abf1a258a7ee3347f7843d1df349ecf1a13` and
   `352e131d5d5e981baf03a0393519b7431a9d2118`.
+
+### 2026-09-23 ~16:15 PDT — Correction: launch-packet authority for Production migrations
+
+- **Actor:** Codex
+- **Actions:** Rechecked the launch-packet section hierarchy after noticing
+  that dated historical notes are explicitly superseded by the September 19
+  current authority snapshot.
+- **Result:** Correction to the preceding schema-verification entry: the
+  packet's controlling September 19 snapshot (`docs/launch-packet.md:12-83`)
+  does not state a Production migration level and says later dated snapshots
+  and provider observations are historical/superseded where they conflict.
+  Historical text includes both the earlier `018` / `019–020 pending` claim
+  (`:398-417`, `:615-616`) and later `001–021` claims (`:452-455`,
+  `:2528-2529`). Neither is a current authority claim. Production's live
+  schema remains unverified / blocked in this audit. The uncommitted
+  `docs/schema-verification-kit.md` draft was corrected to state this.
+- **Gates affected:** none moved.
+- **Next:** Use a usable Production-scoped read-only database credential to
+  establish the live migration ledger and schema before updating the packet's
+  controlling authority snapshot.
+- **Evidence:** `docs/launch-packet.md:12-83`, `:398-417`, `:452-455`,
+  `:615-616`, `:2528-2529`; current Vercel/Supabase access check.

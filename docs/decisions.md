@@ -2,7 +2,7 @@
 **Repository:** `sandabado/hwl-by-smd`
 **Last Updated:** 2026-09-23
 **Status:** ACTIVE — launch preparation (live gates enforced)
-**Revision:** 5
+**Revision:** 6
 
 ## 1. Executive Summary
 Canonical ledger of architectural decisions, rejections, and pivots for the
@@ -11,9 +11,11 @@ single source of truth.
 - **Goal:** Launch a high-converting, sovereign luxury wellness platform.
 - **Constraint:** Zero tolerance for double-booking, payment fragmentation,
   or ambiguous user interfaces.
-- **Verified state (2026-09-23 audit, Revision 5):** Repo and Preview at SHA
-  `c639305527ff01ca792bc627e90a0fb7b2795afa` (checkpoint branch; CI status
-  not independently rechecked). Public Production serves older `403fc5f`
+- **Verified state (2026-09-23 release cut):** Audited checkpoint and exact
+  Preview deployment at SHA `5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f`;
+  frozen `release/1.0.0` was cut directly from that commit. Subsequent
+  governance-only commits continue on checkpoint and do not move the frozen
+  release or Preview deployment. Public Production serves older `403fc5f`
   (environment drift — see Gate 8).
 
 ---
@@ -123,12 +125,16 @@ entitlements).
 1. Close Gate 1 (rotate Preview Stripe bypass; treat current value as
    compromised).
 2. Enable `COMMERCE_SALES_READY` **only on the protected Preview sandbox**.
-3. Run the exact-SHA purchase canary (SHA `c639305`): test purchase reaches
+3. Run the exact-SHA purchase canary against the current frozen
+   `release/1.0.0` head (at this release cut,
+   `5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f`): test purchase reaches the
    correct library, signed video, and PDF download.
 4. Reclose the Preview flag.
 
 **Production live-path canary:**
-1. Deploy `c639305` to Production as an **alias-free, closed candidate**
+1. Deploy the exact current `release/1.0.0` head
+   (`5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f` at this release cut) to
+   Production as an **alias-free, closed candidate**
    (not reachable via `www.hwlbysmd.com` or any public alias). This does
    NOT close Gate 8 — public aliases stay on `403fc5f` until step 3.
 2. Securely route the live Stripe webhook to the protected candidate (the
@@ -139,15 +145,43 @@ entitlements).
    entitlement creation, and library/media access; then refund, and verify
    the refund webhook event and access revocation. Reclose the flag
    immediately after.
-3. Only after canary evidence is recorded: promote public aliases
-   `403fc5f` → `c639305` (this closes Gate 8), making the public sales-opening
-   decision (Gate 7) eligible.
+3. Only after canary evidence is recorded: promote public aliases from
+   `403fc5f` to that same exact release SHA (this closes Gate 8), making the
+   public sales-opening decision (Gate 7) eligible.
 4. **Cost acknowledgment:** the live charge-and-refund canary incurs Stripe
    processing fees that may not be returned. The canary approval must name
    the payer and acknowledge the expected cost before execution.
 
 **Directive:** The flag is never left enabled outside an active, approved
 canary window, and never exposed publicly via unprotected URLs.
+
+### ADR-008: Frozen Release Branches
+**Status:** ✅ Approved
+**Date:** 2026-09-23
+**Decision:** Releases are cut as frozen branches directly from audited
+checkpoint SHAs. `release/1.0.0` forks directly from
+`5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f` without cherry-pick or amendment.
+The exact-SHA canary for Gate 2 targets the current head of
+`release/1.0.0`; the branch head must be recorded and verified before each
+canary. New implementation work continues on
+`checkpoint/platform-overhaul-2026-08-20`. The release branch receives changes
+only by an explicit decision naming the exact change and its audit evidence.
+Any change to the release branch resets its exact-SHA canary gate. This ADR
+supersedes the moving checkpoint and hard-coded canary candidate SHA references
+in ADR-007 and Gate 2 for future canary execution; the safety gates and
+closed-sales requirements in ADR-007 remain in force.
+
+**Context:** Within one day, the candidate moved from `c639305` to `a7e3a98`
+to `5ed2aa4` while the ledger's canary target was being documented. A frozen
+release branch prevents a moving checkpoint from silently changing the
+promotion candidate.
+
+**Operational evidence:** At cut, local checkpoint, origin checkpoint, exact
+Preview deployment `dpl_3cE9FZLnW1woGqDFaHyXT7NBDkZX`, and
+`release/1.0.0` all identified
+`5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f`. The release ref was pushed to
+origin. Any later checkpoint-only documentation commits do not change that
+release ref.
 
 ---
 
@@ -173,12 +207,12 @@ canary window, and never exposed publicly via unprotected URLs.
 | # | Gate | Owner | Detail |
 |---|---|---|---|
 | 1 | **Preview Stripe bypass rotation** | Engineer | Rotation unproven; treat as compromised until replacement + revocation evidence recorded. Must close before Gate 2. |
-| 2 | **Exact-SHA sandbox purchase canary** | Engineer | Test purchase reaches library, video, download at SHA `c639305`, per ADR-007 Preview sequence. |
+| 2 | **Exact-SHA sandbox purchase canary** | Engineer | Test purchase reaches library, video, and download at the current exact `release/1.0.0` head. At this cut: `5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f`; any release-branch change resets the canary (ADR-008). |
 | 3 | **Cal.com lifecycle + Admin integration** | Engineer | Configure persistent webhook (flag, signing secret, deployment target, Supabase connection) AND restricted `CALCOM_API_KEY` for Admin booking queues. Recheck Vercel env inventory — both were absent last check. Canary must verify BOTH (a) webhook ingestion/lifecycle synchronization and (b) the live Admin booking queue — they require separate credentials and configuration. |
 | 4 | **Inquiry delivery canary** | Engineer | Fresh canary on current candidate + confirmed human mailbox receipt (public route currently fails closed). |
 | 5 | **Administrator sign-in canary** | Engineer | Hosted sign-in and role routing verified for the intended Production account. |
 | 7 | **Production sales opening** | You + Shannon | Explicit release decision, eligible only after the protected Production live-path canary (ADR-007) passes. |
-| 8 | **Production deployment parity** | You | Production promotes `403fc5f` → `c639305`. Note: Gate 8 closes only AFTER the Production live-path canary passes (ADR-007 revised sequence). Aliases must not move before canary evidence is recorded. |
+| 8 | **Production deployment parity** | You | Production promotes `403fc5f` to the exact approved `release/1.0.0` candidate. At this cut: `5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f`. Gate 8 closes only AFTER the Production live-path canary passes; aliases must not move before evidence is recorded. |
 
 **Post-launch follow-ups (tracked, not blocking):**
 
@@ -197,17 +231,27 @@ canary window, and never exposed publicly via unprotected URLs.
 
 ---
 
-## 6. Current Reality Snapshot (2026-09-23)
+## 6. Current Reality Snapshot (2026-09-23 release-cut verification)
 
-- **Repo/Preview:** `c639305` (CI not independently rechecked).
-  **Production:** `403fc5f` (drift).
+- **Checkpoint/release/Preview at cut:** checkpoint HEAD and frozen
+  `release/1.0.0` were `5ed2aa4d80580cb87e1d44e6795cb49fabc7af9f`;
+  immutable Preview deployment `dpl_3cE9FZLnW1woGqDFaHyXT7NBDkZX` is READY at
+  that exact SHA. A fresh-cache full homepage traversal hydrated successfully
+  with 11/11 images, no overflow, and zero browser console errors. This is
+  Preview-only evidence; subsequent governance commits continue on checkpoint.
+  **Production:** `403fc5f` remains on the public aliases; the same fresh
+  homepage audit reproduced React hydration error 418 there.
 - **Stripe:** Two valid env-specific accounts; catalogs live; no live charge
   or webhook deliveries found in Production history checked as of Sept 23;
   sales closed.
 - **Cal.com:** 11 published services, real availability, conflict checks on;
   no persistent webhook; Admin API key absent per last Vercel inventory.
-- **Supabase:** Staging through migration 021; private PDF + MP4 hosted and
-  verified.
+- **Supabase:** Staging is through migration 021; private PDF + MP4 are hosted
+  and verified. Production is claimed in later launch-packet notes to be
+  through 021, but this audit could not query its ledger or schema because no
+  usable Production-scoped read-only database credential was available. Treat
+  Production schema state as **unverified / blocked**, not as a confirmed
+  migration level.
 - **Homepage:** Three-world editorial model on checkpoint/Preview.
 - **Risk Level:** MEDIUM (infrastructure verified; rotation, canaries,
   webhook + Admin key, and Production promotion outstanding).
